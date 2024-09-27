@@ -61,16 +61,12 @@ app.post("/api/users", async (req, res) => {
   try {
     const { name, email, password } = req.body;
     const result = await usersCollection.insertOne({ name, email, password });
-    res
-      .status(201)
-      .json({
-        message: "User created successfully",
-        userId: result.insertedId,
-      });
+    res.status(201).json({
+      message: "User created successfully",
+      userId: result.insertedId,
+    });
   } catch (err) {
-    res
-      .status(500)
-      .json({ error: "Failed to create user", details: err.message });
+    res.status(500).json({ error: "Failed to create user", details: err.message });
   }
 });
 
@@ -80,9 +76,7 @@ app.get("/api/users", async (req, res) => {
     const users = await usersCollection.find().toArray();
     res.status(200).json(users);
   } catch (err) {
-    res
-      .status(500)
-      .json({ error: "Failed to fetch users", details: err.message });
+    res.status(500).json({ error: "Failed to fetch users", details: err.message });
   }
 });
 
@@ -97,9 +91,7 @@ app.get("/api/users/:id", async (req, res) => {
     }
     res.status(200).json(user);
   } catch (err) {
-    res
-      .status(500)
-      .json({ error: "Failed to fetch user", details: err.message });
+    res.status(500).json({ error: "Failed to fetch user", details: err.message });
   }
 });
 
@@ -116,9 +108,7 @@ app.put("/api/users/:id", async (req, res) => {
     }
     res.status(200).json({ message: "User updated successfully" });
   } catch (err) {
-    res
-      .status(500)
-      .json({ error: "Failed to update user", details: err.message });
+    res.status(500).json({ error: "Failed to update user", details: err.message });
   }
 });
 
@@ -133,9 +123,7 @@ app.delete("/api/users/:id", async (req, res) => {
     }
     res.status(200).json({ message: "User deleted successfully" });
   } catch (err) {
-    res
-      .status(500)
-      .json({ error: "Failed to delete user", details: err.message });
+    res.status(500).json({ error: "Failed to delete user", details: err.message });
   }
 });
 
