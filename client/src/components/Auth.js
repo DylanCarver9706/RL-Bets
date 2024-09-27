@@ -6,7 +6,8 @@ import {
 } from "firebase/auth";
 import { auth } from "../firebaseConfig.js"; // Import Firebase auth
 
-const Auth = () => {
+const Auth = ({ updateMongoUserId }) => {
+  // Receive the updateUserId function as a prop
   const [isLogin, setIsLogin] = useState(true); // Toggle between Login and Sign-up
   const [email, setEmail] = useState("testuser@example.com");
   const [password, setPassword] = useState("password123");
@@ -14,7 +15,10 @@ const Auth = () => {
   const navigate = useNavigate();
 
   // Function to create a new user in the MongoDB database
-  const createUserInDatabase = async (user) => {
+  const createUserInDatabase = async (firebaseUserId) => {
+
+    console.log("Firebase User Id: ", firebaseUserId);
+    
     try {
       const response = await fetch("http://localhost:5000/api/users", {
         method: "POST",
@@ -25,15 +29,18 @@ const Auth = () => {
           name: name,
           email: email,
           password: password,
+          firebaseUserId: firebaseUserId,
         }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        const data = await response.json();
         throw new Error(data.error || "Failed to create user in database.");
       }
 
-      console.log("User created successfully in MongoDB");
+      console.log("MongoDB User ID: ", data.userId);
+      return data.userId;
     } catch (err) {
       console.error("Error creating user in MongoDB:", err.message);
     }
@@ -45,6 +52,7 @@ const Auth = () => {
 
     try {
       let userCredential;
+      let mongoUserId;
       if (isLogin) {
         // Firebase login
         userCredential = await signInWithEmailAndPassword(
@@ -61,8 +69,11 @@ const Auth = () => {
         );
 
         // Create a new user in MongoDB database
-        await createUserInDatabase(userCredential.user);
+        mongoUserId = await createUserInDatabase(userCredential.user.uid);
       }
+
+      // Pass the user ID up to App.js
+      updateMongoUserId(mongoUserId);
 
       // Navigate to Home after successful login/signup
       navigate("/");

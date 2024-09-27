@@ -3,8 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { signOut } from "firebase/auth";
 import { auth } from "../firebaseConfig.js"; // Import Firebase auth
 
-const Home = () => {
+const Home = ({ mongoUserId }) => {
   const navigate = useNavigate();
+
+  console.log("Mongo User ID: ", mongoUserId)
 
   const handleLogout = async () => {
     try {
