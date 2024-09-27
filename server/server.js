@@ -2,9 +2,22 @@
 const express = require("express");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const bodyParser = require("body-parser");
+const cors = require("cors"); // Import cors
 require("dotenv").config();
 
 const app = express();
+
+// CORS Middleware
+app.use(
+  cors({
+    origin: "http://localhost:3000", // Replace with your frontend URL
+    methods: "GET,PUT,POST,DELETE", // Allowed methods
+    credentials: true, // Enable credentials (cookies, authorization headers)
+  })
+);
+
+// Use this for testing only
+// app.use(cors({ origin: "*" }));
 
 // Middleware
 app.use(bodyParser.json());
