@@ -59,11 +59,10 @@ connectToDatabase();
 // Create a new user (POST)
 app.post("/api/users", async (req, res) => {
   try {
-    const { name, email, password } = req.body;
-    const result = await usersCollection.insertOne({ name, email, password });
+    const result = await usersCollection.insertOne(req.body);
     res.status(201).json({
       message: "User created successfully",
-      userId: result.insertedId,
+      userId: result.insertedId, // TODO: SALT this id when returning
     });
   } catch (err) {
     res.status(500).json({ error: "Failed to create user", details: err.message });
@@ -98,10 +97,9 @@ app.get("/api/users/:id", async (req, res) => {
 // Update a user by ID (PUT)
 app.put("/api/users/:id", async (req, res) => {
   try {
-    const { name, email, password } = req.body;
     const result = await usersCollection.updateOne(
       { _id: new ObjectId(req.params.id) },
-      { $set: { name, email, password } }
+      { $set: req.body }
     );
     if (result.matchedCount === 0) {
       return res.status(404).json({ error: "User not found" });
