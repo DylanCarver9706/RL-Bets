@@ -21,9 +21,8 @@ function App() {
     <>
       <h1>RLBets.com</h1>
       <Routes>
-        <Route path="/Home" element={user ? <Home /> : <Auth />} />
+        <Route path="/" element={user ? <Home /> : <Auth />} />
         <Route path="/Auth" element={<Auth />} />
-        <Route path="/" element={<Auth />} /> {/* Default route */}
       </Routes>
     </>
   );
