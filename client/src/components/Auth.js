@@ -1,15 +1,17 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../firebaseConfig.js"; // Import Firebase auth
-import { createUserInDatabase, getMongoUserIdByFirebaseId } from "../services/userServices.js"; // Import functions
+import { auth } from "../firebaseConfig.js";
+import { createUserInDatabase } from "../services/userService.js";
+import { useUser } from "../context/UserContext"; 
 
-const Auth = ({ updateMongoUserId }) => {
+const Auth = () => {
   const [isLogin, setIsLogin] = useState(true); // Toggle between Login and Sign-up
   const [email, setEmail] = useState("testuser@example.com");
   const [password, setPassword] = useState("password123");
   const [name, setName] = useState("Test User"); // Add a name field for new users
   const navigate = useNavigate();
+  const { setMongoUserId } = useUser(); // Use context function to update MongoDB user ID
 
   // Function to handle form submission
   const handleSubmit = async (e) => {
@@ -18,24 +20,20 @@ const Auth = ({ updateMongoUserId }) => {
     try {
       let userCredential;
       let mongoUserId;
+
       if (isLogin) {
         // Firebase login
         userCredential = await signInWithEmailAndPassword(auth, email, password);
-        // Retrieve the corresponding MongoDB user document
-        mongoUserId = await getMongoUserIdByFirebaseId(userCredential.user.uid);
       } else {
         // Firebase sign up
         userCredential = await createUserWithEmailAndPassword(auth, email, password);
 
         // Create a new user in MongoDB database
         mongoUserId = await createUserInDatabase(name, email, password, userCredential.user.uid);
+        setMongoUserId(mongoUserId); // Set MongoDB User ID in context
       }
 
-      // Pass the user ID up to App.js
-      updateMongoUserId(mongoUserId);
-
-      // Navigate to Home after successful login/signup
-      navigate("/");
+      navigate("/"); // Navigate to Home after successful login/signup
     } catch (error) {
       console.error("Error during authentication:", error.message);
       alert(error.message);
