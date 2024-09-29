@@ -125,6 +125,19 @@ app.delete("/api/users/:id", async (req, res) => {
   }
 });
 
+// Find a user by Firebase ID (GET)
+app.get("/api/users/firebase/:firebaseUserId", async (req, res) => {
+  try {
+    const user = await usersCollection.findOne({ firebaseUserId: req.params.firebaseUserId });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    res.status(200).json(user);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch user", details: err.message });
+  }
+});
+
 // Start the server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
