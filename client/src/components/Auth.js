@@ -1,50 +1,15 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-} from "firebase/auth";
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../firebaseConfig.js"; // Import Firebase auth
+import { createUserInDatabase, getMongoUserIdByFirebaseId } from "../services/userServices.js"; // Import functions
 
 const Auth = ({ updateMongoUserId }) => {
-  // Receive the updateUserId function as a prop
   const [isLogin, setIsLogin] = useState(true); // Toggle between Login and Sign-up
   const [email, setEmail] = useState("testuser@example.com");
   const [password, setPassword] = useState("password123");
   const [name, setName] = useState("Test User"); // Add a name field for new users
   const navigate = useNavigate();
-
-  // Function to create a new user in the MongoDB database
-  const createUserInDatabase = async (firebaseUserId) => {
-
-    console.log("Firebase User Id: ", firebaseUserId);
-    
-    try {
-      const response = await fetch("http://localhost:5000/api/users", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: name,
-          email: email,
-          password: password,
-          firebaseUserId: firebaseUserId,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to create user in database.");
-      }
-
-      console.log("MongoDB User ID: ", data.userId);
-      return data.userId;
-    } catch (err) {
-      console.error("Error creating user in MongoDB:", err.message);
-    }
-  };
 
   // Function to handle form submission
   const handleSubmit = async (e) => {
@@ -55,21 +20,15 @@ const Auth = ({ updateMongoUserId }) => {
       let mongoUserId;
       if (isLogin) {
         // Firebase login
-        userCredential = await signInWithEmailAndPassword(
-          auth,
-          email,
-          password
-        );
+        userCredential = await signInWithEmailAndPassword(auth, email, password);
+        // Retrieve the corresponding MongoDB user document
+        mongoUserId = await getMongoUserIdByFirebaseId(userCredential.user.uid);
       } else {
         // Firebase sign up
-        userCredential = await createUserWithEmailAndPassword(
-          auth,
-          email,
-          password
-        );
+        userCredential = await createUserWithEmailAndPassword(auth, email, password);
 
         // Create a new user in MongoDB database
-        mongoUserId = await createUserInDatabase(userCredential.user.uid);
+        mongoUserId = await createUserInDatabase(name, email, password, userCredential.user.uid);
       }
 
       // Pass the user ID up to App.js
