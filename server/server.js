@@ -383,6 +383,107 @@ app.delete("/api/majors/:id", async (req, res) => {
   }
 });
 
+// ************************************************************************************************
+// ************************************************************************************************
+// *********************************************SERIES*********************************************
+// ************************************************************************************************
+// ************************************************************************************************
+
+// Create a new Series
+app.post("/api/series", async (req, res) => {
+  try {
+    const seriesData = req.body;
+    if (!seriesData.major) {
+      return res.status(400).json({ error: "Major ID is required to create a Series." });
+    }
+
+    // Insert the new series document
+    const result = await seriesCollection.insertOne(seriesData);
+
+    // If a major ID is provided, update the Major collection to include this series
+    await majorsCollection.updateOne(
+      { _id: new ObjectId(seriesData.major) },
+      { $push: { series: result.insertedId } }
+    );
+
+    res.status(201).json({
+      message: "Series created successfully",
+      seriesId: result.insertedId,
+    });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to create series", details: err.message });
+  }
+});
+
+// Get all Series (GET)
+app.get("/api/series", async (req, res) => {
+  try {
+    const series = await seriesCollection.find().toArray();
+    res.status(200).json(series);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch series", details: err.message });
+  }
+});
+
+// Get a single Series by ID (GET)
+app.get("/api/series/:id", async (req, res) => {
+  try {
+    const series = await seriesCollection.findOne({ _id: new ObjectId(req.params.id) });
+    if (!series) {
+      return res.status(404).json({ error: "Series not found" });
+    }
+    res.status(200).json(series);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch series", details: err.message });
+  }
+});
+
+// Update a Series by ID (PUT)
+app.put("/api/series/:id", async (req, res) => {
+  try {
+    const updateData = req.body;
+    const result = await seriesCollection.updateOne(
+      { _id: new ObjectId(req.params.id) },
+      { $set: updateData }
+    );
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ error: "Series not found" });
+    }
+    res.status(200).json({ message: "Series updated successfully" });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to update series", details: err.message });
+  }
+});
+
+// Delete a Series by ID (DELETE)
+app.delete("/api/series/:id", async (req, res) => {
+  try {
+    const seriesId = new ObjectId(req.params.id);
+
+    // Find the series to get the major reference
+    const series = await seriesCollection.findOne({ _id: seriesId });
+    if (!series) {
+      return res.status(404).json({ error: "Series not found" });
+    }
+
+    // Remove the series from the corresponding Major
+    await majorsCollection.updateOne(
+      { _id: new ObjectId(series.major) },
+      { $pull: { series: seriesId } }
+    );
+
+    // Delete the series
+    const result = await seriesCollection.deleteOne({ _id: seriesId });
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ error: "Failed to delete series" });
+    }
+
+    res.status(200).json({ message: "Series deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to delete series", details: err.message });
+  }
+});
+
 // Start the server
 const PORT = process.env.DEV_SERVER_URL_PORT;
 app.listen(PORT, () => {
