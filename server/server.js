@@ -778,6 +778,78 @@ app.delete("/api/players/:id", async (req, res) => {
   }
 });
 
+// ************************************************************************************************
+// ************************************************************************************************
+// *******************************************DATA TREES*******************************************
+// ************************************************************************************************
+// ************************************************************************************************
+
+// Get complete information for a season (GET)
+app.get("/api/season/:id", async (req, res) => {
+  try {
+    // Fetch the season document
+    const season = await seasonsCollection.findOne({ _id: new ObjectId(req.params.id) });
+    if (!season) {
+      return res.status(404).json({ error: "Season not found" });
+    }
+
+    // Fetch the majors related to this season
+    const majors = await majorsCollection.find({ _id: { $in: season.majors } }).toArray();
+
+    // Fetch all series for the majors
+    const seriesList = await seriesCollection.find({ major: { $in: season.majors } }).toArray();
+
+    // Fetch all matches for the series
+    const seriesIds = seriesList.map(series => series._id);
+    const matches = await matchesCollection.find({ series: { $in: seriesIds } }).toArray();
+
+    // Fetch all teams for the series and matches
+    const matchTeamIds = matches.flatMap(match => match.teams);
+    const seriesTeamIds = seriesList.flatMap(series => series.teams);
+    const allTeamIds = [...new Set([...matchTeamIds, ...seriesTeamIds])]; // Unique list of all team IDs
+    const teams = await teamsCollection.find({ _id: { $in: allTeamIds } }).toArray();
+
+    // Fetch all players for the teams
+    const playerIds = teams.flatMap(team => team.players);
+    const players = await playersCollection.find({ _id: { $in: playerIds } }).toArray();
+
+    // Map teams with their respective players
+    const teamsWithPlayers = teams.map(team => ({
+      ...team,
+      players: players.filter(player => player.team.equals(team._id)) // Populate players in the team
+    }));
+
+    // Map matches with their respective teams and players
+    const matchesWithTeams = matches.map(match => ({
+      ...match,
+      teams: teamsWithPlayers.filter(team => match.teams.some(t => t.equals(team._id))) // Populate teams in the match
+    }));
+
+    // Map series with their respective matches and teams
+    const seriesWithMatches = seriesList.map(series => ({
+      ...series,
+      teams: teamsWithPlayers.filter(team => series.teams.some(t => t.equals(team._id))), // Populate teams in the series
+      matches: matchesWithTeams.filter(match => match.series.equals(series._id)) // Populate matches in the series
+    }));
+
+    // Map majors with their respective series
+    const majorsWithSeries = majors.map(major => ({
+      ...major,
+      series: seriesWithMatches.filter(series => series.major.equals(major._id)) // Populate series in the major
+    }));
+
+    // Construct the complete season object
+    const seasonWithMajors = {
+      ...season,
+      majors: majorsWithSeries
+    };
+
+    res.status(200).json(seasonWithMajors);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch season data", details: err.message });
+  }
+});
+
 // Start the server
 const PORT = process.env.DEV_SERVER_URL_PORT;
 app.listen(PORT, () => {
