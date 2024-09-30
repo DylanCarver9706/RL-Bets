@@ -585,6 +585,98 @@ app.delete("/api/matches/:id", async (req, res) => {
   }
 });
 
+// ************************************************************************************************
+// ************************************************************************************************
+// **********************************************TEAMS*********************************************
+// ************************************************************************************************
+// ************************************************************************************************
+
+// Create a new Team (POST)
+app.post("/api/teams", async (req, res) => {
+  try {
+    const teamData = req.body;
+    if (!teamData.name) {
+      return res.status(400).json({ error: "Team name is required." });
+    }
+
+    // Insert the new team document
+    const result = await teamsCollection.insertOne(teamData);
+
+    res.status(201).json({
+      message: "Team created successfully",
+      teamId: result.insertedId,
+    });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to create team", details: err.message });
+  }
+});
+
+// Get all Teams (GET)
+app.get("/api/teams", async (req, res) => {
+  try {
+    const teams = await teamsCollection.find().toArray();
+    res.status(200).json(teams);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch teams", details: err.message });
+  }
+});
+
+// Get a single Team by ID (GET)
+app.get("/api/teams/:id", async (req, res) => {
+  try {
+    const team = await teamsCollection.findOne({ _id: new ObjectId(req.params.id) });
+    if (!team) {
+      return res.status(404).json({ error: "Team not found" });
+    }
+    res.status(200).json(team);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch team", details: err.message });
+  }
+});
+
+// Update a Team by ID (PUT)
+app.put("/api/teams/:id", async (req, res) => {
+  try {
+    const updateData = req.body;
+    const result = await teamsCollection.updateOne(
+      { _id: new ObjectId(req.params.id) },
+      { $set: updateData }
+    );
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ error: "Team not found" });
+    }
+    res.status(200).json({ message: "Team updated successfully" });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to update team", details: err.message });
+  }
+});
+
+// Delete a Team by ID (DELETE)
+app.delete("/api/teams/:id", async (req, res) => {
+  try {
+    const teamId = new ObjectId(req.params.id);
+
+    // Check if the team exists
+    const team = await teamsCollection.findOne({ _id: teamId });
+    if (!team) {
+      return res.status(404).json({ error: "Team not found" });
+    }
+
+    // Remove the players that belong to this team
+    await playersCollection.deleteMany({ team: teamId });
+
+    // Delete the team
+    const result = await teamsCollection.deleteOne({ _id: teamId });
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ error: "Failed to delete team" });
+    }
+
+    res.status(200).json({ message: "Team deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to delete team", details: err.message });
+  }
+});
+
 // Start the server
 const PORT = process.env.DEV_SERVER_URL_PORT;
 app.listen(PORT, () => {
