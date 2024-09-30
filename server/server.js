@@ -10,7 +10,7 @@ const app = express();
 // CORS Middleware
 app.use(
   cors({
-    origin: "http://localhost:3000", // Replace with your frontend URL
+    origin: process.env.CLIENT_URL, // Replace with your frontend URL
     methods: "GET,PUT,POST,DELETE", // Allowed methods
     credentials: true, // Enable credentials (cookies, authorization headers)
   })
@@ -223,7 +223,7 @@ app.delete("/api/wagers/:id", async (req, res) => {
 });
 
 // Start the server
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.DEV_SERVER_URL_PORT;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
