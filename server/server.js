@@ -290,6 +290,99 @@ app.delete("/api/seasons/:id", async (req, res) => {
   }
 });
 
+// ************************************************************************************************
+// ************************************************************************************************
+// *********************************************MAJORS*********************************************
+// ************************************************************************************************
+// ************************************************************************************************
+
+// Create a new Major
+app.post("/api/majors", async (req, res) => {
+  try {
+    const majorData = req.body;
+    if (!majorData.season) {
+      return res.status(400).json({ error: "Season ID is required to create a Major." });
+    }
+
+    const result = await majorsCollection.insertOne(majorData);
+
+    // Add the major to the respective season
+    await seasonsCollection.updateOne(
+      { _id: new ObjectId(majorData.season) },
+      { $push: { majors: result.insertedId } }
+    );
+
+    res.status(201).json({ message: "Major created successfully", majorId: result.insertedId });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to create major", details: err.message });
+  }
+});
+
+// Get all Majors
+app.get("/api/majors", async (req, res) => {
+  try {
+    const majors = await majorsCollection.find().toArray();
+    res.status(200).json(majors);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch majors", details: err.message });
+  }
+});
+
+// Get a single Major by ID
+app.get("/api/majors/:id", async (req, res) => {
+  try {
+    const major = await majorsCollection.findOne({ _id: new ObjectId(req.params.id) });
+    if (!major) {
+      return res.status(404).json({ error: "Major not found" });
+    }
+    res.status(200).json(major);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch major", details: err.message });
+  }
+});
+
+// Update a Major by ID
+app.put("/api/majors/:id", async (req, res) => {
+  try {
+    const result = await majorsCollection.updateOne({ _id: new ObjectId(req.params.id) }, { $set: req.body });
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ error: "Major not found" });
+    }
+    res.status(200).json({ message: "Major updated successfully" });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to update major", details: err.message });
+  }
+});
+
+// Delete a Major by ID
+app.delete("/api/majors/:id", async (req, res) => {
+  try {
+    const majorId = new ObjectId(req.params.id);
+
+    // Find the major to get the season reference
+    const major = await majorsCollection.findOne({ _id: majorId });
+    if (!major) {
+      return res.status(404).json({ error: "Major not found" });
+    }
+
+    // Remove the major from the season
+    await seasonsCollection.updateOne(
+      { _id: new ObjectId(major.season) },
+      { $pull: { majors: majorId } }
+    );
+
+    // Delete the major
+    const result = await majorsCollection.deleteOne({ _id: majorId });
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ error: "Failed to delete major" });
+    }
+
+    res.status(200).json({ message: "Major deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to delete major", details: err.message });
+  }
+});
+
 // Start the server
 const PORT = process.env.DEV_SERVER_URL_PORT;
 app.listen(PORT, () => {
