@@ -677,6 +677,107 @@ app.delete("/api/teams/:id", async (req, res) => {
   }
 });
 
+// ************************************************************************************************
+// ************************************************************************************************
+// ********************************************PLAYERS*********************************************
+// ************************************************************************************************
+// ************************************************************************************************
+
+// Create a new Player (POST)
+app.post("/api/players", async (req, res) => {
+  try {
+    const playerData = req.body;
+    if (!playerData.name || !playerData.team) {
+      return res.status(400).json({ error: "Player name and team ID are required." });
+    }
+
+    // Insert the new player document
+    const result = await playersCollection.insertOne(playerData);
+
+    // Add the player to the corresponding team
+    await teamsCollection.updateOne(
+      { _id: new ObjectId(playerData.team) },
+      { $push: { players: result.insertedId } }
+    );
+
+    res.status(201).json({
+      message: "Player created successfully",
+      playerId: result.insertedId,
+    });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to create player", details: err.message });
+  }
+});
+
+// Get all Players (GET)
+app.get("/api/players", async (req, res) => {
+  try {
+    const players = await playersCollection.find().toArray();
+    res.status(200).json(players);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch players", details: err.message });
+  }
+});
+
+// Get a single Player by ID (GET)
+app.get("/api/players/:id", async (req, res) => {
+  try {
+    const player = await playersCollection.findOne({ _id: new ObjectId(req.params.id) });
+    if (!player) {
+      return res.status(404).json({ error: "Player not found" });
+    }
+    res.status(200).json(player);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch player", details: err.message });
+  }
+});
+
+// Update a Player by ID (PUT)
+app.put("/api/players/:id", async (req, res) => {
+  try {
+    const updateData = req.body;
+    const result = await playersCollection.updateOne(
+      { _id: new ObjectId(req.params.id) },
+      { $set: updateData }
+    );
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ error: "Player not found" });
+    }
+    res.status(200).json({ message: "Player updated successfully" });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to update player", details: err.message });
+  }
+});
+
+// Delete a Player by ID (DELETE)
+app.delete("/api/players/:id", async (req, res) => {
+  try {
+    const playerId = new ObjectId(req.params.id);
+
+    // Find the player to get the team reference
+    const player = await playersCollection.findOne({ _id: playerId });
+    if (!player) {
+      return res.status(404).json({ error: "Player not found" });
+    }
+
+    // Remove the player from the team
+    await teamsCollection.updateOne(
+      { _id: new ObjectId(player.team) },
+      { $pull: { players: playerId } }
+    );
+
+    // Delete the player
+    const result = await playersCollection.deleteOne({ _id: playerId });
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ error: "Failed to delete player" });
+    }
+
+    res.status(200).json({ message: "Player deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to delete player", details: err.message });
+  }
+});
+
 // Start the server
 const PORT = process.env.DEV_SERVER_URL_PORT;
 app.listen(PORT, () => {
