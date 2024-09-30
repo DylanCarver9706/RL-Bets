@@ -225,6 +225,71 @@ app.delete("/api/wagers/:id", async (req, res) => {
   }
 });
 
+// ************************************************************************************************
+// ************************************************************************************************
+// ********************************************SEASONS*********************************************
+// ************************************************************************************************
+// ************************************************************************************************
+
+// Create a new Season
+app.post("/api/seasons", async (req, res) => {
+  try {
+    const result = await seasonsCollection.insertOne(req.body);
+    res.status(201).json({ message: "Season created successfully", seasonId: result.insertedId });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to create season", details: err.message });
+  }
+});
+
+// Get all Seasons
+app.get("/api/seasons", async (req, res) => {
+  try {
+    const seasons = await seasonsCollection.find().toArray();
+    res.status(200).json(seasons);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch seasons", details: err.message });
+  }
+});
+
+// Get a single Season by ID
+app.get("/api/seasons/:id", async (req, res) => {
+  try {
+    const season = await seasonsCollection.findOne({ _id: new ObjectId(req.params.id) });
+    if (!season) {
+      return res.status(404).json({ error: "Season not found" });
+    }
+    res.status(200).json(season);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch season", details: err.message });
+  }
+});
+
+// Update a Season by ID
+app.put("/api/seasons/:id", async (req, res) => {
+  try {
+    const result = await seasonsCollection.updateOne({ _id: new ObjectId(req.params.id) }, { $set: req.body });
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ error: "Season not found" });
+    }
+    res.status(200).json({ message: "Season updated successfully" });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to update season", details: err.message });
+  }
+});
+
+// Delete a Season by ID
+app.delete("/api/seasons/:id", async (req, res) => {
+  try {
+    const result = await seasonsCollection.deleteOne({ _id: new ObjectId(req.params.id) });
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ error: "Season not found" });
+    }
+    res.status(200).json({ message: "Season deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to delete season", details: err.message });
+  }
+});
+
 // Start the server
 const PORT = process.env.DEV_SERVER_URL_PORT;
 app.listen(PORT, () => {
