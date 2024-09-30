@@ -50,12 +50,14 @@ const client = new MongoClient(uri, {
 });
 
 // Connect to MongoDB and define the collections
-let seasonsCollection, majorsCollection, seriesCollection, matchesCollection, teamsCollection, playersCollection;
+let usersCollection, wagersCollection, seasonsCollection, majorsCollection, seriesCollection, matchesCollection, teamsCollection, playersCollection;
 
 async function connectToDatabase() {
   try {
     await client.connect();
     const database = client.db("RLBets");
+    usersCollection = database.collection("Users");
+    wagersCollection = database.collection("Wagers");
     seasonsCollection = database.collection("Seasons");
     majorsCollection = database.collection("Majors");
     seriesCollection = database.collection("Series");
