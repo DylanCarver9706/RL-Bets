@@ -484,6 +484,107 @@ app.delete("/api/series/:id", async (req, res) => {
   }
 });
 
+// ************************************************************************************************
+// ************************************************************************************************
+// ********************************************MATCHES*********************************************
+// ************************************************************************************************
+// ************************************************************************************************
+
+// Create a new match (POST)
+app.post("/api/matches", async (req, res) => {
+  try {
+    const matchData = req.body;
+    if (!matchData.series) {
+      return res.status(400).json({ error: "Series ID is required to create a Match." });
+    }
+
+    // Insert the new match document
+    const result = await matchesCollection.insertOne(matchData);
+
+    // If a series ID is provided, update the Series collection to include this match
+    await seriesCollection.updateOne(
+      { _id: new ObjectId(matchData.series) },
+      { $push: { matches: result.insertedId } }
+    );
+
+    res.status(201).json({
+      message: "Match created successfully",
+      matchId: result.insertedId,
+    });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to create match", details: err.message });
+  }
+});
+
+// Get all matches (GET)
+app.get("/api/matches", async (req, res) => {
+  try {
+    const matches = await matchesCollection.find().toArray();
+    res.status(200).json(matches);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch matches", details: err.message });
+  }
+});
+
+// Get a single match by ID (GET)
+app.get("/api/matches/:id", async (req, res) => {
+  try {
+    const match = await matchesCollection.findOne({ _id: new ObjectId(req.params.id) });
+    if (!match) {
+      return res.status(404).json({ error: "Match not found" });
+    }
+    res.status(200).json(match);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch match", details: err.message });
+  }
+});
+
+// Update a match by ID (PUT)
+app.put("/api/matches/:id", async (req, res) => {
+  try {
+    const updateData = req.body;
+    const result = await matchesCollection.updateOne(
+      { _id: new ObjectId(req.params.id) },
+      { $set: updateData }
+    );
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ error: "Match not found" });
+    }
+    res.status(200).json({ message: "Match updated successfully" });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to update match", details: err.message });
+  }
+});
+
+// Delete a match by ID (DELETE)
+app.delete("/api/matches/:id", async (req, res) => {
+  try {
+    const matchId = new ObjectId(req.params.id);
+
+    // First, find the match to get the series reference
+    const match = await matchesCollection.findOne({ _id: matchId });
+    if (!match) {
+      return res.status(404).json({ error: "Match not found" });
+    }
+
+    // Remove the match from the series it belongs to
+    await seriesCollection.updateOne(
+      { _id: new ObjectId(match.series) },
+      { $pull: { matches: matchId } }
+    );
+
+    // Delete the match
+    const result = await matchesCollection.deleteOne({ _id: matchId });
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ error: "Failed to delete match" });
+    }
+
+    res.status(200).json({ message: "Match deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to delete match", details: err.message });
+  }
+});
+
 // Start the server
 const PORT = process.env.DEV_SERVER_URL_PORT;
 app.listen(PORT, () => {
