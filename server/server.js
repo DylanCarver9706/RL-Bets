@@ -39,15 +39,17 @@ const client = new MongoClient(uri, {
   },
 });
 
-// Connect to MongoDB and define a users collection
+// Connect to MongoDB and define the collections
 let usersCollection;
+let wagersCollection;
 
 async function connectToDatabase() {
   try {
     await client.connect();
-    const database = client.db("RLBets"); // Create or connect to the 'usersdb' database
-    usersCollection = database.collection("Users"); // Create or connect to the 'users' collection
-    console.log("Connected to MongoDB and 'users' collection.");
+    const database = client.db("RLBets");
+    usersCollection = database.collection("Users");
+    wagersCollection = database.collection("Wagers");
+    console.log("Connected to MongoDB and 'users' and 'wagers' collections.");
   } catch (error) {
     console.error("Error connecting to MongoDB:", error);
   }
@@ -55,6 +57,13 @@ async function connectToDatabase() {
 
 // Call connectToDatabase when the app starts
 connectToDatabase();
+
+
+// ************************************************************************************************
+// ************************************************************************************************
+// *********************************************USERS**********************************************
+// ************************************************************************************************
+// ************************************************************************************************
 
 // Create a new user (POST)
 app.post("/api/users", async (req, res) => {
@@ -135,6 +144,81 @@ app.get("/api/users/firebase/:firebaseUserId", async (req, res) => {
     res.status(200).json(user);
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch user", details: err.message });
+  }
+});
+
+// ************************************************************************************************
+// ************************************************************************************************
+// *********************************************WAGERS*********************************************
+// ************************************************************************************************
+// ************************************************************************************************
+
+// Create a new wager (POST)
+app.post("/api/wagers", async (req, res) => {
+  try {
+    const result = await wagersCollection.insertOne(req.body);
+    res.status(201).json({
+      message: "Wager created successfully",
+      wagerId: result.insertedId,
+    });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to create wager", details: err.message });
+  }
+});
+
+// Get all wagers (GET)
+app.get("/api/wagers", async (req, res) => {
+  try {
+    const wagers = await wagersCollection.find().toArray();
+    res.status(200).json(wagers);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch wagers", details: err.message });
+  }
+});
+
+// Get a single wager by ID (GET)
+app.get("/api/wagers/:id", async (req, res) => {
+  try {
+    const wager = await wagersCollection.findOne({
+      _id: new ObjectId(req.params.id),
+    });
+    if (!wager) {
+      return res.status(404).json({ error: "Wager not found" });
+    }
+    res.status(200).json(wager);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch wager", details: err.message });
+  }
+});
+
+// Update a wager by ID (PUT)
+app.put("/api/wagers/:id", async (req, res) => {
+  try {
+    const result = await wagersCollection.updateOne(
+      { _id: new ObjectId(req.params.id) },
+      { $set: req.body }
+    );
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ error: "Wager not found" });
+    }
+    res.status(200).json({ message: "Wager updated successfully" });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to update wager", details: err.message });
+  }
+});
+
+// Delete a wager by ID (DELETE)
+app.delete("/api/wagers/:id", async (req, res) => {
+  try {
+    const result = await wagersCollection.deleteOne({
+      _id: new ObjectId(req.params.id),
+    });
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ error: "Wager not found" });
+    }
+    res.status(200).json({ message: "Wager deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to delete wager", details: err.message });
   }
 });
 
