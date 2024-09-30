@@ -1,4 +1,4 @@
-const BASE_URL = process.env.REACT_APP_BASE_CLIENT_URL; // Define your backend server URL
+const BASE_URL = process.env.REACT_APP_BASE_SERVER_URL; // Define your backend server URL
 
 export const fetchWagers = async () => {
   try {

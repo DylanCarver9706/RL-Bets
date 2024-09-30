@@ -1,4 +1,4 @@
-const BASE_URL = process.env.REACT_APP_BASE_CLIENT_URL; // Define your backend server URL
+const BASE_URL = process.env.REACT_APP_BASE_SERVER_URL; // Define your backend server URL
 
 // Function to create a new user in the MongoDB database
 export const createUserInDatabase = async (name, email, password, firebaseUserId) => {
