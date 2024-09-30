@@ -4,6 +4,7 @@ import { useUser, UserProvider } from "./context/UserContext";
 import Home from "./components/Home";
 import Auth from "./components/Auth";
 import User from "./components/User";
+import Navbar from "./components/Navbar";
 
 function AppRoutes() {
   const { firebaseUser, mongoUserId, loading } = useUser();
@@ -13,7 +14,7 @@ function AppRoutes() {
 
   return (
     <>
-      <h1>RLBets.com</h1>
+      <Navbar />
       <Routes>
         <Route path="/" element={firebaseUser ? <Home /> : <Auth />} />
         <Route path="/Auth" element={<Auth />} />
