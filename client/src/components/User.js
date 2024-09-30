@@ -1,8 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getUserById, updateUser, deleteUser } from "../services/userService.js";
+import {
+  getUserById,
+  updateUser,
+  deleteUser,
+} from "../services/userService.js";
 import { useUser } from "../context/UserContext.js";
-import { deleteUser as firebaseDeleteUser } from "firebase/auth"; // Import Firebase deleteUser function
+import { deleteUser as firebaseDeleteUser, signOut } from "firebase/auth"; // Import Firebase deleteUser function
+import { auth } from "../firebaseConfig.js";
 
 const User = () => {
   const [user, setUser] = useState(null); // State to hold the user data
@@ -35,7 +40,11 @@ const User = () => {
   // Handle updating the user information
   const handleUpdate = async () => {
     try {
-      const updatedUser = await updateUser(mongoUserId, { name, email, password });
+      const updatedUser = await updateUser(mongoUserId, {
+        name,
+        email,
+        password,
+      });
       setUser(updatedUser);
       alert("User updated successfully");
     } catch (err) {
@@ -45,7 +54,11 @@ const User = () => {
 
   // Handle deleting the user from Firebase and MongoDB
   const handleDelete = async () => {
-    if (window.confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
+    if (
+      window.confirm(
+        "Are you sure you want to delete your account? This action cannot be undone."
+      )
+    ) {
       try {
         // Delete user from MongoDB
         await deleteUser(mongoUserId);
@@ -63,6 +76,15 @@ const User = () => {
         console.error("Error deleting user account:", err.message);
         alert("Error deleting user account. Please try again.");
       }
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth); // Firebase sign-out
+      navigate("/Auth"); // Redirect to Auth after logout
+    } catch (error) {
+      console.error("Error logging out:", error.message);
     }
   };
 
@@ -90,7 +112,7 @@ const User = () => {
           <div>
             <label>Password:</label>
             <input
-            //   type="password"
+              //   type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
@@ -99,6 +121,7 @@ const User = () => {
           <button onClick={handleDelete} style={{ marginLeft: "10px" }}>
             Delete User
           </button>
+          <button onClick={handleLogout}>Logout</button>
         </div>
       ) : (
         <p>Loading user data...</p>
