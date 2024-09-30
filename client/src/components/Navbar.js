@@ -8,6 +8,9 @@ const Navbar = () => {
       <div style={styles.navLinks}>
         <Link to="/User" style={styles.link}>Profile</Link>
       </div>
+      <div style={styles.navLinks}>
+        <Link to="/Bet" style={styles.link}>Create Bet</Link>
+      </div>
     </nav>
   );
 };
