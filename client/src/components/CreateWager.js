@@ -137,7 +137,7 @@ const CreateWager = () => {
                 </CollapsibleSection>
               ) : (
                 <div key={key} style={{ marginBottom: "5px" }}>
-                  <strong>{key.charAt(0).toUpperCase() + key.slice(1)}:</strong> {value}
+                  <strong>{value}</strong> 
                 </div>
               );
             })}
@@ -155,7 +155,6 @@ const CreateWager = () => {
       <h2>Welcome to the Create Wager Page</h2>
       {data ? (
         <div>
-          <h3>Data Tree Structure</h3>
           {renderDataTree(data)}
         </div>
       ) : (
