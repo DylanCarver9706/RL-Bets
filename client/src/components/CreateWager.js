@@ -1,11 +1,19 @@
 import React, { useEffect, useState } from "react";
-import { fetchSeasonDataTree, fetchTeams } from "../services/wagerService";
+import { useNavigate } from "react-router-dom";
+import { fetchSeasonDataTree, fetchTeams, createWager } from "../services/wagerService";
 
 const CreateWager = () => {
+  // Load data
   const [data, setData] = useState(null);
-  const [teams, setTeams] = useState(null)
-  const [loading, setLoading] = useState(true);
+  const [teams, setTeams] = useState([]);
   const seasonId = "66fa1588cbd894f17aa0363a"; // Hardcoded for demonstration; replace with dynamic as needed
+  
+  // Track wager related info
+  const [wagerString, setWagerString] = useState("");
+  const [selectedWagerMajor, setSelectedWagerMajor] = useState(null);
+  const [selectedWagerTeam, setSelectedWagerTeam] = useState("");
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -13,22 +21,46 @@ const CreateWager = () => {
         const fetchedData = await fetchSeasonDataTree(seasonId);
         setData(fetchedData);
 
-        const fetchedTeams = await fetchTeams()
-        setTeams(fetchedTeams)
-        setLoading(false);
+        const fetchedTeams = await fetchTeams();
+        setTeams(fetchedTeams);
       } catch (error) {
         console.error("Error fetching data:", error.message);
-        setLoading(false);
       }
     };
 
     fetchData();
   }, [seasonId]);
 
+  // Handle team selection and update the bet description
+  const handleTeamSelect = (e) => {
+    const teamName = e.target.value;
+    setSelectedWagerTeam(teamName);
+
+    if (teamName && selectedWagerMajor) {
+      // Update the bet description when a team is selected
+      setWagerString(`I bet that the team ${teamName} will win the ${selectedWagerMajor.name}`);
+    }
+  };
+
+  // Function to submit the bet
+  const handleBetSubmit = () => {
+    console.log("Bet Submitted: ", wagerString);
+    // Additional submission logic can be added here, such as sending to an API
+    createWager({"name": wagerString})
+    
+    // Reset the wager state values
+    setWagerString("")
+    setSelectedWagerTeam("");
+    setSelectedWagerMajor(null);
+    navigate("/");
+  };
+
   // Function to handle "Bet" button clicks
-  const handleBetClick = (name, id) => {
+  const handleBetClick = (name, id, type) => {
+    if (type === "major") {
+      setSelectedWagerMajor({ name, id }); // Store the major bet
+    }
     console.log(`Betting on ${name} with ID: ${id}`);
-    // Further logic for starting a form or additional operations can be added here
   };
 
   // Collapsible component to handle toggling
@@ -175,7 +207,7 @@ const CreateWager = () => {
                   {/* Only show Bet button for majors, series, or matches */}
                   {level !== 0 && (
                     <button
-                    onClick={() => handleBetClick(value, node._id)}
+                      onClick={() => handleBetClick(value, node._id, "major")}
                       style={{
                         marginLeft: "10px",
                         background: "#007bff",
@@ -196,19 +228,39 @@ const CreateWager = () => {
     }
   };
 
-  if (loading) {
-    return <p>Loading data tree...</p>;
-  }
-
   return (
     <div>
       <h2>Welcome to the Create Wager Page</h2>
-      {data ? (
-        <div>
-          {renderDataTree(data)}
+      {data ? <div>{renderDataTree(data)}</div> : <p>Failed to load data.</p>}
+      
+      {/* Wager input for major bet */}
+      {selectedWagerMajor && (
+        <div style={{ marginTop: "20px" }}>
+          <h3>
+            I bet that the team{" "}
+            <select value={selectedWagerTeam} onChange={handleTeamSelect} style={{ marginRight: "10px" }}>
+              <option value="">Select a team</option>
+              {teams.map((team) => (
+                <option key={team._id} value={team.name}>
+                  {team.name}
+                </option>
+              ))}
+            </select>
+            will win the {selectedWagerMajor.name}
+          </h3>
+          <button
+            onClick={handleBetSubmit}
+            style={{
+              background: "#28a745",
+              color: "white",
+              border: "none",
+              padding: "5px 10px",
+              cursor: "pointer",
+            }}
+          >
+            Confirm Bet
+          </button>
         </div>
-      ) : (
-        <p>Failed to load data.</p>
       )}
     </div>
   );
