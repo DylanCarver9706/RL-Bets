@@ -20,6 +20,28 @@ export const fetchWagers = async () => {
   }
 };
 
+// Create wager
+export const createWager = async (body) => {
+  try {
+    const response = await fetch(`${BASE_URL}/api/wagers`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body)
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to create wager");
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (err) {
+    console.error("Error creating wager:", err.message);
+  }
+};
+
 // Fetch the data tree for a given season ID
 export const fetchSeasonDataTree = async (seasonId) => {
   try {
