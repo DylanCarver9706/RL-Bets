@@ -41,3 +41,25 @@ export const fetchSeasonDataTree = async (seasonId) => {
     throw err;
   }
 };
+
+// Fetch the teams
+export const fetchTeams = async () => {
+  try {
+    const response = await fetch(`${BASE_URL}/api/teams`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch teams`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (err) {
+    console.error("Error fetching teams:", err.message);
+    throw err;
+  }
+};
