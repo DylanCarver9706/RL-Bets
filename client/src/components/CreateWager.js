@@ -94,9 +94,6 @@ const CreateWager = () => {
   const renderDataTree = (node, level = 0) => {
     if (!node || typeof node !== "object") return null;
   
-    // Capture the node ID if it exists
-    const id = node._id;
-  
     if (Array.isArray(node)) {
       return (
         <ul style={{ listStyleType: "none", paddingLeft: level > 0 ? "20px" : "0" }}>
@@ -168,7 +165,7 @@ const CreateWager = () => {
                   {/* Only show Bet button for majors, series, or matches */}
                   {level !== 0 && (
                     <button
-                      onClick={() => console.log(`Betting on ${value} with ID: ${id}`)}
+                      onClick={() => console.log(`Betting on ${value} with ID: ${node._id}`)}
                       style={{
                         marginLeft: "10px",
                         background: "#007bff",
