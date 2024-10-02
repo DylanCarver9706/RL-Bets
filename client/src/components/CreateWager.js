@@ -25,6 +25,12 @@ const CreateWager = () => {
     fetchData();
   }, [seasonId]);
 
+  // Function to handle "Bet" button clicks
+  const handleBetClick = (name, id) => {
+    console.log(`Betting on ${name} with ID: ${id}`);
+    // Further logic for starting a form or additional operations can be added here
+  };
+
   // Collapsible component to handle toggling
   const CollapsibleSection = ({ title, children }) => {
     const [isCollapsed, setIsCollapsed] = useState(true);
@@ -169,7 +175,7 @@ const CreateWager = () => {
                   {/* Only show Bet button for majors, series, or matches */}
                   {level !== 0 && (
                     <button
-                      onClick={() => console.log(`Betting on ${value} with ID: ${node._id}`)}
+                    onClick={() => handleBetClick(value, node._id)}
                       style={{
                         marginLeft: "10px",
                         background: "#007bff",
