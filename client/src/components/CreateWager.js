@@ -120,7 +120,11 @@ const CreateWager = () => {
               else if (key === "teams") title = "Teams";
               else if (key === "players") title = "Players";
               else if (key === "results") title = "Results";
-
+  
+              // Skip rendering teams directly under matches or series
+              if (key === "teams") {
+                return null;
+              }
               // Render results as a table
               if (key === "results" && typeof value === "object") {
                 return (
