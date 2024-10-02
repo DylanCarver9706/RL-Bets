@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { fetchSeasonDataTree } from "../services/wagerService";
+import { fetchSeasonDataTree, fetchTeams } from "../services/wagerService";
 
 const CreateWager = () => {
   const [data, setData] = useState(null);
+  const [teams, setTeams] = useState(null)
   const [loading, setLoading] = useState(true);
   const seasonId = "66fa1588cbd894f17aa0363a"; // Hardcoded for demonstration; replace with dynamic as needed
 
@@ -11,6 +12,9 @@ const CreateWager = () => {
       try {
         const fetchedData = await fetchSeasonDataTree(seasonId);
         setData(fetchedData);
+
+        const fetchedTeams = await fetchTeams()
+        setTeams(fetchedTeams)
         setLoading(false);
       } catch (error) {
         console.error("Error fetching data:", error.message);
