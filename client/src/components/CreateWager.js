@@ -93,7 +93,10 @@ const CreateWager = () => {
   // Recursive render function to display nested data
   const renderDataTree = (node, level = 0) => {
     if (!node || typeof node !== "object") return null;
-
+  
+    // Capture the node ID if it exists
+    const id = node._id;
+  
     if (Array.isArray(node)) {
       return (
         <ul style={{ listStyleType: "none", paddingLeft: level > 0 ? "20px" : "0" }}>
@@ -107,7 +110,7 @@ const CreateWager = () => {
         <div>
           {Object.entries(node)
             .filter(([key, value]) => {
-              // Exclude fields like "_id", "id", or specific reference fields that contain IDs
+              // Exclude keys like "_id", "id", or reference fields that contain IDs
               const excludedKeys = ["_id", "id", "season", "major", "series", "team"];
               return !excludedKeys.includes(key) || typeof value !== "string";
             })
@@ -153,15 +156,31 @@ const CreateWager = () => {
                   </CollapsibleSection>
                 );
               }
-
+  
               // Recursively render if the value is an object or array
               return typeof value === "object" ? (
                 <CollapsibleSection key={key} title={title || key}>
-                  {renderDataTree(value, level + 1)}
+                  {renderDataTree(value, level + 1, key)}
                 </CollapsibleSection>
               ) : (
                 <div key={key} style={{ marginBottom: "5px" }}>
-                  <strong>{value}</strong> 
+                  <strong>{value}</strong>
+                  {/* Only show Bet button for majors, series, or matches */}
+                  {level !== 0 && (
+                    <button
+                      onClick={() => console.log(`Betting on ${value} with ID: ${id}`)}
+                      style={{
+                        marginLeft: "10px",
+                        background: "#007bff",
+                        color: "white",
+                        border: "none",
+                        padding: "3px 8px",
+                        cursor: "pointer",
+                      }}
+                    >
+                      Bet
+                    </button>
+                  )}
                 </div>
               );
             })}
