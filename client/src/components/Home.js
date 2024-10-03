@@ -5,7 +5,8 @@ import { fetchWagers } from "../services/wagerService.js";
 const Home = () => {
   const { mongoUserId } = useUser(); // Get the MongoDB user ID from context
   const [wagers, setWagers] = useState([]); // State to hold the list of wagers
-  const [loading, setLoading] = useState(true); // Loading state
+  const [usersWagers, setUsersWagers] = useState([]);
+  const [userWagerView, setUserWagerView] = useState(false)
 
   console.log("Mongo User ID: ", mongoUserId);
 
@@ -13,24 +14,60 @@ const Home = () => {
   useEffect(() => {
     // Define an async function inside useEffect
     const getWagers = async () => {
-      const wagers = await fetchWagers();
-      setWagers(wagers || []); // Set fetched wagers in state or an empty array if undefined
-      setLoading(false); // Set loading to false after data is fetched
+      const allWagers = await fetchWagers();
+      setWagers(allWagers || []); // Set fetched wagers in state or an empty array if undefined
+
+      console.log("Wagers: ", wagers);
+
+      const allUsersWagers = allWagers.filter((wager) => wager.creator === mongoUserId)
+      console.log("Users Wagers: ", allUsersWagers);
+
+      setUsersWagers(allUsersWagers || []);
+
+  
+      // console.log("Users Wagers: ", usersWagers);
+
     };
 
     // Call the async function
     getWagers();
   }, []); // Empty dependency array to run once on mount
 
+  const toggleWagerView = () => {
+    setUserWagerView(!userWagerView);
+  }
+
   return (
     <div>
       <h2>Welcome to the Home Page (Protected)</h2>
       <hr />
 
-      {loading ? (
-        <p>Loading wagers...</p>
+      {userWagerView ? (
+        <div>
+          <div>
+            <button onClick={() => toggleWagerView()}>View All Wagers</button>
+          </div>
+        <h3>User Wagers</h3>
+        <ul>
+          {usersWagers.length === 0 ? (
+            <p>No wagers created by user.</p>
+          ) : (
+            usersWagers.map((wager) => (
+              <li key={wager._id}>
+                <strong>Wager ID:</strong> {wager._id} <br />
+                <strong>Creator:</strong> {wager.creator} <br />
+                <strong>Wager Name:</strong> {wager.name} <br />
+                <hr />
+              </li>
+            ))
+          )}
+        </ul>
+      </div>
       ) : (
         <div>
+          <div>
+            <button onClick={() => toggleWagerView()}>View Your Wagers</button>
+          </div>
           <h3>All Wagers</h3>
           <ul>
             {wagers.length === 0 ? (
@@ -39,6 +76,7 @@ const Home = () => {
               wagers.map((wager) => (
                 <li key={wager._id}>
                   <strong>Wager ID:</strong> {wager._id} <br />
+                  <strong>Creator:</strong> {wager.creator} <br />
                   <strong>Wager Name:</strong> {wager.name} <br />
                   <hr />
                 </li>
