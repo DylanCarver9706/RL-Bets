@@ -55,6 +55,13 @@ const CreateWager = () => {
     navigate("/");
   };
 
+  const handleBetCancel = () => {
+    // Reset the wager state values
+    setWagerString("")
+    setSelectedWagerTeam("");
+    setSelectedWagerMajor(null);
+  };
+
   // Function to handle "Bet" button clicks
   const handleBetClick = (name, id, type) => {
     if (type === "major") {
@@ -259,6 +266,18 @@ const CreateWager = () => {
             }}
           >
             Confirm Bet
+          </button>
+          <button
+            onClick={handleBetCancel}
+            style={{
+              background: "#e01616",
+              color: "white",
+              border: "none",
+              padding: "5px 10px",
+              cursor: "pointer",
+            }}
+          >
+            Cancel
           </button>
         </div>
       )}
