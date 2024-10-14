@@ -53,7 +53,7 @@ const client = new MongoClient(uri, {
 let usersCollection,
   wagersCollection,
   seasonsCollection,
-  majorsCollection,
+  tournamentsCollection,
   seriesCollection,
   matchesCollection,
   teamsCollection,
@@ -66,7 +66,7 @@ async function connectToDatabase() {
     usersCollection = database.collection("Users");
     wagersCollection = database.collection("Wagers");
     seasonsCollection = database.collection("Seasons");
-    majorsCollection = database.collection("Majors");
+    tournamentsCollection = database.collection("Tournaments");
     seriesCollection = database.collection("Series");
     matchesCollection = database.collection("Matches");
     teamsCollection = database.collection("Teams");
@@ -362,116 +362,116 @@ app.delete("/api/seasons/:id", async (req, res) => {
 
 // ************************************************************************************************
 // ************************************************************************************************
-// *********************************************MAJORS*********************************************
+// ******************************************Tournaments*******************************************
 // ************************************************************************************************
 // ************************************************************************************************
 
-// Create a new Major
-app.post("/api/majors", async (req, res) => {
+// Create a new Tournament
+app.post("/api/tournaments", async (req, res) => {
   try {
-    const majorData = req.body;
-    if (!majorData.season) {
+    const tournamentData = req.body;
+    if (!tournamentData.season) {
       return res
         .status(400)
-        .json({ error: "Season ID is required to create a Major." });
+        .json({ error: "Season ID is required to create a Tournament." });
     }
 
-    const result = await majorsCollection.insertOne(majorData);
+    const result = await tournamentsCollection.insertOne(tournamentData);
 
-    // Add the major to the respective season
+    // Add the tournament to the respective season
     await seasonsCollection.updateOne(
-      { _id: new ObjectId(majorData.season) },
-      { $push: { majors: result.insertedId } }
+      { _id: new ObjectId(tournamentData.season) },
+      { $push: { tournaments: result.insertedId } }
     );
 
     res
       .status(201)
       .json({
-        message: "Major created successfully",
-        majorId: result.insertedId,
+        message: "Tournament created successfully",
+        tournamentId: result.insertedId,
       });
   } catch (err) {
     res
       .status(500)
-      .json({ error: "Failed to create major", details: err.message });
+      .json({ error: "Failed to create tournament", details: err.message });
   }
 });
 
-// Get all Majors
-app.get("/api/majors", async (req, res) => {
+// Get all Tournaments
+app.get("/api/tournaments", async (req, res) => {
   try {
-    const majors = await majorsCollection.find().toArray();
-    res.status(200).json(majors);
+    const tournaments = await tournamentsCollection.find().toArray();
+    res.status(200).json(tournaments);
   } catch (err) {
     res
       .status(500)
-      .json({ error: "Failed to fetch majors", details: err.message });
+      .json({ error: "Failed to fetch tournaments", details: err.message });
   }
 });
 
-// Get a single Major by ID
-app.get("/api/majors/:id", async (req, res) => {
+// Get a single Tournament by ID
+app.get("/api/tournaments/:id", async (req, res) => {
   try {
-    const major = await majorsCollection.findOne({
+    const tournament = await tournamentsCollection.findOne({
       _id: new ObjectId(req.params.id),
     });
-    if (!major) {
-      return res.status(404).json({ error: "Major not found" });
+    if (!tournament) {
+      return res.status(404).json({ error: "Tournament not found" });
     }
-    res.status(200).json(major);
+    res.status(200).json(tournament);
   } catch (err) {
     res
       .status(500)
-      .json({ error: "Failed to fetch major", details: err.message });
+      .json({ error: "Failed to fetch tournament", details: err.message });
   }
 });
 
-// Update a Major by ID
-app.put("/api/majors/:id", async (req, res) => {
+// Update a Tournament by ID
+app.put("/api/tournaments/:id", async (req, res) => {
   try {
-    const result = await majorsCollection.updateOne(
+    const result = await tournamentsCollection.updateOne(
       { _id: new ObjectId(req.params.id) },
       { $set: req.body }
     );
     if (result.matchedCount === 0) {
-      return res.status(404).json({ error: "Major not found" });
+      return res.status(404).json({ error: "Tournament not found" });
     }
-    res.status(200).json({ message: "Major updated successfully" });
+    res.status(200).json({ message: "Tournament updated successfully" });
   } catch (err) {
     res
       .status(500)
-      .json({ error: "Failed to update major", details: err.message });
+      .json({ error: "Failed to update tournament", details: err.message });
   }
 });
 
-// Delete a Major by ID
-app.delete("/api/majors/:id", async (req, res) => {
+// Delete a Tournament by ID
+app.delete("/api/tournaments/:id", async (req, res) => {
   try {
-    const majorId = new ObjectId(req.params.id);
+    const tournamentId = new ObjectId(req.params.id);
 
-    // Find the major to get the season reference
-    const major = await majorsCollection.findOne({ _id: majorId });
-    if (!major) {
-      return res.status(404).json({ error: "Major not found" });
+    // Find the tournament to get the season reference
+    const tournament = await tournamentsCollection.findOne({ _id: tournamentId });
+    if (!tournament) {
+      return res.status(404).json({ error: "Tournament not found" });
     }
 
-    // Remove the major from the season
+    // Remove the tournament from the season
     await seasonsCollection.updateOne(
-      { _id: new ObjectId(major.season) },
-      { $pull: { majors: majorId } }
+      { _id: new ObjectId(tournament.season) },
+      { $pull: { tournaments: tournamentId } }
     );
 
-    // Delete the major
-    const result = await majorsCollection.deleteOne({ _id: majorId });
+    // Delete the tournament
+    const result = await tournamentsCollection.deleteOne({ _id: tournamentId });
     if (result.deletedCount === 0) {
-      return res.status(404).json({ error: "Failed to delete major" });
+      return res.status(404).json({ error: "Failed to delete tournament" });
     }
 
-    res.status(200).json({ message: "Major deleted successfully" });
+    res.status(200).json({ message: "Tournament deleted successfully" });
   } catch (err) {
     res
       .status(500)
-      .json({ error: "Failed to delete major", details: err.message });
+      .json({ error: "Failed to delete tournament", details: err.message });
   }
 });
 
@@ -485,18 +485,18 @@ app.delete("/api/majors/:id", async (req, res) => {
 app.post("/api/series", async (req, res) => {
   try {
     const seriesData = req.body;
-    if (!seriesData.major) {
+    if (!seriesData.tournament) {
       return res
         .status(400)
-        .json({ error: "Major ID is required to create a Series." });
+        .json({ error: "Tournament ID is required to create a Series." });
     }
 
     // Insert the new series document
     const result = await seriesCollection.insertOne(seriesData);
 
-    // If a major ID is provided, update the Major collection to include this series
-    await majorsCollection.updateOne(
-      { _id: new ObjectId(seriesData.major) },
+    // If a tournament ID is provided, update the Tournament collection to include this series
+    await tournamentsCollection.updateOne(
+      { _id: new ObjectId(seriesData.tournament) },
       { $push: { series: result.insertedId } }
     );
 
@@ -564,15 +564,15 @@ app.delete("/api/series/:id", async (req, res) => {
   try {
     const seriesId = new ObjectId(req.params.id);
 
-    // Find the series to get the major reference
+    // Find the series to get the tournament reference
     const series = await seriesCollection.findOne({ _id: seriesId });
     if (!series) {
       return res.status(404).json({ error: "Series not found" });
     }
 
-    // Remove the series from the corresponding Major
-    await majorsCollection.updateOne(
-      { _id: new ObjectId(series.major) },
+    // Remove the series from the corresponding Tournament
+    await tournamentsCollection.updateOne(
+      { _id: new ObjectId(series.tournament) },
       { $pull: { series: seriesId } }
     );
 
@@ -941,14 +941,14 @@ app.get("/api/data-trees/season/:id", async (req, res) => {
       return res.status(404).json({ error: "Season not found" });
     }
 
-    // Fetch the majors related to this season
-    const majors = await majorsCollection
-      .find({ _id: { $in: season.majors } })
+    // Fetch the tournaments related to this season
+    const tournaments = await tournamentsCollection
+      .find({ _id: { $in: season.tournaments } })
       .toArray();
 
-    // Fetch all series for the majors
+    // Fetch all series for the tournaments
     const seriesList = await seriesCollection
-      .find({ major: { $in: season.majors } })
+      .find({ tournament: { $in: season.tournaments } })
       .toArray();
 
     // Fetch all matches for the series
@@ -996,21 +996,21 @@ app.get("/api/data-trees/season/:id", async (req, res) => {
       ), // Populate matches in the series
     }));
 
-    // Map majors with their respective series
-    const majorsWithSeries = majors.map((major) => ({
-      ...major,
+    // Map tournaments with their respective series
+    const tournamentsWithSeries = tournaments.map((tournament) => ({
+      ...tournament,
       series: seriesWithMatches.filter((series) =>
-        series.major.equals(major._id)
-      ), // Populate series in the major
+        series.tournament.equals(tournament._id)
+      ), // Populate series in the tournament
     }));
 
     // Construct the complete season object
-    const seasonWithMajors = {
+    const seasonWithTournaments = {
       ...season,
-      majors: majorsWithSeries,
+      tournaments: tournamentsWithSeries,
     };
 
-    res.status(200).json(seasonWithMajors);
+    res.status(200).json(seasonWithTournaments);
   } catch (err) {
     res
       .status(500)
@@ -1018,20 +1018,20 @@ app.get("/api/data-trees/season/:id", async (req, res) => {
   }
 });
 
-// Get complete information for a major (GET)
-app.get("/api/data-trees/major/:id", async (req, res) => {
+// Get complete information for a tournament (GET)
+app.get("/api/data-trees/tournament/:id", async (req, res) => {
   try {
-    // Fetch the major document
-    const major = await majorsCollection.findOne({
+    // Fetch the tournament document
+    const tournament = await tournamentsCollection.findOne({
       _id: new ObjectId(req.params.id),
     });
-    if (!major) {
-      return res.status(404).json({ error: "Major not found" });
+    if (!tournament) {
+      return res.status(404).json({ error: "Tournament not found" });
     }
 
-    // Fetch all series for this major
+    // Fetch all series for this tournament
     const seriesList = await seriesCollection
-      .find({ major: major._id })
+      .find({ tournament: tournament._id })
       .toArray();
 
     // Fetch all matches for the series
@@ -1079,17 +1079,17 @@ app.get("/api/data-trees/major/:id", async (req, res) => {
       ),
     }));
 
-    // Construct the complete major object
-    const majorWithSeries = {
-      ...major,
+    // Construct the complete tournament object
+    const tournamentWithSeries = {
+      ...tournament,
       series: seriesWithMatches,
     };
 
-    res.status(200).json(majorWithSeries);
+    res.status(200).json(tournamentWithSeries);
   } catch (err) {
     res
       .status(500)
-      .json({ error: "Failed to fetch major data", details: err.message });
+      .json({ error: "Failed to fetch tournament data", details: err.message });
   }
 });
 
