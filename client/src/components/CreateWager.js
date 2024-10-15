@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../context/UserContext.js";
+import { getUserById } from "../services/userService.js";
 import { fetchBetableObjects, createWager } from "../services/wagerService";
 
 const CreateWager = () => {
   // Load data
   const [data, setData] = useState(null);
+  const [userCredits, setUserCredits] = useState(0)
   const seasonId = "66fa1588cbd894f17aa0363a"; // Hardcoded for demonstration; replace with dynamic as needed
 
   // Betting vars
@@ -19,7 +21,7 @@ const CreateWager = () => {
   const [selectedBetOperator, setSelectedBetOperator] = useState("");
   const [selectedAttributeBetType, setSelectedAttributeBetType] = useState("");
   const [attributeBetInput, setAttributeBetInput] = useState(0);
-
+  const [creditsBet, setCreditsBet] = useState(0)
   // Series bet
   const [selectedSeriesBetType, setSelectedSeriesBetType] = useState(null);
   const [seriesOvertimeBetInput, setSeriesOvertimeBetInput] = useState(0);
@@ -35,13 +37,16 @@ const CreateWager = () => {
       try {
         const fetchedData = await fetchBetableObjects(seasonId);
         setData(fetchedData);
+
+        const userData = await getUserById(mongoUserId);
+        setUserCredits(userData.credits);
       } catch (error) {
         console.error("Error fetching data:", error.message);
       }
     };
 
     fetchData();
-  }, [seasonId]);
+  }, [seasonId, mongoUserId]);
 
   const handleBetClick = async (node) => {
     console.log(node);
@@ -331,7 +336,16 @@ const CreateWager = () => {
         selectedSeriesBetType === "Series Winner" && (
           <div style={styles.marginTop}>
             <h3>
-              I bet that the team{" "}
+              I bet{" "} 
+              <input
+                type="number"
+                id="numberInput"
+                value={creditsBet}
+                onChange={(e) => setCreditsBet(e.target.value)}
+                min="0"
+                step="1"
+              />
+              {" "} credits that the team{" "}
               <select
                 value={selectedTeamOrPlayerForBet || ""}
                 onChange={(e) => setSelectedTeamOrPlayerForBet(e.target.value)}
@@ -358,7 +372,16 @@ const CreateWager = () => {
         selectedSeriesBetType === "Series Score" && (
           <div style={styles.marginTop}>
             <h3>
-              I bet that the team {betNode.teams[0].name} will win{" "}
+              I bet{" "} 
+              <input
+                type="number"
+                id="numberInput"
+                value={creditsBet}
+                onChange={(e) => setCreditsBet(e.target.value)}
+                min="0"
+                step="1"
+              />
+              {" "} credits that the team {betNode.teams[0].name} will win{" "}
               <input
                 type="number"
                 id="numberInput"
@@ -390,7 +413,16 @@ const CreateWager = () => {
         selectedSeriesBetType === "First Blood" && (
           <div style={styles.marginTop}>
             <h3>
-              I bet that the team{" "}
+              I bet{" "} 
+              <input
+                type="number"
+                id="numberInput"
+                value={creditsBet}
+                onChange={(e) => setCreditsBet(e.target.value)}
+                min="0"
+                step="1"
+              />
+              {" "} credits that the team{" "}
               <select
                 value={selectedTeamOrPlayerForBet || ""}
                 onChange={(e) => setSelectedTeamOrPlayerForBet(e.target.value)}
@@ -417,7 +449,16 @@ const CreateWager = () => {
         selectedSeriesBetType === "Overtime Count" && (
           <div style={styles.marginTop}>
             <h3>
-              I bet that there will be{" "}
+              I bet{" "} 
+              <input
+                type="number"
+                id="numberInput"
+                value={creditsBet}
+                onChange={(e) => setCreditsBet(e.target.value)}
+                min="0"
+                step="1"
+              />
+              {" "} credits that there will be{" "}
               <select
                 value={selectedBetOperator}
                 onChange={(e) => setSelectedBetOperator(e.target.value)}
@@ -449,7 +490,16 @@ const CreateWager = () => {
         selectedSeriesBetType === "Player/Team Attributes" && (
           <div style={styles.marginTop}>
             <h3>
-              I bet that{" "}
+              I bet{" "} 
+              <input
+                type="number"
+                id="numberInput"
+                value={creditsBet}
+                onChange={(e) => setCreditsBet(e.target.value)}
+                min="0"
+                step="1"
+              />
+              {" "} credits that{" "}
               <select
                 value={selectedTeamOrPlayerForBet || ""}
                 onChange={(e) => setSelectedTeamOrPlayerForBet(e.target.value)}
@@ -542,7 +592,16 @@ const CreateWager = () => {
         selectedMatchBetType === "Match Winner" && (
           <div style={styles.marginTop}>
             <h3>
-              I bet that the team{" "}
+              I bet{" "} 
+              <input
+                type="number"
+                id="numberInput"
+                value={creditsBet}
+                onChange={(e) => setCreditsBet(e.target.value)}
+                min="0"
+                step="1"
+              />
+              {" "} credits that the team{" "}
               <select
                 value={selectedTeamOrPlayerForBet || ""}
                 onChange={(e) => setSelectedTeamOrPlayerForBet(e.target.value)}
@@ -569,7 +628,16 @@ const CreateWager = () => {
         selectedMatchBetType === "Match Score" && (
           <div style={styles.marginTop}>
             <h3>
-              I bet that the team {betNode.teams[0].name} will score{" "}
+              I bet{" "} 
+              <input
+                type="number"
+                id="numberInput"
+                value={creditsBet}
+                onChange={(e) => setCreditsBet(e.target.value)}
+                min="0"
+                step="1"
+              />
+              {" "} credits that the team {betNode.teams[0].name} will score{" "}
               <input
                 type="number"
                 id="numberInput"
@@ -601,7 +669,16 @@ const CreateWager = () => {
         selectedMatchBetType === "First Blood" && (
           <div style={styles.marginTop}>
             <h3>
-              I bet that the team{" "}
+              I bet{" "} 
+              <input
+                type="number"
+                id="numberInput"
+                value={creditsBet}
+                onChange={(e) => setCreditsBet(e.target.value)}
+                min="0"
+                step="1"
+              />
+              {" "} credits that the team{" "}
               <select
                 value={selectedTeamOrPlayerForBet || ""}
                 onChange={(e) => setSelectedTeamOrPlayerForBet(e.target.value)}
@@ -628,7 +705,16 @@ const CreateWager = () => {
         selectedMatchBetType === "Player/Team Attributes" && (
           <div style={styles.marginTop}>
             <h3>
-              I bet that{" "}
+              I bet{" "} 
+              <input
+                type="number"
+                id="numberInput"
+                value={creditsBet}
+                onChange={(e) => setCreditsBet(e.target.value)}
+                min="0"
+                step="1"
+              />
+              {" "} credits that{" "}
               <select
                 value={selectedTeamOrPlayerForBet || ""}
                 onChange={(e) => setSelectedTeamOrPlayerForBet(e.target.value)}
