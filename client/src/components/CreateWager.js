@@ -12,7 +12,8 @@ const CreateWager = () => {
   const [betString, setBetString] = useState("");
   const [betNode, setBetNode] = useState(null);
   const [selectedEventTypeForBet, setSelectedEventTypeForBet] = useState(null);
-  const [selectedTeamOrPlayerForBet, setSelectedTeamOrPlayerForBet] = useState("");
+  const [selectedTeamOrPlayerForBet, setSelectedTeamOrPlayerForBet] =
+    useState("");
   const [selectedTeam1ScoreForBet, setSelectedTeam1ScoreForBet] = useState(0);
   const [selectedTeam2ScoreForBet, setSelectedTeam2ScoreForBet] = useState(0);
   const [selectedBetOperator, setSelectedBetOperator] = useState("");
@@ -57,21 +58,14 @@ const CreateWager = () => {
     const [isCollapsed, setIsCollapsed] = useState(false);
 
     return (
-      <div style={{ marginLeft: "20px", marginTop: "10px" }}>
+      <div style={styles.dataTree}>
         <button
-          style={{
-            marginBottom: "5px",
-            background: "#b3b1b1",
-            color: "white",
-            border: "none",
-            padding: "5px 10px",
-            cursor: "pointer",
-          }}
+          style={styles.dataTreeButton}
           onClick={() => setIsCollapsed(!isCollapsed)}
         >
           {isCollapsed ? "▶" : "▼"} {title}
         </button>
-        {!isCollapsed && <div style={{ paddingLeft: "15px" }}>{children}</div>}
+        {!isCollapsed && <div>{children}</div>}
       </div>
     );
   };
@@ -166,14 +160,7 @@ const CreateWager = () => {
                   {node.status === "Betable" && (
                     <button
                       onClick={() => handleBetClick(node)}
-                      style={{
-                        marginLeft: "10px",
-                        background: "#007bff",
-                        color: "white",
-                        border: "none",
-                        padding: "3px 8px",
-                        cursor: "pointer",
-                      }}
+                      style={styles.betButton}
                     >
                       Bet
                     </button>
@@ -195,7 +182,7 @@ const CreateWager = () => {
     setSelectedSeriesBetType(null);
     setSelectedBetOperator("");
     setSeriesOvertimeBetInput(0);
-    setSelectedMatchBetType(null)
+    setSelectedMatchBetType(null);
     setSelectedTeam1ScoreForBet(0);
     setSelectedTeam2ScoreForBet(0);
     setSelectedAttributeBetType("");
@@ -216,7 +203,10 @@ const CreateWager = () => {
   useEffect(() => {
     // Update bet string whenever selected team or event type changes
     if (selectedEventTypeForBet === "Series") {
-      if (selectedSeriesBetType === "Series Winner" && selectedTeamOrPlayerForBet) {
+      if (
+        selectedSeriesBetType === "Series Winner" &&
+        selectedTeamOrPlayerForBet
+      ) {
         setBetString(
           `I bet that the team ${selectedTeamOrPlayerForBet} will win the ${betNode.name} series`
         );
@@ -256,7 +246,10 @@ const CreateWager = () => {
         );
       }
     } else if (selectedEventTypeForBet === "Match") {
-      if (selectedMatchBetType === "Match Winner" && selectedTeamOrPlayerForBet) {
+      if (
+        selectedMatchBetType === "Match Winner" &&
+        selectedTeamOrPlayerForBet
+      ) {
         setBetString(
           `I bet that the team ${selectedTeamOrPlayerForBet} will win the ${betNode.name} match`
         );
@@ -312,44 +305,37 @@ const CreateWager = () => {
       {selectedEventTypeForBet === "Series" && !selectedSeriesBetType && (
         <div>
           <h3>
-            What type of bet would you like to make on this '{betNode.name}'
-            {" "}{betNode.type.toLowerCase()}?
+            What type of bet would you like to make on this '{betNode.name}'{" "}
+            {betNode.type.toLowerCase()}?
           </h3>
           <select
             value={""}
             onChange={(e) => setSelectedSeriesBetType(e.target.value)}
-            style={{ marginRight: "10px" }}
+            style={styles.marginRight}
           >
             <option value="">Select a Bet Type</option>
             <option value="Series Winner">Series Winner</option>
             <option value="Series Score">Series Score</option>
             <option value="First Blood">First Blood</option>
             <option value="Overtime Count">Overtime Count</option>
-            <option value="Player/Team Attributes">Player/Team Attributes</option>
-            </select>
-          <button
-            onClick={handleBetCancel}
-            style={{
-              background: "#e01616",
-              color: "white",
-              border: "none",
-              padding: "5px 10px",
-              cursor: "pointer",
-            }}
-          >
+            <option value="Player/Team Attributes">
+              Player/Team Attributes
+            </option>
+          </select>
+          <button onClick={handleBetCancel} style={styles.cancelButton}>
             Cancel
           </button>
         </div>
       )}
       {selectedEventTypeForBet === "Series" &&
         selectedSeriesBetType === "Series Winner" && (
-          <div style={{ marginTop: "20px" }}>
+          <div style={styles.marginTop}>
             <h3>
               I bet that the team{" "}
               <select
                 value={selectedTeamOrPlayerForBet || ""}
                 onChange={(e) => setSelectedTeamOrPlayerForBet(e.target.value)}
-                style={{ marginRight: "10px" }}
+                style={styles.marginRight}
               >
                 <option value="">Select a team</option>
                 {betNode.teams.map((team) => (
@@ -360,35 +346,17 @@ const CreateWager = () => {
               </select>
               will win the {betNode.name}
             </h3>
-            <button
-              onClick={handleBetSubmit}
-              style={{
-                background: "#28a745",
-                color: "white",
-                border: "none",
-                padding: "5px 10px",
-                cursor: "pointer",
-              }}
-            >
+            <button onClick={handleBetSubmit} style={styles.confirmButton}>
               Confirm Bet
             </button>
-            <button
-              onClick={handleBetCancel}
-              style={{
-                background: "#e01616",
-                color: "white",
-                border: "none",
-                padding: "5px 10px",
-                cursor: "pointer",
-              }}
-            >
+            <button onClick={handleBetCancel} style={styles.cancelButton}>
               Cancel
             </button>
           </div>
         )}
       {selectedEventTypeForBet === "Series" &&
         selectedSeriesBetType === "Series Score" && (
-          <div style={{ marginTop: "20px" }}>
+          <div style={styles.marginTop}>
             <h3>
               I bet that the team {betNode.teams[0].name} will win{" "}
               <input
@@ -398,8 +366,8 @@ const CreateWager = () => {
                 onChange={(e) => setSelectedTeam1ScoreForBet(e.target.value)}
                 min="0"
                 step="1"
-              />
-              {" "}game(s) and {betNode.teams[1].name} will win{" "}
+              />{" "}
+              game(s) and {betNode.teams[1].name} will win{" "}
               <input
                 type="number"
                 id="numberInput"
@@ -407,44 +375,26 @@ const CreateWager = () => {
                 onChange={(e) => setSelectedTeam2ScoreForBet(e.target.value)}
                 min="0"
                 step="1"
-              />
-              {" "}game(s) in the {betNode.name}
+              />{" "}
+              game(s) in the {betNode.name}
             </h3>
-            <button
-              onClick={handleBetSubmit}
-              style={{
-                background: "#28a745",
-                color: "white",
-                border: "none",
-                padding: "5px 10px",
-                cursor: "pointer",
-              }}
-            >
+            <button onClick={handleBetSubmit} style={styles.confirmButton}>
               Confirm Bet
             </button>
-            <button
-              onClick={handleBetCancel}
-              style={{
-                background: "#e01616",
-                color: "white",
-                border: "none",
-                padding: "5px 10px",
-                cursor: "pointer",
-              }}
-            >
+            <button onClick={handleBetCancel} style={styles.cancelButton}>
               Cancel
             </button>
           </div>
         )}
       {selectedEventTypeForBet === "Series" &&
         selectedSeriesBetType === "First Blood" && (
-          <div style={{ marginTop: "20px" }}>
+          <div style={styles.marginTop}>
             <h3>
               I bet that the team{" "}
               <select
                 value={selectedTeamOrPlayerForBet || ""}
                 onChange={(e) => setSelectedTeamOrPlayerForBet(e.target.value)}
-                style={{ marginRight: "10px" }}
+                style={styles.marginRight}
               >
                 <option value="">Select a team</option>
                 {betNode.teams.map((team) => (
@@ -455,41 +405,23 @@ const CreateWager = () => {
               </select>
               will score the first goal in the '{betNode.name}' series
             </h3>
-            <button
-              onClick={handleBetSubmit}
-              style={{
-                background: "#28a745",
-                color: "white",
-                border: "none",
-                padding: "5px 10px",
-                cursor: "pointer",
-              }}
-            >
+            <button onClick={handleBetSubmit} style={styles.confirmButton}>
               Confirm Bet
             </button>
-            <button
-              onClick={handleBetCancel}
-              style={{
-                background: "#e01616",
-                color: "white",
-                border: "none",
-                padding: "5px 10px",
-                cursor: "pointer",
-              }}
-            >
+            <button onClick={handleBetCancel} style={styles.cancelButton}>
               Cancel
             </button>
           </div>
         )}
       {selectedEventTypeForBet === "Series" &&
         selectedSeriesBetType === "Overtime Count" && (
-          <div style={{ marginTop: "20px" }}>
+          <div style={styles.marginTop}>
             <h3>
               I bet that there will be{" "}
               <select
                 value={selectedBetOperator}
                 onChange={(e) => setSelectedBetOperator(e.target.value)}
-                style={{ marginRight: "10px" }}
+                style={styles.marginRight}
               >
                 <option value="exactly">exactly</option>
                 <option value="more than">more than</option>
@@ -505,49 +437,31 @@ const CreateWager = () => {
               />{" "}
               overtime(s) in the '{betNode.name}' series
             </h3>
-            <button
-              onClick={handleBetSubmit}
-              style={{
-                background: "#28a745",
-                color: "white",
-                border: "none",
-                padding: "5px 10px",
-                cursor: "pointer",
-              }}
-            >
+            <button onClick={handleBetSubmit} style={styles.confirmButton}>
               Confirm Bet
             </button>
-            <button
-              onClick={handleBetCancel}
-              style={{
-                background: "#e01616",
-                color: "white",
-                border: "none",
-                padding: "5px 10px",
-                cursor: "pointer",
-              }}
-            >
+            <button onClick={handleBetCancel} style={styles.cancelButton}>
               Cancel
             </button>
           </div>
         )}
       {selectedEventTypeForBet === "Series" &&
         selectedSeriesBetType === "Player/Team Attributes" && (
-          <div style={{ marginTop: "20px" }}>
+          <div style={styles.marginTop}>
             <h3>
               I bet that{" "}
               <select
                 value={selectedTeamOrPlayerForBet || ""}
                 onChange={(e) => setSelectedTeamOrPlayerForBet(e.target.value)}
-                style={{ marginRight: "10px" }}
+                style={styles.marginRight}
               >
                 <option value="">Select a team</option>
                 <optgroup label={"Team"}>
-                {betNode.teams.map((team) => (
-                  <option key={team._id} value={team.name}>
-                    {team.name}
-                  </option>
-                ))}
+                  {betNode.teams.map((team) => (
+                    <option key={team._id} value={team.name}>
+                      {team.name}
+                    </option>
+                  ))}
                 </optgroup>
                 {betNode.teams.map((team) => (
                   <optgroup key={team._id} label={`Players: ${team.name}`}>
@@ -563,7 +477,7 @@ const CreateWager = () => {
               <select
                 value={selectedBetOperator}
                 onChange={(e) => setSelectedBetOperator(e.target.value)}
-                style={{ marginRight: "10px" }}
+                style={styles.marginRight}
               >
                 <option value="exactly">exactly</option>
                 <option value="more than">more than</option>
@@ -576,12 +490,11 @@ const CreateWager = () => {
                 onChange={(e) => setAttributeBetInput(e.target.value)}
                 min="0"
                 step="1"
-              />
-              {" "}
+              />{" "}
               <select
                 value={selectedAttributeBetType}
                 onChange={(e) => setSelectedAttributeBetType(e.target.value)}
-                style={{ marginRight: "10px" }}
+                style={styles.marginRight}
               >
                 <option value="">Select an Attribute</option>
                 <option value="Points">Points</option>
@@ -593,28 +506,10 @@ const CreateWager = () => {
               </select>
               in the '{betNode.name}' series
             </h3>
-            <button
-              onClick={handleBetSubmit}
-              style={{
-                background: "#28a745",
-                color: "white",
-                border: "none",
-                padding: "5px 10px",
-                cursor: "pointer",
-              }}
-            >
+            <button onClick={handleBetSubmit} style={styles.confirmButton}>
               Confirm Bet
             </button>
-            <button
-              onClick={handleBetCancel}
-              style={{
-                background: "#e01616",
-                color: "white",
-                border: "none",
-                padding: "5px 10px",
-                cursor: "pointer",
-              }}
-            >
+            <button onClick={handleBetCancel} style={styles.cancelButton}>
               Cancel
             </button>
           </div>
@@ -622,43 +517,36 @@ const CreateWager = () => {
       {selectedEventTypeForBet === "Match" && !selectedMatchBetType && (
         <div>
           <h3>
-            What type of bet would you like to make on this '{betNode.name}'
-            {" "}{betNode.type.toLowerCase()}?
+            What type of bet would you like to make on this '{betNode.name}'{" "}
+            {betNode.type.toLowerCase()}?
           </h3>
           <select
             value={""}
             onChange={(e) => setSelectedMatchBetType(e.target.value)}
-            style={{ marginRight: "10px" }}
+            style={styles.marginRight}
           >
             <option value="">Select a Bet Type</option>
             <option value="Match Winner">Match Winner</option>
             <option value="Match Score">Match Score</option>
             <option value="First Blood">First Blood</option>
-            <option value="Player/Team Attributes">Player/Team Attributes</option>
+            <option value="Player/Team Attributes">
+              Player/Team Attributes
+            </option>
           </select>
-          <button
-            onClick={handleBetCancel}
-            style={{
-              background: "#e01616",
-              color: "white",
-              border: "none",
-              padding: "5px 10px",
-              cursor: "pointer",
-            }}
-          >
+          <button onClick={handleBetCancel} style={styles.cancelButton}>
             Cancel
           </button>
         </div>
       )}
       {selectedEventTypeForBet === "Match" &&
         selectedMatchBetType === "Match Winner" && (
-          <div style={{ marginTop: "20px" }}>
+          <div style={styles.marginTop}>
             <h3>
               I bet that the team{" "}
               <select
                 value={selectedTeamOrPlayerForBet || ""}
                 onChange={(e) => setSelectedTeamOrPlayerForBet(e.target.value)}
-                style={{ marginRight: "10px" }}
+                style={styles.marginRight}
               >
                 <option value="">Select a team</option>
                 {betNode.teams.map((team) => (
@@ -669,35 +557,17 @@ const CreateWager = () => {
               </select>
               will win the {betNode.name}
             </h3>
-            <button
-              onClick={handleBetSubmit}
-              style={{
-                background: "#28a745",
-                color: "white",
-                border: "none",
-                padding: "5px 10px",
-                cursor: "pointer",
-              }}
-            >
+            <button onClick={handleBetSubmit} style={styles.confirmButton}>
               Confirm Bet
             </button>
-            <button
-              onClick={handleBetCancel}
-              style={{
-                background: "#e01616",
-                color: "white",
-                border: "none",
-                padding: "5px 10px",
-                cursor: "pointer",
-              }}
-            >
+            <button onClick={handleBetCancel} style={styles.cancelButton}>
               Cancel
             </button>
           </div>
         )}
       {selectedEventTypeForBet === "Match" &&
         selectedMatchBetType === "Match Score" && (
-          <div style={{ marginTop: "20px" }}>
+          <div style={styles.marginTop}>
             <h3>
               I bet that the team {betNode.teams[0].name} will score{" "}
               <input
@@ -707,8 +577,8 @@ const CreateWager = () => {
                 onChange={(e) => setSelectedTeam1ScoreForBet(e.target.value)}
                 min="0"
                 step="1"
-              />
-              {" "}goal(s) and {betNode.teams[1].name} will score{" "}
+              />{" "}
+              goal(s) and {betNode.teams[1].name} will score{" "}
               <input
                 type="number"
                 id="numberInput"
@@ -716,44 +586,26 @@ const CreateWager = () => {
                 onChange={(e) => setSelectedTeam2ScoreForBet(e.target.value)}
                 min="0"
                 step="1"
-              />
-              {" "}goal(s) in the {betNode.name}
+              />{" "}
+              goal(s) in the {betNode.name}
             </h3>
-            <button
-              onClick={handleBetSubmit}
-              style={{
-                background: "#28a745",
-                color: "white",
-                border: "none",
-                padding: "5px 10px",
-                cursor: "pointer",
-              }}
-            >
+            <button onClick={handleBetSubmit} style={styles.confirmButton}>
               Confirm Bet
             </button>
-            <button
-              onClick={handleBetCancel}
-              style={{
-                background: "#e01616",
-                color: "white",
-                border: "none",
-                padding: "5px 10px",
-                cursor: "pointer",
-              }}
-            >
+            <button onClick={handleBetCancel} style={styles.cancelButton}>
               Cancel
             </button>
           </div>
         )}
       {selectedEventTypeForBet === "Match" &&
         selectedMatchBetType === "First Blood" && (
-          <div style={{ marginTop: "20px" }}>
+          <div style={styles.marginTop}>
             <h3>
               I bet that the team{" "}
               <select
                 value={selectedTeamOrPlayerForBet || ""}
                 onChange={(e) => setSelectedTeamOrPlayerForBet(e.target.value)}
-                style={{ marginRight: "10px" }}
+                style={styles.marginRight}
               >
                 <option value="">Select a team</option>
                 {betNode.teams.map((team) => (
@@ -764,49 +616,31 @@ const CreateWager = () => {
               </select>
               will score the first goal in the '{betNode.name}' match
             </h3>
-            <button
-              onClick={handleBetSubmit}
-              style={{
-                background: "#28a745",
-                color: "white",
-                border: "none",
-                padding: "5px 10px",
-                cursor: "pointer",
-              }}
-            >
+            <button onClick={handleBetSubmit} style={styles.confirmButton}>
               Confirm Bet
             </button>
-            <button
-              onClick={handleBetCancel}
-              style={{
-                background: "#e01616",
-                color: "white",
-                border: "none",
-                padding: "5px 10px",
-                cursor: "pointer",
-              }}
-            >
+            <button onClick={handleBetCancel} style={styles.cancelButton}>
               Cancel
             </button>
           </div>
         )}
       {selectedEventTypeForBet === "Match" &&
         selectedMatchBetType === "Player/Team Attributes" && (
-          <div style={{ marginTop: "20px" }}>
+          <div style={styles.marginTop}>
             <h3>
               I bet that{" "}
               <select
                 value={selectedTeamOrPlayerForBet || ""}
                 onChange={(e) => setSelectedTeamOrPlayerForBet(e.target.value)}
-                style={{ marginRight: "10px" }}
+                style={styles.marginRight}
               >
                 <option value="">Select a team</option>
                 <optgroup label={"Team"}>
-                {betNode.teams.map((team) => (
-                  <option key={team._id} value={team.name}>
-                    {team.name}
-                  </option>
-                ))}
+                  {betNode.teams.map((team) => (
+                    <option key={team._id} value={team.name}>
+                      {team.name}
+                    </option>
+                  ))}
                 </optgroup>
                 {betNode.teams.map((team) => (
                   <optgroup key={team._id} label={`Players: ${team.name}`}>
@@ -822,7 +656,7 @@ const CreateWager = () => {
               <select
                 value={selectedBetOperator}
                 onChange={(e) => setSelectedBetOperator(e.target.value)}
-                style={{ marginRight: "10px" }}
+                style={styles.marginRight}
               >
                 <option value="exactly">exactly</option>
                 <option value="more than">more than</option>
@@ -835,12 +669,11 @@ const CreateWager = () => {
                 onChange={(e) => setAttributeBetInput(e.target.value)}
                 min="0"
                 step="1"
-              />
-              {" "}
+              />{" "}
               <select
                 value={selectedAttributeBetType}
                 onChange={(e) => setSelectedAttributeBetType(e.target.value)}
-                style={{ marginRight: "10px" }}
+                style={styles.marginRight}
               >
                 <option value="">Select an Attribute</option>
                 <option value="Points">Points</option>
@@ -852,28 +685,10 @@ const CreateWager = () => {
               </select>
               in the '{betNode.name}' match
             </h3>
-            <button
-              onClick={handleBetSubmit}
-              style={{
-                background: "#28a745",
-                color: "white",
-                border: "none",
-                padding: "5px 10px",
-                cursor: "pointer",
-              }}
-            >
+            <button onClick={handleBetSubmit} style={styles.confirmButton}>
               Confirm Bet
             </button>
-            <button
-              onClick={handleBetCancel}
-              style={{
-                background: "#e01616",
-                color: "white",
-                border: "none",
-                padding: "5px 10px",
-                cursor: "pointer",
-              }}
-            >
+            <button onClick={handleBetCancel} style={styles.cancelButton}>
               Cancel
             </button>
           </div>
@@ -883,3 +698,46 @@ const CreateWager = () => {
 };
 
 export default CreateWager;
+
+const styles = {
+  dataTreeButton: {
+    marginBottom: "5px",
+    background: "#b3b1b1",
+    color: "white",
+    border: "none",
+    padding: "5px 10px",
+    cursor: "pointer",
+  },
+  dataTree: {
+    marginLeft: "20px",
+    marginTop: "10px",
+  },
+  betButton: {
+    marginLeft: "10px",
+    background: "#007bff",
+    color: "white",
+    border: "none",
+    padding: "3px 8px",
+    cursor: "pointer",
+  },
+  cancelButton: {
+    background: "#e01616",
+    color: "white",
+    border: "none",
+    padding: "5px 10px",
+    cursor: "pointer",
+  },
+  confirmButton: {
+    background: "#28a745",
+    color: "white",
+    border: "none",
+    padding: "5px 10px",
+    cursor: "pointer",
+  },
+  marginTop: {
+    marginTop: "20px",
+  },
+  selectInput: {
+    marginRight: "10px",
+  },
+};
