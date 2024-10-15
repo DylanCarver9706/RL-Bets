@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useUser } from "../context/UserContext.js";
 import { fetchBetableObjects, createWager } from "../services/wagerService";
 
 const CreateWager = () => {
@@ -17,6 +18,7 @@ const CreateWager = () => {
   const [selectedSeriesBetType, setSelectedSeriesBetType] = useState(null);
 
   const navigate = useNavigate();
+  const { mongoUserId } = useUser();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -201,7 +203,7 @@ const CreateWager = () => {
 
   const handleBetSubmit = () => {
     console.log("Bet Submitted: ", betString);
-    createWager({ name: betString }); // Submit the bet via API
+    createWager({ name: betString, creator: mongoUserId }); // Submit the bet via API
     resetBetState(); // Reset state
     navigate("/"); // Navigate to the desired page
   };
