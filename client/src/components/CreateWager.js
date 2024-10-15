@@ -16,6 +16,8 @@ const CreateWager = () => {
   const [selectedEventTypeForBet, setSelectedEventTypeForBet] = useState(null);
   const [selectedTeamForBet, setSelectedTeamForBet] = useState(null);
   const [selectedSeriesBetType, setSelectedSeriesBetType] = useState(null);
+  const [selectedSeriesOvertimeBetOperator, setSelectedSeriesOvertimeBetOperator] = useState("");
+  const [seriesOvertimeBetInput, setSeriesOvertimeBetInput] = useState(0);
 
   const navigate = useNavigate();
   const { mongoUserId } = useUser();
@@ -180,6 +182,37 @@ const CreateWager = () => {
     setSelectedSeriesBetType(betType);
   };
 
+  const handleSeriesOvertimeBetInput = (e) => {
+    const value = parseInt(e.target.value);
+    setSeriesOvertimeBetInput(value);
+  };
+
+  const handleSeriesOvertimeBetSelect = (e) => {
+    const operator = e.target.value;
+    setSelectedSeriesOvertimeBetOperator(operator);
+  };
+
+  const resetBetState = () => {
+    setBetString("");
+    setBetNode(null);
+    setSelectedEventTypeForBet(null);
+    setSelectedTeamForBet(null);
+    setSelectedSeriesBetType(null);
+    setSelectedSeriesOvertimeBetOperator("");
+    setSeriesOvertimeBetInput(0);
+  };
+
+  const handleBetSubmit = () => {
+    console.log("Bet Submitted: ", betString);
+    createWager({ name: betString, creator: mongoUserId, eventReference: betNode._id }); // Submit the bet via API
+    resetBetState(); // Reset state
+    navigate("/"); // Navigate to the desired page
+  };
+
+  const handleBetCancel = () => {
+    resetBetState(); // Reset state on cancel
+  };
+
   useEffect(() => {
     // Update bet string whenever selected team or event type changes
     if (selectedEventTypeForBet === "Series" && selectedTeamForBet && selectedSeriesBetType === "Series Win" && betNode) {
@@ -190,27 +223,12 @@ const CreateWager = () => {
       setBetString(
         `I bet that the team ${selectedTeamForBet} will score the first goal in the ${betNode.name} series`
       );
+    } else if (selectedEventTypeForBet === "Series" && selectedSeriesBetType === "Overtime Count" && seriesOvertimeBetInput && selectedSeriesOvertimeBetOperator && betNode) {
+      setBetString(
+        `I bet that there will be ${selectedSeriesOvertimeBetOperator} ${seriesOvertimeBetInput} overtimes in the ${betNode.name} series`
+      );
     }
-  }, [selectedEventTypeForBet, selectedTeamForBet, selectedSeriesBetType, betNode]);
-
-  const resetBetState = () => {
-    setBetString("");
-    setBetNode(null);
-    setSelectedEventTypeForBet(null);
-    setSelectedTeamForBet(null);
-    setSelectedSeriesBetType(null);
-  };
-
-  const handleBetSubmit = () => {
-    console.log("Bet Submitted: ", betString);
-    createWager({ name: betString, creator: mongoUserId }); // Submit the bet via API
-    resetBetState(); // Reset state
-    navigate("/"); // Navigate to the desired page
-  };
-
-  const handleBetCancel = () => {
-    resetBetState(); // Reset state on cancel
-  };
+  }, [selectedEventTypeForBet, selectedTeamForBet, selectedSeriesBetType, seriesOvertimeBetInput, selectedSeriesOvertimeBetOperator, betNode]);
 
   return (
     <div>
@@ -309,6 +327,55 @@ const CreateWager = () => {
               ))}
             </select>
             will score the first goal in the '{betNode.name}' series
+          </h3>
+          <button
+            onClick={handleBetSubmit}
+            style={{
+              background: "#28a745",
+              color: "white",
+              border: "none",
+              padding: "5px 10px",
+              cursor: "pointer",
+            }}
+          >
+            Confirm Bet
+          </button>
+          <button
+            onClick={handleBetCancel}
+            style={{
+              background: "#e01616",
+              color: "white",
+              border: "none",
+              padding: "5px 10px",
+              cursor: "pointer",
+            }}
+          >
+            Cancel
+          </button>
+        </div>
+      )}
+      {selectedEventTypeForBet === "Series" && selectedSeriesBetType === "Overtime Count" && (
+        <div style={{ marginTop: "20px" }}>
+          <h3>
+            I bet that there will be {" "}
+            <select
+              value={selectedSeriesOvertimeBetOperator}
+              onChange={handleSeriesOvertimeBetSelect}
+              style={{ marginRight: "10px" }}
+            >
+              <option value="exactly">exactly</option>
+              <option value="more than">more than</option>
+              <option value="less than">less than</option>
+            </select>
+            <input
+              type="number"
+              id="numberInput"
+              value={seriesOvertimeBetInput}
+              onChange={handleSeriesOvertimeBetInput}
+              min="0"
+              step="1"
+            />
+            {" "}overtime(s) in the '{betNode.name}' series
           </h3>
           <button
             onClick={handleBetSubmit}
