@@ -12,17 +12,19 @@ const CreateWager = () => {
   const [betString, setBetString] = useState("");
   const [betNode, setBetNode] = useState(null);
   const [selectedEventTypeForBet, setSelectedEventTypeForBet] = useState(null);
-  const [selectedTeamForBet, setSelectedTeamForBet] = useState(null);
+  const [selectedTeamOrPlayerForBet, setSelectedTeamOrPlayerForBet] = useState("");
   const [selectedTeam1ScoreForBet, setSelectedTeam1ScoreForBet] = useState(0);
   const [selectedTeam2ScoreForBet, setSelectedTeam2ScoreForBet] = useState(0);
+  const [selectedBetOperator, setSelectedBetOperator] = useState("");
 
   // Series bet
   const [selectedSeriesBetType, setSelectedSeriesBetType] = useState(null);
-  const [selectedSeriesOvertimeBetOperator, setSelectedSeriesOvertimeBetOperator] = useState("");
   const [seriesOvertimeBetInput, setSeriesOvertimeBetInput] = useState(0);
 
   // Match bet
   const [selectedMatchBetType, setSelectedMatchBetType] = useState(null);
+  const [selectedMatchAttributeBetType, setSelectedMatchAttributeBetType] = useState("");
+  const [matchAttributeBetInput, setMatchAttributeBetInput] = useState(0);
 
   const navigate = useNavigate();
   const { mongoUserId } = useUser();
@@ -189,13 +191,15 @@ const CreateWager = () => {
     setBetString("");
     setBetNode(null);
     setSelectedEventTypeForBet(null);
-    setSelectedTeamForBet(null);
+    setSelectedTeamOrPlayerForBet("");
     setSelectedSeriesBetType(null);
-    setSelectedSeriesOvertimeBetOperator("");
+    setSelectedBetOperator("");
     setSeriesOvertimeBetInput(0);
     setSelectedMatchBetType(null)
     setSelectedTeam1ScoreForBet(0);
     setSelectedTeam2ScoreForBet(0);
+    setSelectedMatchAttributeBetType("");
+    setMatchAttributeBetInput(0);
   };
 
   const handleBetSubmit = () => {
@@ -212,9 +216,9 @@ const CreateWager = () => {
   useEffect(() => {
     // Update bet string whenever selected team or event type changes
     if (selectedEventTypeForBet === "Series") {
-      if (selectedSeriesBetType === "Series Winner" && selectedTeamForBet) {
+      if (selectedSeriesBetType === "Series Winner" && selectedTeamOrPlayerForBet) {
         setBetString(
-          `I bet that the team ${selectedTeamForBet} will win the ${betNode.name} series`
+          `I bet that the team ${selectedTeamOrPlayerForBet} will win the ${betNode.name} series`
         );
       } else if (
         // Add check for same number of matches won
@@ -227,24 +231,24 @@ const CreateWager = () => {
         );
       } else if (
         selectedSeriesBetType === "First Blood" &&
-        selectedTeamForBet
+        selectedTeamOrPlayerForBet
       ) {
         setBetString(
-          `I bet that the team ${selectedTeamForBet} will score the first goal in the ${betNode.name} series`
+          `I bet that the team ${selectedTeamOrPlayerForBet} will score the first goal in the ${betNode.name} series`
         );
       } else if (
         selectedSeriesBetType === "Overtime Count" &&
-        selectedSeriesOvertimeBetOperator &&
+        selectedBetOperator &&
         seriesOvertimeBetInput
       ) {
         setBetString(
-          `I bet that there will be ${selectedSeriesOvertimeBetOperator} ${seriesOvertimeBetInput} overtimes in the ${betNode.name} series`
+          `I bet that there will be ${selectedBetOperator} ${seriesOvertimeBetInput} overtimes in the ${betNode.name} series`
         );
       }
     } else if (selectedEventTypeForBet === "Match") {
-      if (selectedMatchBetType === "Match Winner" && selectedTeamForBet) {
+      if (selectedMatchBetType === "Match Winner" && selectedTeamOrPlayerForBet) {
         setBetString(
-          `I bet that the team ${selectedTeamForBet} will win the ${betNode.name} match`
+          `I bet that the team ${selectedTeamOrPlayerForBet} will win the ${betNode.name} match`
         );
       } else if (
         // Add check for same number of goals
@@ -257,22 +261,34 @@ const CreateWager = () => {
         );
       } else if (
         selectedMatchBetType === "First Blood" &&
-        selectedTeamForBet
+        selectedTeamOrPlayerForBet
       ) {
         setBetString(
-          `I bet that the team ${selectedTeamForBet} will score the first goal in the ${betNode.name} match`
+          `I bet that the team ${selectedTeamOrPlayerForBet} will score the first goal in the ${betNode.name} match`
+        );
+      } else if (
+        selectedMatchBetType === "Player/Team Attributes" &&
+        selectedTeamOrPlayerForBet &&
+        selectedBetOperator &&
+        matchAttributeBetInput &&
+        selectedMatchAttributeBetType
+      ) {
+        setBetString(
+          `I bet that ${selectedTeamOrPlayerForBet} will have ${selectedBetOperator} ${matchAttributeBetInput} ${selectedMatchAttributeBetType} in the ${betNode.name} match`
         );
       }
     }
   }, [
     selectedEventTypeForBet,
-    selectedTeamForBet,
+    selectedTeamOrPlayerForBet,
     selectedSeriesBetType,
     seriesOvertimeBetInput,
-    selectedSeriesOvertimeBetOperator,
+    selectedBetOperator,
     selectedMatchBetType,
     selectedTeam1ScoreForBet,
     selectedTeam2ScoreForBet,
+    matchAttributeBetInput,
+    selectedMatchAttributeBetType,
     betNode,
   ]);
 
@@ -320,8 +336,8 @@ const CreateWager = () => {
             <h3>
               I bet that the team{" "}
               <select
-                value={selectedTeamForBet || ""}
-                onChange={(e) => setSelectedTeamForBet(e.target.value)}
+                value={selectedTeamOrPlayerForBet || ""}
+                onChange={(e) => setSelectedTeamOrPlayerForBet(e.target.value)}
                 style={{ marginRight: "10px" }}
               >
                 <option value="">Select a team</option>
@@ -415,8 +431,8 @@ const CreateWager = () => {
             <h3>
               I bet that the team{" "}
               <select
-                value={selectedTeamForBet || ""}
-                onChange={(e) => setSelectedTeamForBet(e.target.value)}
+                value={selectedTeamOrPlayerForBet || ""}
+                onChange={(e) => setSelectedTeamOrPlayerForBet(e.target.value)}
                 style={{ marginRight: "10px" }}
               >
                 <option value="">Select a team</option>
@@ -460,8 +476,8 @@ const CreateWager = () => {
             <h3>
               I bet that there will be{" "}
               <select
-                value={selectedSeriesOvertimeBetOperator}
-                onChange={(e) => setSelectedSeriesOvertimeBetOperator(e.target.value)}
+                value={selectedBetOperator}
+                onChange={(e) => setSelectedBetOperator(e.target.value)}
                 style={{ marginRight: "10px" }}
               >
                 <option value="exactly">exactly</option>
@@ -541,8 +557,8 @@ const CreateWager = () => {
             <h3>
               I bet that the team{" "}
               <select
-                value={selectedTeamForBet || ""}
-                onChange={(e) => setSelectedTeamForBet(e.target.value)}
+                value={selectedTeamOrPlayerForBet || ""}
+                onChange={(e) => setSelectedTeamOrPlayerForBet(e.target.value)}
                 style={{ marginRight: "10px" }}
               >
                 <option value="">Select a team</option>
@@ -636,8 +652,8 @@ const CreateWager = () => {
             <h3>
               I bet that the team{" "}
               <select
-                value={selectedTeamForBet || ""}
-                onChange={(e) => setSelectedTeamForBet(e.target.value)}
+                value={selectedTeamOrPlayerForBet || ""}
+                onChange={(e) => setSelectedTeamOrPlayerForBet(e.target.value)}
                 style={{ marginRight: "10px" }}
               >
                 <option value="">Select a team</option>
@@ -648,6 +664,94 @@ const CreateWager = () => {
                 ))}
               </select>
               will score the first goal in the '{betNode.name}' match
+            </h3>
+            <button
+              onClick={handleBetSubmit}
+              style={{
+                background: "#28a745",
+                color: "white",
+                border: "none",
+                padding: "5px 10px",
+                cursor: "pointer",
+              }}
+            >
+              Confirm Bet
+            </button>
+            <button
+              onClick={handleBetCancel}
+              style={{
+                background: "#e01616",
+                color: "white",
+                border: "none",
+                padding: "5px 10px",
+                cursor: "pointer",
+              }}
+            >
+              Cancel
+            </button>
+          </div>
+        )}
+      {selectedEventTypeForBet === "Match" &&
+        selectedMatchBetType === "Player/Team Attributes" && (
+          <div style={{ marginTop: "20px" }}>
+            <h3>
+              I bet that{" "}
+              <select
+                value={selectedTeamOrPlayerForBet || ""}
+                onChange={(e) => setSelectedTeamOrPlayerForBet(e.target.value)}
+                style={{ marginRight: "10px" }}
+              >
+                <option value="">Select a team</option>
+                <optgroup label={"Team"}>
+                {betNode.teams.map((team) => (
+                  <option key={team._id} value={team.name}>
+                    {team.name}
+                  </option>
+                ))}
+                </optgroup>
+                {betNode.teams.map((team) => (
+                  <optgroup key={team._id} label={`Players: ${team.name}`}>
+                    {team.players.map((player) => (
+                      <option key={player._id} value={player.name}>
+                        {player.name}
+                      </option>
+                    ))}
+                  </optgroup>
+                ))}
+              </select>
+              will have{" "}
+              <select
+                value={selectedBetOperator}
+                onChange={(e) => setSelectedBetOperator(e.target.value)}
+                style={{ marginRight: "10px" }}
+              >
+                <option value="exactly">exactly</option>
+                <option value="more than">more than</option>
+                <option value="less than">less than</option>
+              </select>
+              <input
+                type="number"
+                id="numberInput"
+                value={matchAttributeBetInput}
+                onChange={(e) => setMatchAttributeBetInput(e.target.value)}
+                min="0"
+                step="1"
+              />
+              {" "}
+              <select
+                value={selectedMatchAttributeBetType}
+                onChange={(e) => setSelectedMatchAttributeBetType(e.target.value)}
+                style={{ marginRight: "10px" }}
+              >
+                <option value="">Select an Attribute</option>
+                <option value="Points">Points</option>
+                <option value="Goals">Goals</option>
+                <option value="Assists">Assists</option>
+                <option value="Shots">Shots</option>
+                <option value="Saves">Saves</option>
+                <option value="Demos">Demos</option>
+              </select>
+              in the '{betNode.name}' match
             </h3>
             <button
               onClick={handleBetSubmit}

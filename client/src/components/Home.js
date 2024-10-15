@@ -17,10 +17,9 @@ const Home = () => {
       const allWagers = await fetchWagers();
       setWagers(allWagers || []); // Set fetched wagers in state or an empty array if undefined
 
-      console.log("Wagers: ", wagers);
+      // console.log("Wagers: ", wagers);
 
       const allUsersWagers = allWagers.filter((wager) => wager.creator === mongoUserId)
-      console.log("Users Wagers: ", allUsersWagers);
 
       setUsersWagers(allUsersWagers || []);
 
