@@ -30,7 +30,7 @@ const Home = () => {
 
     // Call the async function
     getWagers();
-  }, []); // Empty dependency array to run once on mount
+  }, [mongoUserId]);
 
   const toggleWagerView = () => {
     setUserWagerView(!userWagerView);
