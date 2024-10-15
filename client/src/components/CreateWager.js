@@ -138,7 +138,11 @@ const CreateWager = () => {
               }
 
               // Skip rendering teams directly under matches or series
-              if (key === "teams" || key === "results") {
+              // Skip rendering matches under a series if there are no matches
+              if (
+                key === "teams" ||
+                (key === "matches" && value.length === 0)
+              ) {
                 return null;
               }
 
