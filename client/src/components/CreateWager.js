@@ -13,6 +13,8 @@ const CreateWager = () => {
   const [betNode, setBetNode] = useState(null);
   const [selectedEventTypeForBet, setSelectedEventTypeForBet] = useState(null);
   const [selectedTeamForBet, setSelectedTeamForBet] = useState(null);
+  const [selectedTeam1ScoreForBet, setSelectedTeam1ScoreForBet] = useState(0);
+  const [selectedTeam2ScoreForBet, setSelectedTeam2ScoreForBet] = useState(0);
 
   // Series bet
   const [selectedSeriesBetType, setSelectedSeriesBetType] = useState(null);
@@ -201,6 +203,16 @@ const CreateWager = () => {
     setSelectedSeriesOvertimeBetOperator(operator);
   };
 
+  const handleSeriesScore1BetInput = (e) => {
+    const value = parseInt(e.target.value);
+    setSelectedTeam1ScoreForBet(value);
+  };
+
+  const handleSeriesScore2BetInput = (e) => {
+    const value = parseInt(e.target.value);
+    setSelectedTeam2ScoreForBet(value);
+  };
+
   const handleMatchBetTypeSelect = (e) => {
     const betType = e.target.value;
     setSelectedMatchBetType(betType);
@@ -215,6 +227,8 @@ const CreateWager = () => {
     setSelectedSeriesOvertimeBetOperator("");
     setSeriesOvertimeBetInput(0);
     setSelectedMatchBetType(null)
+    setSelectedTeam1ScoreForBet(0);
+    setSelectedTeam2ScoreForBet(0);
   };
 
   const handleBetSubmit = () => {
@@ -238,6 +252,14 @@ const CreateWager = () => {
       if (selectedSeriesBetType === "Series Winner" && selectedTeamForBet) {
         setBetString(
           `I bet that the team ${selectedTeamForBet} will win the ${betNode.name} series`
+        );
+      } else if (
+        selectedSeriesBetType === "Series Score" &&
+        selectedTeam1ScoreForBet &&
+        selectedTeam2ScoreForBet
+      ) {
+        setBetString(
+          `I bet that the team ${betNode.teams[0].name} will win ${selectedTeam1ScoreForBet} game(s) and ${betNode.teams[1].name} will win ${selectedTeam2ScoreForBet} game(s) in the ${betNode.name}`
         );
       } else if (
         selectedSeriesBetType === "First Blood" &&
@@ -269,6 +291,8 @@ const CreateWager = () => {
     seriesOvertimeBetInput,
     selectedSeriesOvertimeBetOperator,
     selectedMatchBetType,
+    selectedTeam1ScoreForBet,
+    selectedTeam2ScoreForBet,
     betNode,
   ]);
 
@@ -292,6 +316,7 @@ const CreateWager = () => {
           >
             <option value="">Select a Bet Type</option>
             <option value="Series Winner">Series Winner</option>
+            <option value="Series Score">Series Score</option>
             <option value="First Blood">First Blood</option>
             <option value="Overtime Count">Overtime Count</option>
           </select>
@@ -327,6 +352,56 @@ const CreateWager = () => {
                 ))}
               </select>
               will win the {betNode.name}
+            </h3>
+            <button
+              onClick={handleBetSubmit}
+              style={{
+                background: "#28a745",
+                color: "white",
+                border: "none",
+                padding: "5px 10px",
+                cursor: "pointer",
+              }}
+            >
+              Confirm Bet
+            </button>
+            <button
+              onClick={handleBetCancel}
+              style={{
+                background: "#e01616",
+                color: "white",
+                border: "none",
+                padding: "5px 10px",
+                cursor: "pointer",
+              }}
+            >
+              Cancel
+            </button>
+          </div>
+        )}
+      {selectedEventTypeForBet === "Series" &&
+        selectedSeriesBetType === "Series Score" && (
+          <div style={{ marginTop: "20px" }}>
+            <h3>
+              I bet that the team {betNode.teams[0].name} will win{" "}
+              <input
+                type="number"
+                id="numberInput"
+                value={selectedTeam1ScoreForBet}
+                onChange={handleSeriesScore1BetInput}
+                min="0"
+                step="1"
+              />
+              {" "}games and {betNode.teams[1].name} will win{" "}
+              <input
+                type="number"
+                id="numberInput"
+                value={selectedTeam2ScoreForBet}
+                onChange={handleSeriesScore2BetInput}
+                min="0"
+                step="1"
+              />
+              {" "}games in the {betNode.name}
             </h3>
             <button
               onClick={handleBetSubmit}
