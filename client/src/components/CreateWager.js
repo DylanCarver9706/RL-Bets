@@ -217,6 +217,7 @@ const CreateWager = () => {
           `I bet that the team ${selectedTeamForBet} will win the ${betNode.name} series`
         );
       } else if (
+        // Add check for same number of matches won
         selectedSeriesBetType === "Series Score" &&
         selectedTeam1ScoreForBet &&
         selectedTeam2ScoreForBet
@@ -244,6 +245,15 @@ const CreateWager = () => {
       if (selectedMatchBetType === "Match Winner" && selectedTeamForBet) {
         setBetString(
           `I bet that the team ${selectedTeamForBet} will win the ${betNode.name} match`
+        );
+      } else if (
+        // Add check for same number of goals
+        selectedMatchBetType === "Match Score" &&
+        selectedTeam1ScoreForBet &&
+        selectedTeam2ScoreForBet
+      ) {
+        setBetString(
+          `I bet that the team ${betNode.teams[0].name} will score ${selectedTeam1ScoreForBet} goal(s) and ${betNode.teams[1].name} will score ${selectedTeam2ScoreForBet} goal(s) in the ${betNode.name}`
         );
       }
     }
@@ -355,7 +365,7 @@ const CreateWager = () => {
                 min="0"
                 step="1"
               />
-              {" "}games and {betNode.teams[1].name} will win{" "}
+              {" "}game(s) and {betNode.teams[1].name} will win{" "}
               <input
                 type="number"
                 id="numberInput"
@@ -364,7 +374,7 @@ const CreateWager = () => {
                 min="0"
                 step="1"
               />
-              {" "}games in the {betNode.name}
+              {" "}game(s) in the {betNode.name}
             </h3>
             <button
               onClick={handleBetSubmit}
@@ -500,7 +510,7 @@ const CreateWager = () => {
           >
             <option value="">Select a Bet Type</option>
             <option value="Match Winner">Match Winner</option>
-            <option value="Score">Score</option>
+            <option value="Match Score">Match Score</option>
             <option value="Player/Team Attributes">Player/Team Attributes</option>
           </select>
           <button
@@ -535,6 +545,56 @@ const CreateWager = () => {
                 ))}
               </select>
               will win the {betNode.name}
+            </h3>
+            <button
+              onClick={handleBetSubmit}
+              style={{
+                background: "#28a745",
+                color: "white",
+                border: "none",
+                padding: "5px 10px",
+                cursor: "pointer",
+              }}
+            >
+              Confirm Bet
+            </button>
+            <button
+              onClick={handleBetCancel}
+              style={{
+                background: "#e01616",
+                color: "white",
+                border: "none",
+                padding: "5px 10px",
+                cursor: "pointer",
+              }}
+            >
+              Cancel
+            </button>
+          </div>
+        )}
+      {selectedEventTypeForBet === "Match" &&
+        selectedMatchBetType === "Match Score" && (
+          <div style={{ marginTop: "20px" }}>
+            <h3>
+              I bet that the team {betNode.teams[0].name} will score{" "}
+              <input
+                type="number"
+                id="numberInput"
+                value={selectedTeam1ScoreForBet}
+                onChange={(e) => setSelectedTeam1ScoreForBet(e.target.value)}
+                min="0"
+                step="1"
+              />
+              {" "}goal(s) and {betNode.teams[1].name} will score{" "}
+              <input
+                type="number"
+                id="numberInput"
+                value={selectedTeam2ScoreForBet}
+                onChange={(e) => setSelectedTeam2ScoreForBet(e.target.value)}
+                min="0"
+                step="1"
+              />
+              {" "}goal(s) in the {betNode.name}
             </h3>
             <button
               onClick={handleBetSubmit}
