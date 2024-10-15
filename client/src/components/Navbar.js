@@ -19,7 +19,13 @@ const Navbar = () => {
       }
     };
 
-    fetchData();
+    // Fetch data immediately and then every 3 seconds
+    fetchData(); // Initial fetch
+
+    const intervalId = setInterval(fetchData, 3000); // 3000ms = 3 seconds
+
+    // Cleanup interval on unmount
+    return () => clearInterval(intervalId);
   }, [mongoUserId]);
 
   return (
