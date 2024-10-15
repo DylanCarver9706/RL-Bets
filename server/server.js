@@ -1152,6 +1152,111 @@ app.get("/api/data-trees/series/:id", async (req, res) => {
   }
 });
 
+// Get items that are able to be bet on (GET)
+app.get("/api/data-trees/betable", async (req, res) => {
+  try {
+    // Fetch all betable matches
+    const betableMatches = await matchesCollection
+      .find({ status: "Betable" })
+      .toArray();
+
+    const seriesIds = betableMatches.map((match) => match.series);
+
+    // Fetch the series for the betable matches
+    const betableSeries = await seriesCollection
+      .find({
+        $or: [{ status: "Betable" }, { _id: { $in: seriesIds } }],
+      })
+      .toArray();
+
+    const tournamentIds = betableSeries.map((series) => series.tournament);
+
+    // Fetch the tournaments for the betable series
+    const betableTournaments = await tournamentsCollection
+      .find({
+        $or: [{ status: "Betable" }, { _id: { $in: tournamentIds } }],
+      })
+      .toArray();
+
+    const seasonIds = betableTournaments.map((tournament) => tournament.season);
+
+    // Fetch the seasons for the betable tournaments
+    const betableSeasons = await seasonsCollection
+      .find({
+        $or: [{ status: "Betable" }, { _id: { $in: seasonIds } }],
+      })
+      .toArray();
+
+    // Fetch all teams related to the betable matches and series
+    const allTeamIds = [
+      ...new Set(
+        betableMatches.flatMap((match) => match.teams).concat(
+          betableSeries.flatMap((series) => series.teams)
+        )
+      ),
+    ];
+
+    const teams = await teamsCollection
+      .find({ _id: { $in: allTeamIds } })
+      .toArray();
+
+    // Fetch all players from the fetched teams
+    const playerIds = teams.flatMap((team) => team.players);
+
+    const players = await playersCollection
+      .find({ _id: { $in: playerIds } })
+      .toArray();
+
+    // Map teams with their players
+    const teamsWithPlayers = teams.map((team) => ({
+      ...team,
+      players: players.filter((player) => player.team.equals(team._id)),
+    }));
+
+    // Map matches with their teams
+    const matchesWithTeams = betableMatches.map((match) => ({
+      ...match,
+      teams: teamsWithPlayers.filter((team) =>
+        match.teams.some((t) => t.equals(team._id))
+      ),
+    }));
+
+    // Map series with their matches and teams
+    const seriesWithMatches = betableSeries.map((series) => ({
+      ...series,
+      matches: matchesWithTeams.filter((match) =>
+        match.series.equals(series._id)
+      ),
+      teams: teamsWithPlayers.filter((team) =>
+        series.teams.some((t) => t.equals(team._id))
+      ),
+    }));
+
+    // Map tournaments with their series
+    const tournamentsWithSeries = betableTournaments.map((tournament) => ({
+      ...tournament,
+      series: seriesWithMatches.filter((series) =>
+        series.tournament.equals(tournament._id)
+      ),
+    }));
+
+    // Map seasons with their tournaments
+    const seasonsWithTournaments = betableSeasons.map((season) => ({
+      ...season,
+      tournaments: tournamentsWithSeries.filter((tournament) =>
+        tournament.season.equals(season._id)
+      ),
+    }));
+
+    res.status(200).json(seasonsWithTournaments);
+  } catch (err) {
+    res
+      .status(500)
+      .json({ error: "Failed to fetch betable data", details: err.message });
+  }
+});
+
+
 // ************************************************************************************************
 // ************************************************************************************************
 // ******************************************START SERVER******************************************
