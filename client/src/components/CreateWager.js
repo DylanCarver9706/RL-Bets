@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../context/UserContext.js";
-import { getUserById } from "../services/userService.js";
+import { getUserById, updateUser } from "../services/userService.js";
 import { fetchBetableObjects, createWager } from "../services/wagerService";
 
 const CreateWager = () => {
   // Load data
-  const [data, setData] = useState(null);
-  const [userCredits, setUserCredits] = useState(0)
+  const [betableObjects, setBetableObjects] = useState(null);
+  const [userData, setUserData] = useState(0)
   const seasonId = "66fa1588cbd894f17aa0363a"; // Hardcoded for demonstration; replace with dynamic as needed
 
   // Betting vars
@@ -22,6 +22,7 @@ const CreateWager = () => {
   const [selectedAttributeBetType, setSelectedAttributeBetType] = useState("");
   const [attributeBetInput, setAttributeBetInput] = useState(0);
   const [creditsBet, setCreditsBet] = useState(0)
+  
   // Series bet
   const [selectedSeriesBetType, setSelectedSeriesBetType] = useState(null);
   const [seriesOvertimeBetInput, setSeriesOvertimeBetInput] = useState(0);
@@ -36,10 +37,10 @@ const CreateWager = () => {
     const fetchData = async () => {
       try {
         const fetchedData = await fetchBetableObjects(seasonId);
-        setData(fetchedData);
+        setBetableObjects(fetchedData);
 
         const userData = await getUserById(mongoUserId);
-        setUserCredits(userData.credits);
+        setUserData(userData);
       } catch (error) {
         console.error("Error fetching data:", error.message);
       }
@@ -195,12 +196,27 @@ const CreateWager = () => {
   };
 
   const handleBetSubmit = () => {
-    console.log("Bet Submitted: ", betString);
-    createWager({
+    const remainingCredits = parseFloat(userData.credits) - creditsBet
+    if (remainingCredits < 0) {
+      alert("Wager amount is more credits than you have available!");
+      return; 
+    }
+    
+    let wagerPayload = {
       name: betString,
       creator: mongoUserId,
       eventReference: betNode._id,
-    }); // Submit the bet via API
+      creditsBet: creditsBet
+    }
+    console.log(wagerPayload)
+    createWager(wagerPayload); // Submit the bet via API
+    
+    console.log("Bet Submitted: ", betString);
+
+    let userPayload = {credits: remainingCredits}
+    console.log(userPayload)
+    updateUser(mongoUserId, userPayload)
+    
     handleBetCancel(); // Reset state
     navigate("/"); // Navigate to the desired page
   };
@@ -304,7 +320,7 @@ const CreateWager = () => {
     <div>
       <h2>Welcome to the Create Wager Page</h2>
       <h3>Active Data Tree</h3>
-      {data ? <div>{renderDataTree(data)}</div> : <p>Failed to load data.</p>}
+      {betableObjects ? <div>{renderDataTree(betableObjects)}</div> : <p>Failed to load data.</p>}
 
       {/* User inputs for bet */}
       {selectedEventTypeForBet === "Series" && !selectedSeriesBetType && (
@@ -341,7 +357,7 @@ const CreateWager = () => {
                 type="number"
                 id="numberInput"
                 value={creditsBet}
-                onChange={(e) => setCreditsBet(e.target.value)}
+                onChange={(e) => setCreditsBet(parseFloat(e.target.value))}
                 min="0"
                 step="1"
               />
@@ -377,7 +393,7 @@ const CreateWager = () => {
                 type="number"
                 id="numberInput"
                 value={creditsBet}
-                onChange={(e) => setCreditsBet(e.target.value)}
+                onChange={(e) => setCreditsBet(parseFloat(e.target.value))}
                 min="0"
                 step="1"
               />
@@ -418,7 +434,7 @@ const CreateWager = () => {
                 type="number"
                 id="numberInput"
                 value={creditsBet}
-                onChange={(e) => setCreditsBet(e.target.value)}
+                onChange={(e) => setCreditsBet(parseFloat(e.target.value))}
                 min="0"
                 step="1"
               />
@@ -454,7 +470,7 @@ const CreateWager = () => {
                 type="number"
                 id="numberInput"
                 value={creditsBet}
-                onChange={(e) => setCreditsBet(e.target.value)}
+                onChange={(e) => setCreditsBet(parseFloat(e.target.value))}
                 min="0"
                 step="1"
               />
@@ -495,7 +511,7 @@ const CreateWager = () => {
                 type="number"
                 id="numberInput"
                 value={creditsBet}
-                onChange={(e) => setCreditsBet(e.target.value)}
+                onChange={(e) => setCreditsBet(parseFloat(e.target.value))}
                 min="0"
                 step="1"
               />
@@ -597,7 +613,7 @@ const CreateWager = () => {
                 type="number"
                 id="numberInput"
                 value={creditsBet}
-                onChange={(e) => setCreditsBet(e.target.value)}
+                onChange={(e) => setCreditsBet(parseFloat(e.target.value))}
                 min="0"
                 step="1"
               />
@@ -633,7 +649,7 @@ const CreateWager = () => {
                 type="number"
                 id="numberInput"
                 value={creditsBet}
-                onChange={(e) => setCreditsBet(e.target.value)}
+                onChange={(e) => setCreditsBet(parseFloat(e.target.value))}
                 min="0"
                 step="1"
               />
@@ -674,7 +690,7 @@ const CreateWager = () => {
                 type="number"
                 id="numberInput"
                 value={creditsBet}
-                onChange={(e) => setCreditsBet(e.target.value)}
+                onChange={(e) => setCreditsBet(parseFloat(e.target.value))}
                 min="0"
                 step="1"
               />
@@ -710,7 +726,7 @@ const CreateWager = () => {
                 type="number"
                 id="numberInput"
                 value={creditsBet}
-                onChange={(e) => setCreditsBet(e.target.value)}
+                onChange={(e) => setCreditsBet(parseFloat(e.target.value))}
                 min="0"
                 step="1"
               />
