@@ -183,42 +183,8 @@ const CreateWager = () => {
     }
   };
 
-  const handleTeamSelect = (e) => {
-    const teamName = e.target.value;
-    setSelectedTeamForBet(teamName);
-  };
-
-  const handleSeriesBetTypeSelect = (e) => {
-    const betType = e.target.value;
-    setSelectedSeriesBetType(betType);
-  };
-
-  const handleSeriesOvertimeBetInput = (e) => {
-    const value = parseInt(e.target.value);
-    setSeriesOvertimeBetInput(value);
-  };
-
-  const handleSeriesOvertimeBetSelect = (e) => {
-    const operator = e.target.value;
-    setSelectedSeriesOvertimeBetOperator(operator);
-  };
-
-  const handleSeriesScore1BetInput = (e) => {
-    const value = parseInt(e.target.value);
-    setSelectedTeam1ScoreForBet(value);
-  };
-
-  const handleSeriesScore2BetInput = (e) => {
-    const value = parseInt(e.target.value);
-    setSelectedTeam2ScoreForBet(value);
-  };
-
-  const handleMatchBetTypeSelect = (e) => {
-    const betType = e.target.value;
-    setSelectedMatchBetType(betType);
-  };
-
-  const resetBetState = () => {
+  const handleBetCancel = () => {
+    // Reset state vars
     setBetString("");
     setBetNode(null);
     setSelectedEventTypeForBet(null);
@@ -238,12 +204,8 @@ const CreateWager = () => {
       creator: mongoUserId,
       eventReference: betNode._id,
     }); // Submit the bet via API
-    resetBetState(); // Reset state
+    handleBetCancel(); // Reset state
     navigate("/"); // Navigate to the desired page
-  };
-
-  const handleBetCancel = () => {
-    resetBetState(); // Reset state on cancel
   };
 
   useEffect(() => {
@@ -311,7 +273,7 @@ const CreateWager = () => {
           </h3>
           <select
             value={""}
-            onChange={handleSeriesBetTypeSelect}
+            onChange={(e) => setSelectedSeriesBetType(e.target.value)}
             style={{ marginRight: "10px" }}
           >
             <option value="">Select a Bet Type</option>
@@ -341,7 +303,7 @@ const CreateWager = () => {
               I bet that the team{" "}
               <select
                 value={selectedTeamForBet || ""}
-                onChange={handleTeamSelect}
+                onChange={(e) => setSelectedTeamForBet(e.target.value)}
                 style={{ marginRight: "10px" }}
               >
                 <option value="">Select a team</option>
@@ -388,7 +350,7 @@ const CreateWager = () => {
                 type="number"
                 id="numberInput"
                 value={selectedTeam1ScoreForBet}
-                onChange={handleSeriesScore1BetInput}
+                onChange={(e) => setSelectedTeam1ScoreForBet(e.target.value)}
                 min="0"
                 step="1"
               />
@@ -397,7 +359,7 @@ const CreateWager = () => {
                 type="number"
                 id="numberInput"
                 value={selectedTeam2ScoreForBet}
-                onChange={handleSeriesScore2BetInput}
+                onChange={(e) => setSelectedTeam2ScoreForBet(e.target.value)}
                 min="0"
                 step="1"
               />
@@ -436,7 +398,7 @@ const CreateWager = () => {
               I bet that the team{" "}
               <select
                 value={selectedTeamForBet || ""}
-                onChange={handleTeamSelect}
+                onChange={(e) => setSelectedTeamForBet(e.target.value)}
                 style={{ marginRight: "10px" }}
               >
                 <option value="">Select a team</option>
@@ -481,7 +443,7 @@ const CreateWager = () => {
               I bet that there will be{" "}
               <select
                 value={selectedSeriesOvertimeBetOperator}
-                onChange={handleSeriesOvertimeBetSelect}
+                onChange={(e) => setSelectedSeriesOvertimeBetOperator(e.target.value)}
                 style={{ marginRight: "10px" }}
               >
                 <option value="exactly">exactly</option>
@@ -492,7 +454,7 @@ const CreateWager = () => {
                 type="number"
                 id="numberInput"
                 value={seriesOvertimeBetInput}
-                onChange={handleSeriesOvertimeBetInput}
+                onChange={(e) => setSeriesOvertimeBetInput(e.target.value)}
                 min="0"
                 step="1"
               />{" "}
@@ -532,7 +494,7 @@ const CreateWager = () => {
           </h3>
           <select
             value={""}
-            onChange={handleMatchBetTypeSelect}
+            onChange={(e) => setSelectedMatchBetType(e.target.value)}
             style={{ marginRight: "10px" }}
           >
             <option value="">Select a Bet Type</option>
@@ -561,7 +523,7 @@ const CreateWager = () => {
               I bet that the team{" "}
               <select
                 value={selectedTeamForBet || ""}
-                onChange={handleTeamSelect}
+                onChange={(e) => setSelectedTeamForBet(e.target.value)}
                 style={{ marginRight: "10px" }}
               >
                 <option value="">Select a team</option>
