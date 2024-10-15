@@ -85,3 +85,24 @@ export const fetchTeams = async () => {
     throw err;
   }
 };
+
+export const fetchBetableObjects = async () => {
+  try {
+    const response = await fetch(`${BASE_URL}/api/data-trees/betable`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch data tree`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (err) {
+    console.error("Error fetching data tree:", err.message);
+    throw err;
+  }
+};
