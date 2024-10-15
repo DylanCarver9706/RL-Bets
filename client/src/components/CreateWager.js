@@ -255,6 +255,13 @@ const CreateWager = () => {
         setBetString(
           `I bet that the team ${betNode.teams[0].name} will score ${selectedTeam1ScoreForBet} goal(s) and ${betNode.teams[1].name} will score ${selectedTeam2ScoreForBet} goal(s) in the ${betNode.name}`
         );
+      } else if (
+        selectedMatchBetType === "First Blood" &&
+        selectedTeamForBet
+      ) {
+        setBetString(
+          `I bet that the team ${selectedTeamForBet} will score the first goal in the ${betNode.name} match`
+        );
       }
     }
   }, [
@@ -511,6 +518,7 @@ const CreateWager = () => {
             <option value="">Select a Bet Type</option>
             <option value="Match Winner">Match Winner</option>
             <option value="Match Score">Match Score</option>
+            <option value="First Blood">First Blood</option>
             <option value="Player/Team Attributes">Player/Team Attributes</option>
           </select>
           <button
@@ -595,6 +603,51 @@ const CreateWager = () => {
                 step="1"
               />
               {" "}goal(s) in the {betNode.name}
+            </h3>
+            <button
+              onClick={handleBetSubmit}
+              style={{
+                background: "#28a745",
+                color: "white",
+                border: "none",
+                padding: "5px 10px",
+                cursor: "pointer",
+              }}
+            >
+              Confirm Bet
+            </button>
+            <button
+              onClick={handleBetCancel}
+              style={{
+                background: "#e01616",
+                color: "white",
+                border: "none",
+                padding: "5px 10px",
+                cursor: "pointer",
+              }}
+            >
+              Cancel
+            </button>
+          </div>
+        )}
+      {selectedEventTypeForBet === "Match" &&
+        selectedMatchBetType === "First Blood" && (
+          <div style={{ marginTop: "20px" }}>
+            <h3>
+              I bet that the team{" "}
+              <select
+                value={selectedTeamForBet || ""}
+                onChange={(e) => setSelectedTeamForBet(e.target.value)}
+                style={{ marginRight: "10px" }}
+              >
+                <option value="">Select a team</option>
+                {betNode.teams.map((team) => (
+                  <option key={team._id} value={team.name}>
+                    {team.name}
+                  </option>
+                ))}
+              </select>
+              will score the first goal in the '{betNode.name}' match
             </h3>
             <button
               onClick={handleBetSubmit}
