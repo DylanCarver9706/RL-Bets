@@ -192,6 +192,7 @@ const CreateWager = () => {
     setBetNode(null);
     setSelectedEventTypeForBet(null);
     setSelectedTeamForBet(null);
+    setSelectedSeriesBetType(null);
   };
 
   const handleBetSubmit = () => {
@@ -227,6 +228,18 @@ const CreateWager = () => {
               <option value="First Blood">First Blood</option>
               <option value="Overtime Count">Overtime Count</option>
             </select>
+            <button
+            onClick={handleBetCancel}
+            style={{
+              background: "#e01616",
+              color: "white",
+              border: "none",
+              padding: "5px 10px",
+              cursor: "pointer",
+            }}
+          >
+            Cancel
+          </button>
         </div>
       )}
       {selectedEventTypeForBet === "Series" && selectedSeriesBetType === "Series Win" && (
