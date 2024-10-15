@@ -37,10 +37,12 @@ const CreateWager = () => {
 
   const handleBetClick = async (node) => {
     console.log(node);
+
+    // Set the event type the user wants to bet on like Series or Match
+    setSelectedEventTypeForBet(node.type);
+
+    // Save meta data for event in state for later use
     setBetNode(node);
-    if (node.type === "Series") {
-      setSelectedEventTypeForBet(node.type);
-    }
   };
 
   // Collapsible component to handle toggling
