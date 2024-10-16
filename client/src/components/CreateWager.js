@@ -206,7 +206,10 @@ const CreateWager = () => {
       name: betString,
       creator: mongoUserId,
       eventReference: betNode._id,
-      creditsBet: creditsBet
+      agreeCreditsBet: creditsBet,
+      disagreeCreditsBet: 0,
+      agreeBetsCount: 1,
+      disagreeBetsCount: 0,
     }
     console.log(wagerPayload)
     createWager(wagerPayload); // Submit the bet via API
