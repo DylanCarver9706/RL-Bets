@@ -213,7 +213,21 @@ app.post("/api/wagers", async (req, res) => {
 app.get("/api/wagers", async (req, res) => {
   try {
     const wagers = await wagersCollection.find().toArray();
-    res.status(200).json(wagers);
+
+    // Calculate percentages for agree/disagree bets
+    const wagersWithPercentages = wagers.map((wager) => {
+      const totalBets = wager.agreeBetsCount + wager.disagreeBetsCount;
+      const agreePercentage = totalBets ? ((wager.agreeBetsCount / totalBets) * 100).toFixed(1) : 0;
+      const disagreePercentage = totalBets ? ((wager.disagreeBetsCount / totalBets) * 100).toFixed(1) : 0;
+
+      return {
+        ...wager,
+        agreePercentage: parseFloat(agreePercentage),
+        disagreePercentage: parseFloat(disagreePercentage),
+      };
+    });
+
+    res.status(200).json(wagersWithPercentages);
   } catch (err) {
     res
       .status(500)
