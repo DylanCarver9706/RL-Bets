@@ -4,7 +4,6 @@ require("dotenv").config();
 const http = require("http");
 const { Server } = require("socket.io");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
-const bodyParser = require("body-parser");
 const cors = require("cors");
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY)
 
@@ -15,7 +14,15 @@ const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY)
 // ************************************************************************************************
 
 const app = express();
-app.use(bodyParser.json());
+
+app.use((req, res, next) => {
+  if (req.originalUrl === '/webhook') {
+    next();  // Skip JSON body parsing for the webhook route
+  } else {
+    express.json()(req, res, next);  // Use JSON body parser for all other routes
+  }
+});
+
 const server = http.createServer(app);  // Use the same HTTP server for Express and WebSocket
 
 const io = new Server(server, {
