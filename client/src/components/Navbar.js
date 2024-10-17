@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from "react";
+import io from "socket.io-client";
 import { Link } from "react-router-dom";
 import { useUser } from "../context/UserContext.js";
 import { getUserById } from "../services/userService.js";
+
+const BASE_SERVER_URL = process.env.REACT_APP_BASE_SERVER_URL;
 
 const Navbar = () => {
 
@@ -10,6 +13,10 @@ const Navbar = () => {
   const { mongoUserId } = useUser();
 
   useEffect(() => {
+    // Initialize the socket connection
+    const socket = io(BASE_SERVER_URL); // Adjust the URL if needed
+
+    // Fetch initial user data
     const fetchData = async () => {
       try {
         const userData = await getUserById(mongoUserId);
@@ -19,13 +26,18 @@ const Navbar = () => {
       }
     };
 
-    // Fetch data immediately and then every 3 seconds
-    fetchData(); // Initial fetch
+    // Fetch the data immediately on component mount
+    fetchData();
 
-    const intervalId = setInterval(fetchData, 3000); // 3000ms = 3 seconds
+    // Listen for the 'updateUser' event from the server
+    socket.on("updateUser", (updatedUser) => {
+      if (updatedUser._id === mongoUserId) {
+        setUserCredits(updatedUser.credits);
+      }
+    });
 
-    // Cleanup interval on unmount
-    return () => clearInterval(intervalId);
+    // Cleanup the socket connection on unmount
+    return () => socket.disconnect();
   }, [mongoUserId]);
 
   return (
