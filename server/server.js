@@ -1414,7 +1414,6 @@ app.get("/api/data-trees/betable", async (req, res) => {
   }
 });
 
-
 // ************************************************************************************************
 // ************************************************************************************************
 // ******************************************START SERVER******************************************
@@ -1424,6 +1423,9 @@ app.get("/api/data-trees/betable", async (req, res) => {
 const PORT = process.env.DEV_SERVER_URL_PORT;
 
 // Start Express and Socket.io websocket server
-server.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+// Ensure the database is connected before starting the server
+connectToDatabase().then(() => {
+  server.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+  });
 });
