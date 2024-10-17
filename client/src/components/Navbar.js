@@ -37,7 +37,7 @@ const Navbar = () => {
       </div>
       <div style={styles.navLinks}>
         <Link to="/Bet" style={styles.link}>Create Bet</Link>
-        <Link to="/Purchase" style={styles.link}>{userCredits} Credits</Link>
+        <Link to="/Credits" style={styles.link}>{userCredits} Credits</Link>
         {/* <Link to="/Leaderboard" style={styles.link}>Leaderboard</Link> */}
       </div>
     </nav>
