@@ -212,7 +212,7 @@ app.get("/api/users/firebase/:firebaseUserId", async (req, res) => {
 // ************************************************************************************************
 
 app.post("/api/create-checkout-session", async (req, res) => {
-  const { purchaseItems } = req.body;
+  const { purchaseItems, mongoUserId, creditsTotal } = req.body;
 
   const lineItems = purchaseItems.map((item) => ({
     price_data: {
@@ -230,6 +230,10 @@ app.post("/api/create-checkout-session", async (req, res) => {
       mode: "payment",
       success_url: `${process.env.DEV_CLIENT_URL}`,
       cancel_url: `${process.env.DEV_CLIENT_URL}/Credits`,
+      metadata: {
+        mongoUserId: mongoUserId,
+        creditsTotal: creditsTotal
+      },
     });
 
     res.json(session);
