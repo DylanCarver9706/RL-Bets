@@ -1,17 +1,18 @@
 // server.js
 const express = require("express");
+require("dotenv").config();
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const bodyParser = require("body-parser");
-const cors = require("cors"); // Import cors
-require("dotenv").config();
+const cors = require("cors");
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY)
 
-const app = express();
 
 // ************************************************************************************************
 // ************************************************************************************************
 // *******************************************MIDDLEWARE*******************************************
 // ************************************************************************************************
 // ************************************************************************************************
+const app = express();
 app.use(bodyParser.json());
 
 // CORS
@@ -185,6 +186,40 @@ app.get("/api/users/firebase/:firebaseUserId", async (req, res) => {
     res
       .status(500)
       .json({ error: "Failed to fetch user", details: err.message });
+  }
+});
+
+// ************************************************************************************************
+// ************************************************************************************************
+// *********************************************STRIPE*********************************************
+// ************************************************************************************************
+// ************************************************************************************************
+
+app.post("/api/create-checkout-session", async (req, res) => {
+  const { purchaseItems } = req.body;
+
+  const lineItems = purchaseItems.map((item) => ({
+    price_data: {
+      currency: "usd",
+      product_data: { name: item.name },
+      unit_amount: Math.round(item.price * 100), // Round to ensure valid cents
+    },
+    quantity: item.quantity,
+  }));
+
+  try {
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      line_items: lineItems,
+      mode: "payment",
+      success_url: `${process.env.DEV_CLIENT_URL}`,
+      cancel_url: `${process.env.DEV_CLIENT_URL}/Credits`,
+    });
+
+    res.json(session);
+  } catch (error) {
+    console.error("Error creating checkout session:", error);
+    res.status(500).json({ error: "Failed to create checkout session." });
   }
 });
 
