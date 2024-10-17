@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { loadStripe } from "@stripe/stripe-js";
 import { useUser } from "../context/UserContext.js";
-import { createCheckoutSession, updateUser, getUserById } from "../services/userService"; // Import service
+import { createCheckoutSession } from "../services/userService"; // Import service
 
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
 
@@ -60,11 +60,8 @@ const Credits = () => {
     }
 
     try {
-      const session = await createCheckoutSession(purchaseItems);
+      const session = await createCheckoutSession(purchaseItems, mongoUserId, calculateTotalCredits(cart));
       const stripe = await stripePromise;
-      const userData = await getUserById(mongoUserId);
-      let userPayload = {credits: parseFloat(userData.credits) + calculateTotalCredits(cart)}
-      updateUser(mongoUserId, userPayload)
       await stripe.redirectToCheckout({ sessionId: session.id });
       
     } catch (error) {
