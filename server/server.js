@@ -147,27 +147,31 @@ app.get("/api/users/:id", async (req, res) => {
     }
     res.status(200).json(user);
   } catch (err) {
-    res
-      .status(500)
-      .json({ error: "Failed to fetch user", details: err.message });
+    res.status(500).json({ error: "Failed to fetch user", details: err.message });
   }
 });
 
-// Update a user by ID (PUT)
+// Update a user by ID (PUT) and emit a WebSocket event to update the client in real time
 app.put("/api/users/:id", async (req, res) => {
   try {
     const result = await usersCollection.updateOne(
       { _id: new ObjectId(req.params.id) },
       { $set: req.body }
     );
+    
     if (result.matchedCount === 0) {
       return res.status(404).json({ error: "User not found" });
     }
+
+    // Fetch the updated user data
+    const updatedUser = await usersCollection.findOne({ _id: new ObjectId(req.params.id) });
+
+    // Emit 'updateUser' event with updated user data to all connected clients
+    io.emit("updateUser", updatedUser);
+
     res.status(200).json({ message: "User updated successfully" });
   } catch (err) {
-    res
-      .status(500)
-      .json({ error: "Failed to update user", details: err.message });
+    res.status(500).json({ error: "Failed to update user", details: err.message });
   }
 });
 
