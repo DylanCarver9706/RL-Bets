@@ -123,14 +123,15 @@ export const getUserById = async (userId) => {
   };
 
 // Function to connect to the Stripe API to make a purchase
-export const createCheckoutSession = async (purchaseItems) => {
+export const createCheckoutSession = async (purchaseItems, mongoUserId, creditsTotal) => {
+  console.log(purchaseItems, mongoUserId, creditsTotal)
   try {
     const response = await fetch(`${BASE_URL}/api/create-checkout-session`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ purchaseItems }),
+      body: JSON.stringify({ purchaseItems, mongoUserId, creditsTotal }),
     });
 
     const data = await response.json();
