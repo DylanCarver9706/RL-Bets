@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useUser } from "../context/UserContext.js";
-import { fetchWagers } from "../services/wagerService.js";
+import io from "socket.io-client";
+
+const BASE_SERVER_URL = process.env.REACT_APP_BASE_SERVER_URL;
 
 const Home = () => {
   const { mongoUserId } = useUser();
@@ -8,22 +10,24 @@ const Home = () => {
   const [usersWagers, setUsersWagers] = useState([]);
   const [userWagerView, setUserWagerView] = useState(false);
 
-  // Fetch wagers on component mount and every 3 seconds
   useEffect(() => {
-    const getWagers = async () => {
-      const allWagers = await fetchWagers();
-      setWagers(allWagers || []);
+    // Initialize socket connection
+    const socket = io(BASE_SERVER_URL); // Adjust the URL as needed
 
-      const userSpecificWagers = allWagers.filter(
+    // Listen for updates from the server
+    socket.on("wagersUpdate", (updatedWagers) => {
+      setWagers(updatedWagers || []);
+
+      const userSpecificWagers = updatedWagers.filter(
         (wager) => wager.creator === mongoUserId
       );
       setUsersWagers(userSpecificWagers || []);
+    });
+
+    // Cleanup on unmount
+    return () => {
+      socket.disconnect();
     };
-
-    getWagers(); // Initial fetch
-    const intervalId = setInterval(getWagers, 3000); // Fetch every 3 seconds
-
-    return () => clearInterval(intervalId); // Cleanup on unmount
   }, [mongoUserId]);
 
   const toggleWagerView = () => {
