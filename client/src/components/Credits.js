@@ -98,6 +98,7 @@ const Credits = () => {
         ))}
       </ul>
 
+      <h3>Credits: {calculateTotalCredits(cart)}</h3>
       <h3>Total: ${totalPrice}</h3>
 
       <button onClick={handleCheckout} style={styles.purchaseButton}>
