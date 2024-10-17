@@ -6,6 +6,7 @@ const { Server } = require("socket.io");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const bodyParser = require("body-parser");
 const cors = require("cors");
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY)
 
 // ************************************************************************************************
 // ************************************************************************************************
