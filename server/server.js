@@ -1,26 +1,34 @@
 // server.js
 const express = require("express");
 require("dotenv").config();
+const http = require("http");
+const { Server } = require("socket.io");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const bodyParser = require("body-parser");
 const cors = require("cors");
-const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY)
-
 
 // ************************************************************************************************
 // ************************************************************************************************
 // *******************************************MIDDLEWARE*******************************************
 // ************************************************************************************************
 // ************************************************************************************************
+
 const app = express();
 app.use(bodyParser.json());
+const server = http.createServer(app);  // Use the same HTTP server for Express and WebSocket
 
-// CORS
+const io = new Server(server, {
+  cors: {
+    origin: process.env.CLIENT_URL,  // Allow the React client to connect
+  },
+});
+
+// CORS middleware for Express
 app.use(
   cors({
-    origin: process.env.CLIENT_URL, // Replace with your frontend URL
-    methods: "GET,PUT,POST,DELETE", // Allowed methods
-    credentials: true, // Enable credentials (cookies, authorization headers)
+    origin: process.env.CLIENT_URL,
+    methods: "GET,PUT,POST,DELETE",
+    credentials: true,
   })
 );
 
@@ -187,6 +195,25 @@ app.get("/api/users/firebase/:firebaseUserId", async (req, res) => {
       .status(500)
       .json({ error: "Failed to fetch user", details: err.message });
   }
+});
+
+// ************************************************************************************************
+// ************************************************************************************************
+// *******************************************SOCKET.IO********************************************
+// ************************************************************************************************
+// ************************************************************************************************
+
+// WebSocket connection handler
+io.on("connection", async (socket) => {
+  console.log("New client connected");
+
+  // Fetch wagers and send them to the client immediately upon connection
+  const wagers = await getAllWagers();
+  socket.emit("wagersUpdate", wagers);
+
+  socket.on("disconnect", () => {
+    console.log("Client disconnected");
+  });
 });
 
 // ************************************************************************************************
@@ -1312,8 +1339,9 @@ app.get("/api/data-trees/betable", async (req, res) => {
 // ************************************************************************************************
 // ************************************************************************************************
 
-// Start the server
 const PORT = process.env.DEV_SERVER_URL_PORT;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+
+// Start Express and Socket.io websocket server
+server.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });
