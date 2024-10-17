@@ -258,6 +258,60 @@ app.post("/api/create-checkout-session", async (req, res) => {
   }
 });
 
+// Webhooks
+app.post('/webhook', express.raw({type: 'application/json'}), async (request, response) => {
+  const sig = request.headers['stripe-signature'];
+
+  let event;
+
+  try {
+    event = stripe.webhooks.constructEvent(request.body, sig, process.env.STRIPE_WEBHOOK_ENDPOINT_SECRET);
+  } catch (err) {
+    response.status(400).send(`Webhook Error: ${err.message}`);
+    return;
+  }
+
+  switch (event.type) {
+    case 'checkout.session.completed':  // You can also use payment_intent.succeeded
+      const session = event.data.object;
+
+      // Extract the user ID from the session metadata (assuming you passed it during checkout creation)
+      const userId = session.metadata.mongoUserId;
+      const creditsPurchased = session.metadata.creditsTotal;  // Custom field to track credits purchased
+
+      try {
+        // Fetch the current user's credits
+        const user = await usersCollection.findOne({ _id: new ObjectId(userId) });
+
+        if (user) {
+          // Calculate new credits
+          const updatedCredits = (user.credits || 0) + parseFloat(creditsPurchased);
+
+          // Update the user's credits in the database
+          await usersCollection.updateOne(
+            { _id: new ObjectId(userId) },
+            { $set: { credits: updatedCredits } }
+          );
+
+          // Optionally emit an update to WebSocket clients
+          const updatedUser = await usersCollection.findOne({ _id: new ObjectId(userId) });
+          io.emit('updateUser', updatedUser);  // Notify clients about the update
+        }
+      } catch (error) {
+        console.error('Error updating user credits:', error.message);
+      }
+
+      break;
+
+    // Handle other Stripe event types here (e.g., payment_intent.failed)
+    default:
+      console.log(`Unhandled event type ${event.type}`);
+  }
+
+  // Return a 200 response to acknowledge receipt of the event
+  response.status(200).send();
+});
+
 // ************************************************************************************************
 // ************************************************************************************************
 // *******************************************SOCKET.IO********************************************
