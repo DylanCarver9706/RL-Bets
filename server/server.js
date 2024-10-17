@@ -272,11 +272,11 @@ app.post("/api/wagers", async (req, res) => {
 });
 
 // Get all wagers (GET)
-app.get("/api/wagers", async (req, res) => {
+// Helper function to fetch and calculate wager percentages
+const getAllWagers = async () => {
   try {
     const wagers = await wagersCollection.find().toArray();
 
-    // Calculate percentages for agree/disagree bets
     const wagersWithPercentages = wagers.map((wager) => {
       const totalBets = wager.agreeBetsCount + wager.disagreeBetsCount;
       const agreePercentage = totalBets ? ((wager.agreeBetsCount / totalBets) * 100).toFixed(1) : 0;
@@ -289,12 +289,17 @@ app.get("/api/wagers", async (req, res) => {
       };
     });
 
-    res.status(200).json(wagersWithPercentages);
+    return wagersWithPercentages;
   } catch (err) {
-    res
-      .status(500)
-      .json({ error: "Failed to fetch wagers", details: err.message });
+    console.error("Failed to fetch wagers", err);
+    return [];
   }
+};
+
+// HTTP route for getting wagers (for fallback or initial load)
+app.get("/api/wagers", async (req, res) => {
+  const wagers = await getAllWagers();
+  res.status(200).json(wagers);
 });
 
 // Get a single wager by ID (GET)
@@ -324,6 +329,13 @@ app.put("/api/wagers/:id", async (req, res) => {
     if (result.matchedCount === 0) {
       return res.status(404).json({ error: "Wager not found" });
     }
+
+    // Fetch the updated list of wagers
+    const updatedWagers = await getAllWagers();
+
+    // Emit the update to all connected clients
+    io.emit("wagersUpdate", updatedWagers);
+
     res.status(200).json({ message: "Wager updated successfully" });
   } catch (err) {
     res
