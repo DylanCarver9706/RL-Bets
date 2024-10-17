@@ -121,3 +121,27 @@ export const getUserById = async (userId) => {
       throw err;
     }
   };
+
+// Function to connect to the Stripe API to make a purchase
+export const createCheckoutSession = async (purchaseItems) => {
+  try {
+    const response = await fetch(`${BASE_URL}/api/create-checkout-session`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ purchaseItems }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Purchase Failed");
+    }
+
+    return data; // Return the session ID for Stripe checkout
+  } catch (err) {
+    console.error("Purchase Failed:", err.message);
+    throw err;
+  }
+};
