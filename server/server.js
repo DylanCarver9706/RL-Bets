@@ -69,6 +69,7 @@ const client = new MongoClient(uri, {
 // Connect to MongoDB and define the collections
 let usersCollection,
   wagersCollection,
+  betsCollection,
   seasonsCollection,
   tournamentsCollection,
   seriesCollection,
@@ -82,6 +83,7 @@ async function connectToDatabase() {
     const database = client.db("RLBets");
     usersCollection = database.collection("Users");
     wagersCollection = database.collection("Wagers");
+    betsCollection = database.collection("Bets");
     seasonsCollection = database.collection("Seasons");
     tournamentsCollection = database.collection("Tournaments");
     seriesCollection = database.collection("Series");
