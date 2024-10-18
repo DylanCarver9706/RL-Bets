@@ -435,6 +435,131 @@ app.delete("/api/wagers/:id", async (req, res) => {
 
 // ************************************************************************************************
 // ************************************************************************************************
+// **********************************************BETS**********************************************
+// ************************************************************************************************
+// ************************************************************************************************
+
+// Create a new bet (POST)
+app.post("/api/bets", async (req, res) => {
+  const { user, credits, agreeBet, rlEventReference, wagerId } = req.body;
+
+  try {
+    // Ensure all required fields are present
+    if (!user || !credits || agreeBet === undefined || !rlEventReference || !wagerId) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    // Create the new bet document
+    const newBet = {
+      user: new ObjectId(user),
+      credits: credits,
+      agreeBet: agreeBet,
+      rlEventReference: new ObjectId(rlEventReference),
+      wagerId: new ObjectId(wagerId)
+    };
+
+    // Insert the bet into the Bets collection
+    const betResult = await betsCollection.insertOne(newBet);
+    const betId = betResult.insertedId;
+
+    // Append the new bet's ObjectId to the `bets` array in the associated wager
+    await wagersCollection.updateOne(
+      { _id: new ObjectId(wagerId) },
+      { $push: { bets: betId } }
+    );
+
+    res.status(201).json({
+      message: "Bet created and added to wager successfully",
+      betId: betId
+    });
+
+    // Fetch wagers and send them to the client immediately upon connection
+    const wagers = await getAllWagers();
+    io.emit("wagersUpdate", wagers);
+
+  } catch (err) {
+    console.error("Error creating bet:", err);
+    res.status(500).json({ error: "Failed to create bet", details: err.message });
+  }
+});
+
+// Get all bets (GET)
+app.get("/api/bets", async (req, res) => {
+  try {
+    const bets = await betsCollection.find().toArray();
+    res.status(200).json(bets);
+  } catch (err) {
+    console.error("Error fetching bets:", err);
+    res.status(500).json({ error: "Failed to fetch bets", details: err.message });
+  }
+});
+
+// Get a single bet by ID (GET)
+app.get("/api/bets/:id", async (req, res) => {
+  try {
+    const bet = await betsCollection.findOne({ _id: new ObjectId(req.params.id) });
+    if (!bet) {
+      return res.status(404).json({ error: "Bet not found" });
+    }
+    res.status(200).json(bet);
+  } catch (err) {
+    console.error("Error fetching bet:", err);
+    res.status(500).json({ error: "Failed to fetch bet", details: err.message });
+  }
+});
+
+// Update a bet by ID (PUT)
+app.put("/api/bets/:id", async (req, res) => {
+  const { credits, agreeBet, rlEventReference, wagerId } = req.body;
+
+  try {
+    // Ensure required fields are provided
+    if (!wagerId) {
+      return res.status(400).json({ error: "Missing wagerId" });
+    }
+
+    // Only update provided fields
+    const updateFields = {};
+    if (credits !== undefined) updateFields.credits = credits;
+    if (agreeBet !== undefined) updateFields.agreeBet = agreeBet;
+    if (rlEventReference) updateFields.rlEventReference = new ObjectId(rlEventReference);
+
+    const result = await betsCollection.updateOne(
+      { _id: new ObjectId(req.params.id) },
+      { $set: updateFields }
+    );
+
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ error: "Bet not found" });
+    }
+
+    res.status(200).json({ message: "Bet updated successfully" });
+  } catch (err) {
+    console.error("Error updating bet:", err);
+    res.status(500).json({ error: "Failed to update bet", details: err.message });
+  }
+});
+
+// Delete a bet by ID (DELETE)
+app.delete("/api/bets/:id", async (req, res) => {
+  try {
+    const result = await betsCollection.deleteOne({
+      _id: new ObjectId(req.params.id)
+    });
+
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ error: "Bet not found" });
+    }
+
+    res.status(200).json({ message: "Bet deleted successfully" });
+  } catch (err) {
+    console.error("Error deleting bet:", err);
+    res.status(500).json({ error: "Failed to delete bet", details: err.message });
+  }
+});
+
+// ************************************************************************************************
+// ************************************************************************************************
 // ********************************************SEASONS*********************************************
 // ************************************************************************************************
 // ************************************************************************************************
