@@ -331,7 +331,16 @@ io.on("connection", async (socket) => {
 // Create a new wager (POST)
 app.post("/api/wagers", async (req, res) => {
   try {
-    const result = await wagersCollection.insertOne(req.body);
+    const { name, creator, rlEventReference, bets } = req.body;
+
+    const newWager = {
+      name,
+      creator: new ObjectId(creator),
+      rlEventReference: new ObjectId(rlEventReference),
+      bets: bets.map((betId) => new ObjectId(betId)) // Convert bets to ObjectId
+    };
+
+    const result = await wagersCollection.insertOne(newWager);
     res.status(201).json({
       message: "Wager created successfully",
       wagerId: result.insertedId,
@@ -343,25 +352,38 @@ app.post("/api/wagers", async (req, res) => {
   }
 });
 
+
 // Get all wagers (GET)
 // Helper function to fetch and calculate wager percentages
 const getAllWagers = async () => {
-  try {
-    const wagers = await wagersCollection.find().toArray();
-
-    const wagersWithPercentages = wagers.map((wager) => {
-      const totalBets = wager.agreeBetsCount + wager.disagreeBetsCount;
-      const agreePercentage = totalBets ? ((wager.agreeBetsCount / totalBets) * 100).toFixed(1) : 0;
-      const disagreePercentage = totalBets ? ((wager.disagreeBetsCount / totalBets) * 100).toFixed(1) : 0;
-
-      return {
-        ...wager,
-        agreePercentage: parseFloat(agreePercentage),
-        disagreePercentage: parseFloat(disagreePercentage),
-      };
-    });
-
-    return wagersWithPercentages;
+    try {
+      const wagers = await wagersCollection.find().toArray();
+  
+      const wagersWithStats = await Promise.all(
+        wagers.map(async (wager) => {
+          const betIds = wager.bets || [];
+          const bets = await betsCollection.find({ _id: { $in: betIds } }).toArray();
+  
+          // Calculate agree/disagree counts and credit totals
+          const agreeBets = bets.filter((bet) => bet.agreeBet === true);
+          const disagreeBets = bets.filter((bet) => bet.agreeBet === false);
+  
+          const agreeCreditsBet = agreeBets.reduce((sum, bet) => sum + bet.credits, 0);
+          const disagreeCreditsBet = disagreeBets.reduce((sum, bet) => sum + bet.credits, 0);
+          const agreeBetsCount = agreeBets.length;
+          const disagreeBetsCount = disagreeBets.length;
+  
+          return {
+            ...wager,
+            agreeCreditsBet,
+            disagreeCreditsBet,
+            agreeBetsCount,
+            disagreeBetsCount
+          };
+        })
+      );
+  
+      return wagersWithStats;
   } catch (err) {
     console.error("Failed to fetch wagers", err);
     return [];
@@ -380,10 +402,33 @@ app.get("/api/wagers/:id", async (req, res) => {
     const wager = await wagersCollection.findOne({
       _id: new ObjectId(req.params.id),
     });
+
     if (!wager) {
       return res.status(404).json({ error: "Wager not found" });
     }
-    res.status(200).json(wager);
+
+    // Fetch bet data for this wager
+    const betIds = wager.bets || [];
+    const bets = await betsCollection.find({ _id: { $in: betIds } }).toArray();
+
+    // Calculate agree/disagree counts and credit totals
+    const agreeBets = bets.filter((bet) => bet.agreeBet === true);
+    const disagreeBets = bets.filter((bet) => bet.agreeBet === false);
+
+    const agreeCreditsBet = agreeBets.reduce((sum, bet) => sum + bet.credits, 0);
+    const disagreeCreditsBet = disagreeBets.reduce((sum, bet) => sum + bet.credits, 0);
+    const agreeBetsCount = agreeBets.length;
+    const disagreeBetsCount = disagreeBets.length;
+
+    const wagerWithStats = {
+      ...wager,
+      agreeCreditsBet,
+      disagreeCreditsBet,
+      agreeBetsCount,
+      disagreeBetsCount,
+    };
+
+    res.status(200).json(wagerWithStats);
   } catch (err) {
     res
       .status(500)
@@ -394,19 +439,26 @@ app.get("/api/wagers/:id", async (req, res) => {
 // Update a wager by ID (PUT)
 app.put("/api/wagers/:id", async (req, res) => {
   try {
+    const { name, creator, rlEventReference, bets } = req.body;
+
+    const updatedWager = {
+      ...(name && { name }),
+      ...(creator && { creator: new ObjectId(creator) }),
+      ...(rlEventReference && { rlEventReference: new ObjectId(rlEventReference) }),
+      ...(bets && { bets: bets.map((betId) => new ObjectId(betId)) })
+    };
+
     const result = await wagersCollection.updateOne(
       { _id: new ObjectId(req.params.id) },
-      { $set: req.body }
+      { $set: updatedWager }
     );
     if (result.matchedCount === 0) {
       return res.status(404).json({ error: "Wager not found" });
     }
 
-    // Fetch the updated list of wagers
-    const updatedWagers = await getAllWagers();
-
-    // Emit the update to all connected clients
-    io.emit("wagersUpdate", updatedWagers);
+    // Fetch updated wager and statistics
+    const updatedWagers = await fetchWagersWithBetStats();
+    io.emit("wagersUpdate", updatedWagers);  // Emit updated data to all clients
 
     res.status(200).json({ message: "Wager updated successfully" });
   } catch (err) {
