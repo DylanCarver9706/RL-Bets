@@ -42,6 +42,28 @@ export const createWager = async (body) => {
   }
 };
 
+// Create bet
+export const createBet = async (body) => {
+  try {
+    const response = await fetch(`${BASE_URL}/api/bets`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body)
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to create bet");
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (err) {
+    console.error("Error creating bet:", err.message);
+  }
+};
+
 // Fetch the data tree for a given season ID
 export const fetchSeasonDataTree = async (seasonId) => {
   try {
