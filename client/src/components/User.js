@@ -91,6 +91,8 @@ const User = () => {
   return (
     <div>
       <h2>User Profile</h2>
+      <h3>Mongo ID: {mongoUserId}</h3>
+      <h3>Firebase ID: {firebaseUser.uid}</h3>
       {user ? (
         <div>
           <div>
