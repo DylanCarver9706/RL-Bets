@@ -356,34 +356,41 @@ app.post("/api/wagers", async (req, res) => {
 // Get all wagers (GET)
 // Helper function to fetch and calculate wager percentages
 const getAllWagers = async () => {
-    try {
-      const wagers = await wagersCollection.find().toArray();
-  
-      const wagersWithStats = await Promise.all(
-        wagers.map(async (wager) => {
-          const betIds = wager.bets || [];
-          const bets = await betsCollection.find({ _id: { $in: betIds } }).toArray();
-  
-          // Calculate agree/disagree counts and credit totals
-          const agreeBets = bets.filter((bet) => bet.agreeBet === true);
-          const disagreeBets = bets.filter((bet) => bet.agreeBet === false);
-  
-          const agreeCreditsBet = agreeBets.reduce((sum, bet) => sum + bet.credits, 0);
-          const disagreeCreditsBet = disagreeBets.reduce((sum, bet) => sum + bet.credits, 0);
-          const agreeBetsCount = agreeBets.length;
-          const disagreeBetsCount = disagreeBets.length;
-  
-          return {
-            ...wager,
-            agreeCreditsBet,
-            disagreeCreditsBet,
-            agreeBetsCount,
-            disagreeBetsCount
-          };
-        })
-      );
-  
-      return wagersWithStats;
+  try {
+    const wagers = await wagersCollection.find().toArray();
+
+    const wagersWithStats = await Promise.all(
+      wagers.map(async (wager) => {
+        const betIds = wager.bets || [];
+        const bets = await betsCollection.find({ _id: { $in: betIds } }).toArray();
+
+        // Calculate agree/disagree counts and credit totals
+        const agreeBets = bets.filter((bet) => bet.agreeBet === true);
+        const disagreeBets = bets.filter((bet) => bet.agreeBet === false);
+
+        const agreeCreditsBet = agreeBets.reduce((sum, bet) => sum + bet.credits, 0);
+        const disagreeCreditsBet = disagreeBets.reduce((sum, bet) => sum + bet.credits, 0);
+        const agreeBetsCount = agreeBets.length;
+        const disagreeBetsCount = disagreeBets.length;
+
+        // Calculate percentages for agree/disagree bets
+        const totalBets = agreeBetsCount + disagreeBetsCount;
+        const agreePercentage = totalBets ? ((agreeBetsCount / totalBets) * 100).toFixed(1) : 0;
+        const disagreePercentage = totalBets ? ((disagreeBetsCount / totalBets) * 100).toFixed(1) : 0;
+
+        return {
+          ...wager,
+          agreeCreditsBet,
+          disagreeCreditsBet,
+          agreeBetsCount,
+          disagreeBetsCount,
+          agreePercentage: parseFloat(agreePercentage),  // Return as float
+          disagreePercentage: parseFloat(disagreePercentage),  // Return as float
+        };
+      })
+    );
+
+    return wagersWithStats;
   } catch (err) {
     console.error("Failed to fetch wagers", err);
     return [];
