@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../context/UserContext.js";
 import { getUserById, updateUser } from "../services/userService.js";
-import { fetchBetableObjects, createWager } from "../services/wagerService";
+import { fetchBetableObjects, createWager, createBet } from "../services/wagerService";
 
 const CreateWager = () => {
   // Load data
@@ -195,7 +195,7 @@ const CreateWager = () => {
     setAttributeBetInput(0);
   };
 
-  const handleBetSubmit = () => {
+  const handleBetSubmit = async () => {
     const remainingCredits = parseFloat(userData.credits) - creditsBet
     if (remainingCredits < 0) {
       alert("Wager amount is more credits than you have available!");
@@ -205,14 +205,26 @@ const CreateWager = () => {
     let wagerPayload = {
       name: betString,
       creator: mongoUserId,
-      eventReference: betNode._id,
-      agreeCreditsBet: creditsBet,
-      disagreeCreditsBet: 0,
-      agreeBetsCount: 1,
-      disagreeBetsCount: 0,
+      rlEventReference: betNode._id
     }
+
     console.log(wagerPayload)
-    createWager(wagerPayload); // Submit the bet via API
+    
+    const wagerResponse = await createWager(wagerPayload); // Submit the wager via API
+    
+    console.log(wagerResponse)
+
+    let betPayload = {
+      user: mongoUserId,
+      credits: creditsBet,
+      agreeBet: true,
+      rlEventReference: betNode._id,
+      wagerId: wagerResponse.wagerId
+    }
+    
+    console.log(betPayload)
+
+    await createBet(betPayload); // Submit the bet via API
     
     console.log("Bet Submitted: ", betString);
 
