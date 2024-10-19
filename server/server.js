@@ -331,13 +331,12 @@ io.on("connection", async (socket) => {
 // Create a new wager (POST)
 app.post("/api/wagers", async (req, res) => {
   try {
-    const { name, creator, rlEventReference, bets } = req.body;
+    const { name, creator, rlEventReference } = req.body;
 
     const newWager = {
       name,
       creator: new ObjectId(creator),
       rlEventReference: new ObjectId(rlEventReference),
-      bets: bets.map((betId) => new ObjectId(betId)) // Convert bets to ObjectId
     };
 
     const result = await wagersCollection.insertOne(newWager);
