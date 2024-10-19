@@ -491,6 +491,18 @@ app.delete("/api/wagers/:id", async (req, res) => {
   }
 });
 
+
+// Create bet endpoints with 
+
+// Update wagers endpoints to return info from this newly nested data like count and amounts
+
+// Update create wager component to also create a new Bet
+
+// Update Home to accept this info and display it correctly
+// Now I want the user to be able to bet on the likelihood of an existing wager on the home screen. They should be able to click a button under the agree or disagree of each wager and bet on the chances of that happening. It should ask them for an amount of credits they would like to wager and then they can submit the bet to update the wager
+
+
+
 // ************************************************************************************************
 // ************************************************************************************************
 // **********************************************BETS**********************************************
@@ -505,6 +517,17 @@ app.post("/api/bets", async (req, res) => {
     // Ensure all required fields are present
     if (!user || !credits || agreeBet === undefined || !rlEventReference || !wagerId) {
       return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    // Fetch the user's current credits
+    const userDoc = await usersCollection.findOne({ _id: new ObjectId(user) });
+    if (!userDoc) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Ensure the user has enough credits to place the bet
+    if (userDoc.credits < credits) {
+      return res.status(400).json({ error: "Insufficient credits" });
     }
 
     // Create the new bet document
@@ -526,9 +549,24 @@ app.post("/api/bets", async (req, res) => {
       { $push: { bets: betId } }
     );
 
+    // Deduct the bet amount from the user's credits
+    const updatedCredits = userDoc.credits - credits;
+    await usersCollection.updateOne(
+      { _id: new ObjectId(user) },
+      { $set: { credits: updatedCredits } }
+    );
+
+    // Fetch the updated user data
+    const updatedUser = await usersCollection.findOne({ _id: new ObjectId(user) });
+
+    // Emit 'updateUser' event with updated user data to all connected clients
+    io.emit("updateUser", updatedUser);
+
+    // Send success response
     res.status(201).json({
-      message: "Bet created and added to wager successfully",
-      betId: betId
+      message: "Bet created, user's credits updated, and added to wager successfully",
+      betId: betId,
+      updatedCredits: updatedCredits  // Return updated credits for client if needed
     });
 
     // Fetch wagers and send them to the client immediately upon connection
