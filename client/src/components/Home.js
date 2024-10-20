@@ -105,35 +105,37 @@ const Home = () => {
                   <strong><br/>{wager.name}</strong>
                   <p><br/>Creator: {wager.creator}</p>
                 </div>
-                <div style={styles.wagerBody}>
-                  <div style={styles.agreeSection}>
-                    <div>
-                      <strong>Agree:</strong> {wager.agreePercentage}%
+                {wager.bets.every((bet) => bet.user !== mongoUserId) && (
+                  <div style={styles.wagerBody}>
+                    <div style={styles.agreeSection}>
+                      <div>
+                        <strong>Agree:</strong> {wager.agreePercentage}%
+                      </div>
+                      {wager.creator !== mongoUserId && (
+                        <button
+                          style={styles.betButton}
+                          onClick={() => handleShowBetInput(wager._id, true)}
+                        >
+                          Bet on Agree
+                        </button>
+                      )}
                     </div>
-                    {wager.creator !== mongoUserId && (
-                      <button
-                        style={styles.betButton}
-                        onClick={() => handleShowBetInput(wager._id, true)}
-                      >
-                        Bet on Agree
-                      </button>
-                    )}
-                  </div>
 
-                  <div style={styles.disagreeSection}>
-                    <div>
-                      <strong>Disagree:</strong> {wager.disagreePercentage}%
+                    <div style={styles.disagreeSection}>
+                      <div>
+                        <strong>Disagree:</strong> {wager.disagreePercentage}%
+                      </div>
+                      {wager.creator !== mongoUserId && (
+                        <button
+                          style={styles.betButton}
+                          onClick={() => handleShowBetInput(wager._id, false)}
+                        >
+                          Bet on Disagree
+                        </button>
+                      )}
                     </div>
-                    {wager.creator !== mongoUserId && (
-                      <button
-                        style={styles.betButton}
-                        onClick={() => handleShowBetInput(wager._id, false)}
-                      >
-                        Bet on Disagree
-                      </button>
-                    )}
                   </div>
-                </div>
+                )}
 
                 {/* Show input when Bet button is clicked */}
                 {showBetInput && selectedBet.wagerId === wager._id && (
