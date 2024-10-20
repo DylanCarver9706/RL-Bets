@@ -385,6 +385,7 @@ const getAllWagers = async () => {
           disagreeBetsCount,
           agreePercentage: parseFloat(agreePercentage),  // Return as float
           disagreePercentage: parseFloat(disagreePercentage),  // Return as float
+          bets: bets
         };
       })
     );
