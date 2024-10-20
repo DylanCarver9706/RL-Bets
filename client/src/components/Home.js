@@ -8,34 +8,69 @@ const BASE_SERVER_URL = process.env.REACT_APP_BASE_SERVER_URL;
 const Home = () => {
   const { mongoUserId } = useUser();
   const [wagers, setWagers] = useState([]);
-  const [usersWagers, setUsersWagers] = useState([]);
-  const [userWagerView, setUserWagerView] = useState(false);
-  const [showBetInput, setShowBetInput] = useState(false)
+  const [filteredWagers, setFilteredWagers] = useState([]);  // Track filtered wagers
+  const [showUserBets, setShowUserBets] = useState(false);  // Track if user wants to show wagers they've bet on
+  const [showUserWagers, setShowUsersWagers] = useState(false);
+  const [showBetableWagers, setShowBetableWagers] = useState(false);
+  const [showBetInput, setShowBetInput] = useState(false);
   const [betInputs, setBetInputs] = useState({}); // Track bet inputs
   const [selectedBet, setSelectedBet] = useState({}); // Track selected bet (wagerId + agree/disagree)
 
   useEffect(() => {
     // Initialize socket connection
     const socket = io(BASE_SERVER_URL); // Adjust the URL as needed
-
+  
     // Listen for updates from the server
     socket.on("wagersUpdate", (updatedWagers) => {
       setWagers(updatedWagers || []);
 
-      const userSpecificWagers = updatedWagers.filter(
-        (wager) => wager.creator === mongoUserId
-      );
-      setUsersWagers(userSpecificWagers || []);
+      // Initial filtering
+      applyFilters(updatedWagers, showUserWagers, showUserBets, showBetableWagers);
     });
-
+  
     // Cleanup on unmount
     return () => {
       socket.disconnect();
     };
-  }, [mongoUserId]);
+  }, [mongoUserId, showUserWagers, showUserBets, showBetableWagers]);
 
-  const toggleWagerView = () => {
-    setUserWagerView((prev) => !prev);
+  // Apply filters whenever a filter is toggled
+  useEffect(() => {
+    applyFilters(wagers, showUserWagers, showUserBets, showBetableWagers);
+  }, [showUserWagers, showUserBets, showBetableWagers, wagers]);
+
+  // Helper function to apply all active filters
+  const applyFilters = (allWagers, showUserWagers, showUserBets, showBetableWagers) => {
+    let filtered = allWagers;
+
+    if (showUserWagers) {
+      filtered = filterUserCreated(filtered);
+    }
+
+    if (showUserBets) {
+      filtered = filterUserBets(filtered);
+    }
+
+    if (showBetableWagers) {
+      filtered = filterUserBetable(filtered);
+    }
+
+    setFilteredWagers(filtered);
+  };
+
+  // Filter for wagers created by the user
+  const filterUserCreated = (wagers) => {
+    return wagers.filter((wager) => wager.creator === mongoUserId);
+  };
+
+  // Filter for wagers the user has already bet on
+  const filterUserBets = (wagers) => {
+    return wagers.filter((wager) => wager.bets.some((bet) => bet.user === mongoUserId));
+  };
+
+  // Filter for wagers the user has not bet on
+  const filterUserBetable = (wagers) => {
+    return wagers.filter((wager) => wager.bets.every((bet) => bet.user !== mongoUserId));
   };
 
   // Handle input change for each wager
@@ -51,7 +86,6 @@ const Home = () => {
 
   // Handle cancel bet
   const handleCancelBet = () => {
-    console.log(selectedBet)
     setSelectedBet({});
     setShowBetInput(false);
   };
@@ -67,11 +101,9 @@ const Home = () => {
       user: mongoUserId,
       credits: parseInt(credits, 10),
       agreeBet: agreeBet,
-      rlEventReference: wagerId,  // Assuming this is the correct reference
+      rlEventReference: wagerId,
       wagerId: wagerId
     };
-
-    console.log(betPayload)
 
     try {
       await createBet(betPayload);
@@ -86,19 +118,40 @@ const Home = () => {
   return (
     <div style={styles.container}>
       <h2 style={styles.header}>Welcome to the Wager Dashboard, {mongoUserId}</h2>
-      <button onClick={toggleWagerView} style={styles.toggleButton}>
-        {userWagerView ? "View All Wagers" : "View Your Wagers"}
-      </button>
+
+      <div style={styles.toggleContainer}>
+        <label>
+          <input
+            type="checkbox"
+            checked={showUserWagers}
+            onChange={() => setShowUsersWagers((prev) => !prev)}
+          />
+          View Your Wagers
+        </label>
+        <label>
+          <input
+            type="checkbox"
+            checked={showUserBets}
+            onChange={() => setShowUserBets((prev) => !prev)}
+          />
+          Show Wagers You've Bet On
+        </label>
+        <label>
+          <input
+            type="checkbox"
+            checked={showBetableWagers}
+            onChange={() => setShowBetableWagers((prev) => !prev)}
+          />
+          Show Wagers You Haven't Bet On
+        </label>
+      </div>
 
       <div style={styles.wagerListContainer}>
-        <h3 style={styles.subHeader}>
-          {userWagerView ? "Your Wagers" : "All Wagers"}
-        </h3>
         <ul style={styles.wagerList}>
-          {(userWagerView ? usersWagers : wagers).length === 0 ? (
+          {filteredWagers.length === 0 ? (
             <p>No wagers available.</p>
           ) : (
-            (userWagerView ? usersWagers : wagers).map((wager) => (
+            filteredWagers.map((wager) => (
               <li key={wager._id} style={styles.wagerItem}>
                 <div style={styles.wagerHeader}>
                   <strong>Wager ID: {wager._id}</strong>
@@ -189,21 +242,14 @@ const styles = {
     fontSize: "28px",
     marginBottom: "20px",
   },
-  toggleButton: {
-    padding: "10px 20px",
+  toggleContainer: {
+    display: "flex",
+    justifyContent: "center",
+    gap: "20px",
     marginBottom: "20px",
-    backgroundColor: "#007bff",
-    color: "white",
-    border: "none",
-    borderRadius: "5px",
-    cursor: "pointer",
   },
   wagerListContainer: {
     textAlign: "left",
-  },
-  subHeader: {
-    fontSize: "24px",
-    marginBottom: "10px",
   },
   wagerList: {
     listStyle: "none",
