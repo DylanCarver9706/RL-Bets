@@ -340,6 +340,11 @@ app.post("/api/wagers", async (req, res) => {
     };
 
     const result = await wagersCollection.insertOne(newWager);
+
+    // Fetch wagers and send them to the client immediately upon connection
+    const wagers = await getAllWagers();
+    io.emit("wagersUpdate", wagers);
+
     res.status(201).json({
       message: "Wager created successfully",
       wagerId: result.insertedId,
