@@ -1,12 +1,12 @@
 import SeasonDataTree from "./SeasonDataTree";
 
-const Analytics = () => {
+const Schedule = () => {
   return (
     <div>
-      <h2>Welcome to the Analytics Page</h2>
+      <h2>Welcome to the Schedule Page</h2>
       <SeasonDataTree />
     </div>
   );
 };
 
-export default Analytics;
+export default Schedule;
