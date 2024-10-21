@@ -6,7 +6,7 @@ import Auth from "./components/Auth";
 import User from "./components/User";
 import Navbar from "./components/Navbar";
 import CreateWager from "./components/CreateWager";
-import Analytics from "./components/Analytics";
+import Schedule from "./components/Schedule";
 import Credits from "./components/Credits";
 import Leaderboard from "./components/Leaderboard";
 
@@ -24,7 +24,7 @@ function AppRoutes() {
         <Route path="/Auth" element={<Auth />} />
         <Route path="/User" element={mongoUserId ? <User /> : <Auth />} />
         <Route path="/Bet" element={mongoUserId ? <CreateWager /> : <Auth />} />
-        <Route path="/Analytics" element={mongoUserId ? <Analytics /> : <Auth />} />
+        <Route path="/Schedule" element={mongoUserId ? <Schedule /> : <Auth />}/>
         <Route path="/Credits" element={mongoUserId ? <Credits /> : <Auth />} />
         <Route path="/Leaderboard" element={mongoUserId ? <Leaderboard /> : <Auth />} />
       </Routes>
