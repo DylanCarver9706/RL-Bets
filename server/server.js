@@ -171,6 +171,12 @@ app.put("/api/users/:id", async (req, res) => {
     // Emit 'updateUser' event with updated user data to all connected clients
     io.emit("updateUser", updatedUser);
 
+    // Fetch all users after the update
+    const allUsers = await usersCollection.find().toArray();
+
+    // Emit 'updateUsers' event with all users to all connected clients
+    io.emit("updateUsers", allUsers);
+
     res.status(200).json({ message: "User updated successfully" });
   } catch (err) {
     res.status(500).json({ error: "Failed to update user", details: err.message });
