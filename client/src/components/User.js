@@ -119,6 +119,8 @@ const User = () => {
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
+          <p>Credits: {user.credits}</p>
+          <p>Earned Credits: {user.earnedCredits}</p>
           <button onClick={handleUpdate}>Update User</button>
           <button onClick={handleDelete} style={{ marginLeft: "10px" }}>
             Delete User
