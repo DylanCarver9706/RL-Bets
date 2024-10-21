@@ -54,6 +54,29 @@ export const getMongoUserIdByFirebaseId = async (firebaseUserId) => {
 };
 
 // Get a user by their MongoDB ID
+export const getUsers = async () => {
+  try {
+    const response = await fetch(`${BASE_URL}/api/users`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Failed to fetch user's data.");
+    }
+
+    return data; // Return the user data
+  } catch (err) {
+    console.error("Error fetching users:", err.message);
+    throw err;
+  }
+};
+
+// Get a user by their MongoDB ID
 export const getUserById = async (userId) => {
     try {
       const response = await fetch(`${BASE_URL}/api/users/${userId}`, {
@@ -76,7 +99,7 @@ export const getUserById = async (userId) => {
     }
   };
   
-  // Update a user by their MongoDB ID
+// Update a user by their MongoDB ID
   export const updateUser = async (userId, updatedData) => {
     try {
       const response = await fetch(`${BASE_URL}/api/users/${userId}`, {
@@ -100,7 +123,7 @@ export const getUserById = async (userId) => {
     }
   };
   
-  // Delete a user by their MongoDB ID
+// Delete a user by their MongoDB ID
   export const deleteUser = async (userId) => {
     try {
       const response = await fetch(`${BASE_URL}/api/users/${userId}`, {
