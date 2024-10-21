@@ -45,6 +45,7 @@ const Navbar = () => {
       <h2 style={styles.brand}><Link to="/" style={styles.link}>RLBets.com</Link></h2>
       <div style={styles.navLinks}>
         <Link to="/User" style={styles.link}>Profile</Link>
+        <Link to="/Schedule" style={styles.link}>Schedule</Link>
         <Link to="/Leaderboard" style={styles.link}>Leaderboard</Link>
       </div>
       <div style={styles.navLinks}>
