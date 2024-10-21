@@ -317,14 +317,14 @@ app.post('/webhook', express.raw({type: 'application/json'}), async (request, re
 
 // WebSocket connection handler
 io.on("connection", async (socket) => {
-  console.log("New client connected");
+  // console.log("New client connected");
 
   // Fetch wagers and send them to the client immediately upon connection
   const wagers = await getAllWagers();
   socket.emit("wagersUpdate", wagers);
 
   socket.on("disconnect", () => {
-    console.log("Client disconnected");
+    // console.log("Client disconnected");
   });
 });
 
@@ -1066,6 +1066,115 @@ app.put("/api/matches/:id", async (req, res) => {
       .json({ error: "Failed to update match", details: err.message });
   }
 });
+
+// Update a match by ID (PUT)
+app.put("/api/match_concluded/:id", async (req, res) => {
+  try {
+    const { results, winner, loser, series, endTournament, endSeason } = req.body;
+
+    let message = " updated successfully"
+    
+    // Ensure all required fields are present in the request body
+    if (!results || !winner || !loser || !series) {
+      return res.status(400).json({ error: "Missing required fields in the request body" });
+    }
+
+    // Build the update object for the match
+    const updateData = {
+      results: results,
+      winner: new ObjectId(winner),
+      loser: new ObjectId(loser),
+      series: new ObjectId(series),
+      status: "Ended"
+    };
+
+    // Update the match in the database
+    const result = await matchesCollection.updateOne(
+      { _id: new ObjectId(req.params.id) },
+      { $set: updateData }
+    );
+
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ error: "Match not found" });
+    }
+
+    message = "Match" + message
+
+    // Find the series by its ID
+    const seriesDoc = await seriesCollection.findOne({ _id: new ObjectId(series) });
+    if (!seriesDoc) {
+      return res.status(404).json({ error: "Series not found" });
+    }
+
+    const bestOf = seriesDoc.bestOf; // Int32 value representing the number of wins required
+
+    // Get all the matches in the series
+    const seriesMatches = await matchesCollection.find({
+      _id: { $in: seriesDoc.matches } // Assuming `matches` is an array of match Object IDs in the series
+    }).toArray();
+
+    // Count the number of wins for each team in the series
+    let winnerWinsCount = 0;
+    seriesMatches.forEach((match) => {
+      if (match.status === "Ended" && match.winner.equals(new ObjectId(winner))) {
+        winnerWinsCount++;
+      }
+    });
+
+    // If the winner has won enough matches to win the series, update the series status and declare winner/loser
+    if (winnerWinsCount >= bestOf) {
+      message = "Series," + message
+      await seriesCollection.updateOne(
+        { _id: new ObjectId(series) },
+        {
+          $set: {
+            status: "Ended",
+            winner: new ObjectId(winner),
+            loser: new ObjectId(loser),
+          }
+        }
+      );
+    }
+
+    // Set status for Tournament if included in request body
+    if (endTournament === true) {
+      await tournamentsCollection.updateOne(
+        { _id: new ObjectId(seriesDoc.tournament) },
+        {
+          $set: {
+            status: "Ended",
+            winner: new ObjectId(winner),
+            loser: new ObjectId(loser),
+          }
+        }
+      );
+      message = "Tournament," + message
+    }
+    
+    // Set status for Season if included in request body
+    if (endSeason === true) {
+      // Find the season that contains the tournament in its tournaments array
+      const seasonDoc = await seasonsCollection.findOne({
+        tournaments: { $in: [new ObjectId(seriesDoc.tournament)] }
+      });
+
+      if (seasonDoc) {
+        // Update the status of the season to "Ended"
+        await seasonsCollection.updateOne(
+          { _id: seasonDoc._id },
+          { $set: { status: "Ended", winner: winner, loser: loser } }
+        );
+      }
+      message = "Season," + message
+    }
+
+    res.status(200).json({ message: message, winnerWinsCount: winnerWinsCount });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to update match or series", details: err.message });
+  }
+});
+
+
 
 // Delete a match by ID (DELETE)
 app.delete("/api/matches/:id", async (req, res) => {
