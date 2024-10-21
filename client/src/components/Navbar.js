@@ -45,12 +45,11 @@ const Navbar = () => {
       <h2 style={styles.brand}><Link to="/" style={styles.link}>RLBets.com</Link></h2>
       <div style={styles.navLinks}>
         <Link to="/User" style={styles.link}>Profile</Link>
-        <Link to="/Analytics" style={styles.link}>Analytics</Link>
+        <Link to="/Leaderboard" style={styles.link}>Leaderboard</Link>
       </div>
       <div style={styles.navLinks}>
         <Link to="/Bet" style={styles.link}>Create Bet</Link>
         <Link to="/Credits" style={styles.link}>{userCredits} Credits</Link>
-        {/* <Link to="/Leaderboard" style={styles.link}>Leaderboard</Link> */}
       </div>
     </nav>
   );
