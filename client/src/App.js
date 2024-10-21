@@ -8,6 +8,7 @@ import Navbar from "./components/Navbar";
 import CreateWager from "./components/CreateWager";
 import Analytics from "./components/Analytics";
 import Credits from "./components/Credits";
+import Leaderboard from "./components/Leaderboard";
 
 function AppRoutes() {
   const { firebaseUser, mongoUserId, loading } = useUser();
@@ -25,6 +26,7 @@ function AppRoutes() {
         <Route path="/Bet" element={mongoUserId ? <CreateWager /> : <Auth />} />
         <Route path="/Analytics" element={mongoUserId ? <Analytics /> : <Auth />} />
         <Route path="/Credits" element={mongoUserId ? <Credits /> : <Auth />} />
+        <Route path="/Leaderboard" element={mongoUserId ? <Leaderboard /> : <Auth />} />
       </Routes>
     </>
   );
