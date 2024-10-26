@@ -8,69 +8,69 @@ const BASE_SERVER_URL = process.env.REACT_APP_BASE_SERVER_URL;
 const Home = () => {
   const { mongoUserId } = useUser();
   const [wagers, setWagers] = useState([]);
-  const [filteredWagers, setFilteredWagers] = useState([]);  // Track filtered wagers
-  const [showUserBets, setShowUserBets] = useState(false);  // Track if user wants to show wagers they've bet on
-  const [showUserWagers, setShowUsersWagers] = useState(false);
-  const [showBetableWagers, setShowBetableWagers] = useState(false);
+  const [filteredWagers, setFilteredWagers] = useState([]);
+  const [activeFilter, setActiveFilter] = useState("all"); // Track the active filter
   const [showBetInput, setShowBetInput] = useState(false);
-  const [betInputs, setBetInputs] = useState({}); // Track bet inputs
-  const [selectedBet, setSelectedBet] = useState({}); // Track selected bet (wagerId + agree/disagree)
+  const [betInputs, setBetInputs] = useState({});
+  const [selectedBet, setSelectedBet] = useState({});
 
   useEffect(() => {
     // Initialize socket connection
-    const socket = io(BASE_SERVER_URL); // Adjust the URL as needed
-  
+    const socket = io(BASE_SERVER_URL);
+
     // Listen for updates from the server
     socket.on("wagersUpdate", (updatedWagers) => {
+      console.log(updatedWagers)
       setWagers(updatedWagers || []);
-
-      // Initial filtering
-      applyFilters(updatedWagers, showUserWagers, showUserBets, showBetableWagers);
+      applyFilter("all", updatedWagers); // Default filter on load
     });
-  
-    // Cleanup on unmount
+
     return () => {
       socket.disconnect();
     };
-  }, [mongoUserId, showUserWagers, showUserBets, showBetableWagers]);
+  }, [mongoUserId]);
 
-  // Apply filters whenever a filter is toggled
-  useEffect(() => {
-    applyFilters(wagers, showUserWagers, showUserBets, showBetableWagers);
-  }, [showUserWagers, showUserBets, showBetableWagers, wagers]);
-
-  // Helper function to apply all active filters
-  const applyFilters = (allWagers, showUserWagers, showUserBets, showBetableWagers) => {
+  // Apply filters based on the selected filter option
+  const applyFilter = (filter, allWagers = wagers) => {
     let filtered = allWagers;
 
-    if (showUserWagers) {
-      filtered = filterUserCreated(filtered);
-    }
-
-    if (showUserBets) {
-      filtered = filterUserBets(filtered);
-    }
-
-    if (showBetableWagers) {
-      filtered = filterUserBetable(filtered);
+    switch (filter) {
+      case "all":
+        filtered = allWagers;
+        break;
+      case "Betable":
+        filtered = allWagers.filter(
+          (wager) =>
+            wager.status === "Betable" &&
+            wager.creator !== mongoUserId &&
+            wager.bets.every((bet) => bet.user !== mongoUserId)
+        );
+        break;
+      case "Ongoing":
+        filtered = allWagers.filter((wager) => wager.status === "Ongoing");
+        break;
+      case "Ended":
+        filtered = allWagers.filter((wager) => wager.status === "Ended");
+        break;
+      case "BetOn":
+        filtered = allWagers.filter((wager) =>
+          wager.bets.some((bet) => bet.user === mongoUserId)
+        );
+        break;
+      default:
+        filtered = allWagers;
+        break;
     }
 
     setFilteredWagers(filtered);
+    setActiveFilter(filter); // Set active filter
   };
 
-  // Filter for wagers created by the user
-  const filterUserCreated = (wagers) => {
-    return wagers.filter((wager) => wager.creator === mongoUserId);
-  };
-
-  // Filter for wagers the user has already bet on
-  const filterUserBets = (wagers) => {
-    return wagers.filter((wager) => wager.bets.some((bet) => bet.user === mongoUserId));
-  };
-
-  // Filter for wagers the user has not bet on
-  const filterUserBetable = (wagers) => {
-    return wagers.filter((wager) => wager.bets.every((bet) => bet.user !== mongoUserId));
+  // Helper function for toggling filters, ensuring only one is active at a time
+  const handleFilterChange = (filter) => {
+    if (activeFilter !== filter) {
+      applyFilter(filter);
+    }
   };
 
   // Handle input change for each wager
@@ -102,14 +102,14 @@ const Home = () => {
       credits: parseInt(credits, 10),
       agreeBet: agreeBet,
       rlEventReference: wagerId,
-      wagerId: wagerId
+      wagerId: wagerId,
     };
 
     try {
       await createBet(betPayload);
       alert("Bet placed successfully!");
-      setSelectedBet({});  // Clear the selected bet after submission
-      setBetInputs({});  // Clear the input field after submission
+      setSelectedBet({});
+      setBetInputs({});
     } catch (error) {
       console.error("Error placing bet:", error);
     }
@@ -122,27 +122,43 @@ const Home = () => {
       <div style={styles.toggleContainer}>
         <label>
           <input
-            type="checkbox"
-            checked={showUserWagers}
-            onChange={() => setShowUsersWagers((prev) => !prev)}
+            type="radio"
+            checked={activeFilter === "all"}
+            onChange={() => handleFilterChange("all")}
           />
-          View Your Wagers
+          Show All Wagers
         </label>
         <label>
           <input
-            type="checkbox"
-            checked={showUserBets}
-            onChange={() => setShowUserBets((prev) => !prev)}
+            type="radio"
+            checked={activeFilter === "Betable"}
+            onChange={() => handleFilterChange("Betable")}
+          />
+          Show Betable Wagers
+        </label>
+        <label>
+          <input
+            type="radio"
+            checked={activeFilter === "BetOn"}
+            onChange={() => handleFilterChange("BetOn")}
           />
           Show Wagers You've Bet On
         </label>
         <label>
           <input
-            type="checkbox"
-            checked={showBetableWagers}
-            onChange={() => setShowBetableWagers((prev) => !prev)}
+            type="radio"
+            checked={activeFilter === "Ongoing"}
+            onChange={() => handleFilterChange("Ongoing")}
           />
-          Show Wagers You Haven't Bet On
+          Show Ongoing Wagers
+        </label>
+        <label>
+          <input
+            type="radio"
+            checked={activeFilter === "Ended"}
+            onChange={() => handleFilterChange("Ended")}
+          />
+          Show Ended Wagers
         </label>
       </div>
 
@@ -155,39 +171,39 @@ const Home = () => {
               <li key={wager._id} style={styles.wagerItem}>
                 <div style={styles.wagerHeader}>
                   <strong>Wager ID: {wager._id}</strong>
-                  {/* <p>Bets: {[wager.bets]}</p> */}
                   <strong><br/>{wager.name}</strong>
                   <p><br/>Creator: {wager.creator}</p>
+                  <p><br/>Status: {wager.status}</p>
                 </div>
-                  <div style={styles.wagerBody}>
-                    <div style={styles.agreeSection}>
-                      <div>
-                        <strong>Agree:</strong> {wager.agreePercentage}%
-                      </div>
-                      {wager.bets.every((bet) => bet.user !== mongoUserId) && wager.creator !== mongoUserId && (
-                        <button
-                          style={styles.betButton}
-                          onClick={() => handleShowBetInput(wager._id, true)}
-                        >
-                          Bet on Agree
-                        </button>
-                      )}
+                <div style={styles.wagerBody}>
+                  <div style={styles.agreeSection}>
+                    <div>
+                      <strong>Agree:</strong> {wager.agreePercentage}%
                     </div>
-
-                    <div style={styles.disagreeSection}>
-                      <div>
-                        <strong>Disagree:</strong> {wager.disagreePercentage}%
-                      </div>
-                      {wager.bets.every((bet) => bet.user !== mongoUserId) && wager.creator !== mongoUserId && (
-                        <button
-                          style={styles.betButton}
-                          onClick={() => handleShowBetInput(wager._id, false)}
-                        >
-                          Bet on Disagree
-                        </button>
-                      )}
-                    </div>
+                    {wager.bets.every((bet) => bet.user !== mongoUserId) && wager.creator !== mongoUserId && (
+                      <button
+                        style={styles.betButton}
+                        onClick={() => handleShowBetInput(wager._id, true)}
+                      >
+                        Bet on Agree
+                      </button>
+                    )}
                   </div>
+
+                  <div style={styles.disagreeSection}>
+                    <div>
+                      <strong>Disagree:</strong> {wager.disagreePercentage}%
+                    </div>
+                    {wager.bets.every((bet) => bet.user !== mongoUserId) && wager.creator !== mongoUserId && (
+                      <button
+                        style={styles.betButton}
+                        onClick={() => handleShowBetInput(wager._id, false)}
+                      >
+                        Bet on Disagree
+                      </button>
+                    )}
+                  </div>
+                </div>
 
                 {/* Show input when Bet button is clicked */}
                 {showBetInput && selectedBet.wagerId === wager._id && (
