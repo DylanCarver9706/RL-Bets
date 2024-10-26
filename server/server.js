@@ -454,6 +454,10 @@ app.get("/api/wagers/:id", async (req, res) => {
   }
 });
 
+const WagerOutcomeFormula = (betAmount, totalWinnersBetsAmount, totalLosersBetsAmount) => {
+  return ((betAmount / totalWinnersBetsAmount) * totalLosersBetsAmount) + betAmount
+}
+
 // Update a wager by ID (PUT)
 app.put("/api/wagers/:id", async (req, res) => {
   try {
