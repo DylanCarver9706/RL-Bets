@@ -491,15 +491,14 @@ const payOutBetWinners = async (wagerId, agreeIsWinner) => {
 }
 
 // Update a wager by ID (PUT)
-app.put("/api/wagers/:id", async (req, res) => {
+// Used by admin client
+app.put("/api/wager_ended/:id", async (req, res) => {
   try {
-    const { name, creator, rlEventReference, bets } = req.body;
+    const { agreeIsWinner } = req.body;
 
     const updatedWager = {
-      ...(name && { name }),
-      ...(creator && { creator: new ObjectId(creator) }),
-      ...(rlEventReference && { rlEventReference: new ObjectId(rlEventReference) }),
-      ...(bets && { bets: bets.map((betId) => new ObjectId(betId)) })
+      status: "Ended",
+      agreeIsWinner: agreeIsWinner,
     };
 
     const result = await wagersCollection.updateOne(
@@ -511,8 +510,10 @@ app.put("/api/wagers/:id", async (req, res) => {
     }
 
     // Fetch updated wager and statistics
-    const updatedWagers = await fetchWagersWithBetStats();
+    const updatedWagers = await getAllWagers();
     io.emit("wagersUpdate", updatedWagers);  // Emit updated data to all clients
+
+    await payOutBetWinners(req.params.id, agreeIsWinner)
 
     res.status(200).json({ message: "Wager updated successfully" });
   } catch (err) {
