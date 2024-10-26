@@ -337,15 +337,8 @@ io.on("connection", async (socket) => {
 // Create a new wager (POST)
 app.post("/api/wagers", async (req, res) => {
   try {
-    const { name, creator, rlEventReference } = req.body;
-
-    const newWager = {
-      name,
-      creator: new ObjectId(creator),
-      rlEventReference: new ObjectId(rlEventReference),
-    };
-
-    const result = await wagersCollection.insertOne(newWager);
+    
+    const result = await wagersCollection.insertOne(req.body);
 
     // Fetch wagers and send them to the client immediately upon connection
     const wagers = await getAllWagers();
