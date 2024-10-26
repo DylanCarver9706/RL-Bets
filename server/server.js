@@ -1070,13 +1070,25 @@ app.put("/api/matches/:id", async (req, res) => {
 // Update a match by ID (PUT)
 app.put("/api/match_concluded/:id", async (req, res) => {
   try {
-    const { results, winner, loser, series, endTournament, endSeason } = req.body;
+    const { results, winner, loser, endTournament, endSeason } = req.body;
 
     let message = " updated successfully"
     
     // Ensure all required fields are present in the request body
-    if (!results || !winner || !loser || !series) {
+    if (!results || !winner || !loser) {
       return res.status(400).json({ error: "Missing required fields in the request body" });
+    }
+
+    // Find the match by its ID
+    const matchDoc = await matchesCollection.findOne({ _id: new ObjectId(req.params.id) });
+    if (!matchDoc) {
+      return res.status(404).json({ error: "Match not found" });
+    }
+
+    // Find the series by its ID
+    const seriesDoc = await seriesCollection.findOne({ _id: new ObjectId(matchDoc.series) });
+    if (!seriesDoc) {
+      return res.status(404).json({ error: "Series not found" });
     }
 
     // Build the update object for the match
@@ -1084,7 +1096,7 @@ app.put("/api/match_concluded/:id", async (req, res) => {
       results: results,
       winner: new ObjectId(winner),
       loser: new ObjectId(loser),
-      series: new ObjectId(series),
+      series: new ObjectId(seriesDoc._id),
       status: "Ended"
     };
 
@@ -1099,13 +1111,8 @@ app.put("/api/match_concluded/:id", async (req, res) => {
     }
 
     message = "Match" + message
-
-    // Find the series by its ID
-    const seriesDoc = await seriesCollection.findOne({ _id: new ObjectId(series) });
-    if (!seriesDoc) {
-      return res.status(404).json({ error: "Series not found" });
-    }
-
+    
+    // Update the series document
     const bestOf = seriesDoc.bestOf; // Int32 value representing the number of wins required
 
     // Get all the matches in the series
@@ -1125,7 +1132,7 @@ app.put("/api/match_concluded/:id", async (req, res) => {
     if (winnerWinsCount >= bestOf) {
       message = "Series," + message
       await seriesCollection.updateOne(
-        { _id: new ObjectId(series) },
+        { _id: new ObjectId(seriesDoc._id) },
         {
           $set: {
             status: "Ended",
