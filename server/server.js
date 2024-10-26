@@ -458,6 +458,45 @@ const WagerOutcomeFormula = (betAmount, totalWinnersBetsAmount, totalLosersBetsA
   return ((betAmount / totalWinnersBetsAmount) * totalLosersBetsAmount) + betAmount
 }
 
+// Function to pay out bets
+const payOutBetWinners = async (wagerId, agreeIsWinner) => {
+  // Find all wagers where rlEventReference matches the converted ObjectId
+  const wager = await wagersCollection.findOne({ _id: new ObjectId(wagerId) });
+
+  // console.log(wager)
+
+  // Get all the bets in the wager
+  const wagerBets = await betsCollection.find({
+    _id: { $in: wager.bets }
+  }).toArray();
+
+  // Calculate the total credits for the winner and loser bets
+  let loserCredits = 0
+  let winnerCredits = 0
+  for (let index = 0; index < wagerBets.length; index++) {
+    const bet = wagerBets[index];
+    if (bet.agreeBet !== agreeIsWinner) {
+      loserCredits += bet.credits
+    } else {
+      winnerCredits += bet.credits
+    }
+  }
+
+  // Update users credits field to add the credits they won
+  for (let index = 0; index < wagerBets.length; index++) {
+    const bet = wagerBets[index];
+    if (bet.agreeBet == agreeIsWinner) {
+      const user = await usersCollection.findOne({ _id: new ObjectId(bet.user) });
+      awardedCredits = WagerOutcomeFormula(bet.credits, winnerCredits, loserCredits)
+      console.log(user._id, awardedCredits)
+      await usersCollection.updateOne(
+        { _id: new ObjectId(bet.user) },
+        { $set: { earnedCredits: user.earnedCredits + awardedCredits, credits: user.credits + awardedCredits } }
+      );
+    }
+  }
+}
+
 // Update a wager by ID (PUT)
 app.put("/api/wagers/:id", async (req, res) => {
   try {
