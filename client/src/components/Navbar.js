@@ -20,7 +20,7 @@ const Navbar = () => {
     const fetchData = async () => {
       try {
         const userData = await getUserById(mongoUserId);
-        setUserCredits(userData.credits);
+        setUserCredits(parseInt(userData.credits));
       } catch (error) {
         console.error("Error fetching data:", error.message);
       }
