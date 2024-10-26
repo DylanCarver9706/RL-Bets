@@ -526,17 +526,20 @@ app.put("/api/wager_ended/:id", async (req, res) => {
 // Delete a wager by ID (DELETE)
 app.delete("/api/wagers/:id", async (req, res) => {
   try {
-    const result = await wagersCollection.deleteOne({
-      _id: new ObjectId(req.params.id),
-    });
-    if (result.deletedCount === 0) {
+    const wagerId = new ObjectId(req.params.id);
+
+    // Delete the wager
+    const wagerResult = await wagersCollection.deleteOne({ _id: wagerId });
+    if (wagerResult.deletedCount === 0) {
       return res.status(404).json({ error: "Wager not found" });
     }
-    res.status(200).json({ message: "Wager deleted successfully" });
+
+    // Delete associated bets
+    await betsCollection.deleteMany({ wagerId: wagerId });
+
+    res.status(200).json({ message: "Wager and associated bets deleted successfully" });
   } catch (err) {
-    res
-      .status(500)
-      .json({ error: "Failed to delete wager", details: err.message });
+    res.status(500).json({ error: "Failed to delete wager and bets", details: err.message });
   }
 });
 
