@@ -1,18 +1,29 @@
 import React, { useEffect, useState } from "react";
 import { useUser } from "../context/UserContext.js";
 import io from "socket.io-client";
-import { createBet } from "../services/wagerService.js";  // Import createBet function
+import { createBet } from "../services/wagerService.js";
 
 const BASE_SERVER_URL = process.env.REACT_APP_BASE_SERVER_URL;
+
+const WagerOutcomeFormula = (betAmount, totalWinnersBetsAmount, totalLosersBetsAmount) => {
+  if (totalWinnersBetsAmount === 0 || totalLosersBetsAmount === 0 || isNaN(betAmount)) {
+    return 0;
+  }
+  const winnings = ((betAmount / totalWinnersBetsAmount) * totalLosersBetsAmount) + betAmount
+  // console.log(`((${betAmount} / (${totalWinnersBetsAmount})) * ${totalLosersBetsAmount}) + ${betAmount} = ${winnings}`)
+  return winnings;
+};
 
 const Home = () => {
   const { mongoUserId } = useUser();
   const [wagers, setWagers] = useState([]);
   const [filteredWagers, setFilteredWagers] = useState([]);
-  const [activeFilter, setActiveFilter] = useState("all"); // Track the active filter
+  const [activeFilter, setActiveFilter] = useState("all");
   const [showBetInput, setShowBetInput] = useState(false);
+  const [creditsWagered, setCreditsWagered] = useState(0);
   const [betInputs, setBetInputs] = useState({});
   const [selectedBet, setSelectedBet] = useState({});
+  const [estimatedWinnings, setEstimatedWinnings] = useState(0);
 
   useEffect(() => {
     // Initialize socket connection
@@ -22,13 +33,25 @@ const Home = () => {
     socket.on("wagersUpdate", (updatedWagers) => {
       console.log(updatedWagers)
       setWagers(updatedWagers || []);
-      applyFilter("all", updatedWagers); // Default filter on load
+      applyFilter("all", updatedWagers);
     });
 
     return () => {
       socket.disconnect();
     };
   }, [mongoUserId]);
+
+  useEffect(() => {
+    // Recalculate estimated winnings if credits wagered or selected wager's agree/disagree values change
+    if (selectedBet.wagerId && creditsWagered > 0) {
+      const wager = wagers.find((w) => w._id === selectedBet.wagerId);
+      if (wager) {
+        const { agreeCreditsBet = 0, disagreeCreditsBet = 0 } = wager;
+
+        setEstimatedWinnings(WagerOutcomeFormula(creditsWagered, agreeCreditsBet, disagreeCreditsBet));
+      }
+    }
+  }, [creditsWagered, wagers, selectedBet]);
 
   // Apply filters based on the selected filter option
   const applyFilter = (filter, allWagers = wagers) => {
@@ -63,10 +86,9 @@ const Home = () => {
     }
 
     setFilteredWagers(filtered);
-    setActiveFilter(filter); // Set active filter
+    setActiveFilter(filter);
   };
 
-  // Helper function for toggling filters, ensuring only one is active at a time
   const handleFilterChange = (filter) => {
     if (activeFilter !== filter) {
       applyFilter(filter);
@@ -75,7 +97,9 @@ const Home = () => {
 
   // Handle input change for each wager
   const handleBetInputChange = (wagerId, value) => {
-    setBetInputs((prev) => ({ ...prev, [wagerId]: value }));
+    const betAmount = parseInt(value, 10) || 0;
+    setBetInputs((prev) => ({ ...prev, [wagerId]: betAmount }));
+    setCreditsWagered(betAmount);
   };
 
   // Handle showing bet input
@@ -88,6 +112,7 @@ const Home = () => {
   const handleCancelBet = () => {
     setSelectedBet({});
     setShowBetInput(false);
+    setEstimatedWinnings(0);
   };
 
   // Handle submit bet
@@ -110,6 +135,7 @@ const Home = () => {
       alert("Bet placed successfully!");
       setSelectedBet({});
       setBetInputs({});
+      setEstimatedWinnings(0);
     } catch (error) {
       console.error("Error placing bet:", error);
     }
@@ -179,6 +205,8 @@ const Home = () => {
                   <div style={styles.agreeSection}>
                     <div>
                       <strong>Agree:</strong> {wager.agreePercentage}%
+                      <strong><br/>Agree Bets Count:</strong> {wager.agreeBetsCount}
+                      <strong><br/>Total Agree Credits Bet:</strong> {wager.agreeCreditsBet}
                     </div>
                     {wager.bets.every((bet) => bet.user !== mongoUserId) && wager.creator !== mongoUserId && (
                       <button
@@ -193,7 +221,9 @@ const Home = () => {
                   <div style={styles.disagreeSection}>
                     <div>
                       <strong>Disagree:</strong> {wager.disagreePercentage}%
-                    </div>
+                      <strong><br/>Disagree Bets Count:</strong> {wager.disagreeBetsCount}
+                      <strong><br/>Total Disagree Credits Bet:</strong> {wager.disagreeCreditsBet}
+                      </div>
                     {wager.bets.every((bet) => bet.user !== mongoUserId) && wager.creator !== mongoUserId && (
                       <button
                         style={styles.betButton}
@@ -218,6 +248,9 @@ const Home = () => {
                       step="1"
                     />{" "}
                     credits that this <strong>{selectedBet.agreeBet ? "will" : "will not"}</strong> happen
+                    <p>Estimated Winnings: {parseInt(estimatedWinnings) || 0} credits</p>
+                    <p>Credits Earned: ((Bet Amount / (Total Agree Credits Bet + Bet Amount)) * Total Loser's Credits Bet) + Bet Amount</p>
+                    <p>Meaning: {creditsWagered} credits bet + {parseInt(estimatedWinnings - creditsWagered) || 0} credits earned = {parseInt(estimatedWinnings) || 0} credits won</p>
                     <button
                       style={styles.submitBetButton}
                       onClick={() => handleSubmitBet(wager._id, selectedBet.agreeBet)}
