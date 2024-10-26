@@ -543,17 +543,23 @@ app.delete("/api/wagers/:id", async (req, res) => {
   }
 });
 
+// Delete all wagers and their associated bets (DELETE)
+app.delete("/api/wagers", async (req, res) => {
+  try {
+    // Delete all wagers
+    const wagerResult = await wagersCollection.deleteMany({});
+    if (wagerResult.deletedCount === 0) {
+      return res.status(404).json({ error: "No wagers found to delete" });
+    }
 
-// Create bet endpoints with 
+    // Delete all associated bets
+    await betsCollection.deleteMany({});
 
-// Update wagers endpoints to return info from this newly nested data like count and amounts
-
-// Update create wager component to also create a new Bet
-
-// Update Home to accept this info and display it correctly
-// Now I want the user to be able to bet on the likelihood of an existing wager on the home screen. They should be able to click a button under the agree or disagree of each wager and bet on the chances of that happening. It should ask them for an amount of credits they would like to wager and then they can submit the bet to update the wager
-
-
+    res.status(200).json({ message: "All wagers and associated bets deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to delete wagers and bets", details: err.message });
+  }
+});
 
 // ************************************************************************************************
 // ************************************************************************************************
