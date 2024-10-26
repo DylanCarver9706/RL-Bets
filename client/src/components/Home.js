@@ -155,16 +155,16 @@ const Home = () => {
               <li key={wager._id} style={styles.wagerItem}>
                 <div style={styles.wagerHeader}>
                   <strong>Wager ID: {wager._id}</strong>
+                  {/* <p>Bets: {[wager.bets]}</p> */}
                   <strong><br/>{wager.name}</strong>
                   <p><br/>Creator: {wager.creator}</p>
                 </div>
-                {wager.bets.every((bet) => bet.user !== mongoUserId) && (
                   <div style={styles.wagerBody}>
                     <div style={styles.agreeSection}>
                       <div>
                         <strong>Agree:</strong> {wager.agreePercentage}%
                       </div>
-                      {wager.creator !== mongoUserId && (
+                      {wager.bets.every((bet) => bet.user !== mongoUserId) && wager.creator !== mongoUserId && (
                         <button
                           style={styles.betButton}
                           onClick={() => handleShowBetInput(wager._id, true)}
@@ -178,7 +178,7 @@ const Home = () => {
                       <div>
                         <strong>Disagree:</strong> {wager.disagreePercentage}%
                       </div>
-                      {wager.creator !== mongoUserId && (
+                      {wager.bets.every((bet) => bet.user !== mongoUserId) && wager.creator !== mongoUserId && (
                         <button
                           style={styles.betButton}
                           onClick={() => handleShowBetInput(wager._id, false)}
@@ -188,7 +188,6 @@ const Home = () => {
                       )}
                     </div>
                   </div>
-                )}
 
                 {/* Show input when Bet button is clicked */}
                 {showBetInput && selectedBet.wagerId === wager._id && (
