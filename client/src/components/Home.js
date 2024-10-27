@@ -208,7 +208,7 @@ const Home = () => {
                       <strong><br/>Agree Bets Count:</strong> {wager.agreeBetsCount}
                       <strong><br/>Total Agree Credits Bet:</strong> {wager.agreeCreditsBet}
                     </div>
-                    {wager.bets.every((bet) => bet.user !== mongoUserId) && wager.creator !== mongoUserId && (
+                    {!["Ongoing", "Ended"].includes(wager.status) && wager.bets.every((bet) => bet.user !== mongoUserId) && wager.creator !== mongoUserId && (
                       <button
                         style={styles.betButton}
                         onClick={() => handleShowBetInput(wager._id, true)}
@@ -224,7 +224,7 @@ const Home = () => {
                       <strong><br/>Disagree Bets Count:</strong> {wager.disagreeBetsCount}
                       <strong><br/>Total Disagree Credits Bet:</strong> {wager.disagreeCreditsBet}
                       </div>
-                    {wager.bets.every((bet) => bet.user !== mongoUserId) && wager.creator !== mongoUserId && (
+                      {!["Ongoing", "Ended"].includes(wager.status) && wager.bets.every((bet) => bet.user !== mongoUserId) && wager.creator !== mongoUserId && (
                       <button
                         style={styles.betButton}
                         onClick={() => handleShowBetInput(wager._id, false)}
