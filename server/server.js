@@ -225,20 +225,42 @@ app.get("/api/users/firebase/:firebaseUserId", async (req, res) => {
 // ************************************************************************************************
 // ************************************************************************************************
 
+// Function to create a new log
+const createLog = async (logData) => {
+  try {
+    const result = await logsCollection.insertOne(logData);
+    
+    const logs = await getAllLogs()
+    io.emit("updatedLogs", logs)
+
+    return { logId: result.insertedId };
+  } catch (err) {
+    throw new Error('Failed to create log: ' + err.message);
+  }
+};
+
+// Function to retrieve all logs
+const getAllLogs = async () => {
+  try {
+    return await logsCollection.find().toArray();
+  } catch (err) {
+    throw new Error('Failed to retrieve logs: ' + err.message);
+  }
+};
+
 // Create a new log (POST)
 app.post('/api/logs', async (req, res) => {
   try {
     const logData = req.body; // Accept any fields from the request body
-    const result = await logsCollection.insertOne(logData);
+    const result = await createLog(logData);
 
     res.status(201).json({
       message: 'Log created successfully',
-      logId: result.insertedId,
+      logId: result.logId,
     });
   } catch (err) {
     res.status(500).json({
-      error: 'Failed to create log',
-      details: err.message,
+      error: err.message,
     });
   }
 });
@@ -246,12 +268,11 @@ app.post('/api/logs', async (req, res) => {
 // Retrieve all logs (GET)
 app.get('/api/logs', async (req, res) => {
   try {
-    const logs = await logsCollection.find().toArray();
+    const logs = await getAllLogs();
     res.status(200).json(logs);
   } catch (err) {
     res.status(500).json({
-      error: 'Failed to retrieve logs',
-      details: err.message,
+      error: err.message,
     });
   }
 });
