@@ -50,7 +50,7 @@ const Navbar = () => {
         <Link to="/Log" style={styles.link}>Logs</Link>
       </div>
       <div style={styles.navLinks}>
-        <Link to="/Bet" style={styles.link}>Create Wager</Link>
+        <Link to="/Create_Wager" style={styles.link}>Create Wager</Link>
         <Link to="/Credits" style={styles.link}>{parseInt(userCredits)} Credits</Link>
       </div>
     </nav>

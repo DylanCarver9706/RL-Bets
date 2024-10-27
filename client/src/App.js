@@ -24,7 +24,7 @@ function AppRoutes() {
         <Route path="/" element={firebaseUser ? <Home /> : <Auth />} />
         <Route path="/Auth" element={<Auth />} />
         <Route path="/User" element={mongoUserId ? <User /> : <Auth />} />
-        <Route path="/Bet" element={mongoUserId ? <CreateWager /> : <Auth />} />
+        <Route path="/Create_Wager" element={mongoUserId ? <CreateWager /> : <Auth />} />
         <Route path="/Schedule" element={mongoUserId ? <Schedule /> : <Auth />}/>
         <Route path="/Credits" element={mongoUserId ? <Credits /> : <Auth />} />
         <Route path="/Leaderboard" element={mongoUserId ? <Leaderboard /> : <Auth />} />
