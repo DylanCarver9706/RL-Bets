@@ -49,7 +49,7 @@ const Navbar = () => {
         <Link to="/Leaderboard" style={styles.link}>Leaderboard</Link>
       </div>
       <div style={styles.navLinks}>
-        <Link to="/Bet" style={styles.link}>Create Bet</Link>
+        <Link to="/Bet" style={styles.link}>Create Wager</Link>
         <Link to="/Credits" style={styles.link}>{userCredits} Credits</Link>
       </div>
     </nav>
