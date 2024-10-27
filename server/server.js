@@ -460,6 +460,8 @@ app.post("/api/wagers", async (req, res) => {
     const wagers = await getAllWagers();
     io.emit("wagersUpdate", wagers);
 
+    createLog({ ...req.body, type: "Wager Created", wagerId: result.insertedId })
+
     res.status(201).json({
       message: "Wager created successfully",
       wagerId: result.insertedId,
@@ -602,6 +604,9 @@ const payOutBetWinners = async (wagerId, agreeIsWinner) => {
         { _id: new ObjectId(bet.user) },
         { $set: { earnedCredits: user.earnedCredits + awardedCredits, credits: user.credits + awardedCredits } }
       );
+      
+      createLog({ wagerId: wagerId, earnedCredits: awardedCredits, type: "User Paid Out", user: user._id })
+
     }
   }
 }
@@ -624,6 +629,8 @@ app.put("/api/wager_ended/:id", async (req, res) => {
     if (result.matchedCount === 0) {
       return res.status(404).json({ error: "Wager not found" });
     }
+
+    createLog({ ...req.body, type: "Wager Ended", WagerId: req.params.id })
 
     // Fetch updated wager and statistics
     const updatedWagers = await getAllWagers();
@@ -716,6 +723,8 @@ app.post("/api/bets", async (req, res) => {
     // Insert the bet into the Bets collection
     const betResult = await betsCollection.insertOne(newBet);
     const betId = betResult.insertedId;
+
+    createLog({ ...req.body, type: "Bet Created", betId: betId })
 
     // Append the new bet's ObjectId to the `bets` array in the associated wager
     await wagersCollection.updateOne(
@@ -1272,6 +1281,8 @@ app.put("/api/match_concluded/:id", async (req, res) => {
       return res.status(404).json({ error: "Match not found" });
     }
 
+    createLog({ ...req.body, type: "Match Ended", matchId: result.insertedId })
+
     message = "Match" + message
     
     // Update the series document
@@ -1303,6 +1314,7 @@ app.put("/api/match_concluded/:id", async (req, res) => {
           }
         }
       );
+      createLog({ ...req.body, type: "Series Ended", seriesId: seriesDoc._id })
     }
 
     // Set status for Tournament if included in request body
@@ -1317,6 +1329,7 @@ app.put("/api/match_concluded/:id", async (req, res) => {
           }
         }
       );
+      createLog({ ...req.body, type: "Tournament Ended", tournamentId: seriesDoc.tournament })
       message = "Tournament," + message
     }
     
@@ -1334,6 +1347,7 @@ app.put("/api/match_concluded/:id", async (req, res) => {
           { $set: { status: "Ended", winner: winner, loser: loser } }
         );
       }
+      createLog({ ...req.body, type: "Season Ended", SeasonId: seasonDoc._id })
       message = "Season," + message
     }
 
