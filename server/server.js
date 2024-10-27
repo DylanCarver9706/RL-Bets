@@ -599,12 +599,12 @@ const payOutBetWinners = async (wagerId, agreeIsWinner) => {
     if (bet.agreeBet == agreeIsWinner) {
       const user = await usersCollection.findOne({ _id: new ObjectId(bet.user) });
       awardedCredits = WagerOutcomeFormula(bet.credits, winnerCredits, loserCredits)
-      console.log(user._id, awardedCredits)
+      console.log("User Paid Out:", String(user._id), " Earned Credits: ", awardedCredits)
       await usersCollection.updateOne(
         { _id: new ObjectId(bet.user) },
         { $set: { earnedCredits: user.earnedCredits + awardedCredits, credits: user.credits + awardedCredits } }
       );
-      
+
       createLog({ wagerId: wagerId, earnedCredits: awardedCredits, type: "User Paid Out", user: user._id })
 
       // Fetch the updated user data
