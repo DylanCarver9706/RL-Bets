@@ -607,11 +607,16 @@ const payOutBetWinners = async (wagerId, agreeIsWinner) => {
       
       createLog({ wagerId: wagerId, earnedCredits: awardedCredits, type: "User Paid Out", user: user._id })
 
+      // Fetch the updated user data
+      const updatedUser = await usersCollection.findOne({ _id: new ObjectId(user._id) });
+
+      // Emit 'updateUser' event with updated user data to all connected clients
+      io.emit("updateUser", updatedUser);
     }
   }
 }
 
-// Update a wager by ID (PUT)
+// Update a wager after it has ended by ID (PUT)
 // Used by admin client
 app.put("/api/wager_ended/:id", async (req, res) => {
   try {
