@@ -646,6 +646,38 @@ app.put("/api/wager_ended/:id", async (req, res) => {
   }
 });
 
+// Update a wager by ID (PUT)
+// Used by admin client
+app.put("/api/wagers/:id", async (req, res) => {
+  try {
+    const { status } = req.body;
+
+    const updatedWager = {
+      status: status,
+    };
+
+    const result = await wagersCollection.updateOne(
+      { _id: new ObjectId(req.params.id) },
+      { $set: updatedWager }
+    );
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ error: "Wager not found" });
+    }
+
+    // Fetch updated wager and statistics
+    const updatedWagers = await getAllWagers();
+    io.emit("wagersUpdate", updatedWagers);  // Emit updated data to all clients
+
+    createLog({ ...req.body, type: `Wager ${status}`, wagerId: req.params.id })
+
+    res.status(200).json({ message: "Wager updated successfully" });
+  } catch (err) {
+    res
+      .status(500)
+      .json({ error: "Failed to update wager", details: err.message });
+  }
+});
+
 // Delete a wager by ID (DELETE)
 app.delete("/api/wagers/:id", async (req, res) => {
   try {
