@@ -169,3 +169,26 @@ export const createCheckoutSession = async (purchaseItems, mongoUserId, creditsT
     throw err;
   }
 };
+
+// Get all logs
+export const getLogs = async () => {
+  try {
+    const response = await fetch(`${BASE_URL}/api/logs`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Failed to fetch logs.");
+    }
+
+    return data; // Return the logs data
+  } catch (err) {
+    console.error("Error fetching logs:", err.message);
+    throw err;
+  }
+};
