@@ -51,7 +51,7 @@ const Navbar = () => {
       </div>
       <div style={styles.navLinks}>
         <Link to="/Bet" style={styles.link}>Create Wager</Link>
-        <Link to="/Credits" style={styles.link}>{userCredits} Credits</Link>
+        <Link to="/Credits" style={styles.link}>{parseInt(userCredits)} Credits</Link>
       </div>
     </nav>
   );
