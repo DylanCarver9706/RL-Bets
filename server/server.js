@@ -225,6 +225,96 @@ app.get("/api/users/firebase/:firebaseUserId", async (req, res) => {
 // ************************************************************************************************
 // ************************************************************************************************
 
+// Create a new log (POST)
+app.post('/api/logs', async (req, res) => {
+  try {
+    const logData = req.body; // Accept any fields from the request body
+    const result = await logsCollection.insertOne(logData);
+
+    res.status(201).json({
+      message: 'Log created successfully',
+      logId: result.insertedId,
+    });
+  } catch (err) {
+    res.status(500).json({
+      error: 'Failed to create log',
+      details: err.message,
+    });
+  }
+});
+
+// Retrieve all logs (GET)
+app.get('/api/logs', async (req, res) => {
+  try {
+    const logs = await logsCollection.find().toArray();
+    res.status(200).json(logs);
+  } catch (err) {
+    res.status(500).json({
+      error: 'Failed to retrieve logs',
+      details: err.message,
+    });
+  }
+});
+
+// Retrieve a log by ID (GET)
+app.get('/api/logs/:id', async (req, res) => {
+  try {
+    const log = await logsCollection.findOne({ _id: new ObjectId(req.params.id) });
+    if (!log) {
+      return res.status(404).json({ error: 'Log not found' });
+    }
+    res.status(200).json(log);
+  } catch (err) {
+    res.status(500).json({
+      error: 'Failed to retrieve log',
+      details: err.message,
+    });
+  }
+});
+
+// Update a log by ID (PUT)
+app.put('/api/logs/:id', async (req, res) => {
+  try {
+    const logData = req.body; // Accept any fields from the request body
+    const result = await logsCollection.updateOne(
+      { _id: new ObjectId(req.params.id) },
+      { $set: logData }
+    );
+
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ error: 'Log not found' });
+    }
+    res.status(200).json({ message: 'Log updated successfully' });
+  } catch (err) {
+    res.status(500).json({
+      error: 'Failed to update log',
+      details: err.message,
+    });
+  }
+});
+
+// Delete a log by ID (DELETE)
+app.delete('/api/logs/:id', async (req, res) => {
+  try {
+    const result = await logsCollection.deleteOne({ _id: new ObjectId(req.params.id) });
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ error: 'Log not found' });
+    }
+    res.status(200).json({ message: 'Log deleted successfully' });
+  } catch (err) {
+    res.status(500).json({
+      error: 'Failed to delete log',
+      details: err.message,
+    });
+  }
+});
+
+// ************************************************************************************************
+// ************************************************************************************************
+// *********************************************STRIPE*********************************************
+// ************************************************************************************************
+// ************************************************************************************************
+
 app.post("/api/create-checkout-session", async (req, res) => {
   const { purchaseItems, mongoUserId, creditsTotal } = req.body;
 
