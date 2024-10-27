@@ -47,6 +47,7 @@ const Navbar = () => {
         <Link to="/User" style={styles.link}>Profile</Link>
         <Link to="/Schedule" style={styles.link}>Schedule</Link>
         <Link to="/Leaderboard" style={styles.link}>Leaderboard</Link>
+        <Link to="/Log" style={styles.link}>Logs</Link>
       </div>
       <div style={styles.navLinks}>
         <Link to="/Bet" style={styles.link}>Create Wager</Link>
