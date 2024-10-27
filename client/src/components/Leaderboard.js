@@ -6,12 +6,13 @@ const BASE_SERVER_URL = process.env.REACT_APP_BASE_SERVER_URL;
 
 const Leaderboard = () => {
   const [sortedUsers, setSortedUsers] = useState([]);
-
-  // Initialize the socket connection
-  const socket = io(BASE_SERVER_URL); // Adjust the URL if needed
-
+  
   // Fetch users on component mount
   useEffect(() => {
+    
+    // Initialize the socket connection
+    const socket = io(BASE_SERVER_URL); // Adjust the URL if needed
+    
     const fetchUsers = async () => {
       try {
         const usersResponse = await getUsers();
