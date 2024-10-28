@@ -300,6 +300,14 @@ const CreateWager = () => {
         setBetString(
           `I bet that ${selectedTeamOrPlayerForBet} will have ${selectedBetOperator} ${attributeBetInput} ${selectedAttributeBetType} in the ${betNode.name} Tournament`
         );
+      } else if (
+        selectedTournamentBetType === "Player Accolades" &&
+        selectedTeamOrPlayerForBet &&
+        selectedAccoladeBetType
+      ) {
+        setBetString(
+          `I bet that ${selectedTeamOrPlayerForBet} will be ${selectedAccoladeBetType} in the ${betNode.name} Tournament`
+        );
       }
     } else if (selectedEventTypeForBet === "Series") {
       if (
@@ -610,6 +618,9 @@ const CreateWager = () => {
             <option value="Player/Team Attributes">
               Player/Team Attributes
             </option>
+            <option value="Player Accolades">
+              Player Accolades
+            </option>
           </select>
           <button onClick={handleBetCancel} style={styles.cancelButton}>
             Cancel
@@ -719,6 +730,56 @@ const CreateWager = () => {
                 <option value="Shots">Shots</option>
                 <option value="Saves">Saves</option>
                 <option value="Demos">Demos</option>
+              </select>
+              in the '{betNode.name}' Tournament
+            </h3>
+            <button onClick={handleBetSubmit} style={styles.confirmButton}>
+              Confirm Bet
+            </button>
+            <button onClick={handleBetCancel} style={styles.cancelButton}>
+              Cancel
+            </button>
+          </div>
+        )}
+      {selectedEventTypeForBet === "Tournament" &&
+        selectedTournamentBetType === "Player Accolades" && (
+          <div style={styles.marginTop}>
+            <h3>
+              I bet{" "} 
+              <input
+                type="number"
+                id="numberInput"
+                value={creditsBet}
+                onChange={(e) => setCreditsBet(parseFloat(e.target.value))}
+                min="0"
+                step="1"
+              />
+              {" "} credits that{" "}
+              <select
+                value={selectedTeamOrPlayerForBet || ""}
+                onChange={(e) => setSelectedTeamOrPlayerForBet(e.target.value)}
+                style={styles.marginRight}
+              >
+                <option value="">Select a player</option>
+                {teams.map((team) => (
+                  <optgroup key={team._id} label={`Players: ${team.name}`}>
+                    {team.players.map((player) => (
+                      <option key={player._id} value={player.name}>
+                        {player.name}
+                      </option>
+                    ))}
+                  </optgroup>
+                ))}
+              </select>
+              will be {" "}
+              <select
+                value={selectedAccoladeBetType}
+                onChange={(e) => setSelectedAccoladeBetType(e.target.value)}
+                style={styles.marginRight}
+              >
+                <option value="">Select an Accolade</option>
+                {/* Wording used on Liquipedia */}
+                <option value="Tournament MVP">Tournament MVP</option>
               </select>
               in the '{betNode.name}' Tournament
             </h3>
