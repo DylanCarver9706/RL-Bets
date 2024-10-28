@@ -2,12 +2,13 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../context/UserContext.js";
 import { getUserById, updateUser } from "../services/userService.js";
-import { fetchBetableObjects, createWager, createBet } from "../services/wagerService";
+import { fetchBetableObjects, createWager, createBet, fetchTeams } from "../services/wagerService";
 
 const CreateWager = () => {
   // Load data
   const [betableObjects, setBetableObjects] = useState(null);
   const [userData, setUserData] = useState(0)
+  const [teams, setTeams] = useState(null)
   const seasonId = "66fa1588cbd894f17aa0363a"; // Hardcoded for demonstration; replace with dynamic as needed
 
   // Betting vars
@@ -22,6 +23,9 @@ const CreateWager = () => {
   const [selectedAttributeBetType, setSelectedAttributeBetType] = useState("");
   const [attributeBetInput, setAttributeBetInput] = useState(0);
   const [creditsBet, setCreditsBet] = useState(0)
+
+  // Season bet
+  const [selectedSeasonBetType, setSelectedSeasonBetType] = useState(null);
   
   // Series bet
   const [selectedSeriesBetType, setSelectedSeriesBetType] = useState(null);
@@ -38,6 +42,9 @@ const CreateWager = () => {
       try {
         const fetchedData = await fetchBetableObjects(seasonId);
         setBetableObjects(fetchedData);
+
+        const fetchedTeams = await fetchTeams()
+        setTeams(fetchedTeams)
 
         const userData = await getUserById(mongoUserId);
         setUserData(userData);
@@ -188,6 +195,7 @@ const CreateWager = () => {
     setSelectedEventTypeForBet(null);
     setSelectedTeamOrPlayerForBet("");
     setSelectedSeriesBetType(null);
+    setSelectedSeasonBetType(null);
     setSelectedBetOperator("");
     setSeriesOvertimeBetInput(0);
     setSelectedMatchBetType(null);
@@ -207,7 +215,8 @@ const CreateWager = () => {
     let wagerPayload = {
       name: betString,
       creator: mongoUserId,
-      rlEventReference: betNode._id
+      rlEventReference: betNode._id,
+      status: "Betable"
     }
 
     console.log(wagerPayload)
@@ -240,7 +249,16 @@ const CreateWager = () => {
 
   useEffect(() => {
     // Update bet string whenever selected team or event type changes
-    if (selectedEventTypeForBet === "Series") {
+    if (selectedEventTypeForBet === "Season") {
+      if (
+        selectedSeasonBetType === "Season Winner" &&
+        selectedTeamOrPlayerForBet
+      ) {
+        setBetString(
+          `I bet that the team ${selectedTeamOrPlayerForBet} will win the ${betNode.name}`
+        );
+      }
+    } 
       if (
         selectedSeriesBetType === "Series Winner" &&
         selectedTeamOrPlayerForBet
@@ -322,6 +340,7 @@ const CreateWager = () => {
   }, [
     selectedEventTypeForBet,
     selectedTeamOrPlayerForBet,
+    selectedSeasonBetType,
     selectedSeriesBetType,
     seriesOvertimeBetInput,
     selectedBetOperator,
@@ -340,6 +359,60 @@ const CreateWager = () => {
       {betableObjects ? <div>{renderDataTree(betableObjects)}</div> : <p>Failed to load data.</p>}
 
       {/* User inputs for bet */}
+      {selectedEventTypeForBet === "Season" && !selectedSeasonBetType && (
+        <div>
+          <h3>
+            What type of bet would you like to make on this '{betNode.name}'?
+          </h3>
+          <select
+            value={""}
+            onChange={(e) => setSelectedSeasonBetType(e.target.value)}
+            style={styles.marginRight}
+          >
+            <option value="">Select a Bet Type</option>
+            <option value="Season Winner">Season Winner</option>
+          </select>
+          <button onClick={handleBetCancel} style={styles.cancelButton}>
+            Cancel
+          </button>
+        </div>
+      )}
+      {selectedEventTypeForBet === "Season" &&
+        selectedSeasonBetType === "Season Winner" && (
+          <div style={styles.marginTop}>
+            <h3>
+              I bet{" "} 
+              <input
+                type="number"
+                id="numberInput"
+                value={creditsBet}
+                onChange={(e) => setCreditsBet(parseFloat(e.target.value))}
+                min="0"
+                step="1"
+              />
+              {" "} credits that the team{" "}
+              <select
+                value={selectedTeamOrPlayerForBet || ""}
+                onChange={(e) => setSelectedTeamOrPlayerForBet(e.target.value)}
+                style={styles.marginRight}
+              >
+                <option value="">Select a team</option>
+                {teams.map((team) => (
+                  <option key={team._id} value={team.name}>
+                    {team.name}
+                  </option>
+                ))}
+              </select>
+              {" "}will win the {betNode.name}
+            </h3>
+            <button onClick={handleBetSubmit} style={styles.confirmButton}>
+              Confirm Bet
+            </button>
+            <button onClick={handleBetCancel} style={styles.cancelButton}>
+              Cancel
+            </button>
+          </div>
+        )}
       {selectedEventTypeForBet === "Series" && !selectedSeriesBetType && (
         <div>
           <h3>
@@ -391,7 +464,7 @@ const CreateWager = () => {
                   </option>
                 ))}
               </select>
-              will win the {betNode.name}
+              {" "}will win the {betNode.name}
             </h3>
             <button onClick={handleBetSubmit} style={styles.confirmButton}>
               Confirm Bet
