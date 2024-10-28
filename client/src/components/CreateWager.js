@@ -26,6 +26,9 @@ const CreateWager = () => {
 
   // Season bet
   const [selectedSeasonBetType, setSelectedSeasonBetType] = useState(null);
+
+  // Tournament bet
+  const [selectedTournamentBetType, setSelectedTournamentBetType] = useState(null);
   
   // Series bet
   const [selectedSeriesBetType, setSelectedSeriesBetType] = useState(null);
@@ -196,6 +199,7 @@ const CreateWager = () => {
     setSelectedTeamOrPlayerForBet("");
     setSelectedSeriesBetType(null);
     setSelectedSeasonBetType(null);
+    setSelectedTournamentBetType(null);
     setSelectedBetOperator("");
     setSeriesOvertimeBetInput(0);
     setSelectedMatchBetType(null);
@@ -258,7 +262,16 @@ const CreateWager = () => {
           `I bet that the team ${selectedTeamOrPlayerForBet} will win the ${betNode.name}`
         );
       }
-    } 
+    } else if (selectedEventTypeForBet === "Tournament") {
+      if (
+        selectedTournamentBetType === "Tournament Winner" &&
+        selectedTeamOrPlayerForBet
+      ) {
+        setBetString(
+          `I bet that the team ${selectedTeamOrPlayerForBet} will win the ${betNode.name} Tournament`
+        );
+      }
+    } else if (selectedEventTypeForBet === "Series") {
       if (
         selectedSeriesBetType === "Series Winner" &&
         selectedTeamOrPlayerForBet
@@ -341,6 +354,7 @@ const CreateWager = () => {
     selectedEventTypeForBet,
     selectedTeamOrPlayerForBet,
     selectedSeasonBetType,
+    selectedTournamentBetType,
     selectedSeriesBetType,
     seriesOvertimeBetInput,
     selectedBetOperator,
@@ -379,6 +393,60 @@ const CreateWager = () => {
       )}
       {selectedEventTypeForBet === "Season" &&
         selectedSeasonBetType === "Season Winner" && (
+          <div style={styles.marginTop}>
+            <h3>
+              I bet{" "} 
+              <input
+                type="number"
+                id="numberInput"
+                value={creditsBet}
+                onChange={(e) => setCreditsBet(parseFloat(e.target.value))}
+                min="0"
+                step="1"
+              />
+              {" "} credits that the team{" "}
+              <select
+                value={selectedTeamOrPlayerForBet || ""}
+                onChange={(e) => setSelectedTeamOrPlayerForBet(e.target.value)}
+                style={styles.marginRight}
+              >
+                <option value="">Select a team</option>
+                {teams.map((team) => (
+                  <option key={team._id} value={team.name}>
+                    {team.name}
+                  </option>
+                ))}
+              </select>
+              {" "}will win the {betNode.name}
+            </h3>
+            <button onClick={handleBetSubmit} style={styles.confirmButton}>
+              Confirm Bet
+            </button>
+            <button onClick={handleBetCancel} style={styles.cancelButton}>
+              Cancel
+            </button>
+          </div>
+        )}
+      {selectedEventTypeForBet === "Tournament" && !selectedTournamentBetType && (
+        <div>
+          <h3>
+            What type of bet would you like to make on this '{betNode.name}'?
+          </h3>
+          <select
+            value={""}
+            onChange={(e) => setSelectedTournamentBetType(e.target.value)}
+            style={styles.marginRight}
+          >
+            <option value="">Select a Bet Type</option>
+            <option value="Tournament Winner">Tournament Winner</option>
+          </select>
+          <button onClick={handleBetCancel} style={styles.cancelButton}>
+            Cancel
+          </button>
+        </div>
+      )}
+      {selectedEventTypeForBet === "Tournament" &&
+        selectedTournamentBetType === "Tournament Winner" && (
           <div style={styles.marginTop}>
             <h3>
               I bet{" "} 
