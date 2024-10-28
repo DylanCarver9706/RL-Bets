@@ -1455,15 +1455,29 @@ app.post("/api/teams", async (req, res) => {
   }
 });
 
-// Get all Teams (GET)
+// Get all Teams with Player Metadata (GET)
 app.get("/api/teams", async (req, res) => {
   try {
+    // Fetch all teams
     const teams = await teamsCollection.find().toArray();
-    res.status(200).json(teams);
+
+    // Replace each team's players array with actual player metadata
+    const teamsWithPlayers = await Promise.all(
+      teams.map(async (team) => {
+        const players = await playersCollection.find({
+          _id: { $in: team.players },  // team.players contains ObjectIDs of players
+        }).toArray();
+        
+        // Replace players ObjectIDs with full player data
+        return { ...team, players };
+      })
+    );
+
+    res.status(200).json(teamsWithPlayers);
   } catch (err) {
     res
       .status(500)
-      .json({ error: "Failed to fetch teams", details: err.message });
+      .json({ error: "Failed to fetch teams with player metadata", details: err.message });
   }
 });
 
