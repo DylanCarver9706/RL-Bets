@@ -280,6 +280,16 @@ const CreateWager = () => {
         setBetString(
           `I bet that the team ${selectedTeamOrPlayerForBet} will win the ${betNode.name} Tournament`
         );
+      } else if (
+        selectedTournamentBetType === "Player/Team Attributes" &&
+        selectedTeamOrPlayerForBet &&
+        selectedBetOperator &&
+        attributeBetInput &&
+        selectedAttributeBetType
+      ) {
+        setBetString(
+          `I bet that ${selectedTeamOrPlayerForBet} will have ${selectedBetOperator} ${attributeBetInput} ${selectedAttributeBetType} in the ${betNode.name} Tournament`
+        );
       }
     } else if (selectedEventTypeForBet === "Series") {
       if (
@@ -530,6 +540,9 @@ const CreateWager = () => {
           >
             <option value="">Select a Bet Type</option>
             <option value="Tournament Winner">Tournament Winner</option>
+            <option value="Player/Team Attributes">
+              Player/Team Attributes
+            </option>
           </select>
           <button onClick={handleBetCancel} style={styles.cancelButton}>
             Cancel
@@ -563,6 +576,84 @@ const CreateWager = () => {
                 ))}
               </select>
               {" "}will win the {betNode.name}
+            </h3>
+            <button onClick={handleBetSubmit} style={styles.confirmButton}>
+              Confirm Bet
+            </button>
+            <button onClick={handleBetCancel} style={styles.cancelButton}>
+              Cancel
+            </button>
+          </div>
+        )}
+      {selectedEventTypeForBet === "Tournament" &&
+        selectedTournamentBetType === "Player/Team Attributes" && (
+          <div style={styles.marginTop}>
+            <h3>
+              I bet{" "} 
+              <input
+                type="number"
+                id="numberInput"
+                value={creditsBet}
+                onChange={(e) => setCreditsBet(parseFloat(e.target.value))}
+                min="0"
+                step="1"
+              />
+              {" "} credits that{" "}
+              <select
+                value={selectedTeamOrPlayerForBet || ""}
+                onChange={(e) => setSelectedTeamOrPlayerForBet(e.target.value)}
+                style={styles.marginRight}
+              >
+                <option value="">Select a team or player</option>
+                <optgroup label={"Team"}>
+                  {teams.map((team) => (
+                    <option key={team._id} value={team.name}>
+                      {team.name}
+                    </option>
+                  ))}
+                </optgroup>
+                {teams.map((team) => (
+                  <optgroup key={team._id} label={`Players: ${team.name}`}>
+                    {team.players.map((player) => (
+                      <option key={player._id} value={player.name}>
+                        {player.name}
+                      </option>
+                    ))}
+                  </optgroup>
+                ))}
+              </select>
+              will have{" "}
+              <select
+                value={selectedBetOperator}
+                onChange={(e) => setSelectedBetOperator(e.target.value)}
+                style={styles.marginRight}
+              >
+                <option value="exactly">exactly</option>
+                <option value="more than">more than</option>
+                <option value="less than">less than</option>
+              </select>
+              <input
+                type="number"
+                id="numberInput"
+                value={attributeBetInput}
+                onChange={(e) => setAttributeBetInput(e.target.value)}
+                min="0"
+                step="1"
+              />{" "}
+              <select
+                value={selectedAttributeBetType}
+                onChange={(e) => setSelectedAttributeBetType(e.target.value)}
+                style={styles.marginRight}
+              >
+                <option value="">Select an Attribute</option>
+                <option value="Points">Points</option>
+                <option value="Goals">Goals</option>
+                <option value="Assists">Assists</option>
+                <option value="Shots">Shots</option>
+                <option value="Saves">Saves</option>
+                <option value="Demos">Demos</option>
+              </select>
+              in the '{betNode.name}' Tournament
             </h3>
             <button onClick={handleBetSubmit} style={styles.confirmButton}>
               Confirm Bet
