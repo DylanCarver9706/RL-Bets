@@ -377,6 +377,13 @@ const CreateWager = () => {
           `I bet that the team ${selectedTeamOrPlayerForBet} will score the first goal in the ${betNode.name} match`
         );
       } else if (
+        selectedMatchBetType === "Match MVP" &&
+        selectedTeamOrPlayerForBet
+      ) {
+        setBetString(
+          `I bet that the player ${selectedTeamOrPlayerForBet} will be the MVP (their team will win and they will have the most points) in the ${betNode.name} match`
+        );
+      } else if (
         selectedMatchBetType === "Player/Team Attributes" &&
         selectedTeamOrPlayerForBet &&
         selectedBetOperator &&
@@ -1063,6 +1070,7 @@ const CreateWager = () => {
             <option value="Match Winner">Match Winner</option>
             <option value="Match Score">Match Score</option>
             <option value="First Blood">First Blood</option>
+            <option value="Match MVP">Match MVP</option>
             <option value="Player/Team Attributes">
               Player/Team Attributes
             </option>
@@ -1176,6 +1184,46 @@ const CreateWager = () => {
                 ))}
               </select>
               will score the first goal in the '{betNode.name}' match
+            </h3>
+            <button onClick={handleBetSubmit} style={styles.confirmButton}>
+              Confirm Bet
+            </button>
+            <button onClick={handleBetCancel} style={styles.cancelButton}>
+              Cancel
+            </button>
+          </div>
+        )}
+      {selectedEventTypeForBet === "Match" &&
+        selectedMatchBetType === "Match MVP" && (
+          <div style={styles.marginTop}>
+            <h3>
+              I bet{" "} 
+              <input
+                type="number"
+                id="numberInput"
+                value={creditsBet}
+                onChange={(e) => setCreditsBet(parseFloat(e.target.value))}
+                min="0"
+                step="1"
+              />
+              {" "} credits that the player{" "}
+              <select
+                value={selectedTeamOrPlayerForBet || ""}
+                onChange={(e) => setSelectedTeamOrPlayerForBet(e.target.value)}
+                style={styles.marginRight}
+              >
+                <option value="">Select a player</option>
+                {betNode.teams.map((team) => (
+                  <optgroup key={team._id} label={`Players: ${team.name}`}>
+                    {team.players.map((player) => (
+                      <option key={player._id} value={player.name}>
+                        {player.name}
+                      </option>
+                    ))}
+                  </optgroup>
+                ))}
+              </select>
+              will be the MVP (their team will win and they will have the most points) in the '{betNode.name}' match
             </h3>
             <button onClick={handleBetSubmit} style={styles.confirmButton}>
               Confirm Bet
