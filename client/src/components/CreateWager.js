@@ -21,6 +21,7 @@ const CreateWager = () => {
   const [selectedTeam2ScoreForBet, setSelectedTeam2ScoreForBet] = useState(0);
   const [selectedBetOperator, setSelectedBetOperator] = useState("");
   const [selectedAttributeBetType, setSelectedAttributeBetType] = useState("");
+  const [selectedAccoladeBetType, setSelectedAccoladeBetType] = useState("");
   const [attributeBetInput, setAttributeBetInput] = useState(0);
   const [creditsBet, setCreditsBet] = useState(0)
 
@@ -206,6 +207,7 @@ const CreateWager = () => {
     setSelectedTeam1ScoreForBet(0);
     setSelectedTeam2ScoreForBet(0);
     setSelectedAttributeBetType("");
+    setSelectedAccoladeBetType("");
     setAttributeBetInput(0);
   };
 
@@ -270,6 +272,14 @@ const CreateWager = () => {
       ) {
         setBetString(
           `I bet that ${selectedTeamOrPlayerForBet} will have ${selectedBetOperator} ${attributeBetInput} ${selectedAttributeBetType} in the ${betNode.name}`
+        );
+      } else if (
+        selectedSeasonBetType === "Player Accolades" &&
+        selectedTeamOrPlayerForBet &&
+        selectedAccoladeBetType
+      ) {
+        setBetString(
+          `I bet that ${selectedTeamOrPlayerForBet} will be ${selectedAccoladeBetType} in the ${betNode.name}`
         );
       }
     } else if (selectedEventTypeForBet === "Tournament") {
@@ -383,6 +393,7 @@ const CreateWager = () => {
     selectedTeam2ScoreForBet,
     attributeBetInput,
     selectedAttributeBetType,
+    selectedAccoladeBetType,
     betNode,
   ]);
 
@@ -407,6 +418,9 @@ const CreateWager = () => {
             <option value="Season Winner">Season Winner</option>
             <option value="Player/Team Attributes">
               Player/Team Attributes
+            </option>
+            <option value="Player Accolades">
+              Player Accolades
             </option>
           </select>
           <button onClick={handleBetCancel} style={styles.cancelButton}>
@@ -517,6 +531,59 @@ const CreateWager = () => {
                 <option value="Shots">Shots</option>
                 <option value="Saves">Saves</option>
                 <option value="Demos">Demos</option>
+              </select>
+              in the '{betNode.name}'
+            </h3>
+            <button onClick={handleBetSubmit} style={styles.confirmButton}>
+              Confirm Bet
+            </button>
+            <button onClick={handleBetCancel} style={styles.cancelButton}>
+              Cancel
+            </button>
+          </div>
+        )}
+      {selectedEventTypeForBet === "Season" &&
+        selectedSeasonBetType === "Player Accolades" && (
+          <div style={styles.marginTop}>
+            <h3>
+              I bet{" "} 
+              <input
+                type="number"
+                id="numberInput"
+                value={creditsBet}
+                onChange={(e) => setCreditsBet(parseFloat(e.target.value))}
+                min="0"
+                step="1"
+              />
+              {" "} credits that{" "}
+              <select
+                value={selectedTeamOrPlayerForBet || ""}
+                onChange={(e) => setSelectedTeamOrPlayerForBet(e.target.value)}
+                style={styles.marginRight}
+              >
+                <option value="">Select a player</option>
+                {teams.map((team) => (
+                  <optgroup key={team._id} label={`Players: ${team.name}`}>
+                    {team.players.map((player) => (
+                      <option key={player._id} value={player.name}>
+                        {player.name}
+                      </option>
+                    ))}
+                  </optgroup>
+                ))}
+              </select>
+              will be {" "}
+              <select
+                value={selectedAccoladeBetType}
+                onChange={(e) => setSelectedAccoladeBetType(e.target.value)}
+                style={styles.marginRight}
+              >
+                <option value="">Select an Accolade</option>
+                {/* Wording used on Liquipedia */}
+                <option value="Season MVP">Season MVP</option>
+                <option value="Striker of the Season">Striker of the Season</option>
+                <option value="Saviour of the Season">Saviour of the Season</option>
+                <option value="Playmaker of the Season">Playmaker of the Season</option>
               </select>
               in the '{betNode.name}'
             </h3>
