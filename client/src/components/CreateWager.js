@@ -136,23 +136,14 @@ const CreateWager = () => {
               else if (key === "teams") title = "Teams";
               else if (key === "players") title = "Players";
 
-              // Handle series: include team names in the series title if they exist
+              // Handle series section
               if (key === "series" && Array.isArray(value)) {
                 return value.map((seriesItem) => {
                   const seriesId = seriesItem._id;
-                  const seriesName = seriesItem.name || "Series";
 
-                  // If the series has teams, extract their names
-                  const teamNames = (seriesItem.teams || [])
-                    .map((team) => team.name)
-                    .join(" vs ");
-                  const seriesTitle = teamNames
-                    ? `${seriesName}: [${teamNames}]`
-                    : seriesName;
-
-                  // Render the series with the updated title
+                  // Render the collapsible section as "Series" with the details inside
                   return (
-                    <CollapsibleSection key={seriesId} title={seriesTitle}>
+                    <CollapsibleSection key={seriesId} title="Series">
                       {renderDataTree(seriesItem, level + 1, key)}
                     </CollapsibleSection>
                   );
