@@ -1342,6 +1342,69 @@ const getMatchOutcomes = async (matchResults, teams) => {
   }
 };
 
+const handleWagerEnded = async (wagerId, agreeIsWinner) => {
+
+ const wager = await wagersCollection.findOne({ _id: new ObjectId(wagerId) });
+
+ console.log("wager: ", wager)
+
+ const updatedWager = {
+   status: "Ended",
+   agreeIsWinner: agreeIsWinner,
+ };
+
+ await wagersCollection.updateOne(
+   { _id: new ObjectId(wager._id) },
+   { $set: updatedWager }
+ );
+
+ createLog({ type: "Wager Ended", WagerId: wagerId })
+
+ // Fetch updated wager and statistics
+ const updatedWagers = await getAllWagers();
+ io.emit("wagersUpdate", updatedWagers);  // Emit updated data to all clients
+
+//  const wagerOutcomes = await getMatchOutcomes(matchResults)
+
+ await payOutBetWinners(wagerId, agreeIsWinner)
+}
+
+const handleMatchWagers = async (matchId, wagerOutcomes, firstBlood) => {
+  
+  // Get all wagers associated to this match
+  const matchWagers = await wagersCollection.find({ rlEventReference: matchId }).toArray();
+
+  console.log("matchWagers: ", matchWagers)
+
+  // Wager types:
+  // Match: "Match Winner", "Match Score", "First Blood", "Match MVP", "Player/Team Attributes"
+  // Series: "Series Winner", "Series Score", "First Blood", "Overtime Count", "Player/Team Attributes"
+  // Tournament: "Tournament Winner", "Player/Team Attributes", "Player Accolades"
+  // Season: "Season Winner", "Player/Team Attributes", "Player Accolades"
+
+    for (const wager of matchWagers) {
+      if (wager.wagerType === "Match Winner") {
+        // wager.agreeEvaluation is an Object id of the winning team
+        await handleWagerEnded(wager._id, wager.agreeEvaluation === wagerOutcomes.winningTeam.toString())
+      } else if (wager.wagerType === "Match Score") {
+        // wager.agreeEvaluation is a string formatted as "Object id of Team1: Score - Object id of Team2 Score"
+        await handleWagerEnded(wager._id, wager.agreeEvaluation === wagerOutcomes.teamGoals)
+      } else if (wager.wagerType === "First Blood") {
+        // wager.agreeEvaluation is an Object id of the fist blood team
+        await handleWagerEnded(wager._id, wager.agreeEvaluation === firstBlood)
+      } else if (wager.wagerType === "Match MVP") {
+        // NOTE: Assign object if of the players n the match results
+        // wager.agreeEvaluation is an Object id of the mvp player
+        await handleWagerEnded(wager._id, wager.agreeEvaluation === wagerOutcomes.mvp.toString())
+      } else if (wager.wagerType === "Player/Team Attributes") {
+        // NOTE: Make wager evaluation a trimmed version of wager.name
+        // wager.agreeEvaluation is a string formatted as "Object id of the player/team will have exactly/more than/less than X of the following attributes: Points, Goals, Assists, Shots, Saves, Demos"
+        await handleWagerEnded(wager._id, wager.agreeEvaluation === wager.name.split("I bet that ")[1])
+      }
+    }
+
+}
+
 // Update a match by ID (PUT)
 app.put("/api/match_concluded/:id", async (req, res) => {
   try {
