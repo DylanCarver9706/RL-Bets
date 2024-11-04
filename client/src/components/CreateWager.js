@@ -123,8 +123,9 @@ const CreateWager = () => {
                 "winner",
                 "loser",
                 "firstBlood",
+                "bestOf",
               ];
-              return !excludedKeys.includes(key) || typeof value !== "string";
+              return !excludedKeys.includes(key) || !["string", "number"].includes(typeof value);
             })
             .map(([key, value]) => {
               // Determine the collapsible title based on the key
