@@ -275,8 +275,8 @@ const CreateWager = () => {
         return `I bet that the team ${selectedTeamOrPlayerForBet} will win the ${betNode.name} match`;
       } else if (
         selectedMatchBetType === "Match Score" &&
-        selectedTeam1ScoreForBet &&
-        selectedTeam2ScoreForBet
+        selectedTeam1ScoreForBet >= 0 &&
+        selectedTeam2ScoreForBet >= 0
       ) {
         return `I bet that the team ${betNode.teams[0].name} will score ${selectedTeam1ScoreForBet} goal(s) and ${betNode.teams[1].name} will score ${selectedTeam2ScoreForBet} goal(s) in the ${betNode.name}`;
       } else if (
@@ -293,7 +293,7 @@ const CreateWager = () => {
         selectedMatchBetType === "Player/Team Attributes" &&
         selectedTeamOrPlayerForBet &&
         selectedBetOperator &&
-        attributeBetInput &&
+        attributeBetInput >= 0 &&
         selectedAttributeBetType
       ) {
         return `I bet that ${selectedTeamOrPlayerForBet} will have ${selectedBetOperator} ${attributeBetInput} ${selectedAttributeBetType} in the ${betNode.name} match`;
