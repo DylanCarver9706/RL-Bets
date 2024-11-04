@@ -12,14 +12,13 @@ const CreateWager = () => {
   const seasonId = "66fa1588cbd894f17aa0363a"; // Hardcoded for demonstration; replace with dynamic as needed
 
   // Betting vars
-  const [betString, setBetString] = useState("");
   const [betNode, setBetNode] = useState(null);
   const [selectedEventTypeForBet, setSelectedEventTypeForBet] = useState(null);
   const [selectedTeamOrPlayerForBet, setSelectedTeamOrPlayerForBet] =
     useState("");
   const [selectedTeam1ScoreForBet, setSelectedTeam1ScoreForBet] = useState(0);
   const [selectedTeam2ScoreForBet, setSelectedTeam2ScoreForBet] = useState(0);
-  const [selectedBetOperator, setSelectedBetOperator] = useState("");
+  const [selectedBetOperator, setSelectedBetOperator] = useState("exactly");
   const [selectedAttributeBetType, setSelectedAttributeBetType] = useState("");
   const [selectedAccoladeBetType, setSelectedAccoladeBetType] = useState("");
   const [attributeBetInput, setAttributeBetInput] = useState(0);
@@ -201,6 +200,7 @@ const CreateWager = () => {
     setSelectedAttributeBetType("");
     setSelectedAccoladeBetType("");
     setAttributeBetInput(0);
+    setCreditsBet(0);
   };
 
   const generateBetString = () => {
