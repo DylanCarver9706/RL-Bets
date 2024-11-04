@@ -122,6 +122,7 @@ const CreateWager = () => {
                 "type",
                 "winner",
                 "loser",
+                "firstBlood",
               ];
               return !excludedKeys.includes(key) || typeof value !== "string";
             })
