@@ -187,14 +187,13 @@ const CreateWager = () => {
 
   const handleBetCancel = () => {
     // Reset state vars
-    setBetString("");
     setBetNode(null);
     setSelectedEventTypeForBet(null);
     setSelectedTeamOrPlayerForBet("");
     setSelectedSeriesBetType(null);
     setSelectedSeasonBetType(null);
     setSelectedTournamentBetType(null);
-    setSelectedBetOperator("");
+    setSelectedBetOperator("exactly");
     setSeriesOvertimeBetInput(0);
     setSelectedMatchBetType(null);
     setSelectedTeam1ScoreForBet(0);
@@ -204,81 +203,11 @@ const CreateWager = () => {
     setAttributeBetInput(0);
   };
 
-  const handleBetSubmit = async () => {
-    const remainingCredits = parseFloat(userData.credits) - creditsBet
-    if (remainingCredits < 0) {
-      alert("Wager amount is more credits than you have available!");
-      return; 
-    }
-    
-    let wagerPayload = {
-      name: betString,
-      creator: mongoUserId,
-      rlEventReference: betNode._id,
-      wagerType: null,
-      agreeEvaluation: null,
-      status: "Betable"
-    }
-
-    if (betNode.type === "Season") {
-      wagerPayload.wagerType = selectedTournamentBetType
-    } else if (betNode.type === "Tournament") {
-      wagerPayload.wagerType = selectedSeasonBetType
-    } else if (betNode.type === "Series") {
-      wagerPayload.wagerType = selectedSeriesBetType
-    } else if (betNode.type === "Match") {
-      wagerPayload.wagerType = selectedMatchBetType
-      if (selectedMatchBetType === "Match Winner") {
-        wagerPayload.agreeEvaluation = betNode.teams.find((team) => team.name === selectedTeamOrPlayerForBet)?._id
-      } else if (selectedMatchBetType === "Match Score") {
-        wagerPayload.agreeEvaluation = betString.split("I bet that ")[1]
-      } else if (selectedMatchBetType === "First Blood") {
-        wagerPayload.agreeEvaluation = betNode.teams.find((team) => team.name === selectedTeamOrPlayerForBet)?._id
-      } else if (selectedMatchBetType === "Match MVP") {
-        wagerPayload.agreeEvaluation = betNode.teams.find((team) => team.name === selectedTeamOrPlayerForBet)?._id
-      } else if (selectedMatchBetType === "Player/Team Attributes") {
-        wagerPayload.agreeEvaluation = betString.split("I bet that ")[1]
-      }
-    }
-
-    console.log("wagerPayload: ", wagerPayload)
-    
-    const wagerResponse = await createWager(wagerPayload); // Submit the wager via API
-    
-    console.log(wagerResponse)
-
-    let betPayload = {
-      user: mongoUserId,
-      credits: creditsBet,
-      agreeBet: true,
-      rlEventReference: betNode._id,
-      wagerId: wagerResponse.wagerId
-    }
-    
-    console.log(betPayload)
-
-    await createBet(betPayload); // Submit the bet via API
-    
-    console.log("Bet Submitted: ", betString);
-
-    let userPayload = {credits: remainingCredits}
-    console.log(userPayload)
-    updateUser(mongoUserId, userPayload)
-    
-    handleBetCancel(); // Reset state
-    navigate("/"); // Navigate to the desired page
-  };
-
-  useEffect(() => {
-    // Update bet string whenever selected team or event type changes
+  const generateBetString = () => {
+    // Validation and setting up the bet string based on selected options
     if (selectedEventTypeForBet === "Season") {
-      if (
-        selectedSeasonBetType === "Season Winner" &&
-        selectedTeamOrPlayerForBet
-      ) {
-        setBetString(
-          `I bet that the team ${selectedTeamOrPlayerForBet} will win the ${betNode.name}`
-        );
+      if (selectedSeasonBetType === "Season Winner" && selectedTeamOrPlayerForBet) {
+        return `I bet that the team ${selectedTeamOrPlayerForBet} will win the ${betNode.name}`;
       } else if (
         selectedSeasonBetType === "Player/Team Attributes" &&
         selectedTeamOrPlayerForBet &&
@@ -286,26 +215,17 @@ const CreateWager = () => {
         attributeBetInput &&
         selectedAttributeBetType
       ) {
-        setBetString(
-          `I bet that ${selectedTeamOrPlayerForBet} will have ${selectedBetOperator} ${attributeBetInput} ${selectedAttributeBetType} in the ${betNode.name}`
-        );
+        return `I bet that ${selectedTeamOrPlayerForBet} will have ${selectedBetOperator} ${attributeBetInput} ${selectedAttributeBetType} in the ${betNode.name}`;
       } else if (
         selectedSeasonBetType === "Player Accolades" &&
         selectedTeamOrPlayerForBet &&
         selectedAccoladeBetType
       ) {
-        setBetString(
-          `I bet that ${selectedTeamOrPlayerForBet} will be ${selectedAccoladeBetType} in the ${betNode.name}`
-        );
+        return `I bet that ${selectedTeamOrPlayerForBet} will be ${selectedAccoladeBetType} in the ${betNode.name}`;
       }
     } else if (selectedEventTypeForBet === "Tournament") {
-      if (
-        selectedTournamentBetType === "Tournament Winner" &&
-        selectedTeamOrPlayerForBet
-      ) {
-        setBetString(
-          `I bet that the team ${selectedTeamOrPlayerForBet} will win the ${betNode.name} Tournament`
-        );
+      if (selectedTournamentBetType === "Tournament Winner" && selectedTeamOrPlayerForBet) {
+        return `I bet that the team ${selectedTeamOrPlayerForBet} will win the ${betNode.name} Tournament`;
       } else if (
         selectedTournamentBetType === "Player/Team Attributes" &&
         selectedTeamOrPlayerForBet &&
@@ -313,50 +233,34 @@ const CreateWager = () => {
         attributeBetInput &&
         selectedAttributeBetType
       ) {
-        setBetString(
-          `I bet that ${selectedTeamOrPlayerForBet} will have ${selectedBetOperator} ${attributeBetInput} ${selectedAttributeBetType} in the ${betNode.name} Tournament`
-        );
+        return `I bet that ${selectedTeamOrPlayerForBet} will have ${selectedBetOperator} ${attributeBetInput} ${selectedAttributeBetType} in the ${betNode.name} Tournament`;
       } else if (
         selectedTournamentBetType === "Player Accolades" &&
         selectedTeamOrPlayerForBet &&
         selectedAccoladeBetType
       ) {
-        setBetString(
-          `I bet that ${selectedTeamOrPlayerForBet} will be ${selectedAccoladeBetType} in the ${betNode.name} Tournament`
-        );
+        return `I bet that ${selectedTeamOrPlayerForBet} will be ${selectedAccoladeBetType} in the ${betNode.name} Tournament`;
       }
     } else if (selectedEventTypeForBet === "Series") {
-      if (
-        selectedSeriesBetType === "Series Winner" &&
-        selectedTeamOrPlayerForBet
-      ) {
-        setBetString(
-          `I bet that the team ${selectedTeamOrPlayerForBet} will win the ${betNode.name} series`
-        );
+      if (selectedSeriesBetType === "Series Winner" && selectedTeamOrPlayerForBet) {
+        return `I bet that the team ${selectedTeamOrPlayerForBet} will win the ${betNode.name} series`;
       } else if (
-        // Add check for same number of matches won
         selectedSeriesBetType === "Series Score" &&
         selectedTeam1ScoreForBet &&
         selectedTeam2ScoreForBet
       ) {
-        setBetString(
-          `I bet that the team ${betNode.teams[0].name} will win ${selectedTeam1ScoreForBet} game(s) and ${betNode.teams[1].name} will win ${selectedTeam2ScoreForBet} game(s) in the ${betNode.name}`
-        );
+        return `I bet that the team ${betNode.teams[0].name} will win ${selectedTeam1ScoreForBet} game(s) and ${betNode.teams[1].name} will win ${selectedTeam2ScoreForBet} game(s) in the ${betNode.name}`;
       } else if (
         selectedSeriesBetType === "First Blood" &&
         selectedTeamOrPlayerForBet
       ) {
-        setBetString(
-          `I bet that the team ${selectedTeamOrPlayerForBet} will score the first goal in the ${betNode.name} series`
-        );
+        return `I bet that the team ${selectedTeamOrPlayerForBet} will score the first goal in the ${betNode.name} series`;
       } else if (
         selectedSeriesBetType === "Overtime Count" &&
         selectedBetOperator &&
         seriesOvertimeBetInput
       ) {
-        setBetString(
-          `I bet that there will be ${selectedBetOperator} ${seriesOvertimeBetInput} overtimes in the ${betNode.name} series`
-        );
+        return `I bet that there will be ${selectedBetOperator} ${seriesOvertimeBetInput} overtimes in the ${betNode.name} series`;
       } else if (
         selectedSeriesBetType === "Player/Team Attributes" &&
         selectedTeamOrPlayerForBet &&
@@ -364,41 +268,27 @@ const CreateWager = () => {
         attributeBetInput &&
         selectedAttributeBetType
       ) {
-        setBetString(
-          `I bet that ${selectedTeamOrPlayerForBet} will have ${selectedBetOperator} ${attributeBetInput} ${selectedAttributeBetType} in the ${betNode.name} series`
-        );
+        return `I bet that ${selectedTeamOrPlayerForBet} will have ${selectedBetOperator} ${attributeBetInput} ${selectedAttributeBetType} in the ${betNode.name} series`;
       }
     } else if (selectedEventTypeForBet === "Match") {
-      if (
-        selectedMatchBetType === "Match Winner" &&
-        selectedTeamOrPlayerForBet
-      ) {
-        setBetString(
-          `I bet that the team ${selectedTeamOrPlayerForBet} will win the ${betNode.name} match`
-        );
+      if (selectedMatchBetType === "Match Winner" && selectedTeamOrPlayerForBet) {
+        return `I bet that the team ${selectedTeamOrPlayerForBet} will win the ${betNode.name} match`;
       } else if (
-        // Add check for same number of goals
         selectedMatchBetType === "Match Score" &&
         selectedTeam1ScoreForBet &&
         selectedTeam2ScoreForBet
       ) {
-        setBetString(
-          `I bet that the team ${betNode.teams[0].name} will score ${selectedTeam1ScoreForBet} goal(s) and ${betNode.teams[1].name} will score ${selectedTeam2ScoreForBet} goal(s) in the ${betNode.name}`
-        );
+        return `I bet that the team ${betNode.teams[0].name} will score ${selectedTeam1ScoreForBet} goal(s) and ${betNode.teams[1].name} will score ${selectedTeam2ScoreForBet} goal(s) in the ${betNode.name}`;
       } else if (
         selectedMatchBetType === "First Blood" &&
         selectedTeamOrPlayerForBet
       ) {
-        setBetString(
-          `I bet that the team ${selectedTeamOrPlayerForBet} will score the first goal in the ${betNode.name} match`
-        );
+        return `I bet that the team ${selectedTeamOrPlayerForBet} will score the first goal in the ${betNode.name} match`;
       } else if (
         selectedMatchBetType === "Match MVP" &&
         selectedTeamOrPlayerForBet
       ) {
-        setBetString(
-          `I bet that the player ${selectedTeamOrPlayerForBet} will be the MVP (their team will win and they will have the most points) in the ${betNode.name} match`
-        );
+        return `I bet that the player ${selectedTeamOrPlayerForBet} will be the MVP (their team will win and they will have the most points) in the ${betNode.name} match`;
       } else if (
         selectedMatchBetType === "Player/Team Attributes" &&
         selectedTeamOrPlayerForBet &&
@@ -406,27 +296,57 @@ const CreateWager = () => {
         attributeBetInput &&
         selectedAttributeBetType
       ) {
-        setBetString(
-          `I bet that ${selectedTeamOrPlayerForBet} will have ${selectedBetOperator} ${attributeBetInput} ${selectedAttributeBetType} in the ${betNode.name} match`
-        );
+        return `I bet that ${selectedTeamOrPlayerForBet} will have ${selectedBetOperator} ${attributeBetInput} ${selectedAttributeBetType} in the ${betNode.name} match`;
       }
     }
-  }, [
-    selectedEventTypeForBet,
-    selectedTeamOrPlayerForBet,
-    selectedSeasonBetType,
-    selectedTournamentBetType,
-    selectedSeriesBetType,
-    seriesOvertimeBetInput,
-    selectedBetOperator,
-    selectedMatchBetType,
-    selectedTeam1ScoreForBet,
-    selectedTeam2ScoreForBet,
-    attributeBetInput,
-    selectedAttributeBetType,
-    selectedAccoladeBetType,
-    betNode,
-  ]);
+    alert("Please select all required fields to create a valid bet string.");
+    return null;
+  };
+  
+  const handleBetSubmit = async () => {
+    const remainingCredits = parseFloat(userData.credits) - creditsBet;
+    if (remainingCredits < 0) {
+      alert("Wager amount is more credits than you have available!");
+      return;
+    }
+  
+    // Generate the bet string
+    const generatedBetString = generateBetString();
+    if (!generatedBetString) return; // Stop if bet string is invalid
+  
+    // Proceed with creating wager and bet logic
+    let wagerPayload = {
+      name: generatedBetString,
+      creator: mongoUserId,
+      rlEventReference: betNode._id,
+      wagerType: selectedEventTypeForBet,
+      agreeEvaluation: null,
+      status: "Betable",
+    };
+  
+    console.log("wagerPayload: ", wagerPayload);
+    const wagerResponse = await createWager(wagerPayload);
+    console.log(wagerResponse);
+  
+    let betPayload = {
+      user: mongoUserId,
+      credits: creditsBet,
+      agreeBet: true,
+      rlEventReference: betNode._id,
+      wagerId: wagerResponse.wagerId,
+    };
+  
+    await createBet(betPayload);
+  
+    console.log("Bet Submitted: ", generatedBetString);
+  
+    let userPayload = { credits: remainingCredits };
+    console.log(userPayload);
+    updateUser(mongoUserId, userPayload);
+  
+    handleBetCancel();
+    navigate("/");
+  };
 
   return (
     <div>
