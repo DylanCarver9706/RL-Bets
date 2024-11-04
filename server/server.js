@@ -1275,6 +1275,73 @@ app.put("/api/matches/:id", async (req, res) => {
   }
 });
 
+// Function to return end of match meta like winner, loser, MVP, etc. based on match results
+const getMatchOutcomes = async (matchResults, teams) => {
+  try {
+    // console.log(matchResults)
+    // console.log(teams)
+
+    // Initialize team goals
+    const teamGoals = {
+      [teams[0].toString()]: 0,
+      [teams[1].toString()]: 0,
+    };
+
+    // Step 1: Retrieve players and their team associations
+    const playerNames = Object.keys(matchResults);
+    const players = await playersCollection.find({ name: { $in: playerNames } }).toArray();
+
+    // Step 2: Map player goals to their respective teams
+    players.forEach((player) => {
+      const playerResult = matchResults[player.name];
+      if (playerResult) {
+        const teamId = player.team.toString();
+        if (teamGoals[teamId] !== undefined) {
+          teamGoals[teamId] += playerResult.goals; // Sum goals per team
+        }
+      }
+    });
+
+    // Step 3: Determine the winning team
+    const [team1, team2] = teams.map((team) => team.toString());
+    let winningTeam = null;
+    let losingTeam = null;
+    if (teamGoals[team1] > teamGoals[team2]) {
+      winningTeam = team1;
+      losingTeam = team2;
+    } else if (teamGoals[team2] > teamGoals[team1]) {
+      winningTeam = team2;
+      losingTeam = team1;
+    }
+
+    // Step 4: Find the MVP (highest score on the winning team)
+    let mvp = null;
+    let highestScore = 0;
+
+    players.forEach((player) => {
+      const playerResult = matchResults[player.name];
+      // console.log(player)
+      if (player.team.toString() === winningTeam && playerResult.score > highestScore) {
+        highestScore = playerResult.score;
+        // console.log(player)
+        mvp = player._id; // Assign player as MVP
+      }
+    });
+
+    const response = { 
+      winningTeam, 
+      losingTeam, 
+      teamGoals, 
+      mvp 
+    };
+
+    return response;
+  } catch (error) {
+    console.error("Error determining match winner:", error);
+    throw new Error("Failed to determine match winner");
+  }
+};
+
 // Update a match by ID (PUT)
 app.put("/api/match_concluded/:id", async (req, res) => {
   try {
