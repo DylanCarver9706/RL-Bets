@@ -223,10 +223,33 @@ const CreateWager = () => {
       name: betString,
       creator: mongoUserId,
       rlEventReference: betNode._id,
+      wagerType: null,
+      agreeEvaluation: null,
       status: "Betable"
     }
 
-    console.log(wagerPayload)
+    if (betNode.type === "Season") {
+      wagerPayload.wagerType = selectedTournamentBetType
+    } else if (betNode.type === "Tournament") {
+      wagerPayload.wagerType = selectedSeasonBetType
+    } else if (betNode.type === "Series") {
+      wagerPayload.wagerType = selectedSeriesBetType
+    } else if (betNode.type === "Match") {
+      wagerPayload.wagerType = selectedMatchBetType
+      if (selectedMatchBetType === "Match Winner") {
+        wagerPayload.agreeEvaluation = betNode.teams.find((team) => team.name === selectedTeamOrPlayerForBet)?._id
+      } else if (selectedMatchBetType === "Match Score") {
+        wagerPayload.agreeEvaluation = betString.split("I bet that ")[1]
+      } else if (selectedMatchBetType === "First Blood") {
+        wagerPayload.agreeEvaluation = betNode.teams.find((team) => team.name === selectedTeamOrPlayerForBet)?._id
+      } else if (selectedMatchBetType === "Match MVP") {
+        wagerPayload.agreeEvaluation = betNode.teams.find((team) => team.name === selectedTeamOrPlayerForBet)?._id
+      } else if (selectedMatchBetType === "Player/Team Attributes") {
+        wagerPayload.agreeEvaluation = betString.split("I bet that ")[1]
+      }
+    }
+
+    console.log("wagerPayload: ", wagerPayload)
     
     const wagerResponse = await createWager(wagerPayload); // Submit the wager via API
     
