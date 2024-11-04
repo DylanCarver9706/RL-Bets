@@ -62,6 +62,9 @@ const CreateWager = () => {
   const handleBetClick = async (node) => {
     console.log(node);
 
+    // Reset state vars in case a user clicks on a different bet after selecting attributes for a different bet
+    handleBetCancel();
+
     // Set the event type the user wants to bet on like Series or Match
     setSelectedEventTypeForBet(node.type);
 
@@ -212,7 +215,7 @@ const CreateWager = () => {
         selectedSeasonBetType === "Player/Team Attributes" &&
         selectedTeamOrPlayerForBet &&
         selectedBetOperator &&
-        attributeBetInput &&
+        attributeBetInput >= 0 &&
         selectedAttributeBetType
       ) {
         return `I bet that ${selectedTeamOrPlayerForBet} will have ${selectedBetOperator} ${attributeBetInput} ${selectedAttributeBetType} in the ${betNode.name}`;
@@ -230,7 +233,7 @@ const CreateWager = () => {
         selectedTournamentBetType === "Player/Team Attributes" &&
         selectedTeamOrPlayerForBet &&
         selectedBetOperator &&
-        attributeBetInput &&
+        attributeBetInput >= 0 &&
         selectedAttributeBetType
       ) {
         return `I bet that ${selectedTeamOrPlayerForBet} will have ${selectedBetOperator} ${attributeBetInput} ${selectedAttributeBetType} in the ${betNode.name} Tournament`;
@@ -246,8 +249,8 @@ const CreateWager = () => {
         return `I bet that the team ${selectedTeamOrPlayerForBet} will win the ${betNode.name} series`;
       } else if (
         selectedSeriesBetType === "Series Score" &&
-        selectedTeam1ScoreForBet &&
-        selectedTeam2ScoreForBet
+        selectedTeam1ScoreForBet >= 0 &&
+        selectedTeam2ScoreForBet >= 0
       ) {
         return `I bet that the team ${betNode.teams[0].name} will win ${selectedTeam1ScoreForBet} game(s) and ${betNode.teams[1].name} will win ${selectedTeam2ScoreForBet} game(s) in the ${betNode.name}`;
       } else if (
@@ -258,14 +261,14 @@ const CreateWager = () => {
       } else if (
         selectedSeriesBetType === "Overtime Count" &&
         selectedBetOperator &&
-        seriesOvertimeBetInput
+        seriesOvertimeBetInput >= 0
       ) {
         return `I bet that there will be ${selectedBetOperator} ${seriesOvertimeBetInput} overtimes in the ${betNode.name} series`;
       } else if (
         selectedSeriesBetType === "Player/Team Attributes" &&
         selectedTeamOrPlayerForBet &&
         selectedBetOperator &&
-        attributeBetInput &&
+        attributeBetInput >= 0 &&
         selectedAttributeBetType
       ) {
         return `I bet that ${selectedTeamOrPlayerForBet} will have ${selectedBetOperator} ${attributeBetInput} ${selectedAttributeBetType} in the ${betNode.name} series`;
