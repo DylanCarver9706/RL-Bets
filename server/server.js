@@ -1408,12 +1408,12 @@ const handleMatchWagers = async (matchId, wagerOutcomes, firstBlood) => {
 // Update a match by ID (PUT)
 app.put("/api/match_concluded/:id", async (req, res) => {
   try {
-    const { results, winner, loser, endTournament, endSeason } = req.body;
+    const { results, firstBlood, endTournament, endSeason } = req.body;
 
     let message = " updated successfully"
     
     // Ensure all required fields are present in the request body
-    if (!results || !winner || !loser) {
+    if (!results || !firstBlood) {
       return res.status(400).json({ error: "Missing required fields in the request body" });
     }
 
@@ -1429,29 +1429,38 @@ app.put("/api/match_concluded/:id", async (req, res) => {
       return res.status(404).json({ error: "Series not found" });
     }
 
+    const wagerOutcomes = await getMatchOutcomes(results, matchDoc.teams);
+
+    console.log("wagerOutcomes: ", wagerOutcomes)
+
     // Build the update object for the match
     const updateData = {
       results: results,
-      winner: new ObjectId(winner),
-      loser: new ObjectId(loser),
+      winner: new ObjectId(wagerOutcomes.winningTeam),
+      loser: new ObjectId(wagerOutcomes.winningTeam),
+      firstBlood: firstBlood,
       series: new ObjectId(seriesDoc._id),
       status: "Ended"
     };
 
     // Update the match in the database
-    const result = await matchesCollection.updateOne(
+    const updatedMatch = await matchesCollection.updateOne(
       { _id: new ObjectId(req.params.id) },
       { $set: updateData }
     );
 
-    if (result.matchedCount === 0) {
+    if (updatedMatch.matchedCount === 0) {
       return res.status(404).json({ error: "Match not found" });
     }
 
-    createLog({ ...req.body, type: "Match Ended", matchId: result.insertedId })
+    createLog({ type: "Match Ended", matchId: updatedMatch.insertedId, wagerOutcomes: wagerOutcomes })
 
     message = "Match" + message
-    
+
+
+    await handleMatchWagers(req.params.id, wagerOutcomes, firstBlood)
+
+    console.log("Hello World")
     // Update the series document
     const bestOf = seriesDoc.bestOf; // Int32 value representing the number of wins required
 
@@ -1463,7 +1472,7 @@ app.put("/api/match_concluded/:id", async (req, res) => {
     // Count the number of wins for each team in the series
     let winnerWinsCount = 0;
     seriesMatches.forEach((match) => {
-      if (match.status === "Ended" && match.winner.equals(new ObjectId(winner))) {
+      if (match.status === "Ended" && match.winner.equals(new ObjectId(wagerOutcomes.winningTeam))) {
         winnerWinsCount++;
       }
     });
@@ -1476,12 +1485,12 @@ app.put("/api/match_concluded/:id", async (req, res) => {
         {
           $set: {
             status: "Ended",
-            winner: new ObjectId(winner),
-            loser: new ObjectId(loser),
+            winner: new ObjectId(wagerOutcomes.winningTeam),
+            loser: new ObjectId(wagerOutcomes.losingTeam),
           }
         }
       );
-      createLog({ ...req.body, type: "Series Ended", seriesId: seriesDoc._id })
+      createLog({ type: "Series Ended", seriesId: seriesDoc._id, wagerOutcomes: wagerOutcomes })
     }
 
     // Set status for Tournament if included in request body
@@ -1491,12 +1500,12 @@ app.put("/api/match_concluded/:id", async (req, res) => {
         {
           $set: {
             status: "Ended",
-            winner: new ObjectId(winner),
-            loser: new ObjectId(loser),
+            winner: new ObjectId(wagerOutcomes.winningTeam),
+            loser: new ObjectId(wagerOutcomes.losingTeam),
           }
         }
       );
-      createLog({ ...req.body, type: "Tournament Ended", tournamentId: seriesDoc.tournament })
+      createLog({ type: "Tournament Ended", tournamentId: seriesDoc.tournament, wagerOutcomes: wagerOutcomes })
       message = "Tournament," + message
     }
     
@@ -1511,14 +1520,14 @@ app.put("/api/match_concluded/:id", async (req, res) => {
         // Update the status of the season to "Ended"
         await seasonsCollection.updateOne(
           { _id: seasonDoc._id },
-          { $set: { status: "Ended", winner: winner, loser: loser } }
+          { $set: { status: "Ended", winner: wagerOutcomes.winningTeam } }
         );
       }
-      createLog({ ...req.body, type: "Season Ended", SeasonId: seasonDoc._id })
+      createLog({ type: "Season Ended", SeasonId: seasonDoc._id, wagerOutcomes: wagerOutcomes })
       message = "Season," + message
     }
 
-    res.status(200).json({ message: message, winnerWinsCount: winnerWinsCount });
+    res.status(200).json({ message: message });
   } catch (err) {
     res.status(500).json({ error: "Failed to update match or series", details: err.message });
   }
