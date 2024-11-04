@@ -622,26 +622,7 @@ app.put("/api/wager_ended/:id", async (req, res) => {
   try {
     const { agreeIsWinner } = req.body;
 
-    const updatedWager = {
-      status: "Ended",
-      agreeIsWinner: agreeIsWinner,
-    };
-
-    const result = await wagersCollection.updateOne(
-      { _id: new ObjectId(req.params.id) },
-      { $set: updatedWager }
-    );
-    if (result.matchedCount === 0) {
-      return res.status(404).json({ error: "Wager not found" });
-    }
-
-    createLog({ ...req.body, type: "Wager Ended", WagerId: req.params.id })
-
-    // Fetch updated wager and statistics
-    const updatedWagers = await getAllWagers();
-    io.emit("wagersUpdate", updatedWagers);  // Emit updated data to all clients
-
-    await payOutBetWinners(req.params.id, agreeIsWinner)
+    handleWagerEnded(req.params.id, agreeIsWinner)
 
     res.status(200).json({ message: "Wager updated successfully" });
   } catch (err) {
