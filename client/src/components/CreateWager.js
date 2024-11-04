@@ -304,6 +304,11 @@ const CreateWager = () => {
   };
   
   const handleBetSubmit = async () => {
+    if (creditsBet ===  0) {
+      alert("Please enter a valid wager amount.");
+      return;
+    }
+
     const remainingCredits = parseFloat(userData.credits) - creditsBet;
     if (remainingCredits < 0) {
       alert("Wager amount is more credits than you have available!");
