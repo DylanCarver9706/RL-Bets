@@ -2,3 +2,4 @@
 node_modules
 Internal_Instructions.md
 .vscode
+firebaseServiceAccountKey.json
