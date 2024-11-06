@@ -130,7 +130,6 @@ const verifyFirebaseToken = async (req, res, next) => {
 
   try {
     const decodedToken = await firebaseAdmin.auth().verifyIdToken(token);
-    console.log(decodedToken)
     req.user = decodedToken; // Attach the decoded token to the request
     next();
   } catch (error) {
@@ -1473,7 +1472,6 @@ app.put("/api/match_concluded/:id", async (req, res) => {
 
     await handleMatchWagers(req.params.id, wagerOutcomes, firstBlood)
 
-    console.log("Hello World")
     // Update the series document
     const bestOf = seriesDoc.bestOf; // Int32 value representing the number of wins required
 
