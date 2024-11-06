@@ -146,7 +146,7 @@ const verifyFirebaseToken = async (req, res, next) => {
 // ************************************************************************************************
 
 // Create a new user (POST)
-app.post("/api/users", async (req, res) => {
+app.post("/api/users", verifyFirebaseToken, async (req, res) => {
   try {
     const result = await usersCollection.insertOne(req.body);
     res.status(201).json({
@@ -161,7 +161,7 @@ app.post("/api/users", async (req, res) => {
 });
 
 // Get all users (GET)
-app.get("/api/users", async (req, res) => {
+app.get("/api/users", verifyFirebaseToken, async (req, res) => {
   try {
     const users = await usersCollection.find().toArray();
     res.status(200).json(users);
@@ -173,7 +173,7 @@ app.get("/api/users", async (req, res) => {
 });
 
 // Get a single user by ID (GET)
-app.get("/api/users/:id", async (req, res) => {
+app.get("/api/users/:id", verifyFirebaseToken, async (req, res) => {
   try {
     const user = await usersCollection.findOne({
       _id: new ObjectId(req.params.id),
@@ -188,7 +188,7 @@ app.get("/api/users/:id", async (req, res) => {
 });
 
 // Update a user by ID (PUT) and emit a WebSocket event to update the client in real time
-app.put("/api/users/:id", async (req, res) => {
+app.put("/api/users/:id", verifyFirebaseToken, async (req, res) => {
   try {
     const result = await usersCollection.updateOne(
       { _id: new ObjectId(req.params.id) },
@@ -218,7 +218,7 @@ app.put("/api/users/:id", async (req, res) => {
 });
 
 // Delete a user by ID (DELETE)
-app.delete("/api/users/:id", async (req, res) => {
+app.delete("/api/users/:id", verifyFirebaseToken, async (req, res) => {
   try {
     const result = await usersCollection.deleteOne({
       _id: new ObjectId(req.params.id),
@@ -235,7 +235,7 @@ app.delete("/api/users/:id", async (req, res) => {
 });
 
 // Find a user by Firebase ID (GET)
-app.get("/api/users/firebase/:firebaseUserId", async (req, res) => {
+app.get("/api/users/firebase/:firebaseUserId", verifyFirebaseToken, async (req, res) => {
   try {
     const user = await usersCollection.findOne({
       firebaseUserId: req.params.firebaseUserId,
@@ -301,7 +301,7 @@ app.post('/api/logs', async (req, res) => {
 });
 
 // Retrieve all logs (GET)
-app.get('/api/logs', async (req, res) => {
+app.get('/api/logs', verifyFirebaseToken, async (req, res) => {
   try {
     const logs = await getAllLogs();
     res.status(200).json(logs);
@@ -371,7 +371,7 @@ app.delete('/api/logs/:id', async (req, res) => {
 // ************************************************************************************************
 // ************************************************************************************************
 
-app.post("/api/create-checkout-session", async (req, res) => {
+app.post("/api/create-checkout-session", verifyFirebaseToken, async (req, res) => {
   const { purchaseItems, mongoUserId, creditsTotal } = req.body;
 
   const lineItems = purchaseItems.map((item) => ({
