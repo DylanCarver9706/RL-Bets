@@ -13,6 +13,8 @@ export const createUserInDatabase = async (name, email, password, firebaseUserId
         email: email,
         password: password,
         firebaseUserId: firebaseUserId,
+        credits: 0.0,
+        earnedCredits: 0.0,
       }),
     });
 
