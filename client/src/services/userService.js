@@ -14,10 +14,14 @@ const BASE_URL = process.env.REACT_APP_BASE_SERVER_URL; // Define your backend s
 // Function to create a new user in the MongoDB database
 export const createUserInDatabase = async (name, email, password, firebaseUserId) => {
   try {
+
+    const idToken = await getFirebaseIdToken();
+
     const response = await fetch(`${BASE_URL}/api/users`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${idToken}`, // Include the token in the headers
       },
       body: JSON.stringify({
         name: name,
@@ -35,7 +39,6 @@ export const createUserInDatabase = async (name, email, password, firebaseUserId
       throw new Error(data.error || "Failed to create user in database.");
     }
 
-    console.log("MongoDB User ID: ", data.userId);
     return data.userId;
   } catch (err) {
     console.error("Error creating user in MongoDB:", err.message);
@@ -46,10 +49,14 @@ export const createUserInDatabase = async (name, email, password, firebaseUserId
 // Function to get the MongoDB user ID by Firebase user ID
 export const getMongoUserIdByFirebaseId = async (firebaseUserId) => {
   try {
+
+    const idToken = await getFirebaseIdToken();
+
     const response = await fetch(`${BASE_URL}/api/users/firebase/${firebaseUserId}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${idToken}`, // Include the token in the headers
       },
     });
 
@@ -66,13 +73,17 @@ export const getMongoUserIdByFirebaseId = async (firebaseUserId) => {
   }
 };
 
-// Get a user by their MongoDB ID
+// Get all users
 export const getUsers = async () => {
   try {
+
+    const idToken = await getFirebaseIdToken();
+
     const response = await fetch(`${BASE_URL}/api/users`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${idToken}`, // Include the token in the headers
       },
     });
 
@@ -92,10 +103,14 @@ export const getUsers = async () => {
 // Get a user by their MongoDB ID
 export const getUserById = async (userId) => {
     try {
+
+      const idToken = await getFirebaseIdToken();
+
       const response = await fetch(`${BASE_URL}/api/users/${userId}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${idToken}`, // Include the token in the headers
         },
       });
   
@@ -115,10 +130,14 @@ export const getUserById = async (userId) => {
 // Update a user by their MongoDB ID
   export const updateUser = async (userId, updatedData) => {
     try {
+
+      const idToken = await getFirebaseIdToken();
+
       const response = await fetch(`${BASE_URL}/api/users/${userId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${idToken}`, // Include the token in the headers
         },
         body: JSON.stringify(updatedData),
       });
@@ -139,10 +158,14 @@ export const getUserById = async (userId) => {
 // Delete a user by their MongoDB ID
   export const deleteUser = async (userId) => {
     try {
+
+      const idToken = await getFirebaseIdToken();
+
       const response = await fetch(`${BASE_URL}/api/users/${userId}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${idToken}`, // Include the token in the headers
         },
       });
   
@@ -162,10 +185,14 @@ export const getUserById = async (userId) => {
 export const createCheckoutSession = async (purchaseItems, mongoUserId, creditsTotal) => {
   console.log(purchaseItems, mongoUserId, creditsTotal)
   try {
+
+    const idToken = await getFirebaseIdToken();
+
     const response = await fetch(`${BASE_URL}/api/create-checkout-session`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${idToken}`, // Include the token in the headers
       },
       body: JSON.stringify({ purchaseItems, mongoUserId, creditsTotal }),
     });
@@ -186,10 +213,14 @@ export const createCheckoutSession = async (purchaseItems, mongoUserId, creditsT
 // Get all logs
 export const getLogs = async () => {
   try {
+
+    const idToken = await getFirebaseIdToken();
+
     const response = await fetch(`${BASE_URL}/api/logs`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${idToken}`, // Include the token in the headers
       },
     });
 
