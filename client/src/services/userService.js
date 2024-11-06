@@ -1,3 +1,14 @@
+import { auth } from "../firebaseConfig.js";
+
+// Get ID token from the currently authenticated user
+export const getFirebaseIdToken = async () => {
+  const currentUser = auth.currentUser;
+  if (!currentUser) {
+    throw new Error("User is not authenticated");
+  }
+  return await currentUser.getIdToken(); // Return a fresh ID token
+};
+
 const BASE_URL = process.env.REACT_APP_BASE_SERVER_URL; // Define your backend server URL
 
 // Function to create a new user in the MongoDB database
