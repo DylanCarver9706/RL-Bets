@@ -1,21 +1,30 @@
 import React, { useEffect, useState } from "react";
-import { useUser } from "../context/UserContext.js";
+import { useAuth } from "../context/AuthContext.js";
 import io from "socket.io-client";
 import { createBet } from "../services/wagerService.js";
 
 const BASE_SERVER_URL = process.env.REACT_APP_BASE_SERVER_URL;
 
-const WagerOutcomeFormula = (betAmount, totalWinnersBetsAmount, totalLosersBetsAmount) => {
-  if (totalWinnersBetsAmount === 0 || totalLosersBetsAmount === 0 || isNaN(betAmount)) {
+const WagerOutcomeFormula = (
+  betAmount,
+  totalWinnersBetsAmount,
+  totalLosersBetsAmount
+) => {
+  if (
+    totalWinnersBetsAmount === 0 ||
+    totalLosersBetsAmount === 0 ||
+    isNaN(betAmount)
+  ) {
     return 0;
   }
-  const winnings = ((betAmount / totalWinnersBetsAmount) * totalLosersBetsAmount) + betAmount
+  const winnings =
+    (betAmount / totalWinnersBetsAmount) * totalLosersBetsAmount + betAmount;
   // console.log(`((${betAmount} / (${totalWinnersBetsAmount})) * ${totalLosersBetsAmount}) + ${betAmount} = ${winnings}`)
   return winnings;
 };
 
 const Home = () => {
-  const { mongoUserId } = useUser();
+  const { firebaseUser } = useAuth();
   const [wagers, setWagers] = useState([]);
   const [filteredWagers, setFilteredWagers] = useState([]);
   const [activeFilter, setActiveFilter] = useState("all");
@@ -31,7 +40,6 @@ const Home = () => {
 
     // Listen for updates from the server
     socket.on("wagersUpdate", (updatedWagers) => {
-      console.log(updatedWagers)
       setWagers(updatedWagers || []);
       applyFilter("all", updatedWagers);
     });
@@ -39,7 +47,7 @@ const Home = () => {
     return () => {
       socket.disconnect();
     };
-  }, [mongoUserId]);
+  }, [firebaseUser.mongoUserId]);
 
   useEffect(() => {
     // Recalculate estimated winnings if credits wagered or selected wager's agree/disagree values change
@@ -48,7 +56,13 @@ const Home = () => {
       if (wager) {
         const { agreeCreditsBet = 0, disagreeCreditsBet = 0 } = wager;
 
-        setEstimatedWinnings(WagerOutcomeFormula(creditsWagered, agreeCreditsBet, disagreeCreditsBet));
+        setEstimatedWinnings(
+          WagerOutcomeFormula(
+            creditsWagered,
+            agreeCreditsBet,
+            disagreeCreditsBet
+          )
+        );
       }
     }
   }, [creditsWagered, wagers, selectedBet]);
@@ -65,8 +79,8 @@ const Home = () => {
         filtered = allWagers.filter(
           (wager) =>
             wager.status === "Betable" &&
-            wager.creator !== mongoUserId &&
-            wager.bets.every((bet) => bet.user !== mongoUserId)
+            wager.creator !== firebaseUser.mongoUserId &&
+            wager.bets.every((bet) => bet.user !== firebaseUser.mongoUserId)
         );
         break;
       case "Ongoing":
@@ -77,7 +91,7 @@ const Home = () => {
         break;
       case "BetOn":
         filtered = allWagers.filter((wager) =>
-          wager.bets.some((bet) => bet.user === mongoUserId)
+          wager.bets.some((bet) => bet.user === firebaseUser.mongoUserId)
         );
         break;
       default:
@@ -123,7 +137,7 @@ const Home = () => {
     }
 
     const betPayload = {
-      user: mongoUserId,
+      user: firebaseUser.mongoUserId,
       credits: parseInt(credits, 10),
       agreeBet: agreeBet,
       rlEventReference: wagerId,
@@ -143,7 +157,9 @@ const Home = () => {
 
   return (
     <div style={styles.container}>
-      <h2 style={styles.header}>Welcome to the Wager Dashboard, {mongoUserId}</h2>
+      <h2 style={styles.header}>
+        Welcome to the Wager Dashboard, {firebaseUser.mongoUserId}
+      </h2>
 
       <div style={styles.toggleContainer}>
         <label>
@@ -197,41 +213,74 @@ const Home = () => {
               <li key={wager._id} style={styles.wagerItem}>
                 <div style={styles.wagerHeader}>
                   <strong>Wager ID: {wager._id}</strong>
-                  <strong><br/>{wager.name}</strong>
-                  <p><br/>Creator: {wager.creator}</p>
-                  <p><br/>Status: {wager.status}</p>
+                  <strong>
+                    <br />
+                    {wager.name}
+                  </strong>
+                  <p>
+                    <br />
+                    Creator: {wager.creator}
+                  </p>
+                  <p>
+                    <br />
+                    Status: {wager.status}
+                  </p>
                 </div>
                 <div style={styles.wagerBody}>
                   <div style={styles.agreeSection}>
                     <div>
                       <strong>Agree:</strong> {wager.agreePercentage}%
-                      <strong><br/>Agree Bets Count:</strong> {wager.agreeBetsCount}
-                      <strong><br/>Total Agree Credits Bet:</strong> {wager.agreeCreditsBet}
+                      <strong>
+                        <br />
+                        Agree Bets Count:
+                      </strong>{" "}
+                      {wager.agreeBetsCount}
+                      <strong>
+                        <br />
+                        Total Agree Credits Bet:
+                      </strong>{" "}
+                      {wager.agreeCreditsBet}
                     </div>
-                    {!["Ongoing", "Ended"].includes(wager.status) && wager.bets.every((bet) => bet.user !== mongoUserId) && wager.creator !== mongoUserId && (
-                      <button
-                        style={styles.betButton}
-                        onClick={() => handleShowBetInput(wager._id, true)}
-                      >
-                        Bet on Agree
-                      </button>
-                    )}
+                    {!["Ongoing", "Ended"].includes(wager.status) &&
+                      wager.bets.every(
+                        (bet) => bet.user !== firebaseUser.mongoUserId
+                      ) &&
+                      wager.creator !== firebaseUser.mongoUserId && (
+                        <button
+                          style={styles.betButton}
+                          onClick={() => handleShowBetInput(wager._id, true)}
+                        >
+                          Bet on Agree
+                        </button>
+                      )}
                   </div>
 
                   <div style={styles.disagreeSection}>
                     <div>
                       <strong>Disagree:</strong> {wager.disagreePercentage}%
-                      <strong><br/>Disagree Bets Count:</strong> {wager.disagreeBetsCount}
-                      <strong><br/>Total Disagree Credits Bet:</strong> {wager.disagreeCreditsBet}
-                      </div>
-                      {!["Ongoing", "Ended"].includes(wager.status) && wager.bets.every((bet) => bet.user !== mongoUserId) && wager.creator !== mongoUserId && (
-                      <button
-                        style={styles.betButton}
-                        onClick={() => handleShowBetInput(wager._id, false)}
-                      >
-                        Bet on Disagree
-                      </button>
-                    )}
+                      <strong>
+                        <br />
+                        Disagree Bets Count:
+                      </strong>{" "}
+                      {wager.disagreeBetsCount}
+                      <strong>
+                        <br />
+                        Total Disagree Credits Bet:
+                      </strong>{" "}
+                      {wager.disagreeCreditsBet}
+                    </div>
+                    {!["Ongoing", "Ended"].includes(wager.status) &&
+                      wager.bets.every(
+                        (bet) => bet.user !== firebaseUser.mongoUserId
+                      ) &&
+                      wager.creator !== firebaseUser.mongoUserId && (
+                        <button
+                          style={styles.betButton}
+                          onClick={() => handleShowBetInput(wager._id, false)}
+                        >
+                          Bet on Disagree
+                        </button>
+                      )}
                   </div>
                 </div>
 
@@ -243,17 +292,36 @@ const Home = () => {
                       type="number"
                       id="numberInput"
                       value={betInputs[wager._id] || ""}
-                      onChange={(e) => handleBetInputChange(wager._id, e.target.value)}
+                      onChange={(e) =>
+                        handleBetInputChange(wager._id, e.target.value)
+                      }
                       min="0"
                       step="1"
                     />{" "}
-                    credits that this <strong>{selectedBet.agreeBet ? "will" : "will not"}</strong> happen
-                    <p>Estimated Winnings: {parseInt(estimatedWinnings) || 0} credits</p>
-                    <p>Credits Earned: ((Bet Amount / (Total Agree Credits Bet + Bet Amount)) * Total Loser's Credits Bet) + Bet Amount</p>
-                    <p>Meaning: {creditsWagered} credits bet + {parseInt(estimatedWinnings - creditsWagered) || 0} credits earned = {parseInt(estimatedWinnings) || 0} credits won</p>
+                    credits that this{" "}
+                    <strong>
+                      {selectedBet.agreeBet ? "will" : "will not"}
+                    </strong>{" "}
+                    happen
+                    <p>
+                      Estimated Winnings: {parseInt(estimatedWinnings) || 0}{" "}
+                      credits
+                    </p>
+                    <p>
+                      Credits Earned: ((Bet Amount / (Total Agree Credits Bet +
+                      Bet Amount)) * Total Loser's Credits Bet) + Bet Amount
+                    </p>
+                    <p>
+                      Meaning: {creditsWagered} credits bet +{" "}
+                      {parseInt(estimatedWinnings - creditsWagered) || 0}{" "}
+                      credits earned = {parseInt(estimatedWinnings) || 0}{" "}
+                      credits won
+                    </p>
                     <button
                       style={styles.submitBetButton}
-                      onClick={() => handleSubmitBet(wager._id, selectedBet.agreeBet)}
+                      onClick={() =>
+                        handleSubmitBet(wager._id, selectedBet.agreeBet)
+                      }
                     >
                       Submit Bet
                     </button>
