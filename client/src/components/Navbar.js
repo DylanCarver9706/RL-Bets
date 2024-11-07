@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from "react";
 import io from "socket.io-client";
 import { Link } from "react-router-dom";
-import { useUser } from "../context/UserContext.js";
+import { useAuth } from "../context/AuthContext.js";
 import { getUserById } from "../services/userService.js";
 
 const BASE_SERVER_URL = process.env.REACT_APP_BASE_SERVER_URL;
 
 const Navbar = () => {
+  const [userCredits, setUserCredits] = useState(0);
 
-  const [userCredits, setUserCredits] = useState(0)
-
-  const { mongoUserId } = useUser();
+  const { firebaseUser } = useAuth();
 
   useEffect(() => {
     // Initialize the socket connection
@@ -19,7 +18,7 @@ const Navbar = () => {
     // Fetch initial user data
     const fetchData = async () => {
       try {
-        const userData = await getUserById(mongoUserId);
+        const userData = await getUserById(firebaseUser.mongoUserId);
         setUserCredits(parseInt(userData.credits));
       } catch (error) {
         console.error("Error fetching data:", error.message);
@@ -31,27 +30,45 @@ const Navbar = () => {
 
     // Listen for the 'updateUser' event from the server
     socket.on("updateUser", (updatedUser) => {
-      if (updatedUser._id === mongoUserId) {
+      if (updatedUser._id === firebaseUser.mongoUserId) {
         setUserCredits(updatedUser.credits);
       }
     });
 
     // Cleanup the socket connection on unmount
     return () => socket.disconnect();
-  }, [mongoUserId]);
+  }, [firebaseUser]);
 
   return (
     <nav style={styles.navbar}>
-      <h2 style={styles.brand}><Link to="/" style={styles.link}>RLBets.com</Link></h2>
+      <h2 style={styles.brand}>
+        <Link to="/" style={styles.link}>
+          RLBets.com
+        </Link>
+      </h2>
       <div style={styles.navLinks}>
-        <Link to="/User" style={styles.link}>Profile</Link>
-        <Link to="/Schedule" style={styles.link}>Schedule</Link>
-        <Link to="/Leaderboard" style={styles.link}>Leaderboard</Link>
-        <Link to="/Log" style={styles.link}>Logs</Link>
+        <Link to="/User" style={styles.link}>
+          Profile
+        </Link>
+        <Link to="/Schedule" style={styles.link}>
+          Schedule
+        </Link>
+        <Link to="/Leaderboard" style={styles.link}>
+          Leaderboard
+        </Link>
+        <Link to="/Log" style={styles.link}>
+          Logs
+        </Link>
       </div>
       <div style={styles.navLinks}>
-        <Link to="/Create_Wager" style={styles.link}>Create Wager</Link>
-        <Link to="/Credits" style={styles.link}>{parseInt(userCredits)} Credits</Link>
+        <Link to="/Create_Wager" style={styles.link}>
+          Create Wager
+        </Link>
+        {firebaseUser && (
+        <Link to="/Credits" style={styles.link}>
+          {parseInt(userCredits)} Credits
+        </Link>
+        )}
       </div>
     </nav>
   );
