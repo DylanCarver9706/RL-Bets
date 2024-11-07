@@ -1,6 +1,6 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
-import { useUser, UserProvider } from "./context/UserContext";
+import { AuthProvider, useAuth } from "./context/AuthContext";
 import Home from "./components/Home";
 import Auth from "./components/Auth";
 import User from "./components/User";
@@ -12,23 +12,35 @@ import Leaderboard from "./components/Leaderboard";
 import Log from "./components/Log";
 
 function AppRoutes() {
-  const { firebaseUser, mongoUserId, loading } = useUser();
+  const { firebaseUser, loading } = useAuth();
 
-  // Show a loading screen until Firebase finishes checking the auth state
-  if (loading) return <div>Loading...</div>;
+  // Display loading message if firebaseUser exists but mongoUserId hasn't loaded yet
+  if (loading) {
+    return <p>Loading...</p>;
+  }
 
   return (
     <>
       <Navbar />
+      <div>
+        {firebaseUser ? (
+          <p>
+            Welcome, User ID: {firebaseUser.uid} - MongoId:{" "}
+            {firebaseUser.mongoUserId}
+          </p>
+        ) : (
+          <p>Please log in</p>
+        )}
+      </div>
       <Routes>
         <Route path="/" element={firebaseUser ? <Home /> : <Auth />} />
-        <Route path="/Auth" element={<Auth />} />
-        <Route path="/User" element={mongoUserId ? <User /> : <Auth />} />
-        <Route path="/Create_Wager" element={mongoUserId ? <CreateWager /> : <Auth />} />
-        <Route path="/Schedule" element={mongoUserId ? <Schedule /> : <Auth />}/>
-        <Route path="/Credits" element={mongoUserId ? <Credits /> : <Auth />} />
-        <Route path="/Leaderboard" element={mongoUserId ? <Leaderboard /> : <Auth />} />
-        <Route path="/Log" element={mongoUserId ? <Log /> : <Auth />} />
+        <Route path="/Auth" element={<Auth />} /> {/* Used for testing */}
+        <Route path="/User" element={firebaseUser ? <User /> : <Auth />} />
+        <Route path="/Create_Wager" element={firebaseUser ? <CreateWager /> : <Auth />} />
+        <Route path="/Schedule" element={firebaseUser ? <Schedule /> : <Auth />} />
+        <Route path="/Credits" element={firebaseUser ? <Credits /> : <Auth />} />
+        <Route path="/Leaderboard" element={firebaseUser ? <Leaderboard /> : <Auth />} />
+        <Route path="/Log" element={firebaseUser ? <Log /> : <Auth />} />
       </Routes>
     </>
   );
@@ -36,9 +48,9 @@ function AppRoutes() {
 
 function App() {
   return (
-    <UserProvider>
+    <AuthProvider>
       <AppRoutes />
-    </UserProvider>
+    </AuthProvider>
   );
 }
 
