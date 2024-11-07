@@ -1472,8 +1472,20 @@ app.put("/api/match_concluded/:id", async (req, res) => {
 
     await handleMatchWagers(req.params.id, wagerOutcomes, firstBlood)
 
-    // Update the series document
-    const bestOf = seriesDoc.bestOf; // Int32 value representing the number of wins required
+    
+    // Update the series document if series has ended with this match
+    console.log("seriesDoc: ", seriesDoc.firstBlood)
+    // Set first blood if it is not set because this would be the first match
+    if (seriesDoc.firstBlood === null) {
+      await seriesCollection.updateOne(
+        { _id: new ObjectId(seriesDoc._id) },
+        {
+          $set: {
+            firstBlood: firstBlood
+          }
+        }
+      );
+    }
 
     // Get all the matches in the series
     const seriesMatches = await matchesCollection.find({
@@ -1489,16 +1501,17 @@ app.put("/api/match_concluded/:id", async (req, res) => {
     });
 
     // If the winner has won enough matches to win the series, update the series status and declare winner/loser
-    if (winnerWinsCount >= bestOf) {
+    if (winnerWinsCount >= seriesDoc.bestOf) {
       message = "Series," + message
+      let seriesUpdateData = {
+        status: "Ended",
+        winner: new ObjectId(wagerOutcomes.winningTeam),
+        loser: new ObjectId(wagerOutcomes.losingTeam),
+      };
       await seriesCollection.updateOne(
         { _id: new ObjectId(seriesDoc._id) },
         {
-          $set: {
-            status: "Ended",
-            winner: new ObjectId(wagerOutcomes.winningTeam),
-            loser: new ObjectId(wagerOutcomes.losingTeam),
-          }
+          $set: seriesUpdateData
         }
       );
       createLog({ type: "Series Ended", seriesId: seriesDoc._id, wagerOutcomes: wagerOutcomes })
