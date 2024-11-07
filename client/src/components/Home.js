@@ -47,6 +47,7 @@ const Home = () => {
     return () => {
       socket.disconnect();
     };
+    // eslint-disable-next-line
   }, [firebaseUser.mongoUserId]);
 
   useEffect(() => {
