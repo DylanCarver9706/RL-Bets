@@ -6,6 +6,7 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [firebaseUser, setFirebaseUser] = useState(null); // Stores the user object
+  const [loading, setLoading] = useState(true); // Loading state for initial auth check
 
   useEffect(() => {
     const auth = getAuth();
@@ -15,9 +16,7 @@ export const AuthProvider = ({ children }) => {
       if (user) {
         try {
           const mongoUserId = await getMongoUserIdByFirebaseId(user.uid);
-          console.log("MongoDB User ID:", mongoUserId);
           const userWithMongoId = { ...user, mongoUserId: mongoUserId };
-          console.log("User with Mongo ID:", userWithMongoId);
           setFirebaseUser(userWithMongoId);
         } catch (error) {
           console.error("Error fetching MongoDB User ID:", error);
@@ -25,6 +24,7 @@ export const AuthProvider = ({ children }) => {
       } else {
         setFirebaseUser(null); // Handle case when user is logged out
       }
+      setLoading(false); // Set loading to false after auth check
     };
   
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -36,7 +36,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ firebaseUser }}>
+    <AuthContext.Provider value={{ firebaseUser, loading }}>
       {children}
     </AuthContext.Provider>
   );
