@@ -5,7 +5,7 @@ import {
   updateUser,
   deleteUser,
 } from "../services/userService.js";
-import { useUser } from "../context/UserContext.js";
+import { useAuth } from "../context/AuthContext.js";
 import { deleteUser as firebaseDeleteUser, signOut } from "firebase/auth"; // Import Firebase deleteUser function
 import { auth } from "../firebaseConfig.js";
 
@@ -14,15 +14,15 @@ const User = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { mongoUserId, firebaseUser } = useUser(); // Get MongoDB ID and Firebase user from context
+  const { firebaseUser } = useAuth(); // Get MongoDB ID and Firebase user from context
   const navigate = useNavigate();
 
   // Fetch the user data on component mount
   useEffect(() => {
-    if (mongoUserId) {
-      fetchUserDetails(mongoUserId);
+    if (firebaseUser) {
+      fetchUserDetails(firebaseUser.mongoUserId);
     }
-  }, [mongoUserId]);
+  }, [firebaseUser]);
 
   // Fetch user details using the provided MongoDB User ID
   const fetchUserDetails = async (userId) => {
@@ -40,7 +40,7 @@ const User = () => {
   // Handle updating the user information
   const handleUpdate = async () => {
     try {
-      const updatedUser = await updateUser(mongoUserId, {
+      const updatedUser = await updateUser(firebaseUser.mongoUserId, {
         name,
         email,
         password,
@@ -61,7 +61,7 @@ const User = () => {
     ) {
       try {
         // Delete user from MongoDB
-        await deleteUser(mongoUserId);
+        await deleteUser(firebaseUser.mongoUserId);
 
         // Delete Firebase user if present
         if (firebaseUser) {
@@ -91,7 +91,7 @@ const User = () => {
   return (
     <div>
       <h2>User Profile</h2>
-      <h3>Mongo ID: {mongoUserId}</h3>
+      <h3>Mongo ID: {firebaseUser.mongoUserId}</h3>
       <h3>Firebase ID: {firebaseUser.uid}</h3>
       {user ? (
         <div>
