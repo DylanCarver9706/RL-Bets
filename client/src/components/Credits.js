@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { loadStripe } from "@stripe/stripe-js";
-import { useUser } from "../context/UserContext.js";
+import { useAuth } from "../context/AuthContext.js";
 import { createCheckoutSession } from "../services/userService"; // Import service
 
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
@@ -10,7 +10,7 @@ const Credits = () => {
   const [totalPrice, setTotalPrice] = useState(0);
   const [errorMessage, setErrorMessage] = useState("");
 
-  const { mongoUserId } = useUser();
+  const { firebaseUser } = useAuth();
 
   const creditOptions = [
     { id: 1, name: "100 Credits", amount: 100, price: 1.99 },
@@ -52,7 +52,9 @@ const Credits = () => {
   };
 
   const handleCheckout = async () => {
-    const purchaseItems = Object.values(cart).filter((item) => item.quantity > 0);
+    const purchaseItems = Object.values(cart).filter(
+      (item) => item.quantity > 0
+    );
 
     if (purchaseItems.length === 0) {
       setErrorMessage("Please add some credits to your cart.");
@@ -60,10 +62,13 @@ const Credits = () => {
     }
 
     try {
-      const session = await createCheckoutSession(purchaseItems, mongoUserId, calculateTotalCredits(cart));
+      const session = await createCheckoutSession(
+        purchaseItems,
+        firebaseUser.mongoUserId,
+        calculateTotalCredits(cart)
+      );
       const stripe = await stripePromise;
       await stripe.redirectToCheckout({ sessionId: session.id });
-      
     } catch (error) {
       console.error("Error during checkout:", error.message);
       setErrorMessage("Checkout failed. Please try again.");
@@ -81,14 +86,18 @@ const Credits = () => {
             <strong>{option.name}</strong> ${option.price.toFixed(2)}
             <div style={styles.quantityContainer}>
               <button
-                onClick={() => updateCart(option, (cart[option.id]?.quantity || 0) - 1)}
+                onClick={() =>
+                  updateCart(option, (cart[option.id]?.quantity || 0) - 1)
+                }
                 style={styles.quantityButton}
               >
                 -
               </button>
               <span>{cart[option.id]?.quantity || 0}</span>
               <button
-                onClick={() => updateCart(option, (cart[option.id]?.quantity || 0) + 1)}
+                onClick={() =>
+                  updateCart(option, (cart[option.id]?.quantity || 0) + 1)
+                }
                 style={styles.quantityButton}
               >
                 +
