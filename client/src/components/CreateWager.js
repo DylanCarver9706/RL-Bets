@@ -1,14 +1,19 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useUser } from "../context/UserContext.js";
+import { useAuth } from "../context/AuthContext.js";
 import { getUserById, updateUser } from "../services/userService.js";
-import { fetchBetableObjects, createWager, createBet, fetchTeams } from "../services/wagerService";
+import {
+  fetchBetableObjects,
+  createWager,
+  createBet,
+  fetchTeams,
+} from "../services/wagerService";
 
 const CreateWager = () => {
   // Load data
   const [betableObjects, setBetableObjects] = useState(null);
-  const [userData, setUserData] = useState(0)
-  const [teams, setTeams] = useState(null)
+  const [userData, setUserData] = useState(0);
+  const [teams, setTeams] = useState(null);
   const seasonId = "66fa1588cbd894f17aa0363a"; // Hardcoded for demonstration; replace with dynamic as needed
 
   // Betting vars
@@ -22,14 +27,15 @@ const CreateWager = () => {
   const [selectedAttributeBetType, setSelectedAttributeBetType] = useState("");
   const [selectedAccoladeBetType, setSelectedAccoladeBetType] = useState("");
   const [attributeBetInput, setAttributeBetInput] = useState(0);
-  const [creditsBet, setCreditsBet] = useState(0)
+  const [creditsBet, setCreditsBet] = useState(0);
 
   // Season bet
   const [selectedSeasonBetType, setSelectedSeasonBetType] = useState(null);
 
   // Tournament bet
-  const [selectedTournamentBetType, setSelectedTournamentBetType] = useState(null);
-  
+  const [selectedTournamentBetType, setSelectedTournamentBetType] =
+    useState(null);
+
   // Series bet
   const [selectedSeriesBetType, setSelectedSeriesBetType] = useState(null);
   const [seriesOvertimeBetInput, setSeriesOvertimeBetInput] = useState(0);
@@ -38,7 +44,7 @@ const CreateWager = () => {
   const [selectedMatchBetType, setSelectedMatchBetType] = useState(null);
 
   const navigate = useNavigate();
-  const { mongoUserId } = useUser();
+  const { firebaseUser } = useAuth();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -46,10 +52,10 @@ const CreateWager = () => {
         const fetchedData = await fetchBetableObjects(seasonId);
         setBetableObjects(fetchedData);
 
-        const fetchedTeams = await fetchTeams()
-        setTeams(fetchedTeams)
+        const fetchedTeams = await fetchTeams();
+        setTeams(fetchedTeams);
 
-        const userData = await getUserById(mongoUserId);
+        const userData = await getUserById(firebaseUser.mongoUserId);
         setUserData(userData);
       } catch (error) {
         console.error("Error fetching data:", error.message);
@@ -57,7 +63,7 @@ const CreateWager = () => {
     };
 
     fetchData();
-  }, [seasonId, mongoUserId]);
+  }, [seasonId, firebaseUser.mongoUserId]);
 
   const handleBetClick = async (node) => {
     console.log(node);
@@ -127,7 +133,10 @@ const CreateWager = () => {
                 "firstBlood",
                 "bestOf",
               ];
-              return !excludedKeys.includes(key) || !["string", "number"].includes(typeof value);
+              return (
+                !excludedKeys.includes(key) ||
+                !["string", "number"].includes(typeof value)
+              );
             })
             .map(([key, value]) => {
               // Determine the collapsible title based on the key
@@ -209,7 +218,10 @@ const CreateWager = () => {
   const generateBetString = () => {
     // Validation and setting up the bet string based on selected options
     if (selectedEventTypeForBet === "Season") {
-      if (selectedSeasonBetType === "Season Winner" && selectedTeamOrPlayerForBet) {
+      if (
+        selectedSeasonBetType === "Season Winner" &&
+        selectedTeamOrPlayerForBet
+      ) {
         return `I bet that the team ${selectedTeamOrPlayerForBet} will win the ${betNode.name}`;
       } else if (
         selectedSeasonBetType === "Player/Team Attributes" &&
@@ -227,7 +239,10 @@ const CreateWager = () => {
         return `I bet that ${selectedTeamOrPlayerForBet} will be ${selectedAccoladeBetType} in the ${betNode.name}`;
       }
     } else if (selectedEventTypeForBet === "Tournament") {
-      if (selectedTournamentBetType === "Tournament Winner" && selectedTeamOrPlayerForBet) {
+      if (
+        selectedTournamentBetType === "Tournament Winner" &&
+        selectedTeamOrPlayerForBet
+      ) {
         return `I bet that the team ${selectedTeamOrPlayerForBet} will win the ${betNode.name} Tournament`;
       } else if (
         selectedTournamentBetType === "Player/Team Attributes" &&
@@ -245,7 +260,10 @@ const CreateWager = () => {
         return `I bet that ${selectedTeamOrPlayerForBet} will be ${selectedAccoladeBetType} in the ${betNode.name} Tournament`;
       }
     } else if (selectedEventTypeForBet === "Series") {
-      if (selectedSeriesBetType === "Series Winner" && selectedTeamOrPlayerForBet) {
+      if (
+        selectedSeriesBetType === "Series Winner" &&
+        selectedTeamOrPlayerForBet
+      ) {
         return `I bet that the team ${selectedTeamOrPlayerForBet} will win the ${betNode.name} series`;
       } else if (
         selectedSeriesBetType === "Series Score" &&
@@ -274,7 +292,10 @@ const CreateWager = () => {
         return `I bet that ${selectedTeamOrPlayerForBet} will have ${selectedBetOperator} ${attributeBetInput} ${selectedAttributeBetType} in the ${betNode.name} series`;
       }
     } else if (selectedEventTypeForBet === "Match") {
-      if (selectedMatchBetType === "Match Winner" && selectedTeamOrPlayerForBet) {
+      if (
+        selectedMatchBetType === "Match Winner" &&
+        selectedTeamOrPlayerForBet
+      ) {
         return `I bet that the team ${selectedTeamOrPlayerForBet} will win the ${betNode.name} match`;
       } else if (
         selectedMatchBetType === "Match Score" &&
@@ -305,9 +326,9 @@ const CreateWager = () => {
     alert("Please select all required fields to create a valid bet string.");
     return null;
   };
-  
+
   const handleBetSubmit = async () => {
-    if (creditsBet ===  0) {
+    if (creditsBet === 0) {
       alert("Please enter a valid wager amount.");
       return;
     }
@@ -317,41 +338,41 @@ const CreateWager = () => {
       alert("Wager amount is more credits than you have available!");
       return;
     }
-  
+
     // Generate the bet string
     const generatedBetString = generateBetString();
     if (!generatedBetString) return; // Stop if bet string is invalid
-  
+
     // Proceed with creating wager and bet logic
     let wagerPayload = {
       name: generatedBetString,
-      creator: mongoUserId,
+      creator: firebaseUser.mongoUserId,
       rlEventReference: betNode._id,
       wagerType: selectedEventTypeForBet,
       agreeEvaluation: null,
       status: "Betable",
     };
-  
+
     console.log("wagerPayload: ", wagerPayload);
     const wagerResponse = await createWager(wagerPayload);
     console.log(wagerResponse);
-  
+
     let betPayload = {
-      user: mongoUserId,
+      user: firebaseUser.mongoUserId,
       credits: creditsBet,
       agreeBet: true,
       rlEventReference: betNode._id,
       wagerId: wagerResponse.wagerId,
     };
-  
+
     await createBet(betPayload);
-  
+
     console.log("Bet Submitted: ", generatedBetString);
-  
+
     let userPayload = { credits: remainingCredits };
     console.log(userPayload);
-    updateUser(mongoUserId, userPayload);
-  
+    updateUser(firebaseUser.mongoUserId, userPayload);
+
     handleBetCancel();
     navigate("/");
   };
@@ -360,7 +381,11 @@ const CreateWager = () => {
     <div>
       <h2>Welcome to the Create Wager Page</h2>
       <h3>Active Data Tree</h3>
-      {betableObjects ? <div>{renderDataTree(betableObjects)}</div> : <p>Failed to load data.</p>}
+      {betableObjects ? (
+        <div>{renderDataTree(betableObjects)}</div>
+      ) : (
+        <p>Failed to load data.</p>
+      )}
 
       {/* User inputs for bet */}
       {selectedEventTypeForBet === "Season" && !selectedSeasonBetType && (
@@ -378,9 +403,7 @@ const CreateWager = () => {
             <option value="Player/Team Attributes">
               Player/Team Attributes
             </option>
-            <option value="Player Accolades">
-              Player Accolades
-            </option>
+            <option value="Player Accolades">Player Accolades</option>
           </select>
           <button onClick={handleBetCancel} style={styles.cancelButton}>
             Cancel
@@ -391,7 +414,7 @@ const CreateWager = () => {
         selectedSeasonBetType === "Season Winner" && (
           <div style={styles.marginTop}>
             <h3>
-              I bet{" "} 
+              I bet{" "}
               <input
                 type="number"
                 id="numberInput"
@@ -399,8 +422,8 @@ const CreateWager = () => {
                 onChange={(e) => setCreditsBet(parseFloat(e.target.value))}
                 min="0"
                 step="1"
-              />
-              {" "} credits that the team{" "}
+              />{" "}
+              credits that the team{" "}
               <select
                 value={selectedTeamOrPlayerForBet || ""}
                 onChange={(e) => setSelectedTeamOrPlayerForBet(e.target.value)}
@@ -412,8 +435,8 @@ const CreateWager = () => {
                     {team.name}
                   </option>
                 ))}
-              </select>
-              {" "}will win the {betNode.name}
+              </select>{" "}
+              will win the {betNode.name}
             </h3>
             <button onClick={handleBetSubmit} style={styles.confirmButton}>
               Confirm Bet
@@ -427,7 +450,7 @@ const CreateWager = () => {
         selectedSeasonBetType === "Player/Team Attributes" && (
           <div style={styles.marginTop}>
             <h3>
-              I bet{" "} 
+              I bet{" "}
               <input
                 type="number"
                 id="numberInput"
@@ -435,8 +458,8 @@ const CreateWager = () => {
                 onChange={(e) => setCreditsBet(parseFloat(e.target.value))}
                 min="0"
                 step="1"
-              />
-              {" "} credits that{" "}
+              />{" "}
+              credits that{" "}
               <select
                 value={selectedTeamOrPlayerForBet || ""}
                 onChange={(e) => setSelectedTeamOrPlayerForBet(e.target.value)}
@@ -505,7 +528,7 @@ const CreateWager = () => {
         selectedSeasonBetType === "Player Accolades" && (
           <div style={styles.marginTop}>
             <h3>
-              I bet{" "} 
+              I bet{" "}
               <input
                 type="number"
                 id="numberInput"
@@ -513,8 +536,8 @@ const CreateWager = () => {
                 onChange={(e) => setCreditsBet(parseFloat(e.target.value))}
                 min="0"
                 step="1"
-              />
-              {" "} credits that{" "}
+              />{" "}
+              credits that{" "}
               <select
                 value={selectedTeamOrPlayerForBet || ""}
                 onChange={(e) => setSelectedTeamOrPlayerForBet(e.target.value)}
@@ -531,7 +554,7 @@ const CreateWager = () => {
                   </optgroup>
                 ))}
               </select>
-              will be {" "}
+              will be{" "}
               <select
                 value={selectedAccoladeBetType}
                 onChange={(e) => setSelectedAccoladeBetType(e.target.value)}
@@ -540,9 +563,15 @@ const CreateWager = () => {
                 <option value="">Select an Accolade</option>
                 {/* Wording used on Liquipedia */}
                 <option value="Season MVP">Season MVP</option>
-                <option value="Striker of the Season">Striker of the Season</option>
-                <option value="Saviour of the Season">Saviour of the Season</option>
-                <option value="Playmaker of the Season">Playmaker of the Season</option>
+                <option value="Striker of the Season">
+                  Striker of the Season
+                </option>
+                <option value="Saviour of the Season">
+                  Saviour of the Season
+                </option>
+                <option value="Playmaker of the Season">
+                  Playmaker of the Season
+                </option>
               </select>
               in the '{betNode.name}'
             </h3>
@@ -554,35 +583,34 @@ const CreateWager = () => {
             </button>
           </div>
         )}
-      {selectedEventTypeForBet === "Tournament" && !selectedTournamentBetType && (
-        <div>
-          <h3>
-            What type of bet would you like to make on this '{betNode.name}'?
-          </h3>
-          <select
-            value={""}
-            onChange={(e) => setSelectedTournamentBetType(e.target.value)}
-            style={styles.marginRight}
-          >
-            <option value="">Select a Bet Type</option>
-            <option value="Tournament Winner">Tournament Winner</option>
-            <option value="Player/Team Attributes">
-              Player/Team Attributes
-            </option>
-            <option value="Player Accolades">
-              Player Accolades
-            </option>
-          </select>
-          <button onClick={handleBetCancel} style={styles.cancelButton}>
-            Cancel
-          </button>
-        </div>
-      )}
+      {selectedEventTypeForBet === "Tournament" &&
+        !selectedTournamentBetType && (
+          <div>
+            <h3>
+              What type of bet would you like to make on this '{betNode.name}'?
+            </h3>
+            <select
+              value={""}
+              onChange={(e) => setSelectedTournamentBetType(e.target.value)}
+              style={styles.marginRight}
+            >
+              <option value="">Select a Bet Type</option>
+              <option value="Tournament Winner">Tournament Winner</option>
+              <option value="Player/Team Attributes">
+                Player/Team Attributes
+              </option>
+              <option value="Player Accolades">Player Accolades</option>
+            </select>
+            <button onClick={handleBetCancel} style={styles.cancelButton}>
+              Cancel
+            </button>
+          </div>
+        )}
       {selectedEventTypeForBet === "Tournament" &&
         selectedTournamentBetType === "Tournament Winner" && (
           <div style={styles.marginTop}>
             <h3>
-              I bet{" "} 
+              I bet{" "}
               <input
                 type="number"
                 id="numberInput"
@@ -590,8 +618,8 @@ const CreateWager = () => {
                 onChange={(e) => setCreditsBet(parseFloat(e.target.value))}
                 min="0"
                 step="1"
-              />
-              {" "} credits that the team{" "}
+              />{" "}
+              credits that the team{" "}
               <select
                 value={selectedTeamOrPlayerForBet || ""}
                 onChange={(e) => setSelectedTeamOrPlayerForBet(e.target.value)}
@@ -603,8 +631,8 @@ const CreateWager = () => {
                     {team.name}
                   </option>
                 ))}
-              </select>
-              {" "}will win the {betNode.name}
+              </select>{" "}
+              will win the {betNode.name}
             </h3>
             <button onClick={handleBetSubmit} style={styles.confirmButton}>
               Confirm Bet
@@ -618,7 +646,7 @@ const CreateWager = () => {
         selectedTournamentBetType === "Player/Team Attributes" && (
           <div style={styles.marginTop}>
             <h3>
-              I bet{" "} 
+              I bet{" "}
               <input
                 type="number"
                 id="numberInput"
@@ -626,8 +654,8 @@ const CreateWager = () => {
                 onChange={(e) => setCreditsBet(parseFloat(e.target.value))}
                 min="0"
                 step="1"
-              />
-              {" "} credits that{" "}
+              />{" "}
+              credits that{" "}
               <select
                 value={selectedTeamOrPlayerForBet || ""}
                 onChange={(e) => setSelectedTeamOrPlayerForBet(e.target.value)}
@@ -696,7 +724,7 @@ const CreateWager = () => {
         selectedTournamentBetType === "Player Accolades" && (
           <div style={styles.marginTop}>
             <h3>
-              I bet{" "} 
+              I bet{" "}
               <input
                 type="number"
                 id="numberInput"
@@ -704,8 +732,8 @@ const CreateWager = () => {
                 onChange={(e) => setCreditsBet(parseFloat(e.target.value))}
                 min="0"
                 step="1"
-              />
-              {" "} credits that{" "}
+              />{" "}
+              credits that{" "}
               <select
                 value={selectedTeamOrPlayerForBet || ""}
                 onChange={(e) => setSelectedTeamOrPlayerForBet(e.target.value)}
@@ -722,7 +750,7 @@ const CreateWager = () => {
                   </optgroup>
                 ))}
               </select>
-              will be {" "}
+              will be{" "}
               <select
                 value={selectedAccoladeBetType}
                 onChange={(e) => setSelectedAccoladeBetType(e.target.value)}
@@ -771,7 +799,7 @@ const CreateWager = () => {
         selectedSeriesBetType === "Series Winner" && (
           <div style={styles.marginTop}>
             <h3>
-              I bet{" "} 
+              I bet{" "}
               <input
                 type="number"
                 id="numberInput"
@@ -779,8 +807,8 @@ const CreateWager = () => {
                 onChange={(e) => setCreditsBet(parseFloat(e.target.value))}
                 min="0"
                 step="1"
-              />
-              {" "} credits that the team{" "}
+              />{" "}
+              credits that the team{" "}
               <select
                 value={selectedTeamOrPlayerForBet || ""}
                 onChange={(e) => setSelectedTeamOrPlayerForBet(e.target.value)}
@@ -792,8 +820,8 @@ const CreateWager = () => {
                     {team.name}
                   </option>
                 ))}
-              </select>
-              {" "}will win the {betNode.name}
+              </select>{" "}
+              will win the {betNode.name}
             </h3>
             <button onClick={handleBetSubmit} style={styles.confirmButton}>
               Confirm Bet
@@ -807,7 +835,7 @@ const CreateWager = () => {
         selectedSeriesBetType === "Series Score" && (
           <div style={styles.marginTop}>
             <h3>
-              I bet{" "} 
+              I bet{" "}
               <input
                 type="number"
                 id="numberInput"
@@ -815,8 +843,8 @@ const CreateWager = () => {
                 onChange={(e) => setCreditsBet(parseFloat(e.target.value))}
                 min="0"
                 step="1"
-              />
-              {" "} credits that the team {betNode.teams[0].name} will win{" "}
+              />{" "}
+              credits that the team {betNode.teams[0].name} will win{" "}
               <input
                 type="number"
                 id="numberInput"
@@ -848,7 +876,7 @@ const CreateWager = () => {
         selectedSeriesBetType === "First Blood" && (
           <div style={styles.marginTop}>
             <h3>
-              I bet{" "} 
+              I bet{" "}
               <input
                 type="number"
                 id="numberInput"
@@ -856,8 +884,8 @@ const CreateWager = () => {
                 onChange={(e) => setCreditsBet(parseFloat(e.target.value))}
                 min="0"
                 step="1"
-              />
-              {" "} credits that the team{" "}
+              />{" "}
+              credits that the team{" "}
               <select
                 value={selectedTeamOrPlayerForBet || ""}
                 onChange={(e) => setSelectedTeamOrPlayerForBet(e.target.value)}
@@ -884,7 +912,7 @@ const CreateWager = () => {
         selectedSeriesBetType === "Overtime Count" && (
           <div style={styles.marginTop}>
             <h3>
-              I bet{" "} 
+              I bet{" "}
               <input
                 type="number"
                 id="numberInput"
@@ -892,8 +920,8 @@ const CreateWager = () => {
                 onChange={(e) => setCreditsBet(parseFloat(e.target.value))}
                 min="0"
                 step="1"
-              />
-              {" "} credits that there will be{" "}
+              />{" "}
+              credits that there will be{" "}
               <select
                 value={selectedBetOperator}
                 onChange={(e) => setSelectedBetOperator(e.target.value)}
@@ -925,7 +953,7 @@ const CreateWager = () => {
         selectedSeriesBetType === "Player/Team Attributes" && (
           <div style={styles.marginTop}>
             <h3>
-              I bet{" "} 
+              I bet{" "}
               <input
                 type="number"
                 id="numberInput"
@@ -933,8 +961,8 @@ const CreateWager = () => {
                 onChange={(e) => setCreditsBet(parseFloat(e.target.value))}
                 min="0"
                 step="1"
-              />
-              {" "} credits that{" "}
+              />{" "}
+              credits that{" "}
               <select
                 value={selectedTeamOrPlayerForBet || ""}
                 onChange={(e) => setSelectedTeamOrPlayerForBet(e.target.value)}
@@ -1028,7 +1056,7 @@ const CreateWager = () => {
         selectedMatchBetType === "Match Winner" && (
           <div style={styles.marginTop}>
             <h3>
-              I bet{" "} 
+              I bet{" "}
               <input
                 type="number"
                 id="numberInput"
@@ -1036,8 +1064,8 @@ const CreateWager = () => {
                 onChange={(e) => setCreditsBet(parseFloat(e.target.value))}
                 min="0"
                 step="1"
-              />
-              {" "} credits that the team{" "}
+              />{" "}
+              credits that the team{" "}
               <select
                 value={selectedTeamOrPlayerForBet || ""}
                 onChange={(e) => setSelectedTeamOrPlayerForBet(e.target.value)}
@@ -1064,7 +1092,7 @@ const CreateWager = () => {
         selectedMatchBetType === "Match Score" && (
           <div style={styles.marginTop}>
             <h3>
-              I bet{" "} 
+              I bet{" "}
               <input
                 type="number"
                 id="numberInput"
@@ -1072,8 +1100,8 @@ const CreateWager = () => {
                 onChange={(e) => setCreditsBet(parseFloat(e.target.value))}
                 min="0"
                 step="1"
-              />
-              {" "} credits that the team {betNode.teams[0].name} will score{" "}
+              />{" "}
+              credits that the team {betNode.teams[0].name} will score{" "}
               <input
                 type="number"
                 id="numberInput"
@@ -1105,7 +1133,7 @@ const CreateWager = () => {
         selectedMatchBetType === "First Blood" && (
           <div style={styles.marginTop}>
             <h3>
-              I bet{" "} 
+              I bet{" "}
               <input
                 type="number"
                 id="numberInput"
@@ -1113,8 +1141,8 @@ const CreateWager = () => {
                 onChange={(e) => setCreditsBet(parseFloat(e.target.value))}
                 min="0"
                 step="1"
-              />
-              {" "} credits that the team{" "}
+              />{" "}
+              credits that the team{" "}
               <select
                 value={selectedTeamOrPlayerForBet || ""}
                 onChange={(e) => setSelectedTeamOrPlayerForBet(e.target.value)}
@@ -1141,7 +1169,7 @@ const CreateWager = () => {
         selectedMatchBetType === "Match MVP" && (
           <div style={styles.marginTop}>
             <h3>
-              I bet{" "} 
+              I bet{" "}
               <input
                 type="number"
                 id="numberInput"
@@ -1149,8 +1177,8 @@ const CreateWager = () => {
                 onChange={(e) => setCreditsBet(parseFloat(e.target.value))}
                 min="0"
                 step="1"
-              />
-              {" "} credits that the player{" "}
+              />{" "}
+              credits that the player{" "}
               <select
                 value={selectedTeamOrPlayerForBet || ""}
                 onChange={(e) => setSelectedTeamOrPlayerForBet(e.target.value)}
@@ -1167,7 +1195,8 @@ const CreateWager = () => {
                   </optgroup>
                 ))}
               </select>
-              will be the MVP (their team will win and they will have the most points) in the '{betNode.name}' match
+              will be the MVP (their team will win and they will have the most
+              points) in the '{betNode.name}' match
             </h3>
             <button onClick={handleBetSubmit} style={styles.confirmButton}>
               Confirm Bet
@@ -1181,7 +1210,7 @@ const CreateWager = () => {
         selectedMatchBetType === "Player/Team Attributes" && (
           <div style={styles.marginTop}>
             <h3>
-              I bet{" "} 
+              I bet{" "}
               <input
                 type="number"
                 id="numberInput"
@@ -1189,8 +1218,8 @@ const CreateWager = () => {
                 onChange={(e) => setCreditsBet(parseFloat(e.target.value))}
                 min="0"
                 step="1"
-              />
-              {" "} credits that{" "}
+              />{" "}
+              credits that{" "}
               <select
                 value={selectedTeamOrPlayerForBet || ""}
                 onChange={(e) => setSelectedTeamOrPlayerForBet(e.target.value)}
