@@ -1340,6 +1340,11 @@ const getMatchOutcomes = async (matchResults, teams) => {
       }
     });
 
+    // Step 5: Get a team goals string to use as the agree evaluation
+    const teamGoalsString = Object.entries(teamGoals)
+    .map(([key, value]) => `${key}: ${value}`)
+    .join(' - ');
+
     const response = { 
       winningTeam, 
       losingTeam, 
