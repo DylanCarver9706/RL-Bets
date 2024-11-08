@@ -1288,13 +1288,20 @@ app.put("/api/matches/:id", async (req, res) => {
 });
 
 // Function to return end of match meta like winner, loser, MVP, etc. based on match results
-const getMatchOutcomes = async (matchResults, teams) => {
+const getMatchOutcomes = async (matchResults, teams, agreeEvaluationObject=null) => {
   try {
-    // console.log(matchResults)
-    // console.log(teams)
+
+    // Step 1: Retrieve the teams from the teamsCollection
+    const teamsArray = await teamsCollection.find({ _id: { $in: teams } }).toArray();
+
+    // Step 2: Extract player IDs from the teamsArray
+    const playerIds = teamsArray.flatMap(team => team.players);
+
+    // Step 3: Retrieve the player metadata from the playersCollection
+    const playersArray = await playersCollection.find({ _id: { $in: playerIds } }).toArray();
 
     // Initialize team goals
-    const teamGoals = {
+    let teamGoals = {
       [teams[0].toString()]: 0,
       [teams[1].toString()]: 0,
     };
@@ -1348,9 +1355,82 @@ const getMatchOutcomes = async (matchResults, teams) => {
     const response = { 
       winningTeam, 
       losingTeam, 
-      teamGoals, 
+      teamGoals: teamGoalsString, 
       mvp 
     };
+    
+    // Step 6: Optionally determine the agree evaluation of a player/team attributes wager
+    if (agreeEvaluationObject) {
+      const {
+        selectedTeamOrPlayerForBet,
+        selectedBetOperator,
+        attributeBetInput,
+        selectedAttributeBetType,
+      } = agreeEvaluationObject;
+
+      let agreeEvaluation = false;
+
+      // Convert attributeBetInput to a number for comparison
+      const attributeBetValue = parseInt(attributeBetInput, 10);
+      let actualValue = null;
+
+      // Determine if the wager is for a team or a player
+      let teamOrPlayerForBet = null;
+
+      // Check if the selected ID corresponds to a team
+      if (teamsArray.some(team => team._id.toString() === selectedTeamOrPlayerForBet)) {
+        // Find the team for the bet
+        teamOrPlayerForBet = teamsArray.find(team => team._id.toString() === selectedTeamOrPlayerForBet);
+
+        // Calculate the total for the selected attribute from players on this team
+        actualValue = 0;
+        const teamPlayers = playersArray.filter(player =>
+          teamOrPlayerForBet.players.map(id => id.toString()).includes(player._id.toString())
+        );
+
+        // Sum the values of the selected attribute for all players on the team
+        for (const player of teamPlayers) {
+          const playerResult = matchResults[player.name];
+          if (playerResult && selectedAttributeBetType.toLowerCase() in playerResult) {
+            actualValue += playerResult[selectedAttributeBetType.toLowerCase()];
+          }
+        }
+      }
+      // Check if the selected ID corresponds to a player
+      else if (playersArray.some(player => player._id.toString() === selectedTeamOrPlayerForBet)) {
+        // Find the player for the bet
+        teamOrPlayerForBet = playersArray.find(player => player._id.toString() === selectedTeamOrPlayerForBet);
+
+        // Get the value of the selected attribute for the player
+        const playerResult = matchResults[teamOrPlayerForBet.name];
+        if (playerResult && selectedAttributeBetType.toLowerCase() in playerResult) {
+          actualValue = playerResult[selectedAttributeBetType.toLowerCase()];
+        }
+      } else {
+        // Throw an error if neither a team nor a player was found for the bet
+        throw new Error('Team or player not found');
+      }
+
+      // Evaluate the condition if actualValue is valid
+      if (actualValue !== null) {
+        switch (selectedBetOperator) {
+          case 'exactly':
+            agreeEvaluation = actualValue === attributeBetValue;
+            break;
+          case 'more than':
+            agreeEvaluation = actualValue > attributeBetValue;
+            break;
+          case 'less than':
+            agreeEvaluation = actualValue < attributeBetValue;
+            break;
+          default:
+            throw new Error('Invalid bet operator');
+        }
+      }
+
+      // Add the evaluation result to the response
+      response.agreeEvaluation = agreeEvaluation;
+    }
 
     return response;
   } catch (error) {
@@ -1363,7 +1443,7 @@ const handleWagerEnded = async (wagerId, agreeIsWinner) => {
 
  const wager = await wagersCollection.findOne({ _id: new ObjectId(wagerId) });
 
- console.log("wager: ", wager)
+//  console.log("wager: ", wager)
 
  const updatedWager = {
    status: "Ended",
@@ -1380,8 +1460,6 @@ const handleWagerEnded = async (wagerId, agreeIsWinner) => {
  // Fetch updated wager and statistics
  const updatedWagers = await getAllWagers();
  io.emit("wagersUpdate", updatedWagers);  // Emit updated data to all clients
-
-//  const wagerOutcomes = await getMatchOutcomes(matchResults)
 
  await payOutBetWinners(wagerId, agreeIsWinner)
 }
