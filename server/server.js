@@ -1731,16 +1731,16 @@ const handleMatchWagers = async (matchId, matchOutcomes, firstBlood, matchResult
 
 const handleSeriesWagers = async (seriesId) => {
 
-  console.log("seriesId: ", seriesId)
+  // console.log("seriesId: ", seriesId)
   
   // Get all wagers associated to this match
   const seriesWagers = await wagersCollection.find({ rlEventReference: seriesId.toString(), status: "Ongoing" }).toArray();
 
-  console.log("seriesWagers: ", seriesWagers)
+  // console.log("seriesWagers: ", seriesWagers)
 
   const seriesOutcomes = await getSeriesOutcomes(seriesId)
 
-  console.log("seriesOutcomes: ", seriesOutcomes)
+  // console.log("seriesOutcomes: ", seriesOutcomes)
 
   // Wager types:
   // Match: "Match Winner", "Match Score", "First Blood", "Match MVP", "Player/Team Attributes"
@@ -1762,13 +1762,13 @@ const handleSeriesWagers = async (seriesId) => {
         // NOTE: Assign object if of the players n the match results
         // wager.agreeEvaluation is an Object id of the mvp player
         const seriesOutcomesEval = await getSeriesOutcomes(seriesId, wager.wagerType, wager.agreeEvaluation)
-        console.log("seriesOutcomesEval: ", seriesOutcomesEval)
+        // console.log("seriesOutcomesEval: ", seriesOutcomesEval)
         await handleWagerEnded(wager._id, seriesOutcomesEval.agreeEvaluation);
       } else if (wager.wagerType === "Player/Team Attributes") {
         // NOTE: Make wager evaluation a trimmed version of wager.name
         // wager.agreeEvaluation is a string formatted as "Object id of the player/team will have exactly/more than/less than X of the following attributes: Points, Goals, Assists, Shots, Saves, Demos"
         const seriesOutcomesEval = await getSeriesOutcomes(seriesId, wager.wagerType, wager.agreeEvaluation)
-        console.log("seriesOutcomesEval: ", seriesOutcomesEval)
+        // console.log("seriesOutcomesEval: ", seriesOutcomesEval)
         await handleWagerEnded(wager._id, seriesOutcomesEval.agreeEvaluation);
       }
     }
@@ -1879,6 +1879,7 @@ app.put("/api/match_concluded/:id", async (req, res) => {
         }
       );
       createLog({ type: "Series Ended", seriesId: seriesDoc._id })
+      await handleSeriesWagers(seriesDoc._id)
     }
 
     // Set status for Tournament if included in request body
