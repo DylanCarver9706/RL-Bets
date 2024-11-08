@@ -1469,7 +1469,7 @@ const handleMatchWagers = async (matchId, matchOutcomes, firstBlood, matchResult
   // Get all wagers associated to this match
   const matchWagers = await wagersCollection.find({ rlEventReference: matchId, status: "Ongoing" }).toArray();
 
-  console.log("matchWagers: ", matchWagers)
+  // console.log("matchWagers: ", matchWagers)
 
   // Wager types:
   // Match: "Match Winner", "Match Score", "First Blood", "Match MVP", "Player/Team Attributes"
@@ -1525,15 +1525,15 @@ app.put("/api/match_concluded/:id", async (req, res) => {
       return res.status(404).json({ error: "Series not found" });
     }
 
-    const wagerOutcomes = await getMatchOutcomes(results, matchDoc.teams);
+    const matchOutcomes = await getMatchOutcomes(results, matchDoc.teams);
 
-    console.log("wagerOutcomes: ", wagerOutcomes)
+    // console.log("matchOutcomes: ", matchOutcomes)
 
     // Build the update object for the match
     const updateData = {
       results: results,
-      winner: new ObjectId(wagerOutcomes.winningTeam),
-      loser: new ObjectId(wagerOutcomes.winningTeam),
+      winner: new ObjectId(matchOutcomes.winningTeam),
+      loser: new ObjectId(matchOutcomes.winningTeam),
       firstBlood: firstBlood,
       wentToOvertime: wentToOvertime,
       series: new ObjectId(seriesDoc._id),
@@ -1550,16 +1550,17 @@ app.put("/api/match_concluded/:id", async (req, res) => {
       return res.status(404).json({ error: "Match not found" });
     }
 
-    createLog({ type: "Match Ended", matchId: updatedMatch.insertedId, wagerOutcomes: wagerOutcomes })
+    createLog({ type: "Match Ended", matchId: updatedMatch.insertedId, matchOutcomes: matchOutcomes })
 
     message = "Match" + message
 
 
-    await handleMatchWagers(req.params.id, wagerOutcomes, firstBlood, results, matchDoc.teams)
+    await handleMatchWagers(req.params.id, matchOutcomes, firstBlood, results, matchDoc.teams)
 
     
     // Update the series document if series has ended with this match
-    console.log("seriesDoc: ", seriesDoc.firstBlood)
+
+
     // Set first blood if it is not set because this would be the first match
     if (seriesDoc.firstBlood === null) {
       await seriesCollection.updateOne(
@@ -1594,6 +1595,8 @@ app.put("/api/match_concluded/:id", async (req, res) => {
       message = "Series," + message
       let seriesUpdateData = {
         status: "Ended",
+        winner: new ObjectId(matchOutcomes.winningTeam),
+        loser: new ObjectId(matchOutcomes.losingTeam),
         overtimeCount: overtimeCount,
       };
       await seriesCollection.updateOne(
@@ -1602,7 +1605,7 @@ app.put("/api/match_concluded/:id", async (req, res) => {
           $set: seriesUpdateData
         }
       );
-      createLog({ type: "Series Ended", seriesId: seriesDoc._id, wagerOutcomes: wagerOutcomes })
+      createLog({ type: "Series Ended", seriesId: seriesDoc._id })
     }
 
     // Set status for Tournament if included in request body
@@ -1617,7 +1620,7 @@ app.put("/api/match_concluded/:id", async (req, res) => {
           }
         }
       );
-      createLog({ type: "Tournament Ended", tournamentId: seriesDoc.tournament, wagerOutcomes: wagerOutcomes })
+      createLog({ type: "Tournament Ended", tournamentId: seriesDoc.tournament })
       message = "Tournament," + message
     }
     
@@ -1635,7 +1638,7 @@ app.put("/api/match_concluded/:id", async (req, res) => {
           { $set: { status: "Ended", winner: wagerOutcomes.winningTeam } }
         );
       }
-      createLog({ type: "Season Ended", SeasonId: seasonDoc._id, wagerOutcomes: wagerOutcomes })
+      createLog({ type: "Season Ended", SeasonId: seasonDoc._id })
       message = "Season," + message
     }
 
