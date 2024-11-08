@@ -214,18 +214,17 @@ const Home = () => {
               <li key={wager._id} style={styles.wagerItem}>
                 <div style={styles.wagerHeader}>
                   <strong>Wager ID: {wager._id}</strong>
-                  <strong>
+                  <br />
+                  <strong>Event ID: {wager.rlEventReference}</strong>
+                  <br />
+                  <strong>Creator: {wager.creator}</strong>
+                  <br />
+                  <strong>Status: {wager.status}</strong>
+                  <p>
                     <br />
                     {wager.name}
-                  </strong>
-                  <p>
-                    <br />
-                    Creator: {wager.creator}
                   </p>
-                  <p>
-                    <br />
-                    Status: {wager.status}
-                  </p>
+                  <br />
                 </div>
                 <div style={styles.wagerBody}>
                   <div style={styles.agreeSection}>
