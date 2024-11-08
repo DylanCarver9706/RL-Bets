@@ -348,10 +348,49 @@ const CreateWager = () => {
       name: generatedBetString,
       creator: firebaseUser.mongoUserId,
       rlEventReference: betNode._id,
-      wagerType: selectedEventTypeForBet,
+      wagerType: null,
       agreeEvaluation: null,
       status: "Betable",
     };
+
+    if (selectedEventTypeForBet === "Match") {
+      wagerPayload.wagerType = selectedMatchBetType;
+      if (selectedMatchBetType === "Match Winner") {
+        const agreeTeam = teams.find(team => team.name === selectedTeamOrPlayerForBet);
+        wagerPayload.agreeEvaluation = agreeTeam._id;
+      } else if (selectedMatchBetType === "Match Score") {
+        wagerPayload.agreeEvaluation = `${betNode.teams[0]._id}: ${selectedTeam1ScoreForBet} - ${betNode.teams[1]._id}: ${selectedTeam2ScoreForBet}`;
+      } else if (selectedMatchBetType === "First Blood") {
+        const agreeTeam = teams.find(team => team.name === selectedTeamOrPlayerForBet);
+        wagerPayload.agreeEvaluation = agreeTeam._id;
+      } else if (selectedMatchBetType === "Match MVP") {
+        const allPlayers = teams.flatMap(team => team.players);
+        const agreePlayer = allPlayers.find(player => player.name === selectedTeamOrPlayerForBet);
+        wagerPayload.agreeEvaluation = agreePlayer._id;
+      } else if (selectedMatchBetType === "Player/Team Attributes") {
+        let agreeEvaluationTeamOrPlayer = null;
+        let agreeEvaluationObject = {};
+        const agreeTeam = teams.find(team => team.name === selectedTeamOrPlayerForBet);
+        if (agreeTeam) {
+          agreeEvaluationTeamOrPlayer = agreeTeam._id;
+        } else {
+          const allPlayers = teams.flatMap(team => team.players);
+          const agreePlayer = allPlayers.find(player => player.name === selectedTeamOrPlayerForBet);
+          agreeEvaluationTeamOrPlayer = agreePlayer._id;
+        }
+        agreeEvaluationObject["selectedTeamOrPlayerForBet"] = agreeEvaluationTeamOrPlayer
+        agreeEvaluationObject["selectedBetOperator"] = selectedBetOperator;
+        agreeEvaluationObject["attributeBetInput"] = attributeBetInput;
+        agreeEvaluationObject["selectedAttributeBetType"] = selectedAttributeBetType;
+        wagerPayload.agreeEvaluation = agreeEvaluationObject
+      }
+    } else if (selectedEventTypeForBet === "Series") {
+      wagerPayload.wagerType = selectedSeriesBetType;
+    } else if (selectedEventTypeForBet === "Tournament") {
+      wagerPayload.wagerType = selectedTournamentBetType;
+    } else if (selectedEventTypeForBet === "Season") {
+      wagerPayload.wagerType = selectedSeasonBetType;
+    }
 
     console.log("wagerPayload: ", wagerPayload);
     const wagerResponse = await createWager(wagerPayload);
