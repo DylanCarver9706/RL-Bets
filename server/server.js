@@ -1464,6 +1464,39 @@ const handleWagerEnded = async (wagerId, agreeIsWinner) => {
  await payOutBetWinners(wagerId, agreeIsWinner)
 }
 
+const calculatePlayerTotals = (matches) => {
+  // Object to keep track of each player's aggregated stats across all matches
+  const playerTotals = {};
+
+  // Iterate through each match in the series
+  matches.forEach(match => {
+    const { results } = match;
+
+    // Iterate through each player in the match results
+    Object.entries(results).forEach(([playerName, playerStats]) => {
+      // Initialize the player's total if not already present
+      if (!playerTotals[playerName]) {
+        playerTotals[playerName] = {
+          score: 0,
+          goals: 0,
+          assists: 0,
+          shots: 0,
+          saves: 0,
+          demos: 0,
+        };
+      }
+
+      // Add the stats of the current match to the player's total
+      Object.keys(playerStats).forEach(stat => {
+        playerTotals[playerName][stat] += playerStats[stat];
+      });
+    });
+  });
+
+  // Return the total aggregated results for each player
+  return playerTotals;
+};
+
 const handleMatchWagers = async (matchId, matchOutcomes, firstBlood, matchResults, teams) => {
   
   // Get all wagers associated to this match
