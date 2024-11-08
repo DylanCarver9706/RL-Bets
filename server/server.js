@@ -1497,6 +1497,201 @@ const calculatePlayerTotals = (matches) => {
   return playerTotals;
 };
 
+const getSeriesOutcomes = async (seriesId, agreeEvaluationWagerType=null, agreeEvaluationObject=null) => {
+  try {
+
+    const response = { 
+      winningTeam: null,
+      losingTeam: null,
+      seriesScore: null,
+      firstBlood: null,
+      overtimeCount: null,
+      agreeEvaluation: null,
+    };
+
+    const seriesDoc = await seriesCollection.findOne({ _id: new ObjectId(seriesId) })
+
+    const seriesMatches = await matchesCollection.find({ _id: { $in: seriesDoc.matches } }).toArray();
+
+    let teamWins = {};
+    let overtimeCount = 0; // Counter for matches that went to overtime
+
+    // Iterate through each match in the series
+    seriesMatches.forEach(match => {
+      const { winner, teams, wentToOvertime } = match;
+
+      // Check if the match went to overtime and increment the counter if true
+      if (wentToOvertime) {
+        overtimeCount++;
+      }
+
+      // Initialize teams in the teamWins object if not already present
+      teams.forEach(team => {
+        if (!teamWins[team]) {
+          teamWins[team] = 0;
+        }
+      });
+
+      // Increment the win count for the winning team
+      if (winner) {
+        teamWins[winner]++;
+      }
+    });
+
+    // Create the seriesScore string
+    const seriesScore = Object.entries(teamWins).map(([team, wins]) => `${team}: ${wins}`).join(' - ');
+
+    response.winningTeam = seriesDoc.winner
+    response.losingTeam = seriesDoc.loser
+    response.firstBlood = seriesDoc.firstBlood
+    response.seriesScore = seriesScore;
+    response.overtimeCount = overtimeCount;
+
+    const seriesMatchesResults = calculatePlayerTotals(seriesMatches);
+
+    console.log("seriesMatchesResults: ", seriesMatchesResults)
+
+    // Step 1: Retrieve the teams from the teamsCollection
+    const teamsArray = await teamsCollection.find({ _id: { $in: seriesDoc.teams } }).toArray();
+
+    // Step 2: Extract player IDs from the teamsArray
+    const playerIds = teamsArray.flatMap(team => team.players);
+
+    // Step 3: Retrieve the player metadata from the playersCollection
+    const playersArray = await playersCollection.find({ _id: { $in: playerIds } }).toArray();
+
+    // Initialize team goals
+    let teamGoals = {
+      [seriesDoc.teams[0].toString()]: 0,
+      [seriesDoc.teams[1].toString()]: 0,
+    };
+
+    // Step 1: Retrieve players and their team associations
+    const playerNames = Object.keys(seriesMatchesResults);
+    const players = await playersCollection.find({ name: { $in: playerNames } }).toArray();
+
+    // Step 2: Map player goals to their respective teams
+    players.forEach((player) => {
+      const playerResult = seriesMatchesResults[player.name];
+      if (playerResult) {
+        const teamId = player.team.toString();
+        if (teamGoals[teamId] !== undefined) {
+          teamGoals[teamId] += playerResult.goals; // Sum goals per team
+        }
+      }
+    });
+    
+    // Step 6: Optionally determine the agree evaluation of a player/team attributes wager
+    if (agreeEvaluationWagerType === "Player/Team Attributes" && agreeEvaluationObject) {
+      const {
+        selectedTeamOrPlayerForBet,
+        selectedBetOperator,
+        attributeBetInput,
+        selectedAttributeBetType,
+      } = agreeEvaluationObject;
+
+      let agreeEvaluation = false;
+
+      // Convert attributeBetInput to a number for comparison
+      const attributeBetValue = parseInt(attributeBetInput, 10);
+      let actualValue = null;
+
+      // Determine if the wager is for a team or a player
+      let teamOrPlayerForBet = null;
+
+      // Check if the selected ID corresponds to a team
+      if (teamsArray.some(team => team._id.toString() === selectedTeamOrPlayerForBet)) {
+        // Find the team for the bet
+        teamOrPlayerForBet = teamsArray.find(team => team._id.toString() === selectedTeamOrPlayerForBet);
+
+        // Calculate the total for the selected attribute from players on this team
+        actualValue = 0;
+        const teamPlayers = playersArray.filter(player =>
+          teamOrPlayerForBet.players.map(id => id.toString()).includes(player._id.toString())
+        );
+
+        // Sum the values of the selected attribute for all players on the team
+        for (const player of teamPlayers) {
+          const playerResult = seriesMatchesResults[player.name];
+          if (playerResult && selectedAttributeBetType.toLowerCase() in playerResult) {
+            actualValue += playerResult[selectedAttributeBetType.toLowerCase()];
+          }
+        }
+      }
+      // Check if the selected ID corresponds to a player
+      else if (playersArray.some(player => player._id.toString() === selectedTeamOrPlayerForBet)) {
+        // Find the player for the bet
+        teamOrPlayerForBet = playersArray.find(player => player._id.toString() === selectedTeamOrPlayerForBet);
+
+        // Get the value of the selected attribute for the player
+        const playerResult = seriesMatchesResults[teamOrPlayerForBet.name];
+        if (playerResult && selectedAttributeBetType.toLowerCase() in playerResult) {
+          actualValue = playerResult[selectedAttributeBetType.toLowerCase()];
+        }
+      } else {
+        // Throw an error if neither a team nor a player was found for the bet
+        throw new Error('Team or player not found');
+      }
+
+      // Evaluate the condition if actualValue is valid
+      if (actualValue !== null) {
+        switch (selectedBetOperator) {
+          case 'exactly':
+            agreeEvaluation = actualValue === attributeBetValue;
+            break;
+          case 'more than':
+            agreeEvaluation = actualValue > attributeBetValue;
+            break;
+          case 'less than':
+            agreeEvaluation = actualValue < attributeBetValue;
+            break;
+          default:
+            throw new Error('Invalid bet operator');
+        }
+      }
+
+      // Add the evaluation result to the response
+      response.agreeEvaluation = agreeEvaluation;
+    } else if (agreeEvaluationWagerType === "Overtime Count" && agreeEvaluationObject) {
+      const {
+        selectedBetOperator,
+        seriesOvertimeBetInput,
+      } = agreeEvaluationObject;
+
+      let agreeEvaluation = false;
+
+      // Convert attributeBetInput to a number for comparison
+      const attributeBetValue = parseInt(seriesOvertimeBetInput, 10);
+
+      // Evaluate the condition if actualValue is valid
+      if (attributeBetValue !== null) {
+        switch (selectedBetOperator) {
+          case 'exactly':
+            agreeEvaluation = overtimeCount === attributeBetValue;
+            break;
+          case 'more than':
+            agreeEvaluation = overtimeCount > attributeBetValue;
+            break;
+          case 'less than':
+            agreeEvaluation = overtimeCount < attributeBetValue;
+            break;
+          default:
+            throw new Error('Invalid bet operator');
+        }
+      }
+
+      // Add the evaluation result to the response
+      response.agreeEvaluation = agreeEvaluation;
+    }
+
+
+    return response;
+  } catch (error) {
+    console.error("Error determining match winner:", error);
+    throw new Error("Failed to determine match winner");
+  }
+};
+
 const handleMatchWagers = async (matchId, matchOutcomes, firstBlood, matchResults, teams) => {
   
   // Get all wagers associated to this match
