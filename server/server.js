@@ -1504,7 +1504,7 @@ const handleMatchWagers = async (matchId, matchOutcomes, firstBlood, matchResult
 // Update a match by ID (PUT)
 app.put("/api/match_concluded/:id", async (req, res) => {
   try {
-    const { results, firstBlood, endTournament, endSeason } = req.body;
+    const { results, firstBlood, wentToOvertime, endTournament, endSeason } = req.body;
 
     let message = " updated successfully"
     
@@ -1535,6 +1535,7 @@ app.put("/api/match_concluded/:id", async (req, res) => {
       winner: new ObjectId(wagerOutcomes.winningTeam),
       loser: new ObjectId(wagerOutcomes.winningTeam),
       firstBlood: firstBlood,
+      wentToOvertime: wentToOvertime,
       series: new ObjectId(seriesDoc._id),
       status: "Ended"
     };
@@ -1578,9 +1579,13 @@ app.put("/api/match_concluded/:id", async (req, res) => {
 
     // Count the number of wins for each team in the series
     let winnerWinsCount = 0;
+    let overtimeCount = 0;
     seriesMatches.forEach((match) => {
-      if (match.status === "Ended" && match.winner.equals(new ObjectId(wagerOutcomes.winningTeam))) {
+      if (match.status === "Ended" && match.winner.equals(new ObjectId(matchOutcomes.winningTeam))) {
         winnerWinsCount++;
+      }
+      if (match.status === "Ended" && match.wentToOvertime === true) {
+        overtimeCount++;
       }
     });
 
@@ -1589,8 +1594,7 @@ app.put("/api/match_concluded/:id", async (req, res) => {
       message = "Series," + message
       let seriesUpdateData = {
         status: "Ended",
-        winner: new ObjectId(wagerOutcomes.winningTeam),
-        loser: new ObjectId(wagerOutcomes.losingTeam),
+        overtimeCount: overtimeCount,
       };
       await seriesCollection.updateOne(
         { _id: new ObjectId(seriesDoc._id) },
