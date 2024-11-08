@@ -132,6 +132,7 @@ const CreateWager = () => {
                 "loser",
                 "firstBlood",
                 "bestOf",
+                "overtimeCount"
               ];
               return (
                 !excludedKeys.includes(key) ||
@@ -386,6 +387,38 @@ const CreateWager = () => {
       }
     } else if (selectedEventTypeForBet === "Series") {
       wagerPayload.wagerType = selectedSeriesBetType;
+      if (selectedSeriesBetType === "Series Winner") {
+        console.log("selectedTeamOrPlayerForBet", selectedTeamOrPlayerForBet)
+        const agreeTeam = teams.find(team => team.name === selectedTeamOrPlayerForBet);
+        console.log("agreeTeam", agreeTeam)
+        wagerPayload.agreeEvaluation = agreeTeam._id;
+      } else if (selectedSeriesBetType === "Series Score") {
+        wagerPayload.agreeEvaluation = `${betNode.teams[0]._id}: ${selectedTeam1ScoreForBet} - ${betNode.teams[1]._id}: ${selectedTeam2ScoreForBet}`;
+      } else if (selectedSeriesBetType === "First Blood") {
+        const agreeTeam = teams.find(team => team.name === selectedTeamOrPlayerForBet);
+        wagerPayload.agreeEvaluation = agreeTeam._id;
+      } else if (selectedSeriesBetType === "Overtime Count") {
+        let agreeEvaluationObject = {};
+        agreeEvaluationObject["selectedBetOperator"] = selectedBetOperator;
+        agreeEvaluationObject["seriesOvertimeBetInput"] = seriesOvertimeBetInput;
+        wagerPayload.agreeEvaluation = agreeEvaluationObject
+      } else if (selectedSeriesBetType === "Player/Team Attributes") {
+        let agreeEvaluationTeamOrPlayer = null;
+        let agreeEvaluationObject = {};
+        const agreeTeam = teams.find(team => team.name === selectedTeamOrPlayerForBet);
+        if (agreeTeam) {
+          agreeEvaluationTeamOrPlayer = agreeTeam._id;
+        } else {
+          const allPlayers = teams.flatMap(team => team.players);
+          const agreePlayer = allPlayers.find(player => player.name === selectedTeamOrPlayerForBet);
+          agreeEvaluationTeamOrPlayer = agreePlayer._id;
+        }
+        agreeEvaluationObject["selectedTeamOrPlayerForBet"] = agreeEvaluationTeamOrPlayer
+        agreeEvaluationObject["selectedBetOperator"] = selectedBetOperator;
+        agreeEvaluationObject["attributeBetInput"] = attributeBetInput;
+        agreeEvaluationObject["selectedAttributeBetType"] = selectedAttributeBetType;
+        wagerPayload.agreeEvaluation = agreeEvaluationObject
+      }
     } else if (selectedEventTypeForBet === "Tournament") {
       wagerPayload.wagerType = selectedTournamentBetType;
     } else if (selectedEventTypeForBet === "Season") {
