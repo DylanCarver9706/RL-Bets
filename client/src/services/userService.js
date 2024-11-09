@@ -47,7 +47,7 @@ export const createUserInDatabase = async (name, email, password, firebaseUserId
 };
 
 // Function to get the MongoDB user ID by Firebase user ID
-export const getMongoUserIdByFirebaseId = async (firebaseUserId) => {
+export const getMongoUserDataByFirebaseId = async (firebaseUserId) => {
   try {
 
     const idToken = await getFirebaseIdToken();
@@ -63,10 +63,10 @@ export const getMongoUserIdByFirebaseId = async (firebaseUserId) => {
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.error || "Failed to fetch MongoDB user ID.");
+      throw new Error(data.error || "Failed to fetch MongoDB user data.");
     }
 
-    return data._id; // Return the MongoDB user ID
+    return data; // Return the MongoDB user ID
   } catch (err) {
     console.error("Error fetching MongoDB user ID:", err.message);
     throw err;
