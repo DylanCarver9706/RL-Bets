@@ -52,8 +52,13 @@ const Admin = () => {
     );
   };
 
-  // Function to render each event as a card
-  const renderCard = (title, content) => (
+  // Function to log data of the card
+  const handleLogData = (data) => {
+    console.log("Card Data:", data);
+  };
+
+  // Function to render each event as a card with a log button
+  const renderCard = (title, content, data) => (
     <div
       style={{
         border: "1px solid #ccc",
@@ -63,7 +68,25 @@ const Admin = () => {
         padding: "15px",
       }}
     >
-      <h3 style={{ margin: "0 0 10px" }}>{title}</h3>
+      <h3 style={{ margin: "0 0 10px" }}>
+        {title}{" "}
+        {["season", "tournament", "series", "match"].includes(data.type.toLowerCase()) && (
+          <button
+            onClick={() => handleLogData(data)}
+            style={{
+              marginTop: "10px",
+              background: "#007bff",
+              color: "white",
+              border: "none",
+              padding: "5px 10px",
+              cursor: "pointer",
+              borderRadius: "5px",
+            }}
+          >
+            Log Data
+          </button>
+        )}
+      </h3>
       {content}
     </div>
   );
@@ -122,7 +145,7 @@ const Admin = () => {
         <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
           {node.map((item, index) => (
             <div key={index} style={{ flex: "1 1 300px" }}>
-              {renderCard(item.name || `Item ${index + 1}`, renderDataTree(item))}
+              {renderCard(item.name || `Item ${index + 1}`, renderDataTree(item), item)}
             </div>
           ))}
         </div>
@@ -145,7 +168,7 @@ const Admin = () => {
                 <CollapsibleSection key={key} title={title}>
                   {value.map((item, index) => (
                     <div key={index} style={{ marginBottom: "10px" }}>
-                      {renderCard(item.name || `${title} ${index + 1}`, renderDataTree(item))}
+                      {renderCard(item.name || `${title} ${index + 1}`, renderDataTree(item), item)}
                     </div>
                   ))}
                 </CollapsibleSection>
@@ -154,7 +177,7 @@ const Admin = () => {
 
             return typeof value === "object" ? (
               <CollapsibleSection key={key} title={title}>
-                {renderCard(value.name || title, renderDataTree(value))}
+                {renderCard(value.name || title, renderDataTree(value), value)}
               </CollapsibleSection>
             ) : (
               <div key={key} style={{ marginBottom: "5px" }}>
@@ -172,7 +195,7 @@ const Admin = () => {
   const renderSeasons = (seasons) => {
     return seasons.map((season, index) => (
       <CollapsibleSection key={index} title={`Season: ${season.name || `Season ${index + 1}`}`}>
-        {renderCard(season.name || `Season ${index + 1}`, renderDataTree(season))}
+        {renderCard(season.name || `Season ${index + 1}`, renderDataTree(season), season)}
       </CollapsibleSection>
     ));
   };
