@@ -10,6 +10,7 @@ import Schedule from "./components/Schedule";
 import Credits from "./components/Credits";
 import Leaderboard from "./components/Leaderboard";
 import Log from "./components/Log";
+import Admin from "./components/Admin";
 
 function AppRoutes() {
   const { firebaseUser, loading } = useAuth();
@@ -40,7 +41,7 @@ function AppRoutes() {
         <Route path="/Schedule" element={firebaseUser ? <Schedule /> : <Auth />} />
         <Route path="/Credits" element={firebaseUser ? <Credits /> : <Auth />} />
         <Route path="/Leaderboard" element={firebaseUser ? <Leaderboard /> : <Auth />} />
-        <Route path="/Log" element={firebaseUser ? <Log /> : <Auth />} />
+        <Route path="/Admin" element={firebaseUser.userType === "admin" ? <Admin /> : <Home />} />
       </Routes>
     </>
   );
