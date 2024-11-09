@@ -1549,7 +1549,7 @@ const getSeriesOutcomes = async (seriesId, agreeEvaluationWagerType=null, agreeE
 
     const seriesMatchesResults = calculatePlayerTotals(seriesMatches);
 
-    console.log("seriesMatchesResults: ", seriesMatchesResults)
+    // console.log("seriesMatchesResults: ", seriesMatchesResults)
 
     // Step 1: Retrieve the teams from the teamsCollection
     const teamsArray = await teamsCollection.find({ _id: { $in: seriesDoc.teams } }).toArray();
@@ -1894,6 +1894,38 @@ const getTournamentOutcomes = async (tournamentId, agreeEvaluationObject = null)
     throw new Error("Failed to determine tournament outcomes");
   }
 };
+
+const handleTournamentWagers = async (tournamentId) => {
+
+  // console.log("tournamentId: ", tournamentId)
+  
+  // Get all wagers associated to this match
+  const tournamentWagers = await wagersCollection.find({ rlEventReference: tournamentId.toString(), status: "Ongoing" }).toArray();
+
+  // console.log("tournamentWagers: ", tournamentWagers)
+
+  const tournamentOutcomes = await getTournamentOutcomes(tournamentId)
+
+  // console.log("tournamentOutcomes: ", tournamentOutcomes)
+
+  // Wager types:
+  // Match: "Match Winner", "Match Score", "First Blood", "Match MVP", "Player/Team Attributes"
+  // Series: "Series Winner", "Series Score", "First Blood", "Overtime Count", "Player/Team Attributes"
+  // Tournament: "Tournament Winner", "Player/Team Attributes", "Player Accolades"
+  // Season: "Season Winner", "Player/Team Attributes", "Player Accolades"
+
+  for (const wager of tournamentWagers) {
+    if (wager.wagerType === "Tournament Winner") {
+      // wager.agreeEvaluation is an Object id of the winning team
+      await handleWagerEnded(wager._id, wager.agreeEvaluation === tournamentOutcomes.winningTeam.toString())
+    } else if (wager.wagerType === "Player/Team Attributes") {
+      // NOTE: Make wager evaluation a trimmed version of wager.name
+      // wager.agreeEvaluation is a string formatted as "Object id of the player/team will have exactly/more than/less than X of the following attributes: Points, Goals, Assists, Shots, Saves, Demos"
+      const tournamentOutcomesEval = await getTournamentOutcomes(tournamentId, wager.agreeEvaluation)
+      // console.log("tournamentOutcomesEval: ", tournamentOutcomesEval)
+      await handleWagerEnded(wager._id, tournamentOutcomesEval.agreeEvaluation);
+    }
+  }
 }
 
 // Update a match by ID (PUT)
