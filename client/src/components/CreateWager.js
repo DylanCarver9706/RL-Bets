@@ -443,8 +443,27 @@ const CreateWager = () => {
       }
     } else if (selectedEventTypeForBet === "Season") {
       wagerPayload.wagerType = selectedSeasonBetType;
+      if (selectedSeasonBetType === "Season Winner") {
+        const agreeTeam = teams.find(team => team.name === selectedTeamOrPlayerForBet);
+        wagerPayload.agreeEvaluation = agreeTeam._id;
+      } else if (selectedSeasonBetType === "Player/Team Attributes") {
+        let agreeEvaluationTeamOrPlayer = null;
+        let agreeEvaluationObject = {};
+        const agreeTeam = teams.find(team => team.name === selectedTeamOrPlayerForBet);
+        if (agreeTeam) {
+          agreeEvaluationTeamOrPlayer = agreeTeam._id;
+        } else {
+          const allPlayers = teams.flatMap(team => team.players);
+          const agreePlayer = allPlayers.find(player => player.name === selectedTeamOrPlayerForBet);
+          agreeEvaluationTeamOrPlayer = agreePlayer._id;
+        }
+        agreeEvaluationObject["selectedTeamOrPlayerForBet"] = agreeEvaluationTeamOrPlayer
+        agreeEvaluationObject["selectedBetOperator"] = selectedBetOperator;
+        agreeEvaluationObject["attributeBetInput"] = attributeBetInput;
+        agreeEvaluationObject["selectedAttributeBetType"] = selectedAttributeBetType;
+        wagerPayload.agreeEvaluation = agreeEvaluationObject
+      }
     }
-
     console.log("wagerPayload: ", wagerPayload);
     const wagerResponse = await createWager(wagerPayload);
     console.log(wagerResponse);
