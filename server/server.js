@@ -2505,6 +2505,95 @@ app.delete("/api/players/:id", async (req, res) => {
 // ************************************************************************************************
 // ************************************************************************************************
 
+// Get complete information for all seasons (GET)
+app.get("/api/data-trees/season/all", async (req, res) => {
+  try {
+    // Fetch all season documents
+    const seasons = await seasonsCollection.find().toArray();
+
+    // Iterate over each season to construct a complete data tree
+    const seasonsWithData = await Promise.all(
+      seasons.map(async (season) => {
+        // Fetch the tournaments related to this season
+        const tournaments = await tournamentsCollection
+          .find({ _id: { $in: season.tournaments } })
+          .toArray();
+
+        // Fetch all series for the tournaments
+        const tournamentIds = tournaments.map((tournament) => tournament._id);
+        const seriesList = await seriesCollection
+          .find({ tournament: { $in: tournamentIds } })
+          .toArray();
+
+        // Fetch all matches for the series
+        const seriesIds = seriesList.map((series) => series._id);
+        const matches = await matchesCollection
+          .find({ series: { $in: seriesIds } })
+          .toArray();
+
+        // Fetch all teams for the series and matches
+        const matchTeamIds = matches.flatMap((match) => match.teams);
+        const seriesTeamIds = seriesList.flatMap((series) => series.teams);
+        const allTeamIds = [...new Set([...matchTeamIds, ...seriesTeamIds])]; // Unique list of all team IDs
+        const teams = await teamsCollection
+          .find({ _id: { $in: allTeamIds } })
+          .toArray();
+
+        // Fetch all players for the teams
+        const playerIds = teams.flatMap((team) => team.players);
+        const players = await playersCollection
+          .find({ _id: { $in: playerIds } })
+          .toArray();
+
+        // Map teams with their respective players
+        const teamsWithPlayers = teams.map((team) => ({
+          ...team,
+          players: players.filter((player) => player.team.equals(team._id)), // Populate players in the team
+        }));
+
+        // Map matches with their respective teams and players
+        const matchesWithTeams = matches.map((match) => ({
+          ...match,
+          teams: teamsWithPlayers.filter((team) =>
+            match.teams.some((t) => t.equals(team._id))
+          ), // Populate teams in the match
+        }));
+
+        // Map series with their respective matches and teams
+        const seriesWithMatches = seriesList.map((series) => ({
+          ...series,
+          teams: teamsWithPlayers.filter((team) =>
+            series.teams.some((t) => t.equals(team._id))
+          ), // Populate teams in the series
+          matches: matchesWithTeams.filter((match) =>
+            match.series.equals(series._id)
+          ), // Populate matches in the series
+        }));
+
+        // Map tournaments with their respective series
+        const tournamentsWithSeries = tournaments.map((tournament) => ({
+          ...tournament,
+          series: seriesWithMatches.filter((series) =>
+            series.tournament.equals(tournament._id)
+          ), // Populate series in the tournament
+        }));
+
+        // Construct the complete season object
+        return {
+          ...season,
+          tournaments: tournamentsWithSeries,
+        };
+      })
+    );
+
+    res.status(200).json(seasonsWithData);
+  } catch (err) {
+    res
+      .status(500)
+      .json({ error: "Failed to fetch all season data", details: err.message });
+  }
+});
+
 // Get complete information for a season (GET)
 app.get("/api/data-trees/season/:id", async (req, res) => {
   try {
