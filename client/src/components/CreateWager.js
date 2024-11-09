@@ -619,7 +619,7 @@ const CreateWager = () => {
                 style={styles.marginRight}
               >
                 <option value="">Select an Attribute</option>
-                <option value="Points">Points</option>
+                <option value="Score">Points</option>
                 <option value="Goals">Goals</option>
                 <option value="Assists">Assists</option>
                 <option value="Shots">Shots</option>
@@ -816,7 +816,7 @@ const CreateWager = () => {
                 style={styles.marginRight}
               >
                 <option value="">Select an Attribute</option>
-                <option value="Points">Points</option>
+                <option value="Score">Points</option>
                 <option value="Goals">Goals</option>
                 <option value="Assists">Assists</option>
                 <option value="Shots">Shots</option>
@@ -1123,7 +1123,7 @@ const CreateWager = () => {
                 style={styles.marginRight}
               >
                 <option value="">Select an Attribute</option>
-                <option value="Points">Points</option>
+                <option value="Score">Points</option>
                 <option value="Goals">Goals</option>
                 <option value="Assists">Assists</option>
                 <option value="Shots">Shots</option>
@@ -1380,7 +1380,7 @@ const CreateWager = () => {
                 style={styles.marginRight}
               >
                 <option value="">Select an Attribute</option>
-                <option value="Points">Points</option>
+                <option value="Score">Points</option>
                 <option value="Goals">Goals</option>
                 <option value="Assists">Assists</option>
                 <option value="Shots">Shots</option>
