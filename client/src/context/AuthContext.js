@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { getMongoUserIdByFirebaseId } from "../services/userService";
+import { getMongoUserDataByFirebaseId } from "../services/userService";
 
 const AuthContext = createContext();
 
@@ -15,9 +15,10 @@ export const AuthProvider = ({ children }) => {
     const handleAuthChange = async (user) => {
       if (user) {
         try {
-          const mongoUserId = await getMongoUserIdByFirebaseId(user.uid);
-          const userWithMongoId = { ...user, mongoUserId: mongoUserId };
-          setFirebaseUser(userWithMongoId);
+          const mongoUser = await getMongoUserDataByFirebaseId(user.uid);
+          console.log("MongoDB User ID:", mongoUser);
+          const userWithMongoData = { ...user, mongoUserId: mongoUser.id, userType: mongoUser.type };
+          setFirebaseUser(userWithMongoData);
         } catch (error) {
           console.error("Error fetching MongoDB User ID:", error);
         }
