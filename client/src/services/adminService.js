@@ -64,3 +64,23 @@ export const updateSeriesById = async (id, updateData) => {
 export const updateMatchById = async (id, updateData) => {
   return updateDocumentById("matches", id, updateData);
 };
+
+export const updateMatchResults = async (matchId, updateData) => {
+  try {
+    const response = await fetch(`${BASE_URL}/api/match_concluded/${matchId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(updateData),
+    });
+    if (!response.ok) {
+      throw new Error(`Failed to update match results for match ID: ${matchId}`);
+    }
+    const data = await response.json();
+    return data;
+    } catch (err) {
+    console.error(`Error updating match results for match ID ${matchId}:`, err.message);
+    throw err;
+    }
+};
