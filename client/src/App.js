@@ -41,6 +41,7 @@ function AppRoutes() {
         <Route path="/Schedule" element={firebaseUser ? <Schedule /> : <Auth />} />
         <Route path="/Credits" element={firebaseUser ? <Credits /> : <Auth />} />
         <Route path="/Leaderboard" element={firebaseUser ? <Leaderboard /> : <Auth />} />
+        <Route path="/Log" element={firebaseUser.userType === "admin" ? <Log /> : <Home />} />
         <Route path="/Admin" element={firebaseUser.userType === "admin" ? <Admin /> : <Home />} />
       </Routes>
     </>
