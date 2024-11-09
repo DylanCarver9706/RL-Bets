@@ -475,7 +475,8 @@ const CreateWager = () => {
             <option value="Player/Team Attributes">
               Player/Team Attributes
             </option>
-            <option value="Player Accolades">Player Accolades</option>
+            {/* TODO: Implement this */}
+            {/* <option value="Player Accolades">Player Accolades</option> */}
           </select>
           <button onClick={handleBetCancel} style={styles.cancelButton}>
             Cancel
@@ -596,7 +597,8 @@ const CreateWager = () => {
             </button>
           </div>
         )}
-      {selectedEventTypeForBet === "Season" &&
+      {/* TODO: Implement this */}
+      {/* {selectedEventTypeForBet === "Season" &&
         selectedSeasonBetType === "Player Accolades" && (
           <div style={styles.marginTop}>
             <h3>
@@ -633,7 +635,6 @@ const CreateWager = () => {
                 style={styles.marginRight}
               >
                 <option value="">Select an Accolade</option>
-                {/* Wording used on Liquipedia */}
                 <option value="Season MVP">Season MVP</option>
                 <option value="Striker of the Season">
                   Striker of the Season
@@ -654,7 +655,7 @@ const CreateWager = () => {
               Cancel
             </button>
           </div>
-        )}
+        )} */}
       {selectedEventTypeForBet === "Tournament" &&
         !selectedTournamentBetType && (
           <div>
@@ -671,7 +672,8 @@ const CreateWager = () => {
               <option value="Player/Team Attributes">
                 Player/Team Attributes
               </option>
-              <option value="Player Accolades">Player Accolades</option>
+              {/* TODO: Implement this */}
+              {/* <option value="Player Accolades">Player Accolades</option> */}
             </select>
             <button onClick={handleBetCancel} style={styles.cancelButton}>
               Cancel
@@ -792,7 +794,8 @@ const CreateWager = () => {
             </button>
           </div>
         )}
-      {selectedEventTypeForBet === "Tournament" &&
+      {/* TODO: Implement this */}
+      {/* {selectedEventTypeForBet === "Tournament" &&
         selectedTournamentBetType === "Player Accolades" && (
           <div style={styles.marginTop}>
             <h3>
@@ -829,7 +832,6 @@ const CreateWager = () => {
                 style={styles.marginRight}
               >
                 <option value="">Select an Accolade</option>
-                {/* Wording used on Liquipedia */}
                 <option value="Tournament MVP">Tournament MVP</option>
               </select>
               in the '{betNode.name}' Tournament
@@ -841,7 +843,7 @@ const CreateWager = () => {
               Cancel
             </button>
           </div>
-        )}
+        )} */}
       {selectedEventTypeForBet === "Series" && !selectedSeriesBetType && (
         <div>
           <h3>
