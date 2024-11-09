@@ -2514,30 +2514,57 @@ app.get("/api/data-trees/season/all", async (req, res) => {
     // Iterate over each season to construct a complete data tree
     const seasonsWithData = await Promise.all(
       seasons.map(async (season) => {
+        // Add type to season
+        season.type = "season";
+
         // Fetch the tournaments related to this season
         const tournaments = await tournamentsCollection
           .find({ _id: { $in: season.tournaments } })
           .toArray();
 
+        // Add type to each tournament
+        const tournamentsWithType = tournaments.map((tournament) => ({
+          ...tournament,
+          type: "tournament",
+        }));
+
         // Fetch all series for the tournaments
-        const tournamentIds = tournaments.map((tournament) => tournament._id);
+        const tournamentIds = tournamentsWithType.map((tournament) => tournament._id);
         const seriesList = await seriesCollection
           .find({ tournament: { $in: tournamentIds } })
           .toArray();
 
+        // Add type to each series
+        const seriesWithType = seriesList.map((series) => ({
+          ...series,
+          type: "series",
+        }));
+
         // Fetch all matches for the series
-        const seriesIds = seriesList.map((series) => series._id);
+        const seriesIds = seriesWithType.map((series) => series._id);
         const matches = await matchesCollection
           .find({ series: { $in: seriesIds } })
           .toArray();
 
+        // Add type to each match
+        const matchesWithType = matches.map((match) => ({
+          ...match,
+          type: "match",
+        }));
+
         // Fetch all teams for the series and matches
-        const matchTeamIds = matches.flatMap((match) => match.teams);
-        const seriesTeamIds = seriesList.flatMap((series) => series.teams);
+        const matchTeamIds = matchesWithType.flatMap((match) => match.teams);
+        const seriesTeamIds = seriesWithType.flatMap((series) => series.teams);
         const allTeamIds = [...new Set([...matchTeamIds, ...seriesTeamIds])]; // Unique list of all team IDs
         const teams = await teamsCollection
           .find({ _id: { $in: allTeamIds } })
           .toArray();
+
+        // Add type to each team
+        const teamsWithType = teams.map((team) => ({
+          ...team,
+          type: "team",
+        }));
 
         // Fetch all players for the teams
         const playerIds = teams.flatMap((team) => team.players);
@@ -2545,14 +2572,20 @@ app.get("/api/data-trees/season/all", async (req, res) => {
           .find({ _id: { $in: playerIds } })
           .toArray();
 
+        // Add type to each player
+        const playersWithType = players.map((player) => ({
+          ...player,
+          type: "player",
+        }));
+
         // Map teams with their respective players
-        const teamsWithPlayers = teams.map((team) => ({
+        const teamsWithPlayers = teamsWithType.map((team) => ({
           ...team,
-          players: players.filter((player) => player.team.equals(team._id)), // Populate players in the team
+          players: playersWithType.filter((player) => player.team.equals(team._id)), // Populate players in the team
         }));
 
         // Map matches with their respective teams and players
-        const matchesWithTeams = matches.map((match) => ({
+        const matchesWithTeams = matchesWithType.map((match) => ({
           ...match,
           teams: teamsWithPlayers.filter((team) =>
             match.teams.some((t) => t.equals(team._id))
@@ -2560,7 +2593,7 @@ app.get("/api/data-trees/season/all", async (req, res) => {
         }));
 
         // Map series with their respective matches and teams
-        const seriesWithMatches = seriesList.map((series) => ({
+        const seriesWithMatches = seriesWithType.map((series) => ({
           ...series,
           teams: teamsWithPlayers.filter((team) =>
             series.teams.some((t) => t.equals(team._id))
@@ -2571,14 +2604,14 @@ app.get("/api/data-trees/season/all", async (req, res) => {
         }));
 
         // Map tournaments with their respective series
-        const tournamentsWithSeries = tournaments.map((tournament) => ({
+        const tournamentsWithSeries = tournamentsWithType.map((tournament) => ({
           ...tournament,
           series: seriesWithMatches.filter((series) =>
             series.tournament.equals(tournament._id)
           ), // Populate series in the tournament
         }));
 
-        // Construct the complete season object
+        // Construct the complete season object with type
         return {
           ...season,
           tournaments: tournamentsWithSeries,
