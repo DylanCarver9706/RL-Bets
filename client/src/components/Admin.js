@@ -1,10 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { fetchAllSeasonsDataTree, updateSeasonById, updateTournamentById, updateSeriesById, updateMatchById } from "../services/adminService";
+import {
+  fetchAllSeasonsDataTree,
+  updateSeasonById,
+  updateTournamentById,
+  updateSeriesById,
+  updateMatchById,
+} from "../services/adminService";
 
 const Admin = () => {
   // Load data
   const [data, setData] = useState(null);
-  const [editMode, setEditMode] = useState(null); // Track which item is being edited
+  const [editMode, setEditMode] = useState(null); // Track the item being edited
   const [editData, setEditData] = useState({}); // Store the data being edited
 
   useEffect(() => {
@@ -61,7 +67,7 @@ const Admin = () => {
     setEditData(
       Object.fromEntries(
         Object.entries(data).filter(
-          ([key, value]) => key !== "_id" && (typeof value !== "object" || Array.isArray(value) === false)
+          ([key, value]) => key !== "_id" && key !== "status" && (typeof value !== "object" || Array.isArray(value) === false)
         )
       )
     );
@@ -97,6 +103,33 @@ const Admin = () => {
       setEditMode(null); // Exit edit mode
     } catch (error) {
       console.error("Error updating data:", error.message);
+    }
+  };
+
+  // Function to handle dropdown change
+  const handleStatusChange = async (item, newStatus) => {
+    try {
+      switch (item.type) {
+        case "season":
+          await updateSeasonById(item._id, { status: newStatus });
+          break;
+        case "tournament":
+          await updateTournamentById(item._id, { status: newStatus });
+          break;
+        case "series":
+          await updateSeriesById(item._id, { status: newStatus });
+          break;
+        case "match":
+          await updateMatchById(item._id, { status: newStatus });
+          break;
+        default:
+          throw new Error("Invalid item type");
+      }
+      // Refresh data after updating
+      const updatedData = await fetchAllSeasonsDataTree();
+      setData(updatedData);
+    } catch (error) {
+      console.error("Error updating status:", error.message);
     }
   };
 
@@ -168,6 +201,23 @@ const Admin = () => {
           </button>
         )}
       </h3>
+      {/* Dropdown for status change */}
+      {["season", "tournament", "series", "match"].includes(data.type.toLowerCase()) && (
+        <div style={{ marginBottom: "10px" }}>
+          <label>
+            Status:
+            <select
+              value={data.status}
+              onChange={(e) => handleStatusChange(data, e.target.value)}
+              style={{ marginLeft: "10px", padding: "5px" }}
+            >
+              <option value="Betable">Betable</option>
+              <option value="Ongoing">Ongoing</option>
+              <option value="Ended">Ended</option>
+            </select>
+          </label>
+        </div>
+      )}
       {content}
     </div>
   );
