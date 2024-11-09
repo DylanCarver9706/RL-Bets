@@ -2201,6 +2201,8 @@ app.put("/api/match_concluded/:id", async (req, res) => {
       message = "Tournament," + message
       await handleTournamentWagers(seriesDoc.tournament)
     }
+
+    // Update the season document if season has ended with this match
     
     // Set status for Season if included in request body
     if (endSeason === true) {
@@ -2218,6 +2220,7 @@ app.put("/api/match_concluded/:id", async (req, res) => {
       }
       createLog({ type: "Season Ended", SeasonId: seasonDoc._id })
       message = "Season," + message
+      await handleSeasonWagers(seasonDoc._id)
     }
 
     res.status(200).json({ message: message });
