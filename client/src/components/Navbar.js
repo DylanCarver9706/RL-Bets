@@ -56,9 +56,16 @@ const Navbar = () => {
         <Link to="/Leaderboard" style={styles.link}>
           Leaderboard
         </Link>
+        {firebaseUser.userType === "admin" && (
+        <Link to="/Admin" style={styles.link}>
+          Admin
+        </Link>
+        )}
+        {firebaseUser.userType === "admin" && (
         <Link to="/Log" style={styles.link}>
           Logs
         </Link>
+        )}
       </div>
       <div style={styles.navLinks}>
         <Link to="/Create_Wager" style={styles.link}>
