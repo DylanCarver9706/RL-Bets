@@ -2049,6 +2049,32 @@ const getSeasonOutcomes = async (seasonId, agreeEvaluationObject = null) => {
   }
 };
 
+const handleSeasonWagers = async (seasonId) => {
+  // Get all wagers associated with this season
+  const seasonWagers = await wagersCollection.find({ rlEventReference: seasonId.toString(), status: "Ongoing" }).toArray();
+
+  // console.log("seasonWagers: ", seasonWagers)
+
+  const seasonOutcomes = await getSeasonOutcomes(seasonId);
+
+  // console.log("seasonOutcomes: ", seasonOutcomes)
+
+  // Wager types:
+  // Match: "Match Winner", "Match Score", "First Blood", "Match MVP", "Player/Team Attributes"
+  // Series: "Series Winner", "Series Score", "First Blood", "Overtime Count", "Player/Team Attributes"
+  // Tournament: "Tournament Winner", "Player/Team Attributes", "Player Accolades"
+  // Season: "Season Winner", "Player/Team Attributes", "Player Accolades"
+
+  for (const wager of seasonWagers) {
+    if (wager.wagerType === "Season Winner") {
+      await handleWagerEnded(wager._id, wager.agreeEvaluation === seasonOutcomes.winningTeam.toString());
+    } else if (wager.wagerType === "Player/Team Attributes") {
+      const seasonOutcomesEval = await getSeasonOutcomes(seasonId, wager.agreeEvaluation);
+      await handleWagerEnded(wager._id, seasonOutcomesEval.agreeEvaluation);
+    }
+  }
+};
+
 // Update a match by ID (PUT)
 app.put("/api/match_concluded/:id", async (req, res) => {
   try {
