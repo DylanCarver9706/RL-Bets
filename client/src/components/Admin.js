@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { fetchAllSeasonsDataTree } from "../services/adminService";
+import { fetchAllSeasonsDataTree, updateSeasonById, updateTournamentById, updateSeriesById, updateMatchById } from "../services/adminService";
 
 const Admin = () => {
   // Load data
   const [data, setData] = useState(null);
+  const [editMode, setEditMode] = useState(null); // Track which item is being edited
+  const [editData, setEditData] = useState({}); // Store the data being edited
 
   useEffect(() => {
     const fetchData = async () => {
@@ -52,12 +54,91 @@ const Admin = () => {
     );
   };
 
-  // Function to log data of the card
-  const handleLogData = (data) => {
-    console.log("Card Data:", data);
+  // Function to handle edit button click
+  const handleEditClick = (data) => {
+    console.log("Edit clicked for:", data);
+    setEditMode(data);
+    setEditData(
+      Object.fromEntries(
+        Object.entries(data).filter(
+          ([key, value]) => key !== "_id" && (typeof value !== "object" || Array.isArray(value) === false)
+        )
+      )
+    );
   };
 
-  // Function to render each event as a card with a log button
+  // Function to handle input changes in the edit form
+  const handleChange = (key, value) => {
+    setEditData({ ...editData, [key]: value });
+  };
+
+  // Function to handle save after editing
+  const handleSave = async () => {
+    try {
+      switch (editMode.type) {
+        case "season":
+          await updateSeasonById(editMode._id, editData);
+          break;
+        case "tournament":
+          await updateTournamentById(editMode._id, editData);
+          break;
+        case "series":
+          await updateSeriesById(editMode._id, editData);
+          break;
+        case "match":
+          await updateMatchById(editMode._id, editData);
+          break;
+        default:
+          throw new Error("Invalid item type");
+      }
+      // Refresh data after updating
+      const updatedData = await fetchAllSeasonsDataTree();
+      setData(updatedData);
+      setEditMode(null); // Exit edit mode
+    } catch (error) {
+      console.error("Error updating data:", error.message);
+    }
+  };
+
+  // Function to render the edit modal
+  const renderEditModal = () => (
+    <div
+      style={{
+        position: "fixed",
+        top: "50%",
+        left: "50%",
+        transform: "translate(-50%, -50%)",
+        background: "#b3b1b1",
+        padding: "20px",
+        borderRadius: "10px",
+        boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
+        zIndex: 1000,
+      }}
+    >
+      <h3>Edit {editMode.type}</h3>
+      {Object.entries(editData).map(([key, value]) => (
+        <div key={key} style={{ marginBottom: "10px" }}>
+          <label>
+            {key}: 
+            <input
+              type="text"
+              value={value}
+              onChange={(e) => handleChange(key, e.target.value)}
+              style={{ marginLeft: "10px", padding: "5px", borderRadius: "4px", border: "1px solid #ccc" }}
+            />
+          </label>
+        </div>
+      ))}
+      <button onClick={handleSave} style={{ background: "#28a745", color: "white", padding: "5px 10px", border: "none", borderRadius: "5px", cursor: "pointer" }}>
+        Save
+      </button>
+      <button onClick={() => setEditMode(null)} style={{ marginLeft: "10px", background: "#dc3545", color: "white", padding: "5px 10px", border: "none", borderRadius: "5px", cursor: "pointer" }}>
+        Cancel
+      </button>
+    </div>
+  );
+
+  // Function to render each event as a card with a log/edit button
   const renderCard = (title, content, data) => (
     <div
       style={{
@@ -72,7 +153,7 @@ const Admin = () => {
         {title}{" "}
         {["season", "tournament", "series", "match"].includes(data.type.toLowerCase()) && (
           <button
-            onClick={() => handleLogData(data)}
+            onClick={() => handleEditClick(data)}
             style={{
               marginTop: "10px",
               background: "#007bff",
@@ -83,16 +164,15 @@ const Admin = () => {
               borderRadius: "5px",
             }}
           >
-            Log Data
+            Edit
           </button>
         )}
       </h3>
       {content}
     </div>
   );
-
-  // Function to render the results object as a table
-  const renderResultsTable = (results) => {
+// Function to render the results object as a table
+const renderResultsTable = (results) => {
     if (!results || typeof results !== "object") return null;
 
     // Get the player names (columns) and attributes (rows)
@@ -203,7 +283,7 @@ const Admin = () => {
   return (
     <div>
       <h1>Admin Page - Season Data Overview</h1>
-      {data ? renderSeasons(data) : <p>Loading data...</p>}
+      {editMode ? renderEditModal() : data ? renderSeasons(data) : <p>Loading data...</p>}
     </div>
   );
 };
