@@ -68,20 +68,48 @@ const Admin = () => {
     </div>
   );
 
-  // Function to reorder keys so that arrays are last
-  const reorderObject = (obj) => {
-    if (typeof obj !== "object" || obj === null) return obj;
-    if (Array.isArray(obj)) return obj.map(reorderObject);
+  // Function to render the results object as a table
+  const renderResultsTable = (results) => {
+    if (!results || typeof results !== "object") return null;
 
-    const entries = Object.entries(obj);
-    const nonArrayEntries = entries.filter(([_, value]) => !Array.isArray(value));
-    const arrayEntries = entries.filter(([_, value]) => Array.isArray(value));
+    // Get the player names (columns) and attributes (rows)
+    const playerNames = Object.keys(results);
+    const attributes = Object.keys(results[playerNames[0]] || {});
 
-    return Object.fromEntries(
-      [...nonArrayEntries, ...arrayEntries].map(([key, value]) => [
-        key,
-        reorderObject(value),
-      ])
+    // Calculate the split index to insert the attribute header
+    const halfIndex = Math.ceil(playerNames.length / 2);
+
+    return (
+      <table style={{ borderCollapse: "collapse", width: "100%", marginTop: "10px" }}>
+        <thead>
+          <tr>
+            {playerNames.map((player, index) => (
+              <React.Fragment key={player}>
+                {index === halfIndex && (
+                  <th style={{ border: "1px solid #ddd", padding: "8px", background: "#b3b1b1" }}>Attribute</th>
+                )}
+                <th style={{ border: "1px solid #ddd", padding: "8px", background: "#b3b1b1" }}>{player}</th>
+              </React.Fragment>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {attributes.map((attribute) => (
+            <tr key={attribute}>
+              {playerNames.map((player, index) => (
+                <React.Fragment key={player}>
+                  {index === halfIndex && (
+                    <td style={{ border: "1px solid #ddd", padding: "8px", background: "#b3b1b1" }}>
+                      <strong>{attribute.charAt(0).toUpperCase() + attribute.slice(1)}</strong>
+                    </td>
+                  )}
+                  <td style={{ border: "1px solid #ddd", padding: "8px" }}>{results[player][attribute]}</td>
+                </React.Fragment>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
     );
   };
 
@@ -91,32 +119,42 @@ const Admin = () => {
 
     if (Array.isArray(node)) {
       return (
-        <div style={{ gap: "10px" }}>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
           {node.map((item, index) => (
             <div key={index} style={{ flex: "1 1 300px" }}>
-              {renderDataTree(item)}
+              {renderCard(item.name || `Item ${index + 1}`, renderDataTree(item))}
             </div>
           ))}
         </div>
       );
     } else {
-      node = reorderObject(node); // Reorder the node to place arrays last
-
       return (
         <div>
           {Object.entries(node).map(([key, value]) => {
-            let title = key.charAt(0).toUpperCase() + key.slice(1);
-            if (key === "tournaments") title = "Tournaments";
-            else if (key === "series") title = "Series";
-            else if (key === "matches") title = "Matches";
-            else if (key === "teams") title = "Teams";
-            else if (key === "players") title = "Players";
-            else if (key === "results") title = "Results";
+            let title = value?.name || key.charAt(0).toUpperCase() + key.slice(1);
+            if (key === "results" && typeof value === "object") {
+              return (
+                <CollapsibleSection key={key} title={title}>
+                  {renderResultsTable(value)}
+                </CollapsibleSection>
+              );
+            }
 
-            // Render as a collapsible section
+            if (Array.isArray(value)) {
+              return (
+                <CollapsibleSection key={key} title={title}>
+                  {value.map((item, index) => (
+                    <div key={index} style={{ marginBottom: "10px" }}>
+                      {renderCard(item.name || `${title} ${index + 1}`, renderDataTree(item))}
+                    </div>
+                  ))}
+                </CollapsibleSection>
+              );
+            }
+
             return typeof value === "object" ? (
               <CollapsibleSection key={key} title={title}>
-                {renderCard(title, renderDataTree(value))}
+                {renderCard(value.name || title, renderDataTree(value))}
               </CollapsibleSection>
             ) : (
               <div key={key} style={{ marginBottom: "5px" }}>
@@ -134,7 +172,7 @@ const Admin = () => {
   const renderSeasons = (seasons) => {
     return seasons.map((season, index) => (
       <CollapsibleSection key={index} title={`Season: ${season.name || `Season ${index + 1}`}`}>
-        {renderCard(`Season: ${season.name || `Season ${index + 1}`}`, renderDataTree(season))}
+        {renderCard(season.name || `Season ${index + 1}`, renderDataTree(season))}
       </CollapsibleSection>
     ));
   };
