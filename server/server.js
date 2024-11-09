@@ -2036,6 +2036,8 @@ app.put("/api/match_concluded/:id", async (req, res) => {
       await handleSeriesWagers(seriesDoc._id)
     }
 
+    // Update the tournament document if tournament has ended with this match
+
     // Set status for Tournament if included in request body
     if (endTournament === true) {
       await tournamentsCollection.updateOne(
@@ -2043,13 +2045,14 @@ app.put("/api/match_concluded/:id", async (req, res) => {
         {
           $set: {
             status: "Ended",
-            winner: new ObjectId(wagerOutcomes.winningTeam),
-            loser: new ObjectId(wagerOutcomes.losingTeam),
+            winner: new ObjectId(matchOutcomes.winningTeam),
+            loser: new ObjectId(matchOutcomes.losingTeam),
           }
         }
       );
       createLog({ type: "Tournament Ended", tournamentId: seriesDoc.tournament })
       message = "Tournament," + message
+      await handleTournamentWagers(seriesDoc.tournament)
     }
     
     // Set status for Season if included in request body
@@ -2063,7 +2066,7 @@ app.put("/api/match_concluded/:id", async (req, res) => {
         // Update the status of the season to "Ended"
         await seasonsCollection.updateOne(
           { _id: seasonDoc._id },
-          { $set: { status: "Ended", winner: wagerOutcomes.winningTeam } }
+          { $set: { status: "Ended", winner: matchOutcomes.winningTeam } }
         );
       }
       createLog({ type: "Season Ended", SeasonId: seasonDoc._id })
