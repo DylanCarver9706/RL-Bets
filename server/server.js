@@ -1774,6 +1774,128 @@ const handleSeriesWagers = async (seriesId) => {
     }
 }
 
+const getTournamentOutcomes = async (tournamentId, agreeEvaluationObject = null) => {
+  try {
+    const response = {
+      winningTeam: null,
+      losingTeam: null,
+      agreeEvaluation: null,
+    };
+
+    // Step 1: Retrieve the tournament document
+    const tournamentDoc = await tournamentsCollection.findOne({ _id: new ObjectId(tournamentId) });
+    if (!tournamentDoc) {
+      throw new Error('Tournament not found');
+    }
+
+    response.winningTeam = tournamentDoc.winner;
+    response.losingTeam = tournamentDoc.loser;
+
+    // Step 2: Get all series within the tournament
+    const seriesArray = await seriesCollection.find({ _id: { $in: tournamentDoc.series } }).toArray();
+    const seriesIds = seriesArray.map(series => series._id);
+
+    // Step 3: Get all matches for these series
+    const matchesArray = await matchesCollection.find({ series: { $in: seriesIds } }).toArray();
+
+    // Step 4: Collect all unique team IDs from the series documents
+    const teamIds = new Set();
+    seriesArray.forEach(series => {
+      series.teams.forEach(teamId => teamIds.add(teamId.toString()));
+    });
+
+    // Convert Set to an array of ObjectId
+    const teamIdsArray = Array.from(teamIds).map(id => new ObjectId(id));
+
+    // Step 5: Get all teams using the collected team IDs
+    const teamsArray = await teamsCollection.find({ _id: { $in: teamIdsArray } }).toArray();
+
+    // Step 6: Extract player IDs from the teamsArray
+    const playerIds = teamsArray.flatMap(team => team.players);
+
+    // Step 7: Retrieve the player metadata from the playersCollection
+    const playersArray = await playersCollection.find({ _id: { $in: playerIds } }).toArray();
+
+    // Step 8: Calculate player totals for the tournament
+    const tournamentMatchesResults = calculatePlayerTotals(matchesArray);
+
+    // Step 9: Optionally determine the agree evaluation
+    if (agreeEvaluationObject) {
+      const {
+        selectedTeamOrPlayerForBet,
+        selectedBetOperator,
+        attributeBetInput,
+        selectedAttributeBetType,
+      } = agreeEvaluationObject;
+
+      let agreeEvaluation = false;
+
+      // Convert attributeBetInput to a number for comparison
+      const attributeBetValue = parseInt(attributeBetInput, 10);
+      let actualValue = null;
+
+      // Determine if the wager is for a team or a player
+      let teamOrPlayerForBet = null;
+
+      // Check if the selected ID corresponds to a team
+      if (teamsArray.some(team => team._id.toString() === selectedTeamOrPlayerForBet)) {
+        // Team attribute bet
+        teamOrPlayerForBet = teamsArray.find(team => team._id.toString() === selectedTeamOrPlayerForBet);
+        actualValue = 0;
+        const teamPlayers = playersArray.filter(player =>
+          teamOrPlayerForBet.players.map(id => id.toString()).includes(player._id.toString())
+        );
+
+        // Sum the values of the selected attribute for all players on the team
+        for (const player of teamPlayers) {
+          const playerResult = tournamentMatchesResults[player.name];
+          if (playerResult && selectedAttributeBetType.toLowerCase() in playerResult) {
+            actualValue += playerResult[selectedAttributeBetType.toLowerCase()];
+          }
+        }
+        
+      }
+      // Check if the selected ID corresponds to a player
+      else if (playersArray.some(player => player._id.toString() === selectedTeamOrPlayerForBet)) {
+        // Player attribute bet
+        teamOrPlayerForBet = playersArray.find(player => player._id.toString() === selectedTeamOrPlayerForBet);
+        const playerResult = tournamentMatchesResults[teamOrPlayerForBet.name];
+        if (playerResult && selectedAttributeBetType.toLowerCase() in playerResult) {
+          actualValue = playerResult[selectedAttributeBetType.toLowerCase()];
+        }
+      } else {
+        throw new Error('Team or player not found');
+      }
+
+
+      // Evaluate the bet
+      if (actualValue !== null) {
+        switch (selectedBetOperator) {
+          case 'exactly':
+            agreeEvaluation = actualValue === attributeBetValue;
+            break;
+          case 'more than':
+            agreeEvaluation = actualValue > attributeBetValue;
+            break;
+          case 'less than':
+            agreeEvaluation = actualValue < attributeBetValue;
+            break;
+          default:
+            throw new Error('Invalid bet operator');
+        }
+      }
+
+      response.agreeEvaluation = agreeEvaluation;
+    }
+
+    return response;
+  } catch (error) {
+    console.error("Error determining tournament outcomes:", error);
+    throw new Error("Failed to determine tournament outcomes");
+  }
+};
+}
+
 // Update a match by ID (PUT)
 app.put("/api/match_concluded/:id", async (req, res) => {
   try {
