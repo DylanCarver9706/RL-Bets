@@ -472,6 +472,16 @@ const Admin = () => {
         <div>
           {Object.entries(node).map(([key, value]) => {
             let title = value?.name || key.charAt(0).toUpperCase() + key.slice(1);
+            
+            // Handle boolean rendering
+            if (typeof value === "boolean") {
+              return (
+                <div key={key} style={{ marginBottom: "5px" }}>
+                  <strong>{key}:</strong> {value ? 'True' : 'False'}
+                </div>
+              );
+            }
+  
             if (key === "results" && typeof value === "object") {
               return (
                 <CollapsibleSection key={key} title={title}>
