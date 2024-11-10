@@ -945,10 +945,19 @@ app.get("/api/seasons/:id", async (req, res) => {
 // Update a Season by ID
 app.put("/api/seasons/:id", async (req, res) => {
   try {
+    // Convert `winner` and `loser` to ObjectId if they exist in the request body
+    if (req.body.winner) {
+      req.body.winner = new ObjectId(req.body.winner);
+    }
+    if (req.body.loser) {
+      req.body.loser = new ObjectId(req.body.loser);
+    }
+
     const result = await seasonsCollection.updateOne(
       { _id: new ObjectId(req.params.id) },
       { $set: req.body }
     );
+
     if (result.matchedCount === 0) {
       return res.status(404).json({ error: "Season not found" });
     }
@@ -1046,10 +1055,22 @@ app.get("/api/tournaments/:id", async (req, res) => {
 // Update a Tournament by ID
 app.put("/api/tournaments/:id", async (req, res) => {
   try {
+    // Convert `winner`, `loser`, and `season` to ObjectId if they exist in the request body
+    if (req.body.winner) {
+      req.body.winner = new ObjectId(req.body.winner);
+    }
+    if (req.body.loser) {
+      req.body.loser = new ObjectId(req.body.loser);
+    }
+    if (req.body.season) {
+      req.body.season = new ObjectId(req.body.season);
+    }
+
     const result = await tournamentsCollection.updateOne(
       { _id: new ObjectId(req.params.id) },
       { $set: req.body }
     );
+
     if (result.matchedCount === 0) {
       return res.status(404).json({ error: "Tournament not found" });
     }
@@ -1161,10 +1182,26 @@ app.get("/api/series/:id", async (req, res) => {
 app.put("/api/series/:id", async (req, res) => {
   try {
     const updateData = req.body;
+
+    // Convert `winner`, `loser`, `firstBlood`, and `tournament` to ObjectId if they exist in the request body
+    if (updateData.winner) {
+      updateData.winner = new ObjectId(updateData.winner);
+    }
+    if (updateData.loser) {
+      updateData.loser = new ObjectId(updateData.loser);
+    }
+    if (updateData.firstBlood) {
+      updateData.firstBlood = new ObjectId(updateData.firstBlood);
+    }
+    if (updateData.tournament) {
+      updateData.tournament = new ObjectId(updateData.tournament);
+    }
+
     const result = await seriesCollection.updateOne(
       { _id: new ObjectId(req.params.id) },
       { $set: updateData }
     );
+
     if (result.matchedCount === 0) {
       return res.status(404).json({ error: "Series not found" });
     }
@@ -1276,10 +1313,26 @@ app.get("/api/matches/:id", async (req, res) => {
 app.put("/api/matches/:id", async (req, res) => {
   try {
     const updateData = req.body;
+
+    // Convert `winner`, `loser`, `firstBlood`, and `series` to ObjectId if they exist in the request body
+    if (updateData.winner) {
+      updateData.winner = new ObjectId(updateData.winner);
+    }
+    if (updateData.loser) {
+      updateData.loser = new ObjectId(updateData.loser);
+    }
+    if (updateData.firstBlood) {
+      updateData.firstBlood = new ObjectId(updateData.firstBlood);
+    }
+    if (updateData.series) {
+      updateData.series = new ObjectId(updateData.series);
+    }
+
     const result = await matchesCollection.updateOne(
       { _id: new ObjectId(req.params.id) },
       { $set: updateData }
     );
+
     if (result.matchedCount === 0) {
       return res.status(404).json({ error: "Match not found" });
     }
@@ -2517,6 +2570,11 @@ app.get("/api/data-trees/season/all", async (req, res) => {
         // Add type to season
         season.type = "season";
 
+        // Convert season.tournaments IDs to ObjectId if they are strings
+        season.tournaments = season.tournaments.map((id) =>
+          typeof id === "string" ? new ObjectId(id) : id
+        );
+
         // Fetch the tournaments related to this season
         const tournaments = await tournamentsCollection
           .find({ _id: { $in: season.tournaments } })
@@ -2531,7 +2589,7 @@ app.get("/api/data-trees/season/all", async (req, res) => {
         // Fetch all series for the tournaments
         const tournamentIds = tournamentsWithType.map((tournament) => tournament._id);
         const seriesList = await seriesCollection
-          .find({ tournament: { $in: tournamentIds } })
+          .find({ tournament: { $in: tournamentIds.map((id) => (typeof id === "string" ? new ObjectId(id) : id)) } })
           .toArray();
 
         // Add type to each series
@@ -2542,8 +2600,9 @@ app.get("/api/data-trees/season/all", async (req, res) => {
 
         // Fetch all matches for the series
         const seriesIds = seriesWithType.map((series) => series._id);
+        console.log(seriesIds);
         const matches = await matchesCollection
-          .find({ series: { $in: seriesIds } })
+          .find({ series: { $in: seriesIds.map((id) => (typeof id === "string" ? new ObjectId(id) : id)) } })
           .toArray();
 
         // Add type to each match
@@ -2553,9 +2612,14 @@ app.get("/api/data-trees/season/all", async (req, res) => {
         }));
 
         // Fetch all teams for the series and matches
-        const matchTeamIds = matchesWithType.flatMap((match) => match.teams);
-        const seriesTeamIds = seriesWithType.flatMap((series) => series.teams);
+        const matchTeamIds = matchesWithType.flatMap((match) =>
+          match.teams.map((id) => (typeof id === "string" ? new ObjectId(id) : id))
+        );
+        const seriesTeamIds = seriesWithType.flatMap((series) =>
+          series.teams.map((id) => (typeof id === "string" ? new ObjectId(id) : id))
+        );
         const allTeamIds = [...new Set([...matchTeamIds, ...seriesTeamIds])]; // Unique list of all team IDs
+
         const teams = await teamsCollection
           .find({ _id: { $in: allTeamIds } })
           .toArray();
@@ -2567,7 +2631,9 @@ app.get("/api/data-trees/season/all", async (req, res) => {
         }));
 
         // Fetch all players for the teams
-        const playerIds = teams.flatMap((team) => team.players);
+        const playerIds = teams.flatMap((team) =>
+          team.players.map((id) => (typeof id === "string" ? new ObjectId(id) : id))
+        );
         const players = await playersCollection
           .find({ _id: { $in: playerIds } })
           .toArray();
@@ -2581,14 +2647,18 @@ app.get("/api/data-trees/season/all", async (req, res) => {
         // Map teams with their respective players
         const teamsWithPlayers = teamsWithType.map((team) => ({
           ...team,
-          players: playersWithType.filter((player) => player.team.equals(team._id)), // Populate players in the team
+          players: playersWithType.filter((player) =>
+            player.team.equals(team._id)
+          ), // Populate players in the team
         }));
 
         // Map matches with their respective teams and players
         const matchesWithTeams = matchesWithType.map((match) => ({
           ...match,
           teams: teamsWithPlayers.filter((team) =>
-            match.teams.some((t) => t.equals(team._id))
+            match.teams.some((t) =>
+              typeof t === "string" ? new ObjectId(t).equals(team._id) : t.equals(team._id)
+            )
           ), // Populate teams in the match
         }));
 
@@ -2596,10 +2666,12 @@ app.get("/api/data-trees/season/all", async (req, res) => {
         const seriesWithMatches = seriesWithType.map((series) => ({
           ...series,
           teams: teamsWithPlayers.filter((team) =>
-            series.teams.some((t) => t.equals(team._id))
+            series.teams.some((t) =>
+              typeof t === "string" ? new ObjectId(t).equals(team._id) : t.equals(team._id)
+            )
           ), // Populate teams in the series
           matches: matchesWithTeams.filter((match) =>
-            match.series.equals(series._id)
+            typeof match.series === "string" ? new ObjectId(match.series).equals(series._id) : match.series.equals(series._id)
           ), // Populate matches in the series
         }));
 
@@ -2607,7 +2679,7 @@ app.get("/api/data-trees/season/all", async (req, res) => {
         const tournamentsWithSeries = tournamentsWithType.map((tournament) => ({
           ...tournament,
           series: seriesWithMatches.filter((series) =>
-            series.tournament.equals(tournament._id)
+            typeof series.tournament === "string" ? new ObjectId(series.tournament).equals(tournament._id) : series.tournament.equals(tournament._id)
           ), // Populate series in the tournament
         }));
 
@@ -2621,9 +2693,7 @@ app.get("/api/data-trees/season/all", async (req, res) => {
 
     res.status(200).json(seasonsWithData);
   } catch (err) {
-    res
-      .status(500)
-      .json({ error: "Failed to fetch all season data", details: err.message });
+    res.status(500).json({ error: "Failed to fetch all season data", details: err.message });
   }
 });
 
