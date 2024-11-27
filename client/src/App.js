@@ -1,9 +1,11 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { getMongoUserDataByFirebaseId } from "./services/userService";
+import { useUser } from "./context/UserContext";
 import { Routes, Route } from "react-router-dom";
-import { AuthProvider, useAuth } from "./context/AuthContext";
 import Home from "./components/Home";
 import Auth from "./components/Auth";
-import User from "./components/User";
+import Profile from "./components/Profile";
 import Navbar from "./components/Navbar";
 import CreateWager from "./components/CreateWager";
 import Schedule from "./components/Schedule";
@@ -12,10 +14,50 @@ import Leaderboard from "./components/Leaderboard";
 import Log from "./components/Log";
 import Admin from "./components/Admin";
 
-function AppRoutes() {
-  const { firebaseUser, loading } = useAuth();
+function App() {
+  const { user, setUser } = useUser();
+  const [loading, setLoading] = useState(true);
 
-  // Display loading message if firebaseUser exists but mongoUserId hasn't loaded yet
+  useEffect(() => {
+    const auth = getAuth();
+
+    const handleAuthChange = async (firebaseUser) => {
+      if (firebaseUser?.uid && user?.mongoUserId) {
+        try {
+          const idToken = await firebaseUser.getIdToken();
+          console.log("ID token:", idToken);
+          if (!idToken) {
+            console.warn("ID token not available");
+            setLoading(false);
+            return;
+          }
+
+          // Fetch MongoDB user data
+          const mongoUser = await getMongoUserDataByFirebaseId(firebaseUser.uid);
+          setUser({
+            firebaseUserId: firebaseUser.uid,
+            mongoUserId: mongoUser?.id || null,
+            userType: mongoUser?.type || null,
+            idvStatus: mongoUser?.idvStatus || "unverified",
+            credits: mongoUser?.credits || 0,
+          });
+        } catch (error) {
+          console.error("Error fetching MongoDB user data:", error);
+          setUser(null); // Clear user data on error
+        }
+      } else {
+        setUser(null); // User is logged out
+      }
+      setLoading(false);
+    };
+
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      handleAuthChange(firebaseUser);
+    });
+
+    return () => unsubscribe();
+  }, [setUser]);
+
   if (loading) {
     return <p>Loading...</p>;
   }
@@ -24,35 +66,32 @@ function AppRoutes() {
     <>
       <Navbar />
       <div>
-        {firebaseUser ? (
+        {user ? (
           <p>
-            Welcome, User ID: {firebaseUser.uid} - MongoId:{" "}
-            {firebaseUser.mongoUserId}
+            Welcome, Firebase UID: {user.firebaseUserId} - MongoId: {user.mongoUserId} - IDV Status: {user?.idvStatus}
           </p>
         ) : (
           <p>Please log in</p>
         )}
       </div>
       <Routes>
-        <Route path="/" element={firebaseUser ? <Home /> : <Auth />} />
-        <Route path="/Auth" element={<Auth />} /> {/* Used for testing */}
-        <Route path="/User" element={firebaseUser ? <User /> : <Auth />} />
-        <Route path="/Create_Wager" element={firebaseUser ? <CreateWager /> : <Auth />} />
-        <Route path="/Schedule" element={firebaseUser ? <Schedule /> : <Auth />} />
-        <Route path="/Credits" element={firebaseUser ? <Credits /> : <Auth />} />
-        <Route path="/Leaderboard" element={firebaseUser ? <Leaderboard /> : <Auth />} />
-        <Route path="/Log" element={firebaseUser.userType === "admin" ? <Log /> : <Home />} />
-        <Route path="/Admin" element={firebaseUser.userType === "admin" ? <Admin /> : <Home />} />
+        <Route path="/" element={user?.idvStatus === "verified" ? <Home user={user} /> : <Auth />} />
+        <Route path="/Auth" element={<Auth />} />
+        <Route path="/User" element={user ? <Profile user={user} /> : <Auth />} />
+        <Route
+          path="/Create_Wager"
+          element={user?.idvStatus === "verified" ? <CreateWager user={user} /> : <Auth />}
+        />
+        <Route path="/Schedule" element={user?.idvStatus === "verified" ? <Schedule user={user} /> : <Auth />} />
+        <Route path="/Credits" element={user?.idvStatus === "verified" ? <Credits user={user} /> : <Auth />} />
+        <Route
+          path="/Leaderboard"
+          element={user?.idvStatus === "verified" ? <Leaderboard user={user} /> : <Auth />}
+        />
+        <Route path="/Log" element={user?.userType === "admin" ? <Log user={user} /> : <Home />} />
+        <Route path="/Admin" element={user?.userType === "admin" ? <Admin user={user} /> : <Home />} />
       </Routes>
     </>
-  );
-}
-
-function App() {
-  return (
-    <AuthProvider>
-      <AppRoutes />
-    </AuthProvider>
   );
 }
 
