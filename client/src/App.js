@@ -77,7 +77,7 @@ function App() {
       <Routes>
         <Route path="/" element={user?.idvStatus === "verified" ? <Home user={user} /> : <Auth />} />
         <Route path="/Auth" element={<Auth />} />
-        <Route path="/User" element={user ? <Profile user={user} /> : <Auth />} />
+        <Route path="/Profile" element={user ? <Profile user={user} /> : <Auth />} />
         <Route
           path="/Create_Wager"
           element={user?.idvStatus === "verified" ? <CreateWager user={user} /> : <Auth />}

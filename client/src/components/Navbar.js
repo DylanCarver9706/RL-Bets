@@ -47,7 +47,7 @@ const Navbar = () => {
         </Link>
       </h2>
       <div style={styles.navLinks}>
-        <Link to="/User" style={styles.link}>
+        <Link to="/Profile" style={styles.link}>
           Profile
         </Link>
         <Link to="/Schedule" style={styles.link}>
