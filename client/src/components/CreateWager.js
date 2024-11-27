@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext.js";
+import { useUser } from "../context/UserContext.js";
 import { getUserById, updateUser } from "../services/userService.js";
 import {
   fetchBetableObjects,
@@ -11,6 +11,7 @@ import {
 
 const CreateWager = () => {
   // Load data
+  const { user } = useUser();
   const [betableObjects, setBetableObjects] = useState(null);
   const [userData, setUserData] = useState(0);
   const [teams, setTeams] = useState(null);
@@ -44,7 +45,6 @@ const CreateWager = () => {
   const [selectedMatchBetType, setSelectedMatchBetType] = useState(null);
 
   const navigate = useNavigate();
-  const { firebaseUser } = useAuth();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -55,7 +55,7 @@ const CreateWager = () => {
         const fetchedTeams = await fetchTeams();
         setTeams(fetchedTeams);
 
-        const userData = await getUserById(firebaseUser.mongoUserId);
+        const userData = await getUserById(user.mongoUserId);
         setUserData(userData);
       } catch (error) {
         console.error("Error fetching data:", error.message);
@@ -63,7 +63,7 @@ const CreateWager = () => {
     };
 
     fetchData();
-  }, [seasonId, firebaseUser.mongoUserId]);
+  }, [seasonId, user.mongoUserId]);
 
   const handleBetClick = async (node) => {
     console.log(node);
@@ -132,7 +132,7 @@ const CreateWager = () => {
                 "loser",
                 "firstBlood",
                 "bestOf",
-                "overtimeCount"
+                "overtimeCount",
               ];
               return (
                 !excludedKeys.includes(key) ||
@@ -347,7 +347,7 @@ const CreateWager = () => {
     // Proceed with creating wager and bet logic
     let wagerPayload = {
       name: generatedBetString,
-      creator: firebaseUser.mongoUserId,
+      creator: user.mongoUserId,
       rlEventReference: betNode._id,
       wagerType: null,
       agreeEvaluation: null,
@@ -357,111 +357,150 @@ const CreateWager = () => {
     if (selectedEventTypeForBet === "Match") {
       wagerPayload.wagerType = selectedMatchBetType;
       if (selectedMatchBetType === "Match Winner") {
-        const agreeTeam = teams.find(team => team.name === selectedTeamOrPlayerForBet);
+        const agreeTeam = teams.find(
+          (team) => team.name === selectedTeamOrPlayerForBet
+        );
         wagerPayload.agreeEvaluation = agreeTeam._id;
       } else if (selectedMatchBetType === "Match Score") {
         wagerPayload.agreeEvaluation = `${betNode.teams[0]._id}: ${selectedTeam1ScoreForBet} - ${betNode.teams[1]._id}: ${selectedTeam2ScoreForBet}`;
       } else if (selectedMatchBetType === "First Blood") {
-        const agreeTeam = teams.find(team => team.name === selectedTeamOrPlayerForBet);
+        const agreeTeam = teams.find(
+          (team) => team.name === selectedTeamOrPlayerForBet
+        );
         wagerPayload.agreeEvaluation = agreeTeam._id;
       } else if (selectedMatchBetType === "Match MVP") {
-        const allPlayers = teams.flatMap(team => team.players);
-        const agreePlayer = allPlayers.find(player => player.name === selectedTeamOrPlayerForBet);
+        const allPlayers = teams.flatMap((team) => team.players);
+        const agreePlayer = allPlayers.find(
+          (player) => player.name === selectedTeamOrPlayerForBet
+        );
         wagerPayload.agreeEvaluation = agreePlayer._id;
       } else if (selectedMatchBetType === "Player/Team Attributes") {
         let agreeEvaluationTeamOrPlayer = null;
         let agreeEvaluationObject = {};
-        const agreeTeam = teams.find(team => team.name === selectedTeamOrPlayerForBet);
+        const agreeTeam = teams.find(
+          (team) => team.name === selectedTeamOrPlayerForBet
+        );
         if (agreeTeam) {
           agreeEvaluationTeamOrPlayer = agreeTeam._id;
         } else {
-          const allPlayers = teams.flatMap(team => team.players);
-          const agreePlayer = allPlayers.find(player => player.name === selectedTeamOrPlayerForBet);
+          const allPlayers = teams.flatMap((team) => team.players);
+          const agreePlayer = allPlayers.find(
+            (player) => player.name === selectedTeamOrPlayerForBet
+          );
           agreeEvaluationTeamOrPlayer = agreePlayer._id;
         }
-        agreeEvaluationObject["selectedTeamOrPlayerForBet"] = agreeEvaluationTeamOrPlayer
+        agreeEvaluationObject["selectedTeamOrPlayerForBet"] =
+          agreeEvaluationTeamOrPlayer;
         agreeEvaluationObject["selectedBetOperator"] = selectedBetOperator;
         agreeEvaluationObject["attributeBetInput"] = attributeBetInput;
-        agreeEvaluationObject["selectedAttributeBetType"] = selectedAttributeBetType;
-        wagerPayload.agreeEvaluation = agreeEvaluationObject
+        agreeEvaluationObject["selectedAttributeBetType"] =
+          selectedAttributeBetType;
+        wagerPayload.agreeEvaluation = agreeEvaluationObject;
       }
     } else if (selectedEventTypeForBet === "Series") {
       wagerPayload.wagerType = selectedSeriesBetType;
       if (selectedSeriesBetType === "Series Winner") {
-        const agreeTeam = teams.find(team => team.name === selectedTeamOrPlayerForBet);
+        const agreeTeam = teams.find(
+          (team) => team.name === selectedTeamOrPlayerForBet
+        );
         wagerPayload.agreeEvaluation = agreeTeam._id;
       } else if (selectedSeriesBetType === "Series Score") {
         wagerPayload.agreeEvaluation = `${betNode.teams[0]._id}: ${selectedTeam1ScoreForBet} - ${betNode.teams[1]._id}: ${selectedTeam2ScoreForBet}`;
       } else if (selectedSeriesBetType === "First Blood") {
-        const agreeTeam = teams.find(team => team.name === selectedTeamOrPlayerForBet);
+        const agreeTeam = teams.find(
+          (team) => team.name === selectedTeamOrPlayerForBet
+        );
         wagerPayload.agreeEvaluation = agreeTeam._id;
       } else if (selectedSeriesBetType === "Overtime Count") {
         let agreeEvaluationObject = {};
         agreeEvaluationObject["selectedBetOperator"] = selectedBetOperator;
-        agreeEvaluationObject["seriesOvertimeBetInput"] = seriesOvertimeBetInput;
-        wagerPayload.agreeEvaluation = agreeEvaluationObject
+        agreeEvaluationObject["seriesOvertimeBetInput"] =
+          seriesOvertimeBetInput;
+        wagerPayload.agreeEvaluation = agreeEvaluationObject;
       } else if (selectedSeriesBetType === "Player/Team Attributes") {
         let agreeEvaluationTeamOrPlayer = null;
         let agreeEvaluationObject = {};
-        const agreeTeam = teams.find(team => team.name === selectedTeamOrPlayerForBet);
+        const agreeTeam = teams.find(
+          (team) => team.name === selectedTeamOrPlayerForBet
+        );
         if (agreeTeam) {
           agreeEvaluationTeamOrPlayer = agreeTeam._id;
         } else {
-          const allPlayers = teams.flatMap(team => team.players);
-          const agreePlayer = allPlayers.find(player => player.name === selectedTeamOrPlayerForBet);
+          const allPlayers = teams.flatMap((team) => team.players);
+          const agreePlayer = allPlayers.find(
+            (player) => player.name === selectedTeamOrPlayerForBet
+          );
           agreeEvaluationTeamOrPlayer = agreePlayer._id;
         }
-        agreeEvaluationObject["selectedTeamOrPlayerForBet"] = agreeEvaluationTeamOrPlayer
+        agreeEvaluationObject["selectedTeamOrPlayerForBet"] =
+          agreeEvaluationTeamOrPlayer;
         agreeEvaluationObject["selectedBetOperator"] = selectedBetOperator;
         agreeEvaluationObject["attributeBetInput"] = attributeBetInput;
-        agreeEvaluationObject["selectedAttributeBetType"] = selectedAttributeBetType;
-        wagerPayload.agreeEvaluation = agreeEvaluationObject
+        agreeEvaluationObject["selectedAttributeBetType"] =
+          selectedAttributeBetType;
+        wagerPayload.agreeEvaluation = agreeEvaluationObject;
       }
     } else if (selectedEventTypeForBet === "Tournament") {
       wagerPayload.wagerType = selectedTournamentBetType;
       if (selectedTournamentBetType === "Tournament Winner") {
-        const agreeTeam = teams.find(team => team.name === selectedTeamOrPlayerForBet);
+        const agreeTeam = teams.find(
+          (team) => team.name === selectedTeamOrPlayerForBet
+        );
         wagerPayload.agreeEvaluation = agreeTeam._id;
       } else if (selectedTournamentBetType === "Player/Team Attributes") {
         let agreeEvaluationTeamOrPlayer = null;
         let agreeEvaluationObject = {};
-        const agreeTeam = teams.find(team => team.name === selectedTeamOrPlayerForBet);
+        const agreeTeam = teams.find(
+          (team) => team.name === selectedTeamOrPlayerForBet
+        );
         if (agreeTeam) {
           agreeEvaluationTeamOrPlayer = agreeTeam._id;
         } else {
-          const allPlayers = teams.flatMap(team => team.players);
-          const agreePlayer = allPlayers.find(player => player.name === selectedTeamOrPlayerForBet);
+          const allPlayers = teams.flatMap((team) => team.players);
+          const agreePlayer = allPlayers.find(
+            (player) => player.name === selectedTeamOrPlayerForBet
+          );
           agreeEvaluationTeamOrPlayer = agreePlayer._id;
         }
-        agreeEvaluationObject["selectedTeamOrPlayerForBet"] = agreeEvaluationTeamOrPlayer
+        agreeEvaluationObject["selectedTeamOrPlayerForBet"] =
+          agreeEvaluationTeamOrPlayer;
         agreeEvaluationObject["selectedBetOperator"] = selectedBetOperator;
         agreeEvaluationObject["attributeBetInput"] = attributeBetInput;
-        agreeEvaluationObject["selectedAttributeBetType"] = selectedAttributeBetType;
-        wagerPayload.agreeEvaluation = agreeEvaluationObject
+        agreeEvaluationObject["selectedAttributeBetType"] =
+          selectedAttributeBetType;
+        wagerPayload.agreeEvaluation = agreeEvaluationObject;
       } else if (selectedTournamentBetType === "Player Accolades") {
         // TODO: Implement this
       }
     } else if (selectedEventTypeForBet === "Season") {
       wagerPayload.wagerType = selectedSeasonBetType;
       if (selectedSeasonBetType === "Season Winner") {
-        const agreeTeam = teams.find(team => team.name === selectedTeamOrPlayerForBet);
+        const agreeTeam = teams.find(
+          (team) => team.name === selectedTeamOrPlayerForBet
+        );
         wagerPayload.agreeEvaluation = agreeTeam._id;
       } else if (selectedSeasonBetType === "Player/Team Attributes") {
         let agreeEvaluationTeamOrPlayer = null;
         let agreeEvaluationObject = {};
-        const agreeTeam = teams.find(team => team.name === selectedTeamOrPlayerForBet);
+        const agreeTeam = teams.find(
+          (team) => team.name === selectedTeamOrPlayerForBet
+        );
         if (agreeTeam) {
           agreeEvaluationTeamOrPlayer = agreeTeam._id;
         } else {
-          const allPlayers = teams.flatMap(team => team.players);
-          const agreePlayer = allPlayers.find(player => player.name === selectedTeamOrPlayerForBet);
+          const allPlayers = teams.flatMap((team) => team.players);
+          const agreePlayer = allPlayers.find(
+            (player) => player.name === selectedTeamOrPlayerForBet
+          );
           agreeEvaluationTeamOrPlayer = agreePlayer._id;
         }
-        agreeEvaluationObject["selectedTeamOrPlayerForBet"] = agreeEvaluationTeamOrPlayer
+        agreeEvaluationObject["selectedTeamOrPlayerForBet"] =
+          agreeEvaluationTeamOrPlayer;
         agreeEvaluationObject["selectedBetOperator"] = selectedBetOperator;
         agreeEvaluationObject["attributeBetInput"] = attributeBetInput;
-        agreeEvaluationObject["selectedAttributeBetType"] = selectedAttributeBetType;
-        wagerPayload.agreeEvaluation = agreeEvaluationObject
+        agreeEvaluationObject["selectedAttributeBetType"] =
+          selectedAttributeBetType;
+        wagerPayload.agreeEvaluation = agreeEvaluationObject;
       }
     }
     console.log("wagerPayload: ", wagerPayload);
@@ -469,7 +508,7 @@ const CreateWager = () => {
     console.log(wagerResponse);
 
     let betPayload = {
-      user: firebaseUser.mongoUserId,
+      user: user.mongoUserId,
       credits: creditsBet,
       agreeBet: true,
       rlEventReference: betNode._id,
@@ -482,7 +521,7 @@ const CreateWager = () => {
 
     let userPayload = { credits: remainingCredits };
     console.log(userPayload);
-    updateUser(firebaseUser.mongoUserId, userPayload);
+    updateUser(user.mongoUserId, userPayload);
 
     handleBetCancel();
     navigate("/");
