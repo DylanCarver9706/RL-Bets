@@ -9,6 +9,11 @@ import {
   fetchTeams,
 } from "../services/wagerService";
 
+function capitalize(str) {
+  if (!str) return ''; // Handle empty or null strings
+  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+}
+
 const CreateWager = () => {
   // Load data
   const { user } = useUser();
@@ -72,7 +77,7 @@ const CreateWager = () => {
     handleBetCancel();
 
     // Set the event type the user wants to bet on like Series or Match
-    setSelectedEventTypeForBet(node.type);
+    setSelectedEventTypeForBet(capitalize(node.type));
 
     // Save meta data for event in state for later use
     setBetNode(node);
