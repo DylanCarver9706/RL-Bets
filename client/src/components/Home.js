@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { useAuth } from "../context/AuthContext.js";
 import io from "socket.io-client";
 import { createBet } from "../services/wagerService.js";
+import { useUser } from "../context/UserContext.js";
 
 const BASE_SERVER_URL = process.env.REACT_APP_BASE_SERVER_URL;
 
@@ -24,7 +24,7 @@ const WagerOutcomeFormula = (
 };
 
 const Home = () => {
-  const { firebaseUser } = useAuth();
+  const { user } = useUser();
   const [wagers, setWagers] = useState([]);
   const [filteredWagers, setFilteredWagers] = useState([]);
   const [activeFilter, setActiveFilter] = useState("all");
@@ -48,7 +48,7 @@ const Home = () => {
       socket.disconnect();
     };
     // eslint-disable-next-line
-  }, [firebaseUser.mongoUserId]);
+  }, [user.mongoUserId]);
 
   useEffect(() => {
     // Recalculate estimated winnings if credits wagered or selected wager's agree/disagree values change
@@ -80,8 +80,8 @@ const Home = () => {
         filtered = allWagers.filter(
           (wager) =>
             wager.status === "Betable" &&
-            wager.creator !== firebaseUser.mongoUserId &&
-            wager.bets.every((bet) => bet.user !== firebaseUser.mongoUserId)
+            wager.creator !== user.mongoUserId &&
+            wager.bets.every((bet) => bet.user !== user.mongoUserId)
         );
         break;
       case "Ongoing":
@@ -92,7 +92,7 @@ const Home = () => {
         break;
       case "BetOn":
         filtered = allWagers.filter((wager) =>
-          wager.bets.some((bet) => bet.user === firebaseUser.mongoUserId)
+          wager.bets.some((bet) => bet.user === user.mongoUserId)
         );
         break;
       default:
@@ -138,7 +138,7 @@ const Home = () => {
     }
 
     const betPayload = {
-      user: firebaseUser.mongoUserId,
+      user: user.mongoUserId,
       credits: parseInt(credits, 10),
       agreeBet: agreeBet,
       rlEventReference: wagerId,
@@ -159,7 +159,7 @@ const Home = () => {
   return (
     <div style={styles.container}>
       <h2 style={styles.header}>
-        Welcome to the Wager Dashboard, {firebaseUser.mongoUserId}
+        Welcome to the Wager Dashboard, {user.mongoUserId}
       </h2>
 
       <div style={styles.toggleContainer}>
@@ -243,9 +243,9 @@ const Home = () => {
                     </div>
                     {!["Ongoing", "Ended"].includes(wager.status) &&
                       wager.bets.every(
-                        (bet) => bet.user !== firebaseUser.mongoUserId
+                        (bet) => bet.user !== user.mongoUserId
                       ) &&
-                      wager.creator !== firebaseUser.mongoUserId && (
+                      wager.creator !== user.mongoUserId && (
                         <button
                           style={styles.betButton}
                           onClick={() => handleShowBetInput(wager._id, true)}
@@ -271,9 +271,9 @@ const Home = () => {
                     </div>
                     {!["Ongoing", "Ended"].includes(wager.status) &&
                       wager.bets.every(
-                        (bet) => bet.user !== firebaseUser.mongoUserId
+                        (bet) => bet.user !== user.mongoUserId
                       ) &&
-                      wager.creator !== firebaseUser.mongoUserId && (
+                      wager.creator !== user.mongoUserId && (
                         <button
                           style={styles.betButton}
                           onClick={() => handleShowBetInput(wager._id, false)}
