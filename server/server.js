@@ -337,6 +337,8 @@ app.get("/api/users/firebase/:firebaseUserId", verifyFirebaseToken, async (req, 
     const response = {
       id: user._id.toString(),
       type: user.type,
+      idvStatus: user.idvStatus,
+      credits: user.credits,
     } 
     res.status(200).json(response);
   } catch (err) {
