@@ -21,11 +21,12 @@ function App() {
   useEffect(() => {
     const auth = getAuth();
 
+    console.log("ID token:", auth.currentUser.idToken);
+
     const handleAuthChange = async (firebaseUser) => {
       if (firebaseUser?.uid && user?.mongoUserId) {
         try {
           const idToken = await firebaseUser.getIdToken();
-          console.log("ID token:", idToken);
           if (!idToken) {
             console.warn("ID token not available");
             setLoading(false);
