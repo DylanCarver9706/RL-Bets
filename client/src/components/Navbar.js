@@ -1,43 +1,46 @@
 import React, { useState, useEffect } from "react";
 import io from "socket.io-client";
 import { Link } from "react-router-dom";
-import { useAuth } from "../context/AuthContext.js";
 import { getUserById } from "../services/userService.js";
+import { useUser } from "../context/UserContext.js";
 
 const BASE_SERVER_URL = process.env.REACT_APP_BASE_SERVER_URL;
 
 const Navbar = () => {
-  const [userCredits, setUserCredits] = useState(0);
-
-  const { firebaseUser } = useAuth();
+  const { user } = useUser();
+  const [userCredits, setUserCredits] = useState(null);
 
   useEffect(() => {
+    
     // Initialize the socket connection
-    const socket = io(BASE_SERVER_URL); // Adjust the URL if needed
+    const socket = io(BASE_SERVER_URL);
+    if (user?.mongoUserId) {
+      const fetchData = async () => {
+        try {
+          const userData = await getUserById(user.mongoUserId);
+          setUserCredits(parseInt(userData.credits));
+        } catch (error) {
+          console.error("Error fetching user data:", error.message);
+        }
+      };
 
-    // Fetch initial user data
-    const fetchData = async () => {
-      try {
-        const userData = await getUserById(firebaseUser.mongoUserId);
-        setUserCredits(parseInt(userData.credits));
-      } catch (error) {
-        console.error("Error fetching data:", error.message);
-      }
-    };
+      fetchData();
 
-    // Fetch the data immediately on component mount
-    fetchData();
-
-    // Listen for the 'updateUser' event from the server
+      // Listen for the 'updateUser' event from the server
     socket.on("updateUser", (updatedUser) => {
-      if (updatedUser._id === firebaseUser.mongoUserId) {
+      if (updatedUser._id === user.mongoUserId) {
         setUserCredits(updatedUser.credits);
       }
     });
 
     // Cleanup the socket connection on unmount
     return () => socket.disconnect();
-  }, [firebaseUser]);
+    }
+  }, [user]);
+
+  if (!user) {
+    return null; // Hide navbar if no user is logged in
+  }
 
   return (
     <nav style={styles.navbar}>
@@ -56,30 +59,32 @@ const Navbar = () => {
         <Link to="/Leaderboard" style={styles.link}>
           Leaderboard
         </Link>
-        {firebaseUser.userType === "admin" && (
-        <Link to="/Admin" style={styles.link}>
-          Admin
-        </Link>
-        )}
-        {firebaseUser.userType === "admin" && (
-        <Link to="/Log" style={styles.link}>
-          Logs
-        </Link>
+        {user.userType === "admin" && (
+          <>
+            <Link to="/Admin" style={styles.link}>
+              Admin
+            </Link>
+            <Link to="/Log" style={styles.link}>
+              Logs
+            </Link>
+          </>
         )}
       </div>
       <div style={styles.navLinks}>
         <Link to="/Create_Wager" style={styles.link}>
           Create Wager
         </Link>
-        {firebaseUser && (
-        <Link to="/Credits" style={styles.link}>
-          {parseInt(userCredits)} Credits
-        </Link>
+        {userCredits !== null && (
+          <Link to="/Credits" style={styles.link}>
+            {userCredits} Credits
+          </Link>
         )}
       </div>
     </nav>
   );
 };
+
+export default Navbar;
 
 const styles = {
   navbar: {
@@ -103,5 +108,3 @@ const styles = {
     fontSize: "16px",
   },
 };
-
-export default Navbar;
