@@ -62,7 +62,6 @@ export const openPlaidIDV = async (linkToken) => {
       token: linkToken,
       onSuccess: async (publicToken, metadata) => {
         try {
-          console.log(`IDV completed successfully: ${JSON.stringify(metadata)}`);
           const result = await completeIDV(metadata.link_session_id); // Notify server that IDV is complete
           resolve(result); // Resolve only when the Plaid widget successfully completes
         } catch (error) {

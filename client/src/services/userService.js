@@ -54,6 +54,10 @@ export const getMongoUserDataByFirebaseId = async (firebaseUserId) => {
 
     const data = await response.json();
 
+    if (data?.error === "User not found") {
+      return null; // Handle "user not found" without a console log
+    }
+
     if (!response.ok) {
       throw new Error(data.error || "Failed to fetch MongoDB user data.");
     }
