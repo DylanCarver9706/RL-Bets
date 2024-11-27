@@ -8,7 +8,7 @@ import { generateLinkTokenForIDV, openPlaidIDV } from "../services/plaidService.
 import { useUser } from "../context/UserContext.js";
 
 const Auth = () => {
-  const { user, setUser } = useUser();
+  const { setUser } = useUser();
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("testuser@example.com");
   const [password, setPassword] = useState("password123");
