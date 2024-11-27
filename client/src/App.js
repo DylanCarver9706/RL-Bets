@@ -21,12 +21,11 @@ function App() {
   useEffect(() => {
     const auth = getAuth();
 
-    console.log("ID token:", auth.currentUser.idToken);
-
     const handleAuthChange = async (firebaseUser) => {
-      if (firebaseUser?.uid && user?.mongoUserId) {
+      if (firebaseUser?.uid) {
         try {
           const idToken = await firebaseUser.getIdToken();
+          console.log("ID token:", idToken);
           if (!idToken) {
             console.warn("ID token not available");
             setLoading(false);
@@ -42,9 +41,7 @@ function App() {
             idvStatus: mongoUser?.idvStatus || "unverified",
             credits: mongoUser?.credits || 0,
           });
-        } catch (error) {
-          console.error("Error fetching MongoDB user data:", error);
-          setUser(null); // Clear user data on error
+        } catch {
         }
       } else {
         setUser(null); // User is logged out
