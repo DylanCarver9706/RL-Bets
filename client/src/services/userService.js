@@ -1,13 +1,4 @@
-import { auth } from "../firebaseConfig.js";
-
-// Get ID token from the currently authenticated user
-export const getFirebaseIdToken = async () => {
-  const currentUser = auth.currentUser;
-  if (!currentUser) {
-    throw new Error("User is not authenticated");
-  }
-  return await currentUser.getIdToken(); // Return a fresh ID token
-};
+import { getFirebaseIdToken } from "./firebaseService.js";
 
 const BASE_URL = process.env.REACT_APP_BASE_SERVER_URL; // Define your backend server URL
 
@@ -30,6 +21,7 @@ export const createUserInDatabase = async (name, email, password, firebaseUserId
         firebaseUserId: firebaseUserId,
         credits: 0.0,
         earnedCredits: 0.0,
+        idvStatus: "unverified",
       }),
     });
 
@@ -183,7 +175,6 @@ export const getUserById = async (userId) => {
 
 // Function to connect to the Stripe API to make a purchase
 export const createCheckoutSession = async (purchaseItems, mongoUserId, creditsTotal) => {
-  console.log(purchaseItems, mongoUserId, creditsTotal)
   try {
 
     const idToken = await getFirebaseIdToken();
