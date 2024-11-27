@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { loadStripe } from "@stripe/stripe-js";
-import { useAuth } from "../context/AuthContext.js";
+import { useUser } from "../context/UserContext.js";
 import { createCheckoutSession } from "../services/userService"; // Import service
 
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
@@ -10,7 +10,7 @@ const Credits = () => {
   const [totalPrice, setTotalPrice] = useState(0);
   const [errorMessage, setErrorMessage] = useState("");
 
-  const { firebaseUser } = useAuth();
+  const { user } = useUser();
 
   const creditOptions = [
     { id: 1, name: "100 Credits", amount: 100, price: 1.99 },
@@ -64,7 +64,7 @@ const Credits = () => {
     try {
       const session = await createCheckoutSession(
         purchaseItems,
-        firebaseUser.mongoUserId,
+        user.mongoUserId,
         calculateTotalCredits(cart)
       );
       const stripe = await stripePromise;
