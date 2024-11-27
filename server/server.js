@@ -8,6 +8,7 @@ const cors = require("cors");
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY)
 const firebaseAdmin = require("firebase-admin");
 const firebaseServiceAccountKey = require(process.env.FIREBASE_SERVICE_ACCOUNT_KEY_PATH);
+const { Configuration, PlaidEnvironments, PlaidApi } = require("plaid");
 
 // ************************************************************************************************
 // ************************************************************************************************
@@ -137,6 +138,97 @@ const verifyFirebaseToken = async (req, res, next) => {
     return res.status(401).json({ message: "Unauthorized: Invalid token" });
   }
 };
+
+// ************************************************************************************************
+// ************************************************************************************************
+// **********************************************PLAID*********************************************
+// ************************************************************************************************
+// ************************************************************************************************
+
+const plaidConfig = new Configuration({
+  basePath: PlaidEnvironments[process.env.PLAID_ENV || "sandbox"],
+  baseOptions: {
+    headers: {
+      "PLAID-CLIENT-ID": process.env.PLAID_CLIENT_ID,
+      "PLAID-SECRET": process.env.PLAID_SECRET,
+      "Plaid-Version": "2020-09-14",
+    },
+  },
+});
+
+const plaidClient = new PlaidApi(plaidConfig);
+
+// Generate a Plaid Link token for IDV
+app.post("/api/plaid/idv/link-token", verifyFirebaseToken, async (req, res) => {
+  try {
+    const { mongoUserId } = req.body;
+
+    if (!mongoUserId) {
+      return res.status(400).json({ error: "Missing MongoDB User ID" });
+    }
+
+    const user = await usersCollection.findOne({ _id: new ObjectId(mongoUserId) });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found in MongoDB" });
+    }
+
+    const tokenResponse = await plaidClient.linkTokenCreate({
+      user: {
+        client_user_id: mongoUserId,
+        email_address: user.email,
+      },
+      products: ["identity_verification"],
+      identity_verification: { template_id: process.env.PLAID_TEMPLATE_ID },
+      client_name: "Your App Name",
+      language: "en",
+      country_codes: ["US"],
+    });
+
+    res.json(tokenResponse.data);
+  } catch (error) {
+    console.error("Error creating Plaid Link token:", error.message);
+    res.status(500).json({ error: "Failed to create Link token" });
+  }
+});
+
+// Update user verification status after IDV
+app.post("/api/plaid/idv/complete", verifyFirebaseToken, async (req, res) => {
+  try {
+    const { idvSession } = req.body;
+
+    if (!idvSession) {
+      return res.status(400).json({ error: "Missing IDV session ID" });
+    }
+
+    const idvResult = await plaidClient.identityVerificationGet({
+      identity_verification_id: idvSession,
+    });
+
+    const { status, client_user_id } = idvResult.data;
+
+    // Update the user's verification status in MongoDB
+    const updateResult = await usersCollection.updateOne(
+      { _id: new ObjectId(client_user_id) },
+      {
+        $set: {
+          isVerified: status === "success",
+          idvStatus: status,
+          idvSession,
+        },
+      }
+    );
+
+    if (updateResult.matchedCount === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.json({ status, idvSession });
+  } catch (error) {
+    console.error("Error completing IDV:", error.message);
+    res.status(500).json({ error: "Failed to update IDV status" });
+  }
+});
 
 // ************************************************************************************************
 // ************************************************************************************************
