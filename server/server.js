@@ -1039,22 +1039,34 @@ app.get("/api/seasons/:id", async (req, res) => {
 // Update a Season by ID
 app.put("/api/seasons/:id", async (req, res) => {
   try {
+
+    const updateData = req.body;
+
     // Convert `winner` and `loser` to ObjectId if they exist in the request body
-    if (req.body.winner) {
-      req.body.winner = new ObjectId(req.body.winner);
+    if (updateData.winner) {
+      updateData.winner = new ObjectId(updateData.winner);
     }
-    if (req.body.loser) {
-      req.body.loser = new ObjectId(req.body.loser);
+    if (updateData.loser) {
+      updateData.loser = new ObjectId(updateData.loser);
     }
 
     const result = await seasonsCollection.updateOne(
       { _id: new ObjectId(req.params.id) },
-      { $set: req.body }
+      { $set: updateData }
     );
 
     if (result.matchedCount === 0) {
       return res.status(404).json({ error: "Season not found" });
     }
+    
+    // Update the status of all wagers for the event if the status changes
+    if (updateData?.status) {
+      await wagersCollection.updateMany(
+        { rlEventReference: req.params.id },
+        { $set: { status: updateData.status } }
+      );
+    }
+
     res.status(200).json({ message: "Season updated successfully" });
   } catch (err) {
     res
