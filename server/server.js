@@ -1427,9 +1427,15 @@ app.put("/api/matches/:id", async (req, res) => {
       { $set: updateData }
     );
 
-    if (result.matchedCount === 0) {
-      return res.status(404).json({ error: "Match not found" });
+    // Update the status of all wagers for the event if the status changes
+    if (updateData?.status) {
+      console.log(`Updating wager status to ${updateData.status}`);
+      await wagersCollection.updateMany(
+        { rlEventReference: req.params.id },
+        { $set: { status: updateData.status } }
+      );
     }
+
     res.status(200).json({ message: "Match updated successfully" });
   } catch (err) {
     res
@@ -2694,7 +2700,6 @@ app.get("/api/data-trees/season/all", async (req, res) => {
 
         // Fetch all matches for the series
         const seriesIds = seriesWithType.map((series) => series._id);
-        console.log(seriesIds);
         const matches = await matchesCollection
           .find({ series: { $in: seriesIds.map((id) => (typeof id === "string" ? new ObjectId(id) : id)) } })
           .toArray();
