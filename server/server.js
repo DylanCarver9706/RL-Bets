@@ -1299,6 +1299,15 @@ app.put("/api/series/:id", async (req, res) => {
     if (result.matchedCount === 0) {
       return res.status(404).json({ error: "Series not found" });
     }
+
+    // Update the status of all wagers for the event if the status changes
+    if (updateData?.status) {
+      await wagersCollection.updateMany(
+        { rlEventReference: req.params.id },
+        { $set: { status: updateData.status } }
+      );
+    }
+
     res.status(200).json({ message: "Series updated successfully" });
   } catch (err) {
     res
