@@ -51,7 +51,7 @@ const Auth = () => {
         }
   
         // Create the user in MongoDB
-        const mongoUserId = await createUserInDatabase(name, email, password, firebaseUser.uid);
+        const mongoUserId = await createUserInDatabase(name, email, firebaseUser.uid);
   
         // Temporarily set the user state until the MongoDB fetch happens in `onAuthStateChanged`
         setUser((prevUser) => ({
