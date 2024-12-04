@@ -6,7 +6,9 @@ import {
   updateSeriesById,
   updateMatchById,
   updateMatchResults,
+  createSeries,
 } from "../services/adminService";
+import { fetchTeams } from "../services/wagerService";
 
 const Admin = () => {
   // Load data
@@ -20,12 +22,24 @@ const Admin = () => {
   const [endTournament, setEndTournament] = useState(false);
   const [endSeason, setEndSeason] = useState(false);
   const [firstBlood, setFirstBlood] = useState("");
+  const [newSeriesMode, setNewSeriesMode] = useState(null);
+  const [newSeriesData, setNewSeriesData] = useState({
+    team1: "",
+    team2: "",
+    bestOf: 0,
+    name: "",
+  });
+  const [teams, setTeams] = useState([]);
 
+  // Fetch data for the admin page
   useEffect(() => {
     const fetchData = async () => {
       try {
         const fetchedData = await fetchAllSeasonsDataTree();
         setData(fetchedData);
+
+        const fetchedTeams = await fetchTeams();
+        setTeams(fetchedTeams); // Fetch all teams for dropdown
       } catch (error) {
         console.error("Error fetching data:", error.message);
       }
@@ -388,6 +402,22 @@ const Admin = () => {
             Edit
           </button>
         )}
+        {data.type.toLowerCase() === "tournament" && (
+          <button
+          onClick={() => handleAddSeriesClick(data)}
+          style={{
+            marginTop: "10px",
+            background: "#007bff",
+            color: "white",
+            border: "none",
+            padding: "5px 10px",
+            cursor: "pointer",
+            borderRadius: "5px",
+          }}
+        >
+          Add Series
+        </button>
+        )}
       </h3>
       {/* Dropdown for status change */}
       {["season", "tournament", "series", "match"].includes(data.type.toLowerCase()) && (
@@ -528,9 +558,175 @@ const Admin = () => {
     ));
   };
 
+  // Handle Add Series button click
+  const handleAddSeriesClick = (tournament) => {
+    setNewSeriesMode(tournament); // Enter new series mode with the tournament reference
+  };
+
+  // Handle new series input change
+  const handleNewSeriesChange = (key, value) => {
+    setNewSeriesData((prevData) => ({
+      ...prevData,
+      [key]: value,
+    }));
+  };
+
+  // Handle save new series
+  const handleSaveNewSeries = async () => {
+    try {
+      const payload = {
+        tournament: newSeriesMode._id,
+        team1: newSeriesData.team1,
+        team2: newSeriesData.team2,
+        best_of: parseInt(newSeriesData.bestOf, 10),
+        name: newSeriesData.name,
+      };
+      console.log("Payload:", payload);
+      await createSeries(payload); // Submit the data to create the new series
+      const updatedData = await fetchAllSeasonsDataTree(); // Refresh the data tree
+      setData(updatedData);
+      setNewSeriesMode(null); // Exit new series mode
+      setNewSeriesData({
+        team1: "",
+        team2: "",
+        bestOf: 0,
+        name: "",
+      }); // Reset form data
+    } catch (error) {
+      console.error("Error creating series:", error.message);
+    }
+  };
+
+  // Render the modal for adding a new series
+  const renderNewSeriesModal = () => (
+    <div
+      style={{
+        position: "fixed",
+        top: "50%",
+        left: "50%",
+        transform: "translate(-50%, -50%)",
+        background: "#b3b1b1",
+        padding: "20px",
+        borderRadius: "10px",
+        boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
+        zIndex: 1000,
+      }}
+    >
+      <h3>Add New Series</h3>
+      <div style={{ marginBottom: "15px" }}>
+        <label>
+          Name:
+          <input
+            type="text"
+            value={newSeriesData.name}
+            onChange={(e) => handleNewSeriesChange("name", e.target.value)}
+            style={{
+              marginLeft: "10px",
+              padding: "5px",
+              width: "100%",
+              borderRadius: "4px",
+              border: "1px solid #ccc",
+            }}
+          />
+        </label>
+      </div>
+      <div style={{ marginBottom: "15px" }}>
+        <label>
+          Team 1:
+          <select
+            value={newSeriesData.team1}
+            onChange={(e) => handleNewSeriesChange("team1", e.target.value)}
+            style={{
+              marginLeft: "10px",
+              padding: "5px",
+              width: "100%",
+              borderRadius: "4px",
+              border: "1px solid #ccc",
+            }}
+          >
+            <option value="">Select Team</option>
+            {teams.map((team) => (
+              <option key={team._id} value={team._id}>
+                {team.name}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+      <div style={{ marginBottom: "15px" }}>
+        <label>
+          Team 2:
+          <select
+            value={newSeriesData.team2}
+            onChange={(e) => handleNewSeriesChange("team2", e.target.value)}
+            style={{
+              marginLeft: "10px",
+              padding: "5px",
+              width: "100%",
+              borderRadius: "4px",
+              border: "1px solid #ccc",
+            }}
+          >
+            <option value="">Select Team</option>
+            {teams.map((team) => (
+              <option key={team._id} value={team._id}>
+                {team.name}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+      <div style={{ marginBottom: "15px" }}>
+        <label>
+          Best Of:
+          <input
+            type="number"
+            value={newSeriesData.bestOf}
+            onChange={(e) => handleNewSeriesChange("bestOf", e.target.value)}
+            style={{
+              marginLeft: "10px",
+              padding: "5px",
+              width: "100%",
+              borderRadius: "4px",
+              border: "1px solid #ccc",
+            }}
+          />
+        </label>
+      </div>
+      <button
+        onClick={handleSaveNewSeries}
+        style={{
+          background: "#28a745",
+          color: "white",
+          padding: "5px 10px",
+          border: "none",
+          borderRadius: "5px",
+          cursor: "pointer",
+        }}
+      >
+        Save
+      </button>
+      <button
+        onClick={() => setNewSeriesMode(null)}
+        style={{
+          marginLeft: "10px",
+          background: "#dc3545",
+          color: "white",
+          padding: "5px 10px",
+          border: "none",
+          borderRadius: "5px",
+          cursor: "pointer",
+        }}
+      >
+        Cancel
+      </button>
+    </div>
+  );
+
   return (
     <div>
       <h1>Admin Page - Season Data Overview</h1>
+      {newSeriesMode && renderNewSeriesModal()}
       {showResultsModal && renderResultsModal()}
       {editMode ? renderEditModal() : data ? renderSeasons(data) : <p>Loading data...</p>}
     </div>
