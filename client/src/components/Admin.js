@@ -399,6 +399,7 @@ const Admin = () => {
               onChange={(e) => handleStatusChange(data, e.target.value)}
               style={{ marginLeft: "10px", padding: "5px" }}
             >
+              <option value="Created">Created</option>
               <option value="Betable">Betable</option>
               <option value="Ongoing">Ongoing</option>
               <option value="Ended">Ended</option>
