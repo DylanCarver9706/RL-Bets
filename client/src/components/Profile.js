@@ -5,7 +5,7 @@ import {
   updateUser,
   deleteUser as deleteMongoUser,
 } from "../services/userService.js";
-import { deleteUser as firebaseDeleteUser, signOut } from "firebase/auth"; // Import Firebase deleteUser function
+import { deleteUser as firebaseDeleteUser, signOut, sendPasswordResetEmail } from "firebase/auth"; // Import sendPasswordResetEmail
 import { auth } from "../firebaseConfig.js";
 import { generateLinkTokenForIDV, openPlaidIDV } from "../services/plaidService.js";
 import { useUser } from "../context/UserContext.js";
@@ -86,6 +86,21 @@ const Profile = () => {
     }
   };
 
+  // Handle password reset
+  const handleResetPassword = async () => {
+    if (!email) {
+      alert("Email is required to reset the password.");
+      return;
+    }
+    try {
+      await sendPasswordResetEmail(auth, email);
+      alert("Password reset email sent successfully.");
+    } catch (error) {
+      console.error("Error sending password reset email:", error.message);
+      alert("Failed to send password reset email. Please try again.");
+    }
+  };
+
   const handleIdentityVerification = async () => {
     console.log(user.mongoUserId);
     const linkTokenData = await generateLinkTokenForIDV(user.mongoUserId);
@@ -151,6 +166,9 @@ const Profile = () => {
               </button>
               <button onClick={handleLogout} style={{ marginLeft: "10px" }}>
                 Logout
+              </button>
+              <button onClick={handleResetPassword} style={{ marginLeft: "10px" }}>
+                Reset Password
               </button>
             </div>
           ) : (
