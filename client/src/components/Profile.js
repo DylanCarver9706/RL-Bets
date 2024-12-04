@@ -14,7 +14,6 @@ const Profile = () => {
   const [userData, setUserData] = useState(null); // State to hold the user data
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const navigate = useNavigate();
   const { user, setUser } = useUser();
 
@@ -32,7 +31,6 @@ const Profile = () => {
       setUserData(userDetails);
       setName(userDetails.name);
       setEmail(userDetails.email);
-      setPassword(userDetails.password); // Reset password input
     } catch (err) {
       console.error("Error fetching user data:", err.message);
     }
@@ -44,7 +42,6 @@ const Profile = () => {
       const updatedUser = await updateUser(user.mongoUserId, {
         name,
         email,
-        password,
       });
       setUserData(updatedUser);
       alert("User updated successfully");
@@ -90,10 +87,9 @@ const Profile = () => {
   };
 
   const handleIdentityVerification = async () => {
-    // Generate Plaid Link token for IDV
-    console.log(user.mongoUserId)
+    console.log(user.mongoUserId);
     const linkTokenData = await generateLinkTokenForIDV(user.mongoUserId);
-  
+
     if (!linkTokenData || !linkTokenData.link_token) {
       throw new Error("Failed to generate Plaid Link token.");
     }
@@ -137,14 +133,6 @@ const Profile = () => {
                   onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
-              <div>
-                <label>Password:</label>
-                <input
-                  // type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-              </div>
               <p>Credits: {userData.credits}</p>
               <p>Earned Credits: {userData.earnedCredits}</p>
               <p>Identity Verification Status: {userData.idvStatus}</p>
@@ -156,7 +144,7 @@ const Profile = () => {
                   Verify Identity
                 </button>
               )}
-              <br/>
+              <br />
               <button onClick={handleUpdate}>Update User</button>
               <button onClick={handleDelete} style={{ marginLeft: "10px" }}>
                 Delete User
