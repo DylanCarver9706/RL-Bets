@@ -1240,30 +1240,61 @@ app.delete("/api/tournaments/:id", async (req, res) => {
 // Create a new Series
 app.post("/api/series", async (req, res) => {
   try {
-    const seriesData = req.body;
-    if (!seriesData.tournament) {
-      return res
-        .status(400)
-        .json({ error: "Tournament ID is required to create a Series." });
+    const { tournament, team1, team2, best_of, name } = req.body;
+
+    if (!tournament || !team1 || !team2 || !best_of || !name) {
+      return res.status(400).json({
+        error: "Tournament ID, Team 1, Team 2, Best Of value, and Name are required to create a Series.",
+      });
     }
+
+    // Create the series object
+    const seriesData = {
+      name,
+      tournament: new ObjectId(tournament),
+      teams: [new ObjectId(team1), new ObjectId(team2)],
+      best_of: parseInt(best_of, 10),
+      type: "series",
+      status: "Created",
+    };
 
     // Insert the new series document
     const result = await seriesCollection.insertOne(seriesData);
 
-    // If a tournament ID is provided, update the Tournament collection to include this series
+    // Generate matches based on the best_of value
+    const matches = Array.from({ length: best_of }, (_, index) => ({
+      name: `${name} - Match ${index + 1}`,
+      teams: [new ObjectId(team1), new ObjectId(team2)],
+      series: result.insertedId,
+      status: "Created",
+      type: "match",
+    }));
+
+    // Insert matches into the matches collection
+    const matchInsertResult = await matchesCollection.insertMany(matches);
+
+    // Update the series document to include the generated matches
+    await seriesCollection.updateOne(
+      { _id: result.insertedId },
+      { $set: { matches: Object.values(matchInsertResult.insertedIds) } }
+    );
+
+    // Update the tournament document to include this series
     await tournamentsCollection.updateOne(
-      { _id: new ObjectId(seriesData.tournament) },
+      { _id: new ObjectId(tournament) },
       { $push: { series: result.insertedId } }
     );
 
     res.status(201).json({
       message: "Series created successfully",
       seriesId: result.insertedId,
+      matchIds: Object.values(matchInsertResult.insertedIds),
     });
   } catch (err) {
-    res
-      .status(500)
-      .json({ error: "Failed to create series", details: err.message });
+    res.status(500).json({
+      error: "Failed to create series",
+      details: err.message,
+    });
   }
 });
 
