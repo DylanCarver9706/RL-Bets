@@ -1493,7 +1493,6 @@ app.put("/api/matches/:id", async (req, res) => {
 
     // Update the status of all wagers for the event if the status changes
     if (updateData?.status) {
-      console.log(`Updating wager status to ${updateData.status}`);
       await wagersCollection.updateMany(
         { rlEventReference: req.params.id },
         { $set: { status: updateData.status } }

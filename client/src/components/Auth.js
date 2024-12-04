@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth } from "../firebaseConfig.js";
 import { createUserInDatabase, updateUser, getMongoUserDataByFirebaseId } from "../services/userService.js";
 import { generateLinkTokenForIDV, openPlaidIDV } from "../services/plaidService.js";
@@ -112,6 +112,79 @@ const Auth = () => {
     }
   };
 
+  const handleGoogleAuth = async () => {
+    const provider = new GoogleAuthProvider();
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const firebaseUser = result.user;
+  
+      // Check if the user exists in MongoDB
+      let mongoUser;
+      try {
+        mongoUser = await getMongoUserDataByFirebaseId(firebaseUser.uid);
+      } catch (error) {
+        console.error("Error fetching MongoDB user data:", error.message);
+      }
+  
+      if (mongoUser) {
+        // Existing user
+        setUser({
+          firebaseUserId: firebaseUser.uid,
+          mongoUserId: mongoUser.id,
+          userType: mongoUser.type,
+          idvStatus: mongoUser.idvStatus,
+          credits: mongoUser.credits,
+        });
+        navigate("/");
+      } else {
+        // New user: Create in MongoDB
+        try {
+          const mongoUserId = await createUserInDatabase(
+            firebaseUser.displayName,
+            firebaseUser.email,
+            firebaseUser.uid
+          );
+  
+          setUser((prevUser) => ({
+            ...prevUser,
+            firebaseUserId: firebaseUser.uid,
+            mongoUserId,
+            idvStatus: "unverified",
+          }));
+  
+          // Generate Plaid Link token for IDV
+          const linkTokenData = await generateLinkTokenForIDV(mongoUserId);
+  
+          if (!linkTokenData || !linkTokenData.link_token) {
+            throw new Error("Failed to generate Plaid Link token.");
+          }
+  
+          setIdvActive(true);
+  
+          const idvResult = await openPlaidIDV(linkTokenData.link_token);
+  
+          if (idvResult?.status === "success") {
+            await updateUser(mongoUserId, { idvStatus: "verified" });
+            setUser((prevUser) => ({
+              ...prevUser,
+              idvStatus: "verified",
+            }));
+            navigate("/");
+          } else {
+            navigate("/User");
+          }
+        } catch (error) {
+          console.error("Error creating new user:", error.message);
+          alert("Failed to create a new user. Please try again.");
+          navigate("/Auth");
+        }
+      }
+    } catch (error) {
+      console.error("Error during Google authentication:", error.message);
+      alert("Failed to sign in with Google. Please try again.");
+    }
+  };
+  
   return (
     <div>
       {!idvActive && !showForgotPassword && (
@@ -161,11 +234,27 @@ const Auth = () => {
               Forgot Password
             </button>
           )}
+          {isLogin && (
+            <button
+              onClick={() => handleGoogleAuth(true)}
+              disabled={loading}
+              style={{ marginTop: "10px" }}
+            >
+              Sign In with Google
+            </button>
+          )}
+          {!isLogin && (
+            <button
+              onClick={() => handleGoogleAuth(true)}
+              disabled={loading}
+              style={{ marginTop: "10px" }}
+            >
+              Sign Up with Google
+            </button>
+          )}
           <button onClick={() => setIsLogin(!isLogin)} disabled={loading}>
             {isLogin ? "Switch to Sign Up" : "Switch to Login"}
           </button>
-
-          
         </div>
       )}
       {showForgotPassword && (
