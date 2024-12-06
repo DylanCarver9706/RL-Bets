@@ -16,6 +16,7 @@ const Auth = () => {
   const [error, setError] = useState(null);
   const [idvActive, setIdvActive] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -215,11 +216,12 @@ const Auth = () => {
             <div>
               <label>Password:</label>
               <input
-                type="password"
+                type= { showPassword ? "text" : "password" }
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
+            <input type="checkbox" onClick={() => setShowPassword(!showPassword)} />
             </div>
             <button type="submit" disabled={loading}>
               {loading ? "Processing..." : isLogin ? "Login" : "Sign Up"}
