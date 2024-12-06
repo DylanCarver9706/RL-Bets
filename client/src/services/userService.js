@@ -21,6 +21,7 @@ export const createUserInDatabase = async (name, email, firebaseUserId) => {
         credits: 0.0,
         earnedCredits: 0.0,
         idvStatus: "unverified",
+        type: "user",
       }),
     });
 
@@ -30,7 +31,7 @@ export const createUserInDatabase = async (name, email, firebaseUserId) => {
       throw new Error(data.error || "Failed to create user in database.");
     }
 
-    return data.userId;
+    return data;
   } catch (err) {
     console.error("Error creating user in MongoDB:", err.message);
     throw err;

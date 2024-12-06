@@ -5,9 +5,16 @@ import {
   updateUser,
   deleteUser as deleteMongoUser,
 } from "../services/userService.js";
-import { deleteUser as firebaseDeleteUser, signOut, sendPasswordResetEmail } from "firebase/auth"; // Import sendPasswordResetEmail
+import {
+  deleteUser as firebaseDeleteUser,
+  signOut,
+  sendPasswordResetEmail,
+} from "firebase/auth"; // Import sendPasswordResetEmail
 import { auth } from "../firebaseConfig.js";
-import { generateLinkTokenForIDV, openPlaidIDV } from "../services/plaidService.js";
+import {
+  generateLinkTokenForIDV,
+  openPlaidIDV,
+} from "../services/plaidService.js";
 import { useUser } from "../context/UserContext.js";
 
 const Profile = () => {
@@ -119,7 +126,7 @@ const Profile = () => {
       }));
       navigate("/");
     } else {
-      navigate("/User");
+      navigate("/Profile");
     }
   };
 
@@ -167,7 +174,10 @@ const Profile = () => {
               <button onClick={handleLogout} style={{ marginLeft: "10px" }}>
                 Logout
               </button>
-              <button onClick={handleResetPassword} style={{ marginLeft: "10px" }}>
+              <button
+                onClick={handleResetPassword}
+                style={{ marginLeft: "10px" }}
+              >
                 Reset Password
               </button>
             </div>

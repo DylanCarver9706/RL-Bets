@@ -59,7 +59,7 @@ const Navbar = () => {
         <Link to="/Leaderboard" style={styles.link}>
           Leaderboard
         </Link>
-        {user.userType === "admin" && (
+        {user.type === "admin" && (
           <>
             <Link to="/Admin" style={styles.link}>
               Admin

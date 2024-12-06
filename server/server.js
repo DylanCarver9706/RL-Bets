@@ -212,9 +212,7 @@ app.post("/api/plaid/idv/complete", verifyFirebaseToken, async (req, res) => {
       { _id: new ObjectId(client_user_id) },
       {
         $set: {
-          isVerified: status === "success",
           idvStatus: status,
-          idvSession,
         },
       }
     );
@@ -240,10 +238,15 @@ app.post("/api/plaid/idv/complete", verifyFirebaseToken, async (req, res) => {
 app.post("/api/users", verifyFirebaseToken, async (req, res) => {
   try {
     const result = await usersCollection.insertOne(req.body);
-    res.status(201).json({
-      message: "User created successfully",
-      userId: result.insertedId, // TODO: SALT this id when returning
-    });
+
+    if (result.acknowledged && result.insertedId) {
+      // Fetch the newly created user document
+      const newUser = await usersCollection.findOne({ _id: result.insertedId });
+
+      res.status(201).json(newUser); // Return the full user document
+    } else {
+      res.status(500).json({ error: "Failed to create user" });
+    }
   } catch (err) {
     res
       .status(500)
@@ -335,10 +338,14 @@ app.get("/api/users/firebase/:firebaseUserId", verifyFirebaseToken, async (req, 
       return res.status(200).json({ error: "User not found" });
     }
     const response = {
-      id: user._id.toString(),
+      _id: user._id.toString(),
+      name: user.name,
+      email: user.email,
+      credits: user.credits,
+      earnedCredits: user.earnedCredits,
       type: user.type,
       idvStatus: user.idvStatus,
-      credits: user.credits,
+
     } 
     res.status(200).json(response);
   } catch (err) {
