@@ -18,8 +18,8 @@ function App() {
   const { user, setUser } = useUser();
   const [loading, setLoading] = useState(true);
 
+  const auth = getAuth();
   useEffect(() => {
-    const auth = getAuth();
 
     const handleAuthChange = async (firebaseUser) => {
       if (firebaseUser?.uid) {
@@ -32,11 +32,13 @@ function App() {
             return;
           }
 
+          console.log(user)
+
           // Fetch MongoDB user data
           const mongoUser = await getMongoUserDataByFirebaseId(firebaseUser.uid);
           setUser({
             firebaseUserId: firebaseUser.uid,
-            mongoUserId: mongoUser?.id || null,
+            mongoUserId: mongoUser?._id || null,
             userType: mongoUser?.type || null,
             idvStatus: mongoUser?.idvStatus || "unverified",
             credits: mongoUser?.credits || 0,
@@ -73,21 +75,21 @@ function App() {
         )}
       </div>
       <Routes>
-        <Route path="/" element={user?.idvStatus === "verified" ? <Home user={user} /> : <Auth />} />
+        <Route path="/" element={user?.idvStatus === "verified" ? <Home /> : <Auth />} />
         <Route path="/Auth" element={<Auth />} />
-        <Route path="/Profile" element={user ? <Profile user={user} /> : <Auth />} />
+        <Route path="/Profile" element={user ? <Profile /> : <Auth />} />
         <Route
           path="/Create_Wager"
-          element={user?.idvStatus === "verified" ? <CreateWager user={user} /> : <Auth />}
+          element={user?.idvStatus === "verified" ? <CreateWager /> : <Auth />}
         />
-        <Route path="/Schedule" element={user?.idvStatus === "verified" ? <Schedule user={user} /> : <Auth />} />
-        <Route path="/Credits" element={user?.idvStatus === "verified" ? <Credits user={user} /> : <Auth />} />
+        <Route path="/Schedule" element={user?.idvStatus === "verified" ? <Schedule /> : <Auth />} />
+        <Route path="/Credits" element={user?.idvStatus === "verified" ? <Credits /> : <Auth />} />
         <Route
           path="/Leaderboard"
-          element={user?.idvStatus === "verified" ? <Leaderboard user={user} /> : <Auth />}
+          element={user?.idvStatus === "verified" ? <Leaderboard /> : <Auth />}
         />
-        <Route path="/Log" element={user?.userType === "admin" ? <Log user={user} /> : <Home />} />
-        <Route path="/Admin" element={user?.userType === "admin" ? <Admin user={user} /> : <Home />} />
+        <Route path="/Log" element={user?.userType === "admin" ? <Log /> : <Home />} />
+        <Route path="/Admin" element={user?.userType === "admin" ? <Admin /> : <Home />} />
       </Routes>
     </>
   );
