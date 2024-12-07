@@ -21,6 +21,7 @@ export const createUserInDatabase = async (name, email, firebaseUserId) => {
         credits: 0.0,
         earnedCredits: 0.0,
         idvStatus: "unverified",
+        emailVerificationStatus: "unverified",
         type: "user",
       }),
     });

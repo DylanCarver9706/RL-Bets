@@ -9,6 +9,7 @@ import {
   deleteUser as firebaseDeleteUser,
   signOut,
   sendPasswordResetEmail,
+  sendEmailVerification,
 } from "firebase/auth"; // Import sendPasswordResetEmail
 import { auth } from "../firebaseConfig.js";
 import {
@@ -130,6 +131,23 @@ const Profile = () => {
     }
   };
 
+  const handleEmailVerification = async () => {
+    if (!auth.currentUser) {
+      alert("No user is currently logged in.");
+      return;
+    }
+
+    try {
+      await sendEmailVerification(auth.currentUser);
+      alert(
+        "Verification email sent. Please check your inbox and verify your email."
+      );
+    } catch (error) {
+      console.error("Error sending email verification:", error.message);
+      alert("Failed to send verification email. Please try again.");
+    }
+  };
+
   return (
     <div>
       <h2>User Profile</h2>
@@ -164,6 +182,15 @@ const Profile = () => {
                   style={{ marginLeft: "10px" }}
                 >
                   Verify Identity
+                </button>
+              )}
+              <p>Email Verification Status: {userData.emailVerificationStatus}</p>
+              {userData.emailVerificationStatus !== "verified" && (
+                <button
+                  onClick={() => handleEmailVerification()}
+                  style={{ marginLeft: "10px" }}
+                >
+                  Resend Verification Email
                 </button>
               )}
               <br />

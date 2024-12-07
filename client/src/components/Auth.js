@@ -6,6 +6,7 @@ import {
   sendPasswordResetEmail,
   GoogleAuthProvider,
   signInWithPopup,
+  sendEmailVerification,
 } from "firebase/auth";
 import { auth } from "../firebaseConfig.js";
 import {
@@ -72,6 +73,11 @@ const Auth = () => {
           throw new Error("Failed to retrieve Firebase user ID.");
         }
 
+        // Send Email Verification
+        await sendEmailVerification(firebaseUser);
+
+        alert("Verification email sent. Please check your inbox and verify your email.");
+      
         // Create the user in MongoDB
         const mongoUser = await createUserInDatabase(
           name,
@@ -112,6 +118,7 @@ const Auth = () => {
           alert(error.message);
           navigate("/Auth");
         }
+        navigate("/Email-Verification");
       }
     } catch (error) {
       console.error("Error during authentication:", error.message);
@@ -176,6 +183,13 @@ const Auth = () => {
             mongoUser,
             idvStatus: "unverified",
           }));
+
+          // Send Email Verification
+          await firebaseUser.sendEmailVerification();
+
+          alert("Verification email sent. Please check your inbox and verify your email.");
+
+          navigate("/Email-Verification");
 
           // Generate Plaid Link token for IDV
           const linkTokenData = await generateLinkTokenForIDV(mongoUser._id);

@@ -345,6 +345,7 @@ app.get("/api/users/firebase/:firebaseUserId", verifyFirebaseToken, async (req, 
       earnedCredits: user.earnedCredits,
       type: user.type,
       idvStatus: user.idvStatus,
+      emailVerificationStatus: user.emailVerificationStatus,
 
     } 
     res.status(200).json(response);
