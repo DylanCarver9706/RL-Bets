@@ -62,10 +62,10 @@ function App() {
     });
 
     return () => unsubscribe();
-  }, [setUser]);
+  }, [setUser, auth]);
 
   useEffect(() => {
-    if (!user.emailVerificationStatus || !user.idvStatus) {
+    if (!user || !user?.emailVerificationStatus || !user?.idvStatus) {
       return;
     }
     if (user?.emailVerificationStatus !== "verified") {
@@ -85,14 +85,14 @@ function App() {
       <div>
         {user ? (
           <p>
-            Welcome, Firebase UID: {user.firebaseUserId} - MongoId: {user.mongoUserId} - Email Verification Status: {user.emailVerificationStatus} - IDV Status: {user?.idvStatus}
+            Welcome, Firebase UID: {user?.firebaseUserId} - MongoId: {user?.mongoUserId} - Email Verification Status: {user?.emailVerificationStatus} - IDV Status: {user?.idvStatus}
           </p>
         ) : (
           <p>Please log in</p>
         )}
       </div>
       <Routes>
-        <Route path="/" element={user ? <Home /> : <Auth /> } />
+        <Route path="/" element={user?.emailVerificationStatus === "verified" && user?.idvStatus === "verified" ? <Home /> : <Auth /> } />
         <Route path="/Auth" element={user ? <Home /> : <Auth />} />
         <Route path="/Email-Verification" element={user ? <EmailVerification /> : <Home />} />
         <Route path="/Identity-Verification" element={user ? <IdentityVerification /> : <Home />} />

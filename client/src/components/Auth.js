@@ -11,13 +11,8 @@ import {
 import { auth } from "../firebaseConfig.js";
 import {
   createUserInDatabase,
-  updateUser,
   getMongoUserDataByFirebaseId,
 } from "../services/userService.js";
-import {
-  generateLinkTokenForIDV,
-  openPlaidIDV,
-} from "../services/plaidService.js";
 import { useUser } from "../context/UserContext.js";
 
 const Auth = () => {
@@ -28,7 +23,6 @@ const Auth = () => {
   const [name, setName] = useState("Test User");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [idvActive, setIdvActive] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
@@ -51,16 +45,19 @@ const Auth = () => {
 
         // Fetch MongoDB user data
         const mongoUser = await getMongoUserDataByFirebaseId(firebaseUser.uid);
-        
+
         console.log("MongoDB User:", mongoUser);
 
         setUser({
+          firebaseUserId: firebaseUser.uid,
           mongoUserId: mongoUser?._id,
-          mongoUser,
+          userType: mongoUser?.type,
+          idvStatus: mongoUser?.idvStatus,
+          emailVerificationStatus: mongoUser?.emailVerificationStatus,
+          credits: mongoUser?.credits,
         });
 
         navigate("/");
-        window.location.reload()
       } else {
         firebaseCredential = await createUserWithEmailAndPassword(
           auth,
@@ -76,8 +73,6 @@ const Auth = () => {
         // Send Email Verification
         await sendEmailVerification(firebaseUser);
 
-        alert("Verification email sent. Please check your inbox and verify your email.");
-      
         // Create the user in MongoDB
         const mongoUser = await createUserInDatabase(
           name,
@@ -85,39 +80,15 @@ const Auth = () => {
           firebaseUser.uid
         );
 
-        // Temporarily set the user state until the MongoDB fetch happens in `onAuthStateChanged`
-        setUser((prevUser) => ({
-          ...prevUser,
+        setUser({
+          firebaseUserId: firebaseUser.uid,
           mongoUserId: mongoUser?._id,
-          mongoUser,
-        }));
+          userType: mongoUser?.type,
+          idvStatus: mongoUser?.idvStatus,
+          emailVerificationStatus: mongoUser?.emailVerificationStatus,
+          credits: mongoUser?.credits,
+        });
 
-        // Generate Plaid Link token for IDV
-        const linkTokenData = await generateLinkTokenForIDV(mongoUser._id);
-
-        if (!linkTokenData || !linkTokenData.link_token) {
-          throw new Error("Failed to generate Plaid Link token.");
-        }
-
-        setIdvActive(true);
-
-        try {
-          const idvResult = await openPlaidIDV(linkTokenData.link_token);
-
-          if (idvResult?.status === "success") {
-            await updateUser(mongoUser._id, { idvStatus: "verified" });
-            setUser((prevUser) => ({
-              ...prevUser,
-              idvStatus: "verified",
-            }));
-            navigate("/");
-          } else {
-            navigate("/Profile");
-          }
-        } catch (error) {
-          alert(error.message);
-          navigate("/Auth");
-        }
         navigate("/Email-Verification");
       }
     } catch (error) {
@@ -162,11 +133,13 @@ const Auth = () => {
         // Existing user
         setUser({
           firebaseUserId: firebaseUser.uid,
-          mongoUserId: mongoUser._id,
-          mongoUser,
+          mongoUserId: mongoUser?._id,
+          userType: mongoUser?.type,
+          idvStatus: mongoUser?.idvStatus,
+          emailVerificationStatus: mongoUser?.emailVerificationStatus,
+          credits: mongoUser?.credits,
         });
         navigate("/");
-        window.location.reload()
       } else {
         // New user: Create in MongoDB
         try {
@@ -176,42 +149,16 @@ const Auth = () => {
             firebaseUser.uid
           );
 
-          setUser((prevUser) => ({
-            ...prevUser,
+          setUser({
             firebaseUserId: firebaseUser.uid,
-            mongoUserId: mongoUser._id,
+            mongoUserId: mongoUser?._id,
             mongoUser,
-            idvStatus: "unverified",
-          }));
+          });
 
           // Send Email Verification
-          await firebaseUser.sendEmailVerification();
-
-          alert("Verification email sent. Please check your inbox and verify your email.");
+          await sendEmailVerification(firebaseUser);
 
           navigate("/Email-Verification");
-
-          // Generate Plaid Link token for IDV
-          const linkTokenData = await generateLinkTokenForIDV(mongoUser._id);
-
-          if (!linkTokenData || !linkTokenData.link_token) {
-            throw new Error("Failed to generate Plaid Link token.");
-          }
-
-          setIdvActive(true);
-
-          const idvResult = await openPlaidIDV(linkTokenData.link_token);
-
-          if (idvResult?.status === "success") {
-            await updateUser(mongoUser._id, { idvStatus: "verified" });
-            setUser((prevUser) => ({
-              ...prevUser,
-              idvStatus: "verified",
-            }));
-            navigate("/");
-          } else {
-            navigate("/Profile");
-          }
         } catch (error) {
           console.error("Error creating new user:", error.message);
           alert("Failed to create a new user. Please try again.");
@@ -226,7 +173,7 @@ const Auth = () => {
 
   return (
     <div>
-      {!idvActive && !showForgotPassword && (
+      {!showForgotPassword && (
         <div>
           <h2>{isLogin ? "Login" : "Sign Up"}</h2>
           {error && <p style={{ color: "red" }}>{error}</p>}
