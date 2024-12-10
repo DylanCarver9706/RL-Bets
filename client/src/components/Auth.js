@@ -152,7 +152,10 @@ const Auth = () => {
           setUser({
             firebaseUserId: firebaseUser.uid,
             mongoUserId: mongoUser?._id,
-            mongoUser,
+            userType: mongoUser?.type,
+            idvStatus: mongoUser?.idvStatus,
+            emailVerificationStatus: mongoUser?.emailVerificationStatus,
+            credits: mongoUser?.credits,
           });
 
           // Send Email Verification
