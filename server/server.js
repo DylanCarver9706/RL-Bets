@@ -583,6 +583,129 @@ io.on("connection", async (socket) => {
 
 // ************************************************************************************************
 // ************************************************************************************************
+// **********************************************JIRA**********************************************
+// ************************************************************************************************
+// ************************************************************************************************
+
+// Helper function to create basic auth header
+const getAuthorizationHeader = () => {
+  const credentials = `${process.env.JIRA_EMAIL}:${process.env.JIRA_API_TOKEN_PART_1}=${process.env.JIRA_API_TOKEN_PART_2}`;
+  return `Basic ${btoa(credentials)}`; // Use Buffer for base64 encoding in Node.js
+};
+
+// Transition Jira issue status
+const transitionJiraIssueStatus = async (jiraIssueKey, transitionId) => {
+  try {
+    const url = `${process.env.JIRA_BASE_URL}/rest/api/3/issue/${jiraIssueKey}/transitions`;
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        Authorization: getAuthorizationHeader(),
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        transition: {
+          id: transitionId,
+        },
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(
+        `Failed to transition Jira issue status: ${response.statusText}`
+      );
+    }
+  } catch (error) {
+    console.error("Error transitioning Jira issue status:", error.message);
+    throw error;
+  }
+};
+
+// Create Jira issue
+const createJiraIssue = async (summary, description = "") => {
+  try {
+    const url = `${process.env.JIRA_BASE_URL}/${process.env.JIRA_CREATE_ISSUE_ENDPOINT}`;
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: getAuthorizationHeader(),
+      },
+      body: JSON.stringify({
+        fields: {
+          project: {
+            key: process.env.JIRA_PROJECT_KEY,
+          },
+          summary,
+          description: {
+            type: "doc",
+            version: 1,
+            content: [
+              {
+                type: "paragraph",
+                content: [
+                  {
+                    type: "text",
+                    text: description
+                  }
+                ]
+              }
+            ]
+          },
+          issuetype: {
+            name: "Story",
+          },
+        },
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(
+        `Failed to create issue: ${errorData.errorMessages.join(", ")}`
+      );
+    }
+
+    return await response.json(); // The created issue object
+  } catch (error) {
+    console.error("Error adding issue to Jira:", error.message);
+    throw error;
+  }
+};
+
+// Create Jira issue for email update
+app.post("/api/jira/email-update-request", verifyFirebaseToken, async (req, res) => {
+  const { userName, userEmail } = req.body;
+
+  if (!userName || !userEmail) {
+    return res.status(400).json({ error: "User name and email are required." });
+  }
+
+  try {
+    const description = `User: ${userName}\nEmail: ${userEmail}`;
+    const jiraIssue = await createJiraIssue(
+      process.env.JIRA_CREATE_ISSUE_EMAIL_UPDATE_SUMMARY,
+      description
+    );
+
+    await transitionJiraIssueStatus(
+      jiraIssue.key,
+      process.env.JIRA_TRANSITION_ID_FOR_EMAIL_UPDATE
+    );
+
+    res.status(200).json({
+      message: "Jira issue created and status transitioned successfully.",
+      issueKey: jiraIssue.key,
+    });
+  } catch (error) {
+    console.error("Error processing Jira issue:", error.message);
+    res.status(500).json({ error: "Failed to create Jira issue." });
+  }
+});
+
+// ************************************************************************************************
+// ************************************************************************************************
 // *********************************************WAGERS*********************************************
 // ************************************************************************************************
 // ************************************************************************************************
