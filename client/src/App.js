@@ -47,6 +47,8 @@ function App() {
             idvStatus: mongoUser?.idvStatus,
             emailVerificationStatus: mongoUser?.emailVerificationStatus,
             credits: mongoUser?.credits,
+            email: mongoUser?.email,
+            name: mongoUser?.name,
           });
 
         } catch {
