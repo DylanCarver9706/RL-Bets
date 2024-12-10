@@ -75,7 +75,7 @@ const Navbar = () => {
           Create Wager
         </Link>
         {userCredits !== null && (
-          <Link to="/Credits" style={styles.link}>
+          <Link to="/Credit-Shop" style={styles.link}>
             {userCredits} Credits
           </Link>
         )}

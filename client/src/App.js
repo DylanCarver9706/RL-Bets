@@ -9,7 +9,7 @@ import Profile from "./components/Profile";
 import Navbar from "./components/Navbar";
 import CreateWager from "./components/CreateWager";
 import Schedule from "./components/Schedule";
-import Credits from "./components/Credits";
+import CreditShop from "./components/CreditShop";
 import Leaderboard from "./components/Leaderboard";
 import Log from "./components/Log";
 import Admin from "./components/Admin";
@@ -102,7 +102,7 @@ function App() {
         <Route path="/Profile" element={user ? <Profile /> : <Auth />} />
         <Route path="/Create_Wager" element={user ? <CreateWager /> : <Auth />} />
         <Route path="/Schedule" element={user ? <Schedule /> : <Auth />} />
-        <Route path="/Credits" element={user ? <Credits /> : <Auth />} />
+        <Route path="/Credit-Shop" element={user ? <CreditShop /> : <Auth />} />
         <Route path="/Leaderboard" element={user ? <Leaderboard /> : <Auth />} />
         <Route path="/Settings" element={user ? <Settings /> : <Auth />} />
         <Route path="/Log" element={user?.userType === "admin" ? <Log /> : <Home />} />
