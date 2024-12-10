@@ -625,7 +625,7 @@ const transitionJiraIssueStatus = async (jiraIssueKey, transitionId) => {
 // Create Jira issue
 const createJiraIssue = async (summary, description = "") => {
   try {
-    const url = `${process.env.JIRA_BASE_URL}/${process.env.JIRA_CREATE_ISSUE_ENDPOINT}`;
+    const url = `${process.env.JIRA_BASE_URL}/rest/api/3/issue`;
     const response = await fetch(url, {
       method: "POST",
       headers: {
@@ -685,7 +685,7 @@ app.post("/api/jira/email-update-request", verifyFirebaseToken, async (req, res)
   try {
     const description = `User: ${userName}\nEmail: ${userEmail}`;
     const jiraIssue = await createJiraIssue(
-      process.env.JIRA_CREATE_ISSUE_EMAIL_UPDATE_SUMMARY,
+      "Request for email update",
       description
     );
 
