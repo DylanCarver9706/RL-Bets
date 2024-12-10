@@ -16,6 +16,7 @@ import Admin from "./components/Admin";
 import EmailVerification from "./components/EmailVerification";
 import IdentityVerification from "./components/IdentityVerification";
 import Settings from "./components/Settings";
+import Credits from "./components/Credits";
 
 function App() {
   const { user, setUser } = useUser();
@@ -105,6 +106,7 @@ function App() {
         <Route path="/Credit-Shop" element={user ? <CreditShop /> : <Auth />} />
         <Route path="/Leaderboard" element={user ? <Leaderboard /> : <Auth />} />
         <Route path="/Settings" element={user ? <Settings /> : <Auth />} />
+        <Route path="/Credits" element={user ? <Credits /> : <Auth />} />
         <Route path="/Log" element={user?.userType === "admin" ? <Log /> : <Home />} />
         <Route path="/Admin" element={user?.userType === "admin" ? <Admin /> : <Home />} />
       </Routes>
