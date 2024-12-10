@@ -1,58 +1,42 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  getUserById,
-  updateUser,
-  deleteUser as deleteMongoUser,
-} from "../services/userService.js";
+import { updateUser, deleteUser } from "../services/userService.js";
+import { createEmailUpdateRequest } from "../services/jiraService.js";
 import {
   deleteUser as firebaseDeleteUser,
   signOut,
   sendPasswordResetEmail,
-  sendEmailVerification,
+  updateProfile,
 } from "firebase/auth"; // Import sendPasswordResetEmail
 import { auth } from "../firebaseConfig.js";
-import {
-  generateLinkTokenForIDV,
-  openPlaidIDV,
-} from "../services/plaidService.js";
 import { useUser } from "../context/UserContext.js";
 
 const Profile = () => {
-  const [userData, setUserData] = useState(null); // State to hold the user data
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const navigate = useNavigate();
   const { user, setUser } = useUser();
+  const [name, setName] = useState(user?.name);
+  const [editing, setEditing] = useState(false); // Track if editing mode is active
+  const navigate = useNavigate();
 
-  // Fetch the user data on component mount
-  useEffect(() => {
-    if (user) {
-      fetchUserDetails(user.mongoUserId);
-    }
-  }, [user]);
-
-  // Fetch user details using the provided MongoDB User ID
-  const fetchUserDetails = async (userId) => {
-    try {
-      const userDetails = await getUserById(userId);
-      setUserData(userDetails);
-      setName(userDetails.name);
-      setEmail(userDetails.email);
-    } catch (err) {
-      console.error("Error fetching user data:", err.message);
-    }
-  };
-
-  // Handle updating the user information
+  // Handle updating the user information to Firebase and MongoDB
   const handleUpdate = async () => {
     try {
-      const updatedUser = await updateUser(user.mongoUserId, {
-        name,
-        email,
-      });
-      setUserData(updatedUser);
-      alert("User updated successfully");
+      // Update Firebase user profile
+      if (auth.currentUser.displayName !== name) {
+        await updateProfile(auth.currentUser, { displayName: name });
+      }
+
+      // Update MongoDB user
+      await updateUser(user.mongoUserId, { name: name });
+
+      setEditing(false);
+
+      // Update global user state
+      setUser((prevUser) => ({
+        ...prevUser,
+        name: name,
+      }));
+
+      alert("User info updated successfully");
     } catch (err) {
       console.error("Error updating user data:", err.message);
       alert("Failed to update user. Please try again.");
@@ -68,7 +52,7 @@ const Profile = () => {
     ) {
       try {
         // Delete user from MongoDB
-        await deleteMongoUser(user.mongoUserId);
+        await deleteUser(user.mongoUserId);
 
         // Delete Firebase user if present
         if (auth.currentUser) {
@@ -96,12 +80,12 @@ const Profile = () => {
 
   // Handle password reset
   const handleResetPassword = async () => {
-    if (!email) {
+    if (!user.email) {
       alert("Email is required to reset the password.");
       return;
     }
     try {
-      await sendPasswordResetEmail(auth, email);
+      await sendPasswordResetEmail(auth, user.email);
       alert("Password reset email sent successfully.");
     } catch (error) {
       console.error("Error sending password reset email:", error.message);
@@ -109,42 +93,15 @@ const Profile = () => {
     }
   };
 
-  const handleIdentityVerification = async () => {
-    console.log(user.mongoUserId);
-    const linkTokenData = await generateLinkTokenForIDV(user.mongoUserId);
-
-    if (!linkTokenData || !linkTokenData.link_token) {
-      throw new Error("Failed to generate Plaid Link token.");
-    }
-
-    const idvResult = await openPlaidIDV(linkTokenData.link_token);
-
-    if (idvResult?.status === "success") {
-      await updateUser(user.mongoUserId, { idvStatus: "verified" });
-      setUser((prevUser) => ({
-        ...prevUser,
-        idvStatus: "verified",
-      }));
-      navigate("/");
-    } else {
-      navigate("/Profile");
-    }
-  };
-
-  const handleEmailVerification = async () => {
-    if (!auth.currentUser) {
-      alert("No user is currently logged in.");
-      return;
-    }
-
+  const handleEmailUpdate = async () => {
     try {
-      await sendEmailVerification(auth.currentUser);
-      alert(
-        "Verification email sent. Please check your inbox and verify your email."
-      );
+      const response = await createEmailUpdateRequest(user.name, user.email);
+      if (response.status === 200) {
+        alert("Email update request sent successfully.");
+      }
     } catch (error) {
-      console.error("Error sending email verification:", error.message);
-      alert("Failed to send verification email. Please try again.");
+      console.error("Error updating email:", error.message);
+      alert("Failed to send email update request. Please try again.");
     }
   };
 
@@ -155,44 +112,42 @@ const Profile = () => {
         <div>
           <h3>Mongo ID: {user.mongoUserId}</h3>
           <h3>Firebase ID: {user.firebaseUserId}</h3>
-          {userData ? (
+          {user ? (
             <div>
-              <div>
-                <label>Name:</label>
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                />
-              </div>
-              <div>
-                <label>Email:</label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
-              <p>Credits: {userData.credits}</p>
-              <p>Earned Credits: {userData.earnedCredits}</p>
-              <p>Identity Verification Status: {userData.idvStatus}</p>
-              {userData.idvStatus !== "verified" && (
-                <button
-                  onClick={handleIdentityVerification}
-                  style={{ marginLeft: "10px" }}
-                >
-                  Verify Identity
-                </button>
+              {!editing ? (
+                <>
+                  <p>Name: {user.name}</p>
+                  <p>Email: {user.email}</p>
+                  <button onClick={() => setEditing(true)}>Edit Profile</button>
+                </>
+              ) : (
+                <>
+                  <div>
+                    <label>Name:</label>
+                    <input
+                      type="text"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <p>
+                      The ability to update the email for an account is not
+                      available at this time. Please create a new account or
+                      submit a request to update the email here:{" "}
+                    </p>
+                    <button onClick={handleEmailUpdate}>
+                      Send Email Update Request
+                    </button>
+                  </div>
+                  <button onClick={handleUpdate}>Update User</button>
+                  <button onClick={() => setEditing(false)}>Cancel</button>
+                </>
               )}
-              <p>Email Verification Status: {userData.emailVerificationStatus}</p>
-              {userData.emailVerificationStatus !== "verified" && (
-                <button
-                  onClick={() => handleEmailVerification()}
-                  style={{ marginLeft: "10px" }}
-                >
-                  Resend Verification Email
-                </button>
-              )}
+              <p>Credits: {user.credits}</p>
+              <p>Earned Credits: {user.earnedCredits}</p>
+              <p>Identity Verification Status: {user.idvStatus}</p>
+              <p>Email Verification Status: {user.emailVerificationStatus}</p>
               <br />
               <button onClick={handleUpdate}>Update User</button>
               <button onClick={handleDelete} style={{ marginLeft: "10px" }}>
