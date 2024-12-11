@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { updateUser, deleteUser } from "../services/userService.js";
-import { createEmailUpdateRequest } from "../services/jiraService.js";
+import { createJiraIssue } from "../services/jiraService.js";
 import {
   deleteUser as firebaseDeleteUser,
   signOut,
@@ -95,7 +95,7 @@ const Profile = () => {
 
   const handleEmailUpdate = async () => {
     try {
-      const response = await createEmailUpdateRequest(user.name, user.email);
+      const response = await createJiraIssue(user.name, user.email, user.mongoUserId, "Story", "Request for email update", "", "Requests For Email Change");
       if (response.status === 200) {
         alert("Email update request sent successfully.");
       }
