@@ -587,6 +587,13 @@ io.on("connection", async (socket) => {
 // ************************************************************************************************
 // ************************************************************************************************
 
+const jiraStatusTransitionIds = {
+  "Requests For Email Change": 9,
+  "Beta Tester Feedback - Problem Reports": 4,
+  "Beta Tester Feedback - Enhancement Requests": 3,
+  "BETA TESTER FEEDBACK - GENERAL": 14
+}
+
 // Helper function to create basic auth header
 const getAuthorizationHeader = () => {
   const credentials = `${process.env.JIRA_EMAIL}:${process.env.JIRA_API_TOKEN_PART_1}=${process.env.JIRA_API_TOKEN_PART_2}`;
@@ -623,7 +630,7 @@ const transitionJiraIssueStatus = async (jiraIssueKey, transitionId) => {
 };
 
 // Create Jira issue
-const createJiraIssue = async (summary, description = "") => {
+const createJiraIssue = async (summary, description = "", issueType) => {
   try {
     const url = `${process.env.JIRA_BASE_URL}/rest/api/3/issue`;
     const response = await fetch(url, {
@@ -654,7 +661,7 @@ const createJiraIssue = async (summary, description = "") => {
             ]
           },
           issuetype: {
-            name: "Story",
+            name: issueType,
           },
         },
       }),
@@ -675,23 +682,24 @@ const createJiraIssue = async (summary, description = "") => {
 };
 
 // Create Jira issue for email update
-app.post("/api/jira/email-update-request", verifyFirebaseToken, async (req, res) => {
-  const { userName, userEmail } = req.body;
-
+app.post("/api/jira/create-issue", verifyFirebaseToken, async (req, res) => {
+  const { userName, userEmail, mongoUserId, issueType, summary, description, status } = req.body;
   if (!userName || !userEmail) {
     return res.status(400).json({ error: "User name and email are required." });
   }
 
   try {
-    const description = `User: ${userName}\nEmail: ${userEmail}`;
+    const descriptionHeader = `User: ${userName}\nEmail: ${userEmail}\nMongoId: ${mongoUserId}`;
+    const jiraDescription = description ? `${descriptionHeader}\n\nUser Submission:\n${description}` : descriptionHeader;
     const jiraIssue = await createJiraIssue(
-      "Request for email update",
-      description
+      summary,
+      jiraDescription,
+      issueType,
     );
 
     await transitionJiraIssueStatus(
       jiraIssue.key,
-      process.env.JIRA_TRANSITION_ID_FOR_EMAIL_UPDATE
+      jiraStatusTransitionIds[status]
     );
 
     res.status(200).json({
