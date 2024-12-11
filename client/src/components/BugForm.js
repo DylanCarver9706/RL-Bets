@@ -1,14 +1,33 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { createJiraIssue } from "../services/jiraService";
 import { useUser } from "../context/UserContext.js";
 
 const BugForm = () => {
   const { user } = useUser();
+  const navigate = useNavigate();
   const [summary, setSummary] = useState("");
   const [description, setDescription] = useState("");
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
+
+    // Validation
+    if (!summary || !description) {
+      setError("Summary and Description are required.");
+      return;
+    }
+    if (summary.length > 255) {
+      setError("Summary cannot exceed 255 characters.");
+      return;
+    }
+    if (description.length > 32500) {
+      setError("Description cannot exceed 32,500 characters.");
+      return;
+    }
+
     try {
       const response = await createJiraIssue(
         user.name,
@@ -22,10 +41,10 @@ const BugForm = () => {
 
       if (response.status === 200) {
         alert("Bug report submitted successfully!");
+        setSummary("");
+        setDescription("");
+        navigate("/");
       }
-
-      setSummary("");
-      setDescription("");
     } catch (error) {
       alert("Failed to submit bug report. Please try again.");
     }
@@ -34,6 +53,7 @@ const BugForm = () => {
   return (
     <div style={{ padding: "20px" }}>
       <h2>Report a Bug</h2>
+      {error && <p style={{ color: "red" }}>{error}</p>} {/* Display validation error */}
       <form onSubmit={handleSubmit}>
         <div>
           <label>Summary:</label>
@@ -41,7 +61,6 @@ const BugForm = () => {
             type="text"
             value={summary}
             onChange={(e) => setSummary(e.target.value)}
-            required
             style={{ width: "100%", marginBottom: "10px" }}
           />
         </div>
@@ -50,7 +69,6 @@ const BugForm = () => {
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            required
             style={{ width: "100%", height: "100px", marginBottom: "10px" }}
           />
         </div>
