@@ -17,6 +17,7 @@ import EmailVerification from "./components/EmailVerification";
 import IdentityVerification from "./components/IdentityVerification";
 import Settings from "./components/Settings";
 import Credits from "./components/Credits";
+import BugForm from "./components/BugForm";
 
 function App() {
   const { user, setUser } = useUser();
@@ -107,6 +108,7 @@ function App() {
         <Route path="/Leaderboard" element={user ? <Leaderboard /> : <Auth />} />
         <Route path="/Settings" element={user ? <Settings /> : <Auth />} />
         <Route path="/Credits" element={user ? <Credits /> : <Auth />} />
+        <Route path="/Bug-Form" element={user ? <BugForm /> : <Auth />} />
         <Route path="/Log" element={user?.userType === "admin" ? <Log /> : <Home />} />
         <Route path="/Admin" element={user?.userType === "admin" ? <Admin /> : <Home />} />
       </Routes>
