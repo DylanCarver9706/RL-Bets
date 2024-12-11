@@ -1,11 +1,8 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
 
 const Credits = () => {
-  const navigate = useNavigate();
-
   // Generate 50+ roles with the same name
-  const roles = [
+  const dylanRoles = [
     "Project Manager",
     "Full-Stack Developer",
     "Frontend Developer",
@@ -46,7 +43,6 @@ const Credits = () => {
     "End-User Support Specialist",
     "Data Scientist",
     "Game Theorist",
-    "Mathematician",
     "Infrastructure Engineer",
     "Creative Director",
     "Animation Specialist",
@@ -60,50 +56,57 @@ const Credits = () => {
     "Founder",
   ].map((role) => `${role}: Dylan Carver`);
 
+  const otherRoles = [
+    "Mathematician: Dawson Bauer",
+    "Data Analyst: Dawson Bauer",
+    "Actuary: Dawson Bauer",
+  ]
+
+  // Calculate total height and duration based on the number of roles
+  const roleHeight = 30; // Approximate height of each role in pixels
+  const totalHeight = (dylanRoles.length + otherRoles.length) * roleHeight + 200; // Add extra padding
+  const scrollDuration = Math.ceil(totalHeight / 50); // Dynamic duration based on content size
+
   return (
-    <div style={{ textAlign: "center",  position: "relative" }}>
+    <div style={{ textAlign: "center", position: "relative" }}>
       <h2 style={{ marginTop: "20px" }}>Credits</h2>
       <div
         style={{
-          height: "80vh", // Adjust height to fit within the viewport, leaving space for title and button
+          height: "80vh", // Adjust height to fit within the viewport
           overflow: "hidden",
           position: "relative",
         }}
       >
         <div
           style={{
-            animation: "scroll 20s linear infinite",
+            animation: `scroll ${scrollDuration}s linear infinite`,
             position: "absolute",
             top: "100%",
             width: "100%",
             textAlign: "center",
           }}
         >
-          {roles.map((role, index) => (
+          <p style={{ margin: "5px 0" }}>RL Bets</p>
+          <br />
+          <br />
+          <br />
+          <br />
+          <br />
+          <br />
+          <br />
+          <br />
+          {[...dylanRoles, ...otherRoles].map((role, index) => (
             <p key={index} style={{ margin: "5px 0" }}>
               {role}
             </p>
           ))}
         </div>
       </div>
-      <button
-        onClick={() => navigate("/Settings")}
-        style={{
-          position: "fixed",
-          bottom: "20px",
-          left: "50%",
-          transform: "translateX(-50%)",
-          padding: "10px 20px",
-          fontSize: "16px",
-        }}
-      >
-        Back to Settings
-      </button>
       <style>
         {`
           @keyframes scroll {
             0% { top: 100%; }
-            100% { top: -100%; }
+            100% { top: -${totalHeight}px; }
           }
         `}
       </style>
