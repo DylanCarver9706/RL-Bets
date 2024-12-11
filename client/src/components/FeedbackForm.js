@@ -27,7 +27,6 @@ const FeedbackForm = () => {
       setError("Description cannot exceed 32,500 characters.");
       return;
     }
-
     
     try {
       const response = await createJiraIssue(
@@ -66,7 +65,7 @@ const FeedbackForm = () => {
           />
         </div>
         <div>
-          <label>Description:</label>
+          <label>Feedback:</label>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
