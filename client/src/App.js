@@ -19,6 +19,7 @@ import Settings from "./components/Settings";
 import Credits from "./components/Credits";
 import BugForm from "./components/BugForm";
 import FeatureForm from "./components/FeatureForm";
+import FeedbackForm from "./components/FeedbackForm";
 
 function App() {
   const { user, setUser } = useUser();
@@ -111,6 +112,7 @@ function App() {
         <Route path="/Credits" element={user ? <Credits /> : <Auth />} />
         <Route path="/Bug-Form" element={user ? <BugForm /> : <Auth />} />
         <Route path="/Feature-Form" element={user ? <FeatureForm /> : <Auth />} />
+        <Route path="/Feedback-Form" element={user ? <FeedbackForm /> : <Auth />} />
         <Route path="/Log" element={user?.userType === "admin" ? <Log /> : <Home />} />
         <Route path="/Admin" element={user?.userType === "admin" ? <Admin /> : <Home />} />
       </Routes>
