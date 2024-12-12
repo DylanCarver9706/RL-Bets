@@ -87,12 +87,25 @@ function App() {
         }
       }
 
+      // console.log("Current Path:", currentPath);
+
       // Redirect authenticated users to Home
       if (auth.currentUser || user?.mongoUserId) {
         if (currentPath === "/Auth") {
           navigate("/");
         }
       }
+      // TODO
+      // Potential edge case where admin verifies user remotely and user is not redirected upon successful verification
+      // else if (auth.currentUser && user?.emailVerificationStatus === "verified") {
+      //   if (currentPath === "/Email-Verification") {
+      //     navigate("/");
+      //   }
+      // } else if (auth.currentUser && user?.idvStatus === "verified") {
+      //   if (currentPath === "/Identity-Verification") {
+      //     navigate("/");
+      //   }
+      // }
       
       // If user has not verified email or IDV, redirect to respective pages
       if (auth.currentUser && user?.emailVerificationStatus !== "verified") {
