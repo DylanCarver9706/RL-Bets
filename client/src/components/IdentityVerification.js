@@ -81,7 +81,7 @@ const IdentityVerification = () => {
               cursor: "pointer",
             }}
           >
-            Start Identity Verification
+            {(user?.idvStatus === "pending review"? "Retry Identity Verification" : "Start Identity Verification")}
           </button>
         </div>
       )}
