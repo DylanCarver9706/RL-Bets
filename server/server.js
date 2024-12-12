@@ -577,7 +577,8 @@ const jiraStatusTransitionIds = {
   "Requests For Email Change": 9,
   "Beta Tester Feedback - Problem Reports": 4,
   "Beta Tester Feedback - Enhancement Requests": 3,
-  "BETA TESTER FEEDBACK - GENERAL": 14
+  "BETA TESTER FEEDBACK - GENERAL": 14,
+  "IDV Failed": 15,
 }
 
 // Helper function to create basic auth header
