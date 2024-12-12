@@ -129,17 +129,23 @@ const Auth = () => {
         console.error("Error fetching MongoDB user data:", error.message);
       }
 
+      // Existing user
       if (mongoUser) {
-        // Existing user
+
+        // Destructure the user object to remove the _id field
+        const { _id, ...userWithoutId } = mongoUser;
+
+        // Set the user state with the updated user object
+        // NOTE: Needed so Home can access the user object
+        //       when it navigates, but will not be needed if they refresh
         setUser({
           firebaseUserId: firebaseUser.uid,
-          mongoUserId: mongoUser?._id,
-          userType: mongoUser?.type,
-          idvStatus: mongoUser?.idvStatus,
-          emailVerificationStatus: mongoUser?.emailVerificationStatus,
-          credits: mongoUser?.credits,
+          mongoUserId: _id,
+          ...userWithoutId,
         });
+
         navigate("/");
+
       } else {
         // New user: Create in MongoDB
         try {
@@ -149,28 +155,44 @@ const Auth = () => {
             firebaseUser.uid
           );
 
-          setUser({
-            firebaseUserId: firebaseUser.uid,
-            mongoUserId: mongoUser?._id,
-            userType: mongoUser?.type,
-            idvStatus: mongoUser?.idvStatus,
-            emailVerificationStatus: mongoUser?.emailVerificationStatus,
-            credits: mongoUser?.credits,
-          });
+          if (!firebaseUser.emailVerified) {
+            // Send Email Verification
+            await sendEmailVerification(firebaseUser);
+            navigate("/Email-Verification");
+          } else {
+            console.log("User is verified");
+            const updatedUser = await updateUser(mongoUser._id, {
+              // ...mongoUser,
+              emailVerificationStatus: "verified",
+            });
 
-          // Send Email Verification
-          await sendEmailVerification(firebaseUser);
+            console.log("Updated User:", updatedUser);
+            
+            // Destructure the user object to remove the _id field
+            const { _id, ...userWithoutId } = updatedUser;
 
-          navigate("/Email-Verification");
+            // Set the user state with the updated user object
+            // NOTE: Needed so Identity Verification can access the user object
+            //       when it navigates, but will not be needed if they refresh
+            setUser({
+              firebaseUserId: firebaseUser.uid,
+              mongoUserId: _id,
+              ...userWithoutId,
+            });
+
+            navigate("/Identity-Verification");
+          }
+
         } catch (error) {
           console.error("Error creating new user:", error.message);
           alert("Failed to create a new user. Please try again.");
-          navigate("/Auth");
+          window.location.reload()
         }
       }
     } catch (error) {
       console.error("Error during Google authentication:", error.message);
       alert("Failed to sign in with Google. Please try again.");
+      window.location.reload()
     }
   };
 
