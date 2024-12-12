@@ -205,21 +205,7 @@ app.post("/api/plaid/idv/complete", verifyFirebaseToken, async (req, res) => {
       identity_verification_id: idvSession,
     });
 
-    const { status, client_user_id } = idvResult.data;
-
-    // Update the user's verification status in MongoDB
-    const updateResult = await usersCollection.updateOne(
-      { _id: new ObjectId(client_user_id) },
-      {
-        $set: {
-          idvStatus: status,
-        },
-      }
-    );
-
-    if (updateResult.matchedCount === 0) {
-      return res.status(404).json({ error: "User not found" });
-    }
+    const { status } = idvResult.data;
 
     res.json({ status, idvSession });
   } catch (error) {
