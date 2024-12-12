@@ -10,19 +10,26 @@ const EmailVerification = () => {
 
   useEffect(() => {
     const checkEmailVerification = async () => {
-      const currentUser = auth.currentUser;
+      
+      console.log("Polling user for email verification. firebaseUser:", auth.currentUser, "User:", user);
+      
+      // Checking if the user is authenticated and has had their email verified
+      if (auth.currentUser) {
 
-      if (currentUser) {
-        await currentUser.reload(); // Reload Firebase user data to get updated email verification status
-        if (currentUser.emailVerified) {
+        // Reload Firebase user data to get updated email verification status
+        await auth.currentUser.reload();
+
+        // Checking if the user has had their email verified either through Firebase or MongoDB
+        if (auth.currentUser.emailVerified || user.emailVerificationStatus === "verified") {
+          
           // Update the user's verification status in MongoDB
           await updateUser(user.mongoUserId, { emailVerificationStatus: "verified" });
 
-          // Redirect the user to the homepage
-          navigate("/");
-          
           // Update the global user state
           setUser({ ...user, emailVerificationStatus: "verified" });
+          
+          // Redirect the user to the Identity Verification page
+          navigate("/Identity-Verification");
         }
       }
     };
