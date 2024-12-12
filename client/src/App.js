@@ -86,6 +86,13 @@ function App() {
           navigate("/Auth");
         }
       }
+
+      // Redirect authenticated users to Home
+      if (auth.currentUser || user?.mongoUserId) {
+        if (currentPath === "/Auth") {
+          navigate("/");
+        }
+      }
       
       // If user has not verified email or IDV, redirect to respective pages
       if (auth.currentUser && user?.emailVerificationStatus !== "verified") {
