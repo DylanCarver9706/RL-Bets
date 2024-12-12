@@ -305,7 +305,7 @@ app.put("/api/users/:id", verifyFirebaseToken, async (req, res) => {
     // Emit 'updateUsers' event with all users to all connected clients
     io.emit("updateUsers", allUsers);
 
-    res.status(200).json({ message: "User updated successfully" });
+    res.status(200).json(updatedUser);
   } catch (err) {
     res.status(500).json({ error: "Failed to update user", details: err.message });
   }
