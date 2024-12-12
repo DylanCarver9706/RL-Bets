@@ -26,38 +26,36 @@ function App() {
   const [loading, setLoading] = useState(true);
   const auth = getAuth();
   const navigate = useNavigate();
-  
-  useEffect(() => {
 
+  useEffect(() => {
     const handleAuthChange = async (firebaseUser) => {
       if (firebaseUser?.uid) {
         try {
           const idToken = await firebaseUser.getIdToken();
-          console.log("ID token:", idToken);
+          console.log("Firebase ID token:", idToken);
           if (!idToken) {
             console.warn("ID token not available");
             setLoading(false);
             return;
           }
 
-          console.log("firebaseUser", firebaseUser)
-
           // Fetch MongoDB user data
-          const mongoUser = await getMongoUserDataByFirebaseId(firebaseUser.uid);
+          const mongoUser = await getMongoUserDataByFirebaseId(
+            firebaseUser.uid
+          );
           console.log("Mongo User:", mongoUser);
+          console.log("firebaseUser", firebaseUser);
+
+          // Destructure the user object to remove the _id field
+          const { _id, ...userWithoutId } = mongoUser;
+
+          // Set the user state with the updated user object
           setUser({
             firebaseUserId: firebaseUser.uid,
-            mongoUserId: mongoUser?._id,
-            userType: mongoUser?.type,
-            idvStatus: mongoUser?.idvStatus,
-            emailVerificationStatus: mongoUser?.emailVerificationStatus,
-            credits: mongoUser?.credits,
-            email: mongoUser?.email,
-            name: mongoUser?.name,
+            mongoUserId: _id,
+            ...userWithoutId,
           });
-
-        } catch {
-        }
+        } catch {}
       } else {
         setUser(null); // User is logged out
       }
@@ -72,15 +70,32 @@ function App() {
   }, [setUser, auth]);
 
   useEffect(() => {
-    if (!user || !user?.emailVerificationStatus || !user?.idvStatus) {
-      return;
-    }
-    if (user?.emailVerificationStatus !== "verified") {
-      navigate("/Email-Verification");
-    } else if (user?.idvStatus !== "verified") {
-      navigate("/Identity-Verification");
-    }
-  }, [user, navigate]);
+    const routeUnverifiedUser = async () => {
+      
+      // If still loading, do nothing
+      if (loading) {
+        return;
+      }
+      
+      // Check current path
+      const currentPath = window.location.pathname;
+
+      // Redirect unauthenticated users from protected routes
+      if (!auth.currentUser || !user?.mongoUserId) {
+        if (currentPath !== "/Auth") {
+          navigate("/Auth");
+        }
+      }
+      
+      // If user has not verified email or IDV, redirect to respective pages
+      if (auth.currentUser && user?.emailVerificationStatus !== "verified") {
+        navigate("/Email-Verification");
+      } else if (auth.currentUser && user?.idvStatus !== "verified") {
+        navigate("/Identity-Verification");
+      }
+    };
+    routeUnverifiedUser();
+  }, [loading, user, navigate, auth?.currentUser]);
 
   if (loading) {
     return <p>Loading...</p>;
@@ -88,33 +103,38 @@ function App() {
 
   return (
     <>
-      { user && (<Navbar />)} 
+      {user &&
+        user?.emailVerificationStatus === "verified" &&
+        user?.idvStatus === "verified" && <Navbar />}
       <div>
         {user ? (
           <p>
-            Welcome, Firebase UID: {user?.firebaseUserId} - MongoId: {user?.mongoUserId} - Email Verification Status: {user?.emailVerificationStatus} - IDV Status: {user?.idvStatus}
+            Welcome, Firebase UID: {user?.firebaseUserId} - MongoId:{" "}
+            {user?.mongoUserId} - Email Verification Status:{" "}
+            {user?.emailVerificationStatus} - IDV Status: {user?.idvStatus}
           </p>
         ) : (
           <p>Please log in</p>
         )}
       </div>
       <Routes>
-        <Route path="/" element={user?.emailVerificationStatus === "verified" && user?.idvStatus === "verified" ? <Home /> : <Auth /> } />
-        <Route path="/Auth" element={user ? <Home /> : <Auth />} />
-        <Route path="/Email-Verification" element={user ? <EmailVerification /> : <Home />} />
-        <Route path="/Identity-Verification" element={user ? <IdentityVerification /> : <Home />} />
-        <Route path="/Profile" element={user ? <Profile /> : <Auth />} />
-        <Route path="/Create_Wager" element={user ? <CreateWager /> : <Auth />} />
-        <Route path="/Schedule" element={user ? <Schedule /> : <Auth />} />
-        <Route path="/Credit-Shop" element={user ? <CreditShop /> : <Auth />} />
-        <Route path="/Leaderboard" element={user ? <Leaderboard /> : <Auth />} />
-        <Route path="/Settings" element={user ? <Settings /> : <Auth />} />
-        <Route path="/Credits" element={user ? <Credits /> : <Auth />} />
-        <Route path="/Bug-Form" element={user ? <BugForm /> : <Auth />} />
-        <Route path="/Feature-Form" element={user ? <FeatureForm /> : <Auth />} />
-        <Route path="/Feedback-Form" element={user ? <FeedbackForm /> : <Auth />} />
-        <Route path="/Log" element={user?.userType === "admin" ? <Log /> : <Home />} />
-        <Route path="/Admin" element={user?.userType === "admin" ? <Admin /> : <Home />} />
+        {/* This expression is needed because React Router does not check App before navigating to base route */}
+        <Route path="/" element={user && auth?.currentUser && user?.mongoUserId ? <Home /> : <Auth />} />
+        <Route path="/Auth" element={<Auth />} />
+        <Route path="/Email-Verification" element={<EmailVerification />} />
+        <Route path="/Identity-Verification" element={<IdentityVerification />} />
+        <Route path="/Profile" element={<Profile />} />
+        <Route path="/Create_Wager" element={<CreateWager />} />
+        <Route path="/Schedule" element={<Schedule />} />
+        <Route path="/Credit-Shop" element={<CreditShop />} />
+        <Route path="/Leaderboard" element={<Leaderboard />} />
+        <Route path="/Settings" element={<Settings />} />
+        <Route path="/Credits" element={<Credits />} />
+        <Route path="/Bug-Form" element={<BugForm />} />
+        <Route path="/Feature-Form" element={<FeatureForm />} />
+        <Route path="/Feedback-Form" element={<FeedbackForm />} />
+        <Route path="/Log" element={user?.userType === "admin" && <Log />} />
+        <Route path="/Admin" element={user?.userType === "admin" && <Admin />} />
       </Routes>
     </>
   );
