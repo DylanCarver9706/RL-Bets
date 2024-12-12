@@ -11,6 +11,7 @@ import {
 import { auth } from "../firebaseConfig.js";
 import {
   createUserInDatabase,
+  updateUser,
   getMongoUserDataByFirebaseId,
 } from "../services/userService.js";
 import { useUser } from "../context/UserContext.js";
@@ -35,6 +36,7 @@ const Auth = () => {
     try {
       let firebaseCredential;
 
+      // Email Login
       if (isLogin) {
         firebaseCredential = await signInWithEmailAndPassword(
           auth,
@@ -48,16 +50,21 @@ const Auth = () => {
 
         console.log("MongoDB User:", mongoUser);
 
+        // Destructure the user object to remove the _id field
+        const { _id, ...userWithoutId } = mongoUser;
+
+        // Set the user state with the updated user object
+        // NOTE: Needed so Home can access the user object
+        //       when it navigates, but will not be needed if they refresh
         setUser({
           firebaseUserId: firebaseUser.uid,
-          mongoUserId: mongoUser?._id,
-          userType: mongoUser?.type,
-          idvStatus: mongoUser?.idvStatus,
-          emailVerificationStatus: mongoUser?.emailVerificationStatus,
-          credits: mongoUser?.credits,
+          mongoUserId: _id,
+          ...userWithoutId,
         });
 
         navigate("/");
+
+      // Email Signup
       } else {
         firebaseCredential = await createUserWithEmailAndPassword(
           auth,
@@ -66,30 +73,62 @@ const Auth = () => {
         );
         const firebaseUser = firebaseCredential.user;
 
+        console.log("firebaseUser Created:", firebaseUser);
+
         if (!firebaseUser?.uid) {
           throw new Error("Failed to retrieve Firebase user ID.");
         }
-
-        // Send Email Verification
-        await sendEmailVerification(firebaseUser);
-
+        
         // Create the user in MongoDB
         const mongoUser = await createUserInDatabase(
           name,
           email,
           firebaseUser.uid
         );
+        
+        console.log("MongoUser Created:", mongoUser);
+  
+        // if (providerId === "password") {
+        if (!firebaseUser.emailVerified) {
 
-        setUser({
-          firebaseUserId: firebaseUser.uid,
-          mongoUserId: mongoUser?._id,
-          userType: mongoUser?.type,
-          idvStatus: mongoUser?.idvStatus,
-          emailVerificationStatus: mongoUser?.emailVerificationStatus,
-          credits: mongoUser?.credits,
-        });
+          // Send Email Verification
+          await sendEmailVerification(firebaseUser);
 
-        navigate("/Email-Verification");
+          // Destructure the user object to remove the _id field
+          const { _id, ...userWithoutId } = mongoUser;
+
+          // Set the user state with the updated user object
+          // NOTE: Needed so Email Verification can access the user object
+          //       when it navigates, but will not be needed if they refresh
+          setUser({
+            firebaseUserId: firebaseUser.uid,
+            mongoUserId: _id,
+            ...userWithoutId,
+          });
+
+          navigate("/Email-Verification");
+
+        } else {
+          const updatedUser = await updateUser(mongoUser._id, {
+            emailVerificationStatus: "verified",
+          });
+  
+          // Destructure the user object to remove the _id field
+          const { _id, ...userWithoutId } = updatedUser;
+
+          // Set the user state with the updated user object
+          // NOTE: Needed so Identity Verification can access the user object
+          //       when it navigates, but will not be needed if they refresh
+          setUser({
+            firebaseUserId: firebaseUser.uid,
+            mongoUserId: _id,
+            ...userWithoutId,
+          });
+
+          navigate("/Identity-Verification");
+        }
+        
+
       }
     } catch (error) {
       console.error("Error during authentication:", error.message);
