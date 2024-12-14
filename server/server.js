@@ -324,6 +324,46 @@ app.put("/api/users/:id", verifyFirebaseToken, async (req, res) => {
   }
 });
 
+// Update a user by ID (PUT) to act as a soft delete
+app.put("/api/users/soft_delete/:id", async (req, res) => {
+  try {
+    
+    const result = await usersCollection.updateOne(
+      { _id: new ObjectId(req.params.id) },
+      { $set: {
+          name: null,
+          firebaseUserId: null,
+          credits: 0.0,
+          earnedCredits: 0.0,
+          idvStatus: "unverified",
+          emailVerificationStatus: "unverified",
+          accountStatus: "deleted",
+        }
+      }
+    );
+    
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Fetch the updated user data
+    const updatedUser = await usersCollection.findOne({ _id: new ObjectId(req.params.id) });
+
+    // Emit 'updateUser' event with updated user data to all connected clients
+    io.emit("updateUser", updatedUser);
+
+    // Fetch all users after the update
+    const allUsers = await usersCollection.find().toArray();
+
+    // Emit 'updateUsers' event with all users to all connected clients
+    io.emit("updateUsers", allUsers);
+
+    res.status(200).json()
+  } catch (err) {
+    res.status(500).json({ error: "Failed to update user", details: err.message });
+  }
+});
+
 // Delete a user by ID (DELETE)
 app.delete("/api/users/:id", verifyFirebaseToken, async (req, res) => {
   try {
