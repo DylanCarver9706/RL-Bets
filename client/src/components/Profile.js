@@ -60,7 +60,6 @@ const Profile = () => {
     }
   
     try {
-  
       const attemptDelete = async () => {
         try {
           await deleteUser(auth.currentUser);
@@ -68,77 +67,51 @@ const Profile = () => {
           navigate("/Auth"); // Redirect to Auth after account deletion
           return true;
         } catch (deleteError) {
-          // Handle reauthentication required error
           if (deleteError.code === "auth/requires-recent-login") {
             alert("Reauthentication required for account deletion.");
-  
-            // Determine the authentication provider, prioritize Google
+            // Handle reauthentication
             const providerId =
               auth.currentUser.providerData.find(
                 (provider) => provider.providerId === "google.com"
               )?.providerId || auth.currentUser.providerData[0]?.providerId;
   
-            try {
-              if (providerId === "google.com") {
-                // Google authentication
+            if (providerId === "google.com") {
+              try {
                 const provider = new GoogleAuthProvider();
                 await reauthenticateWithPopup(auth.currentUser, provider);
-              } else if (providerId === "password") {
-                // Email/password authentication
-                const email = auth.currentUser.email;
-                setShowPasswordInput(true);
-                if (!password) {
-                  alert("Password is required for reauthentication.");
+                return await attemptDelete(); // Retry deletion
+              } catch (reauthError) {
+                console.error("Reauthentication error (Google):", reauthError);
+                if (reauthError.code === "auth/popup-closed-by-user") {
+                  alert("Reauthentication canceled. Please try again.");
+                } else {
+                  alert("Reauthentication failed. Please try again.");
                 }
-  
-                const credential = EmailAuthProvider.credential(email, password);
-                await reauthenticateWithCredential(auth.currentUser, credential);
-              } else {
-                throw new Error(
-                  `Unsupported authentication provider: ${providerId}. Please contact support.`
-                );
-              }
-  
-              // Retry delete after successful reauthentication
-              await deleteUser(auth.currentUser);
-              alert("Your account has been successfully deleted.");
-              return true;
-            } catch (reauthError) {
-              console.error("Reauthentication error:", reauthError);
-  
-              if (reauthError.code === "auth/popup-closed-by-user") {
-                alert("Reauthentication canceled. Please try again.");
-                return false;
-              } else if (deleteError.code === "auth/cancelled-popup-request") {
-                alert("Reauthentication canceled. Please try again.");
-                return false;
-              } else if (reauthError.code === "auth/user-mismatch") {
-                alert(
-                  "Reauthentication failed due to account mismatch. Please try again."
-                );
-                return false;
-              } else {
-                alert(
-                  "Reauthentication failed. Please check your credentials and try again."
-                );
                 return false;
               }
+            } else if (providerId === "password") {
+              setShowPasswordInput(true);
+              return false; // Wait for password submission
+            } else {
+              alert(
+                `Unsupported authentication provider: ${providerId}. Please contact support.`
+              );
+              return false;
             }
+          } else {
+            throw deleteError;
           }
         }
       };
-
+  
       // Attempt to delete user
       const deleteSuccessful = await attemptDelete();
-
-      // Mark the user as deleted in your MongoDB database
-      if (deleteSuccessful === true) {
-        await softDeleteUser(user.mongoUserId);
-      }
   
-      setUser(null); // Clear user state
-      
-      navigate("/Auth"); // Redirect to Auth after account deletion
+      if (deleteSuccessful) {
+        await softDeleteUser(user.mongoUserId); // Mark user as deleted in MongoDB
+        setUser(null); // Clear user state
+        navigate("/Auth"); // Redirect to Auth
+      }
     } catch (err) {
       console.error("Error deleting user account:", err.message);
       alert("An error occurred while deleting your account. Please try again.");
@@ -151,29 +124,23 @@ const Profile = () => {
       return;
     }
   
-    // Attempt reauthentication with entered password
     const email = auth.currentUser.email;
     const credential = EmailAuthProvider.credential(email, password);
   
     try {
       await reauthenticateWithCredential(auth.currentUser, credential);
-      await deleteUser(auth.currentUser);
-  
-      // Mark the user as deleted in MongoDB
-      await softDeleteUser(user.mongoUserId);
+      await deleteUser(auth.currentUser); // Retry deletion after reauthentication
+      await softDeleteUser(user.mongoUserId); // Mark user as deleted in MongoDB
   
       alert("Your account has been successfully deleted.");
       setUser(null); // Clear user state
-      navigate("/Auth"); // Redirect to Auth after account deletion
+      navigate("/Auth"); // Redirect to Auth
     } catch (reauthError) {
-      console.error("Reauthentication error:", reauthError);
-      alert(
-        "Reauthentication failed. Please check your credentials and try again."
-      );
+      console.error("Reauthentication error (password):", reauthError);
+      alert("Reauthentication failed. Please check your credentials and try again.");
     } finally {
-      // Reset password input state
-      setPassword("");
-      setShowPasswordInput(false);
+      setPassword(""); // Reset password state
+      setShowPasswordInput(false); // Hide password input
     }
   };
 
