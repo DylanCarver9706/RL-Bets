@@ -223,13 +223,40 @@ app.post("/api/plaid/idv/complete", verifyFirebaseToken, async (req, res) => {
 // Create a new user (POST)
 app.post("/api/users", verifyFirebaseToken, async (req, res) => {
   try {
+
+    // Check if a user with the provided email exists and has been deleted
+    const existingUser = await usersCollection.findOne({
+      email: req.body.email, accountStatus: "deleted",
+    });
+
+    if (existingUser) {
+      // Reactivate the deleted user
+      const updateResult = await usersCollection.updateOne(
+        { _id: existingUser._id },
+        {
+          $set: {
+            ...req.body,
+            accountStatus: "active",
+          },
+        }
+      );
+
+      if (updateResult.acknowledged) {
+        const updatedUser = await usersCollection.findOne({
+          _id: existingUser._id,
+        });
+        return res.status(200).json(updatedUser);
+      } else {
+        return res.status(500).json({ error: "Failed to reactivate user" });
+      }
+    }
+
+    // If no matching deleted user is found, create a new user
     const result = await usersCollection.insertOne(req.body);
 
     if (result.acknowledged && result.insertedId) {
-      // Fetch the newly created user document
       const newUser = await usersCollection.findOne({ _id: result.insertedId });
-
-      res.status(201).json(newUser); // Return the full user document
+      res.status(201).json(newUser);
     } else {
       res.status(500).json({ error: "Failed to create user" });
     }
