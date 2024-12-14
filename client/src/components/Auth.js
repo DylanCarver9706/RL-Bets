@@ -48,8 +48,6 @@ const Auth = () => {
         // Fetch MongoDB user data
         const mongoUser = await getMongoUserDataByFirebaseId(firebaseUser.uid);
 
-        console.log("MongoDB User:", mongoUser);
-
         // Destructure the user object to remove the _id field
         const { _id, ...userWithoutId } = mongoUser;
 
@@ -73,8 +71,6 @@ const Auth = () => {
         );
         const firebaseUser = firebaseCredential.user;
 
-        console.log("firebaseUser Created:", firebaseUser);
-
         if (!firebaseUser?.uid) {
           throw new Error("Failed to retrieve Firebase user ID.");
         }
@@ -86,8 +82,6 @@ const Auth = () => {
           firebaseUser.uid
         );
         
-        console.log("MongoUser Created:", mongoUser);
-  
         // if (providerId === "password") {
         if (!firebaseUser.emailVerified) {
 
@@ -199,14 +193,11 @@ const Auth = () => {
             await sendEmailVerification(firebaseUser);
             navigate("/Email-Verification");
           } else {
-            console.log("User is verified");
             const updatedUser = await updateUser(mongoUser._id, {
               // ...mongoUser,
               emailVerificationStatus: "verified",
             });
 
-            console.log("Updated User:", updatedUser);
-            
             // Destructure the user object to remove the _id field
             const { _id, ...userWithoutId } = updatedUser;
 
