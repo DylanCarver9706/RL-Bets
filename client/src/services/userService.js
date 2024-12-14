@@ -23,6 +23,7 @@ export const createUserInDatabase = async (name, email, firebaseUserId) => {
         idvStatus: "unverified",
         emailVerificationStatus: "unverified",
         type: "user",
+        accountStatus: "active",
       }),
     });
 
@@ -177,6 +178,28 @@ export const getUserById = async (userId) => {
       throw err;
     }
   };
+
+// Soft delete a user by their MongoDB ID
+// NOTE: Only keeping email to prevent abuse in future new customer promotions
+export const softDeleteUser = async (mongoUserId) => {
+  try {
+
+    const response = await fetch(`${BASE_URL}/api/users/soft_delete/${mongoUserId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to soft delete user.");
+    }
+
+  } catch (err) {
+    console.error("Error soft deleting user:", err.message);
+    throw err;
+  }
+};
 
 // Function to connect to the Stripe API to make a purchase
 export const createCheckoutSession = async (purchaseItems, mongoUserId, creditsTotal) => {
