@@ -391,15 +391,8 @@ app.get("/api/users/firebase/:firebaseUserId", verifyFirebaseToken, async (req, 
       return res.status(200).json({ error: "User not found" });
     }
     const response = {
+      ...user,
       _id: user._id.toString(),
-      name: user.name,
-      email: user.email,
-      credits: user.credits,
-      earnedCredits: user.earnedCredits,
-      type: user.type,
-      idvStatus: user.idvStatus,
-      emailVerificationStatus: user.emailVerificationStatus,
-
     } 
     res.status(200).json(response);
   } catch (err) {
@@ -518,6 +511,25 @@ app.delete('/api/logs/:id', async (req, res) => {
   } catch (err) {
     res.status(500).json({
       error: 'Failed to delete log',
+      details: err.message,
+    });
+  }
+});
+
+// Delete all logs (DELETE)
+app.delete('/api/logs', async (req, res) => {
+  try {
+    const result = await logsCollection.deleteMany({});
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ message: 'No logs found to delete' });
+    }
+    res.status(200).json({
+      message: 'All logs deleted successfully',
+      deletedCount: result.deletedCount,
+    });
+  } catch (err) {
+    res.status(500).json({
+      error: 'Failed to delete all logs',
       details: err.message,
     });
   }
