@@ -6,11 +6,16 @@ const UserContext = createContext();
 // Create a provider component
 export const UserProvider = ({ children }) => {
   const [user, setUser] = useState({
-    firebaseUserId: null,
+    name: null,
+    email: null,
     mongoUserId: null,
+    credits: null,
+    earnedCredits: null,
+    firebaseUserId: null,
     userType: "user",
     idvStatus: "unverified",
-    credits: null,
+    emailVerificationStatus: "unverified",
+    accountStatus: null,
   }); // Global user state
 
   return (
