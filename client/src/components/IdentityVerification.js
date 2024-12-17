@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useUser } from "../context/UserContext";
 import { useNavigate } from "react-router-dom";
 import { updateUser } from "../services/userService";
@@ -7,6 +7,7 @@ import {
   openPlaidIDV,
 } from "../services/plaidService.js";
 import { createJiraIssue } from "../services/jiraService.js";
+import { auth } from "../firebaseConfig";
 
 const wait = async (timeInMs) => {
   return new Promise((resolve) => setTimeout(resolve, timeInMs));
@@ -60,6 +61,14 @@ const IdentityVerification = () => {
       window.location.reload()
     }
   };
+  
+  // Disallows the user to navigate to this page if they have already verified their identity
+  useEffect(() => {
+    if (auth.currentUser && user?.emailVerificationStatus === "verified") {
+      navigate("/");
+      return;
+    }
+  }, [user, setUser, navigate]);
 
   return (
     <>
