@@ -9,12 +9,13 @@ const EmailVerification = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+
     const checkEmailVerification = async () => {
       
       console.log("Polling user for email verification. firebaseUser:", auth.currentUser, "User:", user);
       
       // Checking if the user is authenticated and has had their email verified
-      if (auth.currentUser) {
+      if (auth.currentUser && user?.emailVerificationStatus !== "verified") {
 
         // Reload Firebase user data to get updated email verification status
         await auth.currentUser.reload();
@@ -33,6 +34,12 @@ const EmailVerification = () => {
         }
       }
     };
+
+    // Disallows the user to navigate to this page if they have already verified their email
+    if (auth.currentUser && user?.emailVerificationStatus === "verified") {
+      navigate("/");
+      return;
+    }
 
     // Poll every 1.5 seconds to check if the email is verified
     const interval = setInterval(checkEmailVerification, 1500);
