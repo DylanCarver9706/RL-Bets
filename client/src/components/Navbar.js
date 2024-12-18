@@ -50,6 +50,9 @@ const Navbar = () => {
         </Link>
       </h2>
       <div style={styles.navLinks}>
+        <Link to="/Wagers" style={styles.link}>
+          Wagers
+        </Link>
         <Link to="/Profile" style={styles.link}>
           Profile
         </Link>
