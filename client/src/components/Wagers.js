@@ -23,7 +23,7 @@ const WagerOutcomeFormula = (
   return winnings;
 };
 
-const Home = () => {
+const Wagers = () => {
   const { user } = useUser();
   const [wagers, setWagers] = useState([]);
   const [filteredWagers, setFilteredWagers] = useState([]);
@@ -342,7 +342,7 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default Wagers;
 
 const styles = {
   container: {

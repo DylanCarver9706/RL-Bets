@@ -3,7 +3,7 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { getMongoUserDataByFirebaseId } from "./services/userService";
 import { useUser } from "./context/UserContext";
 import { Routes, Route, useNavigate } from "react-router-dom";
-import Home from "./components/Home";
+import Wagers from "./components/Wagers";
 import Auth from "./components/Auth";
 import Profile from "./components/Profile";
 import Navbar from "./components/Navbar";
