@@ -72,12 +72,11 @@ function App() {
 
   useEffect(() => {
     const routeUnverifiedUser = async () => {
-      
       // If still loading, do nothing
       if (loading) {
         return;
       }
-      
+
       // Check current path
       const currentPath = window.location.pathname;
 
@@ -93,10 +92,10 @@ function App() {
       // Redirect authenticated users to Home
       if (auth.currentUser || user?.mongoUserId) {
         if (currentPath === "/Auth") {
-          navigate("/");
+          navigate("/Wagers");
         }
       }
-      
+
       // If user has not verified email or IDV, redirect to respective pages
       if (auth.currentUser && user?.emailVerificationStatus !== "verified") {
         navigate("/Email-Verification");

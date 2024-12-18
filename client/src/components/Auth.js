@@ -60,9 +60,9 @@ const Auth = () => {
           ...userWithoutId,
         });
 
-        navigate("/");
+        navigate("/Wagers");
 
-      // Email Signup
+        // Email Signup
       } else {
         firebaseCredential = await createUserWithEmailAndPassword(
           auth,
@@ -74,17 +74,16 @@ const Auth = () => {
         if (!firebaseUser?.uid) {
           throw new Error("Failed to retrieve Firebase user ID.");
         }
-        
+
         // Create the user in MongoDB
         const mongoUser = await createUserInDatabase(
           name,
           email,
           firebaseUser.uid
         );
-        
+
         // if (providerId === "password") {
         if (!firebaseUser.emailVerified) {
-
           // Send Email Verification
           await sendEmailVerification(firebaseUser);
 
@@ -101,12 +100,11 @@ const Auth = () => {
           });
 
           navigate("/Email-Verification");
-
         } else {
           const updatedUser = await updateUser(mongoUser._id, {
             emailVerificationStatus: "verified",
           });
-  
+
           // Destructure the user object to remove the _id field
           const { _id, ...userWithoutId } = updatedUser;
 
@@ -121,8 +119,6 @@ const Auth = () => {
 
           navigate("/Identity-Verification");
         }
-        
-
       }
     } catch (error) {
       console.error("Error during authentication:", error.message);
@@ -164,7 +160,6 @@ const Auth = () => {
 
       // Existing user
       if (mongoUser) {
-
         // Destructure the user object to remove the _id field
         const { _id, ...userWithoutId } = mongoUser;
 
@@ -177,8 +172,7 @@ const Auth = () => {
           ...userWithoutId,
         });
 
-        navigate("/");
-
+        navigate("/Wagers");
       } else {
         // New user: Create in MongoDB
         try {
@@ -212,17 +206,16 @@ const Auth = () => {
 
             navigate("/Identity-Verification");
           }
-
         } catch (error) {
           console.error("Error creating new user:", error.message);
           alert("Failed to create a new user. Please try again.");
-          window.location.reload()
+          window.location.reload();
         }
       }
     } catch (error) {
       console.error("Error during Google authentication:", error.message);
       alert("Failed to sign in with Google. Please try again.");
-      window.location.reload()
+      window.location.reload();
     }
   };
 

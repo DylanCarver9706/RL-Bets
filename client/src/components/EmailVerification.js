@@ -9,26 +9,32 @@ const EmailVerification = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-
     const checkEmailVerification = async () => {
-      
-      console.log("Polling user for email verification. firebaseUser:", auth.currentUser, "User:", user);
-      
+      console.log(
+        "Polling user for email verification. firebaseUser:",
+        auth.currentUser,
+        "User:",
+        user
+      );
+
       // Checking if the user is authenticated and has had their email verified
       if (auth.currentUser && user?.emailVerificationStatus !== "verified") {
-
         // Reload Firebase user data to get updated email verification status
         await auth.currentUser.reload();
 
         // Checking if the user has had their email verified either through Firebase or MongoDB
-        if (auth.currentUser.emailVerified || user.emailVerificationStatus === "verified") {
-          
+        if (
+          auth.currentUser.emailVerified ||
+          user.emailVerificationStatus === "verified"
+        ) {
           // Update the user's verification status in MongoDB
-          await updateUser(user.mongoUserId, { emailVerificationStatus: "verified" });
+          await updateUser(user.mongoUserId, {
+            emailVerificationStatus: "verified",
+          });
 
           // Update the global user state
           setUser({ ...user, emailVerificationStatus: "verified" });
-          
+
           // Redirect the user to the Identity Verification page
           navigate("/Identity-Verification");
         }
@@ -37,7 +43,7 @@ const EmailVerification = () => {
 
     // Disallows the user to navigate to this page if they have already verified their email
     if (auth.currentUser && user?.emailVerificationStatus === "verified") {
-      navigate("/");
+      navigate("/Wagers");
       return;
     }
 
@@ -66,9 +72,12 @@ const EmailVerification = () => {
       <h1>Email Verification Required</h1>
       <p>
         Thank you for signing up! To proceed, please verify your email address.
-        Check your inbox for a verification email and click the verification link.
+        Check your inbox for a verification email and click the verification
+        link.
       </p>
-      <p>If you didn't receive the email, click the button below to resend it.</p>
+      <p>
+        If you didn't receive the email, click the button below to resend it.
+      </p>
       <button
         onClick={resendVerificationEmail}
         style={{

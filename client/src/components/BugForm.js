@@ -62,7 +62,7 @@ const BugForm = () => {
 
       if (response.status === 200) {
         alert("Bug report submitted successfully!");
-        navigate("/");
+        navigate("/Wagers");
       }
     } catch (error) {
       alert("Failed to submit bug report. Please try again.");

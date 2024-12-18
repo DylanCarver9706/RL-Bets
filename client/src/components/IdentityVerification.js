@@ -11,7 +11,7 @@ import { auth } from "../firebaseConfig";
 
 const wait = async (timeInMs) => {
   return new Promise((resolve) => setTimeout(resolve, timeInMs));
-}
+};
 
 const IdentityVerification = () => {
   const [idvActive, setIdvActive] = useState(false);
@@ -33,7 +33,6 @@ const IdentityVerification = () => {
       const idvResult = await openPlaidIDV(linkTokenData.link_token);
 
       if (idvResult?.status === "success") {
-        
         await updateUser(user.mongoUserId, { idvStatus: "verified" });
 
         // Set the user state with the updated user object
@@ -41,31 +40,40 @@ const IdentityVerification = () => {
         //       when it navigates, but will not be needed if they refresh
         setUser({ ...user, idvStatus: "verified" });
 
-        navigate("/");
-
+        navigate("/Wagers");
       } else {
         console.log("IDV failed");
         // Create Jira issue if IDV fails and alert user
         if (user.idvStatus !== "pending review") {
           await updateUser(user.mongoUserId, { idvStatus: "pending review" });
           setUser({ ...user, idvStatus: "pending review" });
-          await createJiraIssue(user.name, user.email, user.mongoUserId, "Story", "IDV Failed", "", "IDV Failed");
+          await createJiraIssue(
+            user.name,
+            user.email,
+            user.mongoUserId,
+            "Story",
+            "IDV Failed",
+            "",
+            "IDV Failed"
+          );
         }
-        alert("Identity Verification failed. RL Bets will review your information and approve or deny your account manually.");
-        await wait(5000)
-        window.location.reload()
+        alert(
+          "Identity Verification failed. RL Bets will review your information and approve or deny your account manually."
+        );
+        await wait(5000);
+        window.location.reload();
       }
     } catch (error) {
       alert(error.message);
       // Wait 5 seconds before refreshing the page
-      window.location.reload()
+      window.location.reload();
     }
   };
-  
+
   // Disallows the user to navigate to this page if they have already verified their identity
   useEffect(() => {
     if (auth.currentUser && user?.emailVerificationStatus === "verified") {
-      navigate("/");
+      navigate("/Wagers");
       return;
     }
   }, [user, setUser, navigate]);
@@ -90,7 +98,9 @@ const IdentityVerification = () => {
               cursor: "pointer",
             }}
           >
-            {(user?.idvStatus === "pending review"? "Retry Identity Verification" : "Start Identity Verification")}
+            {user?.idvStatus === "pending review"
+              ? "Retry Identity Verification"
+              : "Start Identity Verification"}
           </button>
         </div>
       )}

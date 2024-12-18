@@ -27,7 +27,7 @@ const FeedbackForm = () => {
       setError("Description cannot exceed 32,500 characters.");
       return;
     }
-    
+
     try {
       const response = await createJiraIssue(
         user.name,
@@ -38,12 +38,12 @@ const FeedbackForm = () => {
         description,
         "BETA TESTER FEEDBACK - GENERAL"
       );
-      
+
       if (response.status === 200) {
         alert("Feedback submitted successfully!");
         setSummary("");
         setDescription("");
-        navigate("/");
+        navigate("/Wagers");
       }
     } catch (error) {
       alert("Failed to submit feedback. Please try again.");
@@ -53,7 +53,8 @@ const FeedbackForm = () => {
   return (
     <div style={{ padding: "20px" }}>
       <h2>Give Feedback</h2>
-      {error && <p style={{ color: "red" }}>{error}</p>} {/* Display validation error */}
+      {error && <p style={{ color: "red" }}>{error}</p>}{" "}
+      {/* Display validation error */}
       <form onSubmit={handleSubmit}>
         <div>
           <label>Summary:</label>
