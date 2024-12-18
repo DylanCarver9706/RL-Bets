@@ -255,3 +255,34 @@ export const getLogs = async () => {
     throw err;
   }
 };
+
+export const validateStateByLatLon = async (lat, lon) => {
+  try {
+    // Retrieve the Firebase ID token
+    const idToken = await getFirebaseIdToken();
+
+    // Make the fetch request to your backend API
+    const response = await fetch(
+      `${BASE_URL}/api/reverse-geocode`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${idToken}`, // Include the token in the headers
+        },
+        body: JSON.stringify({ lat, lon }),
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Failed to validate state.");
+    }
+
+    return data; // Return the validation result and address details
+  } catch (err) {
+    console.error("Error validating state:", err.message);
+    throw err;
+  }
+};
