@@ -286,3 +286,40 @@ export const validateStateByLatLon = async (lat, lon) => {
     throw err;
   }
 };
+
+export const checkUserLocation = async () => {
+  if (!navigator.geolocation) {
+    console.log("Geolocation is not supported by your browser.");
+    return;
+  }
+
+  try {
+    // Get the user's location
+    const position = await new Promise((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(resolve, reject);
+    });
+
+    const { latitude, longitude } = position.coords;
+    console.log("Position:", position);
+    console.log(
+      "User's Coordinates ('Latitude','Longitude'):",
+      `${latitude},${longitude}`
+    );
+
+    // Check if the user is in an allowed state
+    const reverseGeocodeResponse = await validateStateByLatLon(latitude, longitude);
+    console.log("reverseGeocodeResponse:", reverseGeocodeResponse);
+    console.log("Is Valid State:", reverseGeocodeResponse?.allowed);
+
+    if (reverseGeocodeResponse?.allowed) {
+      console.log("Access granted: User is in an allowed state.");
+      return true;
+    } else {
+      console.log("Access denied: Sports gambling is not allowed in your location.");
+      return false;
+    }
+  } catch (error) {
+    console.error("Error checking user location:", error.message);
+    console.log("Unable to determine your location. Location access is required.");
+  }
+};
