@@ -629,6 +629,66 @@ app.post('/webhook', express.raw({type: 'application/json'}), async (request, re
 
 // ************************************************************************************************
 // ************************************************************************************************
+// *******************************************GEOFENCING*******************************************
+// ************************************************************************************************
+// ************************************************************************************************
+
+const allowedStates = ["Missouri", "California", "New York"];
+
+// Get the user's location (state) from the provided latitude and longitude
+app.post("/api/reverse-geocode", async (req, res) => {
+  const { lat, lon } = req.body;
+
+  console.log(req.body);
+
+  if (!lat || !lon) {
+    return res
+      .status(400)
+      .json({ error: "Latitude (lat) and longitude (lon) are required." });
+  }
+
+  try {
+    // Call the Nominatim API
+    const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`;
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      throw new Error(`Nominatim API failed with status: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    // Extract the state from the response
+    const state = data?.address?.state;
+
+    if (!state) {
+      return res.status(404).json({
+        error: "Unable to retrieve state information from the Nominatim response.",
+      });
+    }
+
+    // Check if the state is in the allowed list
+    const isAllowed = allowedStates.includes(state);
+
+    res.status(200).json({
+      state,
+      allowed: isAllowed,
+      message: isAllowed
+        ? "State is allowed."
+        : "State is not allowed.",
+      full_address: data.display_name,
+    });
+  } catch (error) {
+    console.error("Error fetching from Nominatim API:", error.message);
+    res.status(500).json({
+      error: "Failed to retrieve address data.",
+      details: error.message,
+    });
+  }
+});
+
+// ************************************************************************************************
+// ************************************************************************************************
 // *******************************************SOCKET.IO********************************************
 // ************************************************************************************************
 // ************************************************************************************************
