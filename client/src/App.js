@@ -20,6 +20,7 @@ import Credits from "./components/Credits";
 import BugForm from "./components/BugForm";
 import FeatureForm from "./components/FeatureForm";
 import FeedbackForm from "./components/FeedbackForm";
+import Hero from "./components/Hero";
 
 function App() {
   const { user, setUser } = useUser();
@@ -128,7 +129,7 @@ function App() {
       </div>
       <Routes>
         {/* This expression is needed because React Router does not check App before navigating to base route */}
-        <Route path="/" element={user && auth?.currentUser && user?.mongoUserId ? <Home /> : <Auth />} />
+        <Route path="/" element={<Hero />} />
         <Route path="/Auth" element={<Auth />} />
         <Route path="/Email-Verification" element={<EmailVerification />} />
         <Route path="/Identity-Verification" element={<IdentityVerification />} />
