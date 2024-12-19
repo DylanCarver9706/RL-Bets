@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { getMongoUserDataByFirebaseId } from "./services/userService";
 import { useUser } from "./context/UserContext";
-import { Routes, Route, useNavigate } from "react-router-dom";
+import { Routes, Route, useNavigate, Navigate } from "react-router-dom";
 import Wagers from "./components/Wagers";
 import Auth from "./components/Auth";
 import Profile from "./components/Profile";
@@ -21,6 +21,10 @@ import BugForm from "./components/BugForm";
 import FeatureForm from "./components/FeatureForm";
 import FeedbackForm from "./components/FeedbackForm";
 import Hero from "./components/Hero";
+
+const ProtectedRoute = ({ loggedIn, redirectTo = "/Auth", children }) => {
+  return loggedIn ? children : <Navigate to={redirectTo} />;
+};
 
 function App() {
   const { user, setUser } = useUser();
@@ -71,7 +75,7 @@ function App() {
   }, [setUser, auth]);
 
   useEffect(() => {
-    const routeUnverifiedUser = async () => {
+    const routeUser = async () => {
       // If still loading, do nothing
       if (loading) {
         return;
@@ -80,20 +84,11 @@ function App() {
       // Check current path
       const currentPath = window.location.pathname;
 
-      // Redirect unauthenticated users from protected routes
-      if (!auth.currentUser || !user?.mongoUserId) {
-        if (currentPath !== "/Auth") {
-          navigate("/Auth");
-        }
-      }
+      const unprotectedRoutes = ["/"];
 
-      // console.log("Current Path:", currentPath);
-
-      // Redirect authenticated users to Home
-      if (auth.currentUser || user?.mongoUserId) {
-        if (currentPath === "/Auth") {
-          navigate("/Wagers");
-        }
+      // Allow all users to access unprotected routes
+      if (unprotectedRoutes.includes(currentPath)) {
+        return;
       }
 
       // If user has not verified email or IDV, redirect to respective pages
@@ -103,12 +98,15 @@ function App() {
         navigate("/Identity-Verification");
       }
     };
-    routeUnverifiedUser();
+    routeUser();
   }, [loading, user, navigate, auth?.currentUser]);
 
   if (loading) {
     return <p>Loading...</p>;
   }
+
+  const loggedIn = user && auth?.currentUser && user?.mongoUserId;
+  const admin = loggedIn && user?.userType === "admin";
 
   return (
     <>
@@ -127,23 +125,140 @@ function App() {
         )}
       </div>
       <Routes>
-        {/* This expression is needed because React Router does not check App before navigating to base route */}
+        {/* Public Routes */}
         <Route path="/" element={<Hero />} />
-        <Route path="/Auth" element={<Auth />} />
-        <Route path="/Email-Verification" element={<EmailVerification />} />
-        <Route path="/Identity-Verification" element={<IdentityVerification />} />
-        <Route path="/Profile" element={<Profile />} />
-        <Route path="/Create_Wager" element={<CreateWager />} />
-        <Route path="/Schedule" element={<Schedule />} />
-        <Route path="/Credit-Shop" element={<CreditShop />} />
-        <Route path="/Leaderboard" element={<Leaderboard />} />
-        <Route path="/Settings" element={<Settings />} />
-        <Route path="/Credits" element={<Credits />} />
-        <Route path="/Bug-Form" element={<BugForm />} />
-        <Route path="/Feature-Form" element={<FeatureForm />} />
-        <Route path="/Feedback-Form" element={<FeedbackForm />} />
-        <Route path="/Log" element={user?.userType === "admin" && <Log />} />
-        <Route path="/Admin" element={user?.userType === "admin" && <Admin />} />
+
+        {/* Protected Routes */}
+        <Route
+          path="/Auth"
+          element={
+            <ProtectedRoute loggedIn={!loggedIn} redirectTo="/Wagers">
+              <Auth />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/Wagers"
+          element={
+            <ProtectedRoute loggedIn={loggedIn}>
+              <Wagers />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/Create_Wager"
+          element={
+            <ProtectedRoute loggedIn={loggedIn}>
+              <CreateWager />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/Profile"
+          element={
+            <ProtectedRoute loggedIn={loggedIn}>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/Email-Verification"
+          element={
+            <ProtectedRoute loggedIn={loggedIn} redirectTo="/Wagers">
+              <EmailVerification />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/Identity-Verification"
+          element={
+            <ProtectedRoute loggedIn={loggedIn} redirectTo="/Wagers">
+              <IdentityVerification />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/Settings"
+          element={
+            <ProtectedRoute loggedIn={loggedIn}>
+              <Settings />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/Credits"
+          element={
+            <ProtectedRoute loggedIn={loggedIn}>
+              <Credits />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/Schedule"
+          element={
+            <ProtectedRoute loggedIn={loggedIn}>
+              <Schedule />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/CreditShop"
+          element={
+            <ProtectedRoute loggedIn={loggedIn}>
+              <CreditShop />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/Leaderboard"
+          element={
+            <ProtectedRoute loggedIn={loggedIn}>
+              <Leaderboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/BugForm"
+          element={
+            <ProtectedRoute loggedIn={loggedIn}>
+              <BugForm />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/FeatureForm"
+          element={
+            <ProtectedRoute loggedIn={loggedIn}>
+              <FeatureForm />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/FeedbackForm"
+          element={
+            <ProtectedRoute loggedIn={loggedIn}>
+              <FeedbackForm />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Admin Routes */}
+        <Route
+          path="/Log"
+          element={
+            <ProtectedRoute loggedIn={loggedIn && admin}>
+              <Log />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/Admin"
+          element={
+            <ProtectedRoute loggedIn={loggedIn && admin}>
+              <Admin />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </>
   );
