@@ -18,6 +18,9 @@ export const UserProvider = ({ children }) => {
     accountStatus: null,
     locationValid: null,
     locationPermissionGranted: null,
+    currentState: null,
+    DOB: null,
+    ageValid: null,
   }); // Global user state
 
   return (
