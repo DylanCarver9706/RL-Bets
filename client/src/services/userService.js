@@ -373,3 +373,34 @@ export const checkGeolocationPermission = async () => {
     return false;
   }
 };
+
+export const userAgeLegal = async (state, DOB) => {
+  try {
+  // Retrieve the Firebase ID token
+  const idToken = await getFirebaseIdToken();
+
+  // Make the fetch request to your backend API
+  const response = await fetch(
+    `${BASE_URL}/api/check-legal-age`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${idToken}`, // Include the token in the headers
+      },
+      body: JSON.stringify({ state, DOB }),
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error || "Failed to validate age.");
+  }
+
+  return data.isAllowed; // Return the validation result
+  } catch (err) {
+    console.error("Error validating age:", err.message);
+    throw err;
+  }
+}
