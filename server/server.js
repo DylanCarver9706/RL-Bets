@@ -8,6 +8,7 @@ const cors = require("cors");
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY)
 const firebaseAdmin = require("firebase-admin");
 const firebaseServiceAccountKey = require(process.env.FIREBASE_SERVICE_ACCOUNT_KEY_PATH);
+const unitedStatesLegalStates = require(process.env.UNITED_STATES_LEGAL_STATES_PATH);
 const { Configuration, PlaidEnvironments, PlaidApi } = require("plaid");
 
 // ************************************************************************************************
@@ -633,7 +634,7 @@ app.post('/webhook', express.raw({type: 'application/json'}), async (request, re
 // ************************************************************************************************
 // ************************************************************************************************
 
-const LEGAL_GAMBLING_STATES = process.env.LEGAL_GAMBLING_STATES.split(",");
+// TODO: Support other countries
 
 // Get the user's location (state) from the provided latitude and longitude
 // TODO: Create stack which will prevent this from calling Nominatim API more than once per second
@@ -667,7 +668,7 @@ app.post("/api/reverse-geocode", async (req, res) => {
     }
 
     // Check if the state is in the allowed list
-    const isAllowed = LEGAL_GAMBLING_STATES.includes(state);
+    const isAllowed = unitedStatesLegalStates?.[state]?.legal;
     
     res.status(200).json({
       state,
