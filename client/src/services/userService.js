@@ -262,12 +262,11 @@ export const getUserLocation = async () => {
     navigator.geolocation.getCurrentPosition(resolve, reject);
   });
 
-  const { latitude, longitude } = position.coords;
-  console.log("Position:", position);
-  console.log(
-    "User's Coordinates ('Latitude','Longitude'):",
-    `${latitude},${longitude}`
-  );
+  // const { latitude, longitude } = position.coords;
+  // console.log(
+  //   "User's Coordinates ('Latitude','Longitude'):",
+  //   `${latitude},${longitude}`
+  // );
 
   return position;
 };
@@ -316,13 +315,11 @@ export const userLocationLegal = async () => {
     // Find what state the user is in
     const reverseGeocodeResponse = await getUserStateByLatLon(latitude, longitude);
     console.log("reverseGeocodeResponse:", reverseGeocodeResponse);
-    console.log("Is Valid State:", reverseGeocodeResponse?.allowed);
 
     let response = {allowed: reverseGeocodeResponse?.allowed, state: reverseGeocodeResponse?.state} 
     
     // Check if the user is in an allowed state
     if (reverseGeocodeResponse?.allowed) {
-      console.log("Access granted: User is in an allowed state.");
       return response;
     } else {
       console.log("Access denied: Sports gambling is not allowed in your location.");
@@ -343,15 +340,12 @@ export const checkGeolocationPermission = async () => {
   try {
     const permissionStatus = await navigator.permissions.query({ name: "geolocation" });
 
-    console.log("Initial permission state:", permissionStatus.state);
-
     if (permissionStatus.state === "denied") {
       console.log("Geolocation permission denied.");
       return false;
     }
 
     if (permissionStatus.state === "prompt") {
-      console.log("Geolocation permission prompt active...");
       try {
         await new Promise((resolve, reject) => {
           navigator.geolocation.getCurrentPosition(resolve, reject);
@@ -365,7 +359,6 @@ export const checkGeolocationPermission = async () => {
     }
 
     if (permissionStatus.state === "granted") {
-      console.log("Geolocation permission granted.");
       return true;
     }
   } catch (error) {
