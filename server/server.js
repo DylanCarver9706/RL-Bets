@@ -633,13 +633,12 @@ app.post('/webhook', express.raw({type: 'application/json'}), async (request, re
 // ************************************************************************************************
 // ************************************************************************************************
 
-const allowedStates = ["Missouri", "California", "New York"];
+const LEGAL_GAMBLING_STATES = process.env.LEGAL_GAMBLING_STATES.split(",");
 
 // Get the user's location (state) from the provided latitude and longitude
+// TODO: Create stack which will prevent this from calling Nominatim API more than once per second
 app.post("/api/reverse-geocode", async (req, res) => {
   const { lat, lon } = req.body;
-
-  console.log(req.body);
 
   if (!lat || !lon) {
     return res
@@ -668,8 +667,8 @@ app.post("/api/reverse-geocode", async (req, res) => {
     }
 
     // Check if the state is in the allowed list
-    const isAllowed = allowedStates.includes(state);
-
+    const isAllowed = LEGAL_GAMBLING_STATES.includes(state);
+    
     res.status(200).json({
       state,
       allowed: isAllowed,
