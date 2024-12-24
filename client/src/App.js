@@ -116,9 +116,12 @@ function App() {
       <div>
         {user ? (
           <p>
-            Welcome, Firebase UID: {user?.firebaseUserId} - MongoId:{" "}
-            {user?.mongoUserId} - Email Verification Status:{" "}
-            {user?.emailVerificationStatus} - IDV Status: {user?.idvStatus}
+            Welcome, Firebase UID: {user?.firebaseUserId} || 
+            MongoId:{" "}{user?.mongoUserId} ||
+            Email Verification Status:{" "}{user?.emailVerificationStatus} ||
+            IDV Status: {user?.idvStatus}{" "} ||
+            Location Permission Granted: {`${user?.locationPermissionGranted}`}{" "} ||
+            Location Valid: {`${user?.locationValid}`}
           </p>
         ) : (
           <p>Please log in</p>
