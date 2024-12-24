@@ -104,12 +104,12 @@ function App() {
       }
 
       // If user has not verified email or IDV, redirect to respective pages
-      if (auth.currentUser && user?.emailVerificationStatus !== "verified") {
+      if (auth.currentUser && !user?.locationPermissionGranted) {
+        navigate("/Location-Permission-Required");
+      } else if (auth.currentUser && user?.emailVerificationStatus !== "verified") {
         navigate("/Email-Verification");
       } else if (auth.currentUser && user?.idvStatus !== "verified") {
         navigate("/Identity-Verification");
-      } else if (auth.currentUser && !user?.locationPermissionGranted) {
-        navigate("/Location-Permission-Required");
       } else if (auth.currentUser && !user?.locationValid) {
         navigate("/Illegal-State");
       }
