@@ -256,7 +256,23 @@ export const getLogs = async () => {
   }
 };
 
-export const validateStateByLatLon = async (lat, lon) => {
+export const getUserLocation = async () => {
+  // Get the user's location
+  const position = await new Promise((resolve, reject) => {
+    navigator.geolocation.getCurrentPosition(resolve, reject);
+  });
+
+  const { latitude, longitude } = position.coords;
+  console.log("Position:", position);
+  console.log(
+    "User's Coordinates ('Latitude','Longitude'):",
+    `${latitude},${longitude}`
+  );
+
+  return position;
+};
+
+export const getUserStateByLatLon = async (lat, lon) => {
   try {
     // Retrieve the Firebase ID token
     const idToken = await getFirebaseIdToken();
@@ -287,30 +303,22 @@ export const validateStateByLatLon = async (lat, lon) => {
   }
 };
 
-export const checkUserLocation = async () => {
+export const userLocationLegal = async () => {
   if (!navigator.geolocation) {
     console.log("Geolocation is not supported by your browser.");
     return;
   }
 
   try {
-    // Get the user's location
-    const position = await new Promise((resolve, reject) => {
-      navigator.geolocation.getCurrentPosition(resolve, reject);
-    });
+    // Destructure the latitude and longitude from the geolocation response
+    const { coords: { latitude, longitude } } = await getUserLocation();
 
-    const { latitude, longitude } = position.coords;
-    console.log("Position:", position);
-    console.log(
-      "User's Coordinates ('Latitude','Longitude'):",
-      `${latitude},${longitude}`
-    );
-
-    // Check if the user is in an allowed state
-    const reverseGeocodeResponse = await validateStateByLatLon(latitude, longitude);
+    // Find what state the user is in
+    const reverseGeocodeResponse = await getUserStateByLatLon(latitude, longitude);
     console.log("reverseGeocodeResponse:", reverseGeocodeResponse);
     console.log("Is Valid State:", reverseGeocodeResponse?.allowed);
-
+    
+    // Check if the user is in an allowed state
     if (reverseGeocodeResponse?.allowed) {
       console.log("Access granted: User is in an allowed state.");
       return true;
