@@ -350,6 +350,7 @@ app.put("/api/users/soft_delete/:id", async (req, res) => {
           idvStatus: "unverified",
           emailVerificationStatus: "unverified",
           accountStatus: "deleted",
+          DOB: null,
         }
       }
     );
