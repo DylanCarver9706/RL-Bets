@@ -4,6 +4,7 @@ import {
   getMongoUserDataByFirebaseId,
   userLocationLegal,
   checkGeolocationPermission,
+  userAgeLegal,
 } from "./services/userService";
 import { useUser } from "./context/UserContext";
 import { Routes, Route, useNavigate, Navigate } from "react-router-dom";
@@ -59,6 +60,9 @@ function App() {
           console.log("Mongo User:", mongoUser);
           console.log("firebaseUser", firebaseUser);
 
+          const userLocationMeta = await userLocationLegal();
+          const ageValid = await userAgeLegal(userLocationMeta?.state, mongoUser?.DOB);
+
           // Destructure the user object to remove the _id field
           const { _id, ...userWithoutId } = mongoUser;
 
@@ -67,7 +71,9 @@ function App() {
             firebaseUserId: firebaseUser.uid,
             mongoUserId: _id,
             ...userWithoutId,
-            locationValid: await userLocationLegal(),
+            ageValid: ageValid,
+            locationValid: userLocationMeta?.allowed,
+            currentState: userLocationMeta?.state,
             locationPermissionGranted: await checkGeolocationPermission(),
           });
 
@@ -113,6 +119,8 @@ function App() {
         navigate("/Identity-Verification");
       } else if (auth.currentUser && !user?.locationValid) {
         navigate("/Illegal-State");
+      } else if (auth.currentUser && !user?.ageValid) {
+        navigate("/Illegal-Age")
       }
 
     };
@@ -125,6 +133,7 @@ function App() {
 
   const locationPermissionGranted = user?.locationPermissionGranted;
   const locationValid = user?.locationValid;
+  const ageValid = user?.ageValid;
   const loggedIn = auth?.currentUser !== null && user?.mongoUserId !== null;
   const admin = loggedIn && user?.userType === "admin";
 
@@ -141,7 +150,8 @@ function App() {
             Email Verification Status:{" "}{user?.emailVerificationStatus} ||
             IDV Status: {user?.idvStatus}{" "} ||
             Location Permission Granted: {`${user?.locationPermissionGranted}`}{" "} ||
-            Location Valid: {`${user?.locationValid}`}
+            Location Valid: {`${user?.locationValid}`}{" "} ||
+            Age Valid: {`${user?.ageValid}`}
           </p>
         ) : (
           <p>Please log in</p>
