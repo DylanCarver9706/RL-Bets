@@ -684,6 +684,7 @@ app.post("/api/reverse-geocode", async (req, res) => {
         error: "Unable to retrieve state information from the Nominatim response.",
       });
     }
+    
 
     // Check if the state is in the allowed list
     const isAllowed = unitedStatesLegalStates?.[state]?.legal;
