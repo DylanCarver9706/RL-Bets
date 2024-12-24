@@ -13,6 +13,8 @@ import {
   createUserInDatabase,
   updateUser,
   getMongoUserDataByFirebaseId,
+  userLocationLegal,
+  checkGeolocationPermission,
 } from "../services/userService.js";
 import { useUser } from "../context/UserContext.js";
 
@@ -58,6 +60,8 @@ const Auth = () => {
           firebaseUserId: firebaseUser.uid,
           mongoUserId: _id,
           ...userWithoutId,
+          locationValid: await userLocationLegal(),
+          locationPermissionGranted: await checkGeolocationPermission(),
         });
 
         navigate("/Wagers");
@@ -97,6 +101,8 @@ const Auth = () => {
             firebaseUserId: firebaseUser.uid,
             mongoUserId: _id,
             ...userWithoutId,
+            locationValid: await userLocationLegal(),
+            locationPermissionGranted: await checkGeolocationPermission(),
           });
 
           navigate("/Email-Verification");
@@ -115,6 +121,8 @@ const Auth = () => {
             firebaseUserId: firebaseUser.uid,
             mongoUserId: _id,
             ...userWithoutId,
+            locationValid: await userLocationLegal(),
+            locationPermissionGranted: await checkGeolocationPermission(),
           });
 
           navigate("/Identity-Verification");
@@ -170,6 +178,8 @@ const Auth = () => {
           firebaseUserId: firebaseUser.uid,
           mongoUserId: _id,
           ...userWithoutId,
+          locationValid: await userLocationLegal(),
+          locationPermissionGranted: await checkGeolocationPermission(),
         });
 
         navigate("/Wagers");
@@ -202,6 +212,8 @@ const Auth = () => {
               firebaseUserId: firebaseUser.uid,
               mongoUserId: _id,
               ...userWithoutId,
+              locationValid: await userLocationLegal(),
+              locationPermissionGranted: await checkGeolocationPermission(),
             });
 
             navigate("/Identity-Verification");
