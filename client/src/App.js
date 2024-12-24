@@ -27,6 +27,7 @@ import FeedbackForm from "./components/FeedbackForm";
 import Hero from "./components/Hero";
 import IllegalState from "./components/IllegalState";
 import LocationPermissionRequired from "./components/LocationPermissionRequired";
+import IllegalAge from "./components/IllegalAge";
 
 const ProtectedRoute = ({ loggedIn, redirectTo = "/Auth", children }) => {
   return loggedIn ? children : <Navigate to={redirectTo} />;
@@ -276,6 +277,14 @@ function App() {
           element={
             <ProtectedRoute loggedIn={loggedIn && !locationPermissionGranted} redirectTo="/Wagers">
               <LocationPermissionRequired />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/Illegal-Age"
+          element={
+            <ProtectedRoute loggedIn={loggedIn && !ageValid} redirectTo="/Wagers">
+              <IllegalAge />
             </ProtectedRoute>
           }
         />
