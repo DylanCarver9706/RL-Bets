@@ -33,12 +33,19 @@ const IdentityVerification = () => {
       const idvResult = await openPlaidIDV(linkTokenData.link_token);
 
       if (idvResult?.status === "success") {
-        await updateUser(user.mongoUserId, { idvStatus: "verified" });
+        
+        let updateUserObject = { idvStatus: "verified" };
+        
+        if (idvResult?.DOB) {
+          updateUserObject.DOB = idvResult.DOB;
+        }
+        
+        await updateUser(user.mongoUserId, updateUserObject);
 
         // Set the user state with the updated user object
         // NOTE: Needed so Home can access the user object
         //       when it navigates, but will not be needed if they refresh
-        setUser({ ...user, idvStatus: "verified" });
+        setUser({ ...user, ...updateUserObject });
 
         navigate("/Wagers");
       } else {
