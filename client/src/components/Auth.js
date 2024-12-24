@@ -50,6 +50,8 @@ const Auth = () => {
         // Fetch MongoDB user data
         const mongoUser = await getMongoUserDataByFirebaseId(firebaseUser.uid);
 
+        const userLocationMeta = await userLocationLegal();
+
         // Destructure the user object to remove the _id field
         const { _id, ...userWithoutId } = mongoUser;
 
@@ -60,7 +62,8 @@ const Auth = () => {
           firebaseUserId: firebaseUser.uid,
           mongoUserId: _id,
           ...userWithoutId,
-          locationValid: await userLocationLegal(),
+          locationValid: userLocationMeta?.allowed,
+          currentState: userLocationMeta?.state,
           locationPermissionGranted: await checkGeolocationPermission(),
         });
 
@@ -91,6 +94,8 @@ const Auth = () => {
           // Send Email Verification
           await sendEmailVerification(firebaseUser);
 
+          const userLocationMeta = await userLocationLegal();
+
           // Destructure the user object to remove the _id field
           const { _id, ...userWithoutId } = mongoUser;
 
@@ -101,7 +106,8 @@ const Auth = () => {
             firebaseUserId: firebaseUser.uid,
             mongoUserId: _id,
             ...userWithoutId,
-            locationValid: await userLocationLegal(),
+            locationValid: userLocationMeta?.allowed,
+            currentState: userLocationMeta?.state,
             locationPermissionGranted: await checkGeolocationPermission(),
           });
 
@@ -110,6 +116,8 @@ const Auth = () => {
           const updatedUser = await updateUser(mongoUser._id, {
             emailVerificationStatus: "verified",
           });
+
+          const userLocationMeta = await userLocationLegal();
 
           // Destructure the user object to remove the _id field
           const { _id, ...userWithoutId } = updatedUser;
@@ -121,7 +129,8 @@ const Auth = () => {
             firebaseUserId: firebaseUser.uid,
             mongoUserId: _id,
             ...userWithoutId,
-            locationValid: await userLocationLegal(),
+            locationValid: userLocationMeta?.allowed,
+            currentState: userLocationMeta?.state,
             locationPermissionGranted: await checkGeolocationPermission(),
           });
 
@@ -168,6 +177,9 @@ const Auth = () => {
 
       // Existing user
       if (mongoUser) {
+
+        const userLocationMeta = await userLocationLegal();
+
         // Destructure the user object to remove the _id field
         const { _id, ...userWithoutId } = mongoUser;
 
@@ -178,7 +190,8 @@ const Auth = () => {
           firebaseUserId: firebaseUser.uid,
           mongoUserId: _id,
           ...userWithoutId,
-          locationValid: await userLocationLegal(),
+          locationValid: userLocationMeta?.allowed,
+          currentState: userLocationMeta?.state,
           locationPermissionGranted: await checkGeolocationPermission(),
         });
 
@@ -202,6 +215,8 @@ const Auth = () => {
               emailVerificationStatus: "verified",
             });
 
+            const userLocationMeta = await userLocationLegal();
+
             // Destructure the user object to remove the _id field
             const { _id, ...userWithoutId } = updatedUser;
 
@@ -212,7 +227,8 @@ const Auth = () => {
               firebaseUserId: firebaseUser.uid,
               mongoUserId: _id,
               ...userWithoutId,
-              locationValid: await userLocationLegal(),
+              locationValid: userLocationMeta?.allowed,
+              currentState: userLocationMeta?.state,
               locationPermissionGranted: await checkGeolocationPermission(),
             });
 
