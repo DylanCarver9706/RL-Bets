@@ -331,3 +331,43 @@ export const userLocationLegal = async () => {
     console.log("Unable to determine your location. Location access is required.");
   }
 };
+
+export const checkGeolocationPermission = async () => {
+  if (!navigator.permissions) {
+    alert("Permissions API is not supported in this browser.");
+    return false;
+  }
+
+  try {
+    const permissionStatus = await navigator.permissions.query({ name: "geolocation" });
+
+    console.log("Initial permission state:", permissionStatus.state);
+
+    if (permissionStatus.state === "denied") {
+      console.log("Geolocation permission denied.");
+      return false;
+    }
+
+    if (permissionStatus.state === "prompt") {
+      console.log("Geolocation permission prompt active...");
+      try {
+        await new Promise((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(resolve, reject);
+        });
+        console.log("Geolocation access granted after prompt.");
+        return true;
+      } catch (error) {
+        console.log("Geolocation access denied after prompt.");
+        return false;
+      }
+    }
+
+    if (permissionStatus.state === "granted") {
+      console.log("Geolocation permission granted.");
+      return true;
+    }
+  } catch (error) {
+    console.error("Error checking geolocation permission:", error);
+    return false;
+  }
+};
