@@ -31,14 +31,14 @@ const server = http.createServer(app);  // Use the same HTTP server for Express 
 
 const io = new Server(server, {
   cors: {
-    origin: process.env.CLIENT_URL,  // Allow the React client to connect
+    origin: process.env.DEV_CLIENT_URL,  // Allow the React client to connect
   },
 });
 
 // CORS middleware for Express
 app.use(
   cors({
-    origin: process.env.CLIENT_URL,
+    origin: process.env.DEV_CLIENT_URL,
     methods: "GET,PUT,POST,DELETE",
     credentials: true,
   })
