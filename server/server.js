@@ -724,6 +724,34 @@ const isOldEnough = (dob, minAge) => {
   return actualAge >= minAge;
 };
 
+// API endpoint to check if a user is legally old enough to make wagers
+app.post('/api/check-legal-age', (req, res) => {
+  try {
+    const { state, DOB } = req.body;
+
+    if (!state || !DOB) {
+      return res.status(400).json({ error: "State and DOB are required" });
+    }
+
+    const stateInfo = unitedStatesLegalStates?.[state];
+
+    if (!stateInfo) {
+      return res.status(400).json({ error: "Invalid state" });
+    }
+
+    const isAllowed = isOldEnough(DOB, stateInfo.minAge);
+
+    if (!isAllowed) {
+      return res.json({ isAllowed: false, message: `Due to state law, you must be at least ${stateInfo.minAge} years old in ${state}` });
+    }
+
+    res.json({ isAllowed: true, message: "User is allowed to make wagers" });
+  } catch (error) {
+    console.error("Error checking legal age:", error.message);
+    res.status(500).json({ error: "Failed to check legal age" });
+  }
+});
+
 // ************************************************************************************************
 // ************************************************************************************************
 // *******************************************SOCKET.IO********************************************
