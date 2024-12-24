@@ -700,6 +700,32 @@ app.post("/api/reverse-geocode", async (req, res) => {
 
 // ************************************************************************************************
 // ************************************************************************************************
+// ****************************************Age Restriction*****************************************
+// ************************************************************************************************
+// ************************************************************************************************
+
+// Helper function to check if a user is old enough based on their DOB and state minAge
+const isOldEnough = (dob, minAge) => {
+  if (!dob || !minAge) return false;
+
+  const birthDate = new Date(dob);
+  if (isNaN(birthDate)) return false; // Invalid date check
+
+  const today = new Date();
+  const age = today.getFullYear() - birthDate.getFullYear();
+
+  // Adjust age if the birthday hasn't occurred yet this year
+  const isBirthdayPassed = 
+    today.getMonth() > birthDate.getMonth() || 
+    (today.getMonth() === birthDate.getMonth() && today.getDate() >= birthDate.getDate());
+
+  const actualAge = isBirthdayPassed ? age : age - 1;
+
+  return actualAge >= minAge;
+};
+
+// ************************************************************************************************
+// ************************************************************************************************
 // *******************************************SOCKET.IO********************************************
 // ************************************************************************************************
 // ************************************************************************************************
