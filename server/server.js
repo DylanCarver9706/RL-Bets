@@ -669,6 +669,15 @@ app.post("/api/reverse-geocode", async (req, res) => {
 
     const data = await response.json();
 
+    // Only allow US states
+    if (data?.address?.country_code !== "us") {
+      return res.status(404).json({
+        error: "RL Bets is currently only available in the United States.",
+      });
+    }
+
+    console.log("Response from Nominatim API:", data);
+
     // Extract the state from the response
     const state = data?.address?.state;
 
@@ -684,11 +693,9 @@ app.post("/api/reverse-geocode", async (req, res) => {
     res.status(200).json({
       state,
       allowed: isAllowed,
-      message: isAllowed
-        ? "State is allowed."
-        : "State is not allowed.",
       full_address: data.display_name,
     });
+
   } catch (error) {
     console.error("Error fetching from Nominatim API:", error.message);
     res.status(500).json({
