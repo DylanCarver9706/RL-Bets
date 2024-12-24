@@ -317,14 +317,16 @@ export const userLocationLegal = async () => {
     const reverseGeocodeResponse = await getUserStateByLatLon(latitude, longitude);
     console.log("reverseGeocodeResponse:", reverseGeocodeResponse);
     console.log("Is Valid State:", reverseGeocodeResponse?.allowed);
+
+    let response = {allowed: reverseGeocodeResponse?.allowed, state: reverseGeocodeResponse?.state} 
     
     // Check if the user is in an allowed state
     if (reverseGeocodeResponse?.allowed) {
       console.log("Access granted: User is in an allowed state.");
-      return true;
+      return response;
     } else {
       console.log("Access denied: Sports gambling is not allowed in your location.");
-      return false;
+      return response;
     }
   } catch (error) {
     console.error("Error checking user location:", error.message);
