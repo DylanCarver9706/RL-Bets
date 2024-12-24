@@ -16,6 +16,8 @@ export const UserProvider = ({ children }) => {
     idvStatus: "unverified",
     emailVerificationStatus: "unverified",
     accountStatus: null,
+    locationValid: null,
+    locationPermissionGranted: null,
   }); // Global user state
 
   return (
