@@ -206,9 +206,20 @@ app.post("/api/plaid/idv/complete", verifyFirebaseToken, async (req, res) => {
       identity_verification_id: idvSession,
     });
 
-    const { status } = idvResult.data;
+    const { status, user } = idvResult.data;
 
-    res.json({ status, idvSession });
+    console.log("IDV Result:", idvResult.data);
+
+    let responseBody = {
+      status: status,
+      idvSession: idvSession,
+    };
+    
+    if (user?.date_of_birth) {
+      responseBody.DOB = user.date_of_birth;
+    }
+
+    res.json(responseBody);
   } catch (error) {
     console.error("Error completing IDV:", error.message);
     res.status(500).json({ error: "Failed to update IDV status" });
