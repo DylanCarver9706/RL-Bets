@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { getMongoUserDataByFirebaseId } from "./services/userService";
+import {
+  getMongoUserDataByFirebaseId,
+  userLocationLegal,
+  checkGeolocationPermission,
+} from "./services/userService";
 import { useUser } from "./context/UserContext";
 import { Routes, Route, useNavigate, Navigate } from "react-router-dom";
 import Wagers from "./components/Wagers";
@@ -21,6 +25,8 @@ import BugForm from "./components/BugForm";
 import FeatureForm from "./components/FeatureForm";
 import FeedbackForm from "./components/FeedbackForm";
 import Hero from "./components/Hero";
+import IllegalState from "./components/IllegalState";
+import LocationPermissionRequired from "./components/LocationPermissionRequired";
 
 const ProtectedRoute = ({ loggedIn, redirectTo = "/Auth", children }) => {
   return loggedIn ? children : <Navigate to={redirectTo} />;
@@ -34,6 +40,7 @@ function App() {
 
   useEffect(() => {
     const handleAuthChange = async (firebaseUser) => {
+
       if (firebaseUser?.uid) {
         try {
           const idToken = await firebaseUser.getIdToken();
@@ -59,7 +66,10 @@ function App() {
             firebaseUserId: firebaseUser.uid,
             mongoUserId: _id,
             ...userWithoutId,
+            locationValid: await userLocationLegal(),
+            locationPermissionGranted: await checkGeolocationPermission(),
           });
+
         } catch {}
       } else {
         setUser(null); // User is logged out
@@ -72,7 +82,7 @@ function App() {
     });
 
     return () => unsubscribe();
-  }, [setUser, auth]);
+  }, [setUser, auth, navigate]);
 
   useEffect(() => {
     const routeUser = async () => {
@@ -98,7 +108,12 @@ function App() {
         navigate("/Email-Verification");
       } else if (auth.currentUser && user?.idvStatus !== "verified") {
         navigate("/Identity-Verification");
+      } else if (auth.currentUser && !user?.locationPermissionGranted) {
+        navigate("/Location-Permission-Required");
+      } else if (auth.currentUser && !user?.locationValid) {
+        navigate("/Illegal-State");
       }
+
     };
     routeUser();
   }, [loading, user, navigate, auth?.currentUser]);
@@ -107,7 +122,9 @@ function App() {
     return <p>Loading...</p>;
   }
 
-  const loggedIn = user && auth?.currentUser && user?.mongoUserId;
+  const locationPermissionGranted = user?.locationPermissionGranted;
+  const locationValid = user?.locationValid;
+  const loggedIn = auth?.currentUser !== null && user?.mongoUserId !== null;
   const admin = loggedIn && user?.userType === "admin";
 
   return (
@@ -118,9 +135,12 @@ function App() {
       <div>
         {user ? (
           <p>
-            Welcome, Firebase UID: {user?.firebaseUserId} - MongoId:{" "}
-            {user?.mongoUserId} - Email Verification Status:{" "}
-            {user?.emailVerificationStatus} - IDV Status: {user?.idvStatus}
+            Welcome, Firebase UID: {user?.firebaseUserId} || 
+            MongoId:{" "}{user?.mongoUserId} ||
+            Email Verification Status:{" "}{user?.emailVerificationStatus} ||
+            IDV Status: {user?.idvStatus}{" "} ||
+            Location Permission Granted: {`${user?.locationPermissionGranted}`}{" "} ||
+            Location Valid: {`${user?.locationValid}`}
           </p>
         ) : (
           <p>Please log in</p>
@@ -243,7 +263,22 @@ function App() {
             </ProtectedRoute>
           }
         />
-
+        <Route
+          path="/Illegal-State"
+          element={
+            <ProtectedRoute loggedIn={loggedIn && !locationValid} redirectTo="/Wagers">
+              <IllegalState />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/Location-Permission-Required"
+          element={
+            <ProtectedRoute loggedIn={loggedIn && !locationPermissionGranted} redirectTo="/Wagers">
+              <LocationPermissionRequired />
+            </ProtectedRoute>
+          }
+        />
         {/* Admin Routes */}
         <Route
           path="/Log"
