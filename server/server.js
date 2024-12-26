@@ -1454,12 +1454,21 @@ app.put("/api/seasons/:id", async (req, res) => {
       { $set: updateData }
     );
     
-    // Update the status of all wagers for the event if the status changes
+    // Update the status of all wagers for the event if the status changes 
     if (updateData?.status) {
-      await wagersCollection.updateMany(
-        { rlEventReference: req.params.id },
-        { $set: { status: updateData.status } }
-      );
+      // First, find all wagers for this event
+      const wagers = await wagersCollection.find({ 
+        rlEventReference: req.params.id 
+      }).toArray();
+      
+      // Update each wager individually using updateMongoDocument
+      await Promise.all(wagers.map(wager => 
+        updateMongoDocument(
+          wagersCollection,
+          wager._id.toString(),
+          { $set: { status: updateData.status } }
+        )
+      ));
     }
 
     res.status(200).json({ message: "Season updated successfully" });
@@ -1579,10 +1588,19 @@ app.put("/api/tournaments/:id", async (req, res) => {
     
     // Update the status of all wagers for the event if the status changes
     if (updateData?.status) {
-      await wagersCollection.updateMany(
-        { rlEventReference: req.params.id },
-        { $set: { status: updateData.status } }
-      );
+      
+      const wagers = await wagersCollection.find({ 
+        rlEventReference: req.params.id 
+      }).toArray();
+      
+      // Update each wager individually using updateMongoDocument
+      await Promise.all(wagers.map(wager => 
+        updateMongoDocument(
+          wagersCollection,
+          wager._id.toString(),
+          { $set: { status: updateData.status } }
+        )
+      ));
     }
 
     res.status(200).json({ message: "Tournament updated successfully" });
@@ -1756,10 +1774,18 @@ app.put("/api/series/:id", async (req, res) => {
 
     // Update the status of all wagers for the event if the status changes
     if (updateData?.status) {
-      await wagersCollection.updateMany(
-        { rlEventReference: req.params.id },
-        { $set: { status: updateData.status } }
-      );
+      const wagers = await wagersCollection.find({ 
+        rlEventReference: req.params.id 
+      }).toArray();
+      
+      // Update each wager individually using updateMongoDocument
+      await Promise.all(wagers.map(wager => 
+        updateMongoDocument(
+          wagersCollection,
+          wager._id.toString(),
+          { $set: { status: updateData.status } }
+        )
+      ));
     }
 
     res.status(200).json({ message: "Series updated successfully" });
@@ -1895,10 +1921,18 @@ app.put("/api/matches/:id", async (req, res) => {
 
     // Update the status of all wagers for the event if the status changes
     if (updateData?.status) {
-      await wagersCollection.updateMany(
-        { rlEventReference: req.params.id },
-        { $set: { status: updateData.status } }
-      );
+      const wagers = await wagersCollection.find({ 
+        rlEventReference: req.params.id 
+      }).toArray();
+      
+      // Update each wager individually using updateMongoDocument
+      await Promise.all(wagers.map(wager => 
+        updateMongoDocument(
+          wagersCollection,
+          wager._id.toString(),
+          { $set: { status: updateData.status } }
+        )
+      ));
     }
 
     res.status(200).json({ message: "Match updated successfully" });
