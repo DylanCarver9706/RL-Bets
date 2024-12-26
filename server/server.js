@@ -135,6 +135,33 @@ const getTimestamp = () => {
 
 };
 
+const createMongoDocument = async (collection, data, returnDocument = false) => {
+  try {
+    
+    const documentData = {
+      ...data,
+      createdAt: getTimestamp(),
+      updatedAt: getTimestamp(),
+    };
+    
+    const result = await collection.insertOne(documentData);
+    
+    if (returnDocument && result.acknowledged && result.insertedId) {
+      // Return the inserted document with the _id field to avoid and extra query
+      return {
+        _id: result.insertedId,
+        ...documentData,
+      };
+    }
+    
+    return result;
+
+  } catch (error) {
+    console.error("Error creating document:", error);
+    throw error;
+  }
+};
+
 // ************************************************************************************************
 // ************************************************************************************************
 // ********************************************FIREBASE********************************************
