@@ -334,25 +334,21 @@ app.post("/api/users", verifyFirebaseToken, async (req, res) => {
     });
 
     if (existingUser) {
+      console.log("User found with deleted status. Reactivating...");
       // Reactivate the deleted user
-      const updateResult = await usersCollection.updateOne(
-        { _id: existingUser._id },
+      const updatedUser = await updateMongoDocument(
+        usersCollection,
+        existingUser._id,
         {
           $set: {
             ...req.body,
             accountStatus: "active",
           },
-        }
+        },
+        true
       );
 
-      if (updateResult.acknowledged) {
-        const updatedUser = await usersCollection.findOne({
-          _id: existingUser._id,
-        });
-        return res.status(200).json(updatedUser);
-      } else {
-        return res.status(500).json({ error: "Failed to reactivate user" });
-      }
+      return res.status(200).json(updatedUser);
     }
 
     // If no matching deleted user is found, create a new user
@@ -396,14 +392,11 @@ app.get("/api/users/:id", verifyFirebaseToken, async (req, res) => {
 // Update a user by ID (PUT) and emit a WebSocket event to update the client in real time
 app.put("/api/users/:id", verifyFirebaseToken, async (req, res) => {
   try {
-    const result = await usersCollection.updateOne(
-      { _id: new ObjectId(req.params.id) },
+    await updateMongoDocument(
+      usersCollection,
+      req.params.id,
       { $set: req.body }
     );
-    
-    if (result.matchedCount === 0) {
-      return res.status(404).json({ error: "User not found" });
-    }
 
     // Fetch the updated user data
     const updatedUser = await usersCollection.findOne({ _id: new ObjectId(req.params.id) });
@@ -427,8 +420,9 @@ app.put("/api/users/:id", verifyFirebaseToken, async (req, res) => {
 app.put("/api/users/soft_delete/:id", async (req, res) => {
   try {
     
-    const result = await usersCollection.updateOne(
-      { _id: new ObjectId(req.params.id) },
+    await updateMongoDocument(
+      usersCollection,
+      req.params.id,
       { $set: {
           name: null,
           firebaseUserId: null,
@@ -441,10 +435,6 @@ app.put("/api/users/soft_delete/:id", async (req, res) => {
         }
       }
     );
-    
-    if (result.matchedCount === 0) {
-      return res.status(404).json({ error: "User not found" });
-    }
 
     // Fetch the updated user data
     const updatedUser = await usersCollection.findOne({ _id: new ObjectId(req.params.id) });
@@ -582,15 +572,9 @@ app.get('/api/logs/:id', async (req, res) => {
 // Update a log by ID (PUT)
 app.put('/api/logs/:id', async (req, res) => {
   try {
-    const logData = req.body; // Accept any fields from the request body
-    const result = await logsCollection.updateOne(
-      { _id: new ObjectId(req.params.id) },
-      { $set: logData }
-    );
 
-    if (result.matchedCount === 0) {
-      return res.status(404).json({ error: 'Log not found' });
-    }
+    await updateMongoDocument(logsCollection, req.params.id, { $set: req.body })
+
     res.status(200).json({ message: 'Log updated successfully' });
   } catch (err) {
     res.status(500).json({
@@ -703,13 +687,14 @@ app.post('/webhook', express.raw({type: 'application/json'}), async (request, re
           const updatedCredits = (user.credits || 0) + parseFloat(creditsPurchased);
 
           // Update the user's credits in the database
-          await usersCollection.updateOne(
-            { _id: new ObjectId(userId) },
-            { $set: { credits: updatedCredits } }
+          const updatedUser =  await updateMongoDocument(
+            usersCollection,
+            userId,
+            { $set: { credits: updatedCredits } },
+            true
           );
 
           // Optionally emit an update to WebSocket clients
-          const updatedUser = await usersCollection.findOne({ _id: new ObjectId(userId) });
           io.emit('updateUser', updatedUser);  // Notify clients about the update
         }
       } catch (error) {
@@ -1152,15 +1137,14 @@ const payOutBetWinners = async (wagerId, agreeIsWinner) => {
       const user = await usersCollection.findOne({ _id: new ObjectId(bet.user) });
       awardedCredits = WagerOutcomeFormula(bet.credits, winnerCredits, loserCredits)
       console.log("User Paid Out:", String(user._id), " Earned Credits: ", awardedCredits)
-      await usersCollection.updateOne(
-        { _id: new ObjectId(bet.user) },
-        { $set: { earnedCredits: user.earnedCredits + awardedCredits, credits: user.credits + awardedCredits } }
+      const updatedUser = await updateMongoDocument(
+        usersCollection,
+        bet.user,
+        { $set: { earnedCredits: user.earnedCredits + awardedCredits, credits: user.credits + awardedCredits } },
+        true
       );
 
       createLog({ wagerId: wagerId, earnedCredits: awardedCredits, type: "User Paid Out", user: user._id })
-
-      // Fetch the updated user data
-      const updatedUser = await usersCollection.findOne({ _id: new ObjectId(user._id) });
 
       // Emit 'updateUser' event with updated user data to all connected clients
       io.emit("updateUser", updatedUser);
@@ -1194,13 +1178,11 @@ app.put("/api/wagers/:id", async (req, res) => {
       status: status,
     };
 
-    const result = await wagersCollection.updateOne(
-      { _id: new ObjectId(req.params.id) },
+    await updateMongoDocument(
+      wagersCollection,
+      req.params.id,
       { $set: updatedWager }
     );
-    if (result.matchedCount === 0) {
-      return res.status(404).json({ error: "Wager not found" });
-    }
 
     // Fetch updated wager and statistics
     const updatedWagers = await getAllWagers();
@@ -1297,20 +1279,16 @@ app.post("/api/bets", async (req, res) => {
     createLog({ ...req.body, type: "Bet Created", betId: betId })
 
     // Append the new bet's ObjectId to the `bets` array in the associated wager
-    await wagersCollection.updateOne(
-      { _id: new ObjectId(wagerId) },
-      { $push: { bets: betId } }
-    );
+    await updateMongoDocument(wagersCollection, wagerId, { $push: { bets: betId } })
 
     // Deduct the bet amount from the user's credits
     const updatedCredits = userDoc.credits - credits;
-    await usersCollection.updateOne(
-      { _id: new ObjectId(user) },
-      { $set: { credits: updatedCredits } }
+    const updatedUser = await updateMongoDocument(
+      usersCollection,
+      user,
+      { $set: { credits: updatedCredits } },
+      true
     );
-
-    // Fetch the updated user data
-    const updatedUser = await usersCollection.findOne({ _id: new ObjectId(user) });
 
     // Emit 'updateUser' event with updated user data to all connected clients
     io.emit("updateUser", updatedUser);
@@ -1373,14 +1351,11 @@ app.put("/api/bets/:id", async (req, res) => {
     if (agreeBet !== undefined) updateFields.agreeBet = agreeBet;
     if (rlEventReference) updateFields.rlEventReference = new ObjectId(rlEventReference);
 
-    const result = await betsCollection.updateOne(
-      { _id: new ObjectId(req.params.id) },
+    await updateMongoDocument(
+      betsCollection,
+      req.params.id,
       { $set: updateFields }
     );
-
-    if (result.matchedCount === 0) {
-      return res.status(404).json({ error: "Bet not found" });
-    }
 
     res.status(200).json({ message: "Bet updated successfully" });
   } catch (err) {
@@ -1473,14 +1448,11 @@ app.put("/api/seasons/:id", async (req, res) => {
       updateData.loser = new ObjectId(updateData.loser);
     }
 
-    const result = await seasonsCollection.updateOne(
-      { _id: new ObjectId(req.params.id) },
+    await updateMongoDocument(
+      seasonsCollection,
+      req.params.id,
       { $set: updateData }
     );
-
-    if (result.matchedCount === 0) {
-      return res.status(404).json({ error: "Season not found" });
-    }
     
     // Update the status of all wagers for the event if the status changes
     if (updateData?.status) {
@@ -1534,8 +1506,9 @@ app.post("/api/tournaments", async (req, res) => {
     const result = await createMongoDocument(tournamentsCollection, tournamentData);
 
     // Add the tournament to the respective season
-    await seasonsCollection.updateOne(
-      { _id: new ObjectId(tournamentData.season) },
+    await updateMongoDocument(
+      seasonsCollection,
+      tournamentData.season,
       { $push: { tournaments: result.insertedId } }
     );
 
@@ -1598,14 +1571,11 @@ app.put("/api/tournaments/:id", async (req, res) => {
       updateData.season = new ObjectId(updateData.season);
     }
 
-    const result = await tournamentsCollection.updateOne(
-      { _id: new ObjectId(req.params.id) },
+    await updateMongoDocument(
+      tournamentsCollection,
+      req.params.id,
       { $set: updateData }
     );
-
-    if (result.matchedCount === 0) {
-      return res.status(404).json({ error: "Tournament not found" });
-    }
     
     // Update the status of all wagers for the event if the status changes
     if (updateData?.status) {
@@ -1635,8 +1605,9 @@ app.delete("/api/tournaments/:id", async (req, res) => {
     }
 
     // Remove the tournament from the season
-    await seasonsCollection.updateOne(
-      { _id: new ObjectId(tournament.season) },
+    await updateMongoDocument(
+      seasonsCollection,
+      tournament.season,
       { $pull: { tournaments: tournamentId } }
     );
 
@@ -1703,21 +1674,23 @@ app.post("/api/series", async (req, res) => {
     }
 
     // Update the series document to include the generated matches
-    await seriesCollection.updateOne(
-      { _id: result.insertedId },
+    await updateMongoDocument(
+      seriesCollection,
+      result.insertedId,
       { $set: { matches: insertedIds } } // Use the collected IDs
     );
 
     // Update the tournament document to include this series
-    await tournamentsCollection.updateOne(
-      { _id: new ObjectId(tournament) },
+    await updateMongoDocument(
+      tournamentsCollection,
+      tournament,
       { $push: { series: result.insertedId } }
     );
 
     res.status(201).json({
       message: "Series created successfully",
       seriesId: result.insertedId,
-      matchIds: Object.values(matchInsertResult.insertedIds),
+      matchIds: Object.values(insertedIds),
     });
   } catch (err) {
     res.status(500).json({
@@ -1775,14 +1748,11 @@ app.put("/api/series/:id", async (req, res) => {
       updateData.tournament = new ObjectId(updateData.tournament);
     }
 
-    const result = await seriesCollection.updateOne(
-      { _id: new ObjectId(req.params.id) },
+    await updateMongoDocument(
+      seriesCollection,
+      req.params.id,
       { $set: updateData }
     );
-
-    if (result.matchedCount === 0) {
-      return res.status(404).json({ error: "Series not found" });
-    }
 
     // Update the status of all wagers for the event if the status changes
     if (updateData?.status) {
@@ -1812,8 +1782,9 @@ app.delete("/api/series/:id", async (req, res) => {
     }
 
     // Remove the series from the corresponding Tournament
-    await tournamentsCollection.updateOne(
-      { _id: new ObjectId(series.tournament) },
+    await updateMongoDocument(
+      tournamentsCollection,
+      series.tournament,
       { $pull: { series: seriesId } }
     );
 
@@ -1851,8 +1822,9 @@ app.post("/api/matches", async (req, res) => {
     const result = await createMongoDocument(matchesCollection, matchData);
 
     // If a series ID is provided, update the Series collection to include this match
-    await seriesCollection.updateOne(
-      { _id: new ObjectId(matchData.series) },
+    await updateMongoDocument(
+      seriesCollection,
+      matchData.series,
       { $push: { matches: result.insertedId } }
     );
 
@@ -1915,8 +1887,9 @@ app.put("/api/matches/:id", async (req, res) => {
       updateData.series = new ObjectId(updateData.series);
     }
 
-    const result = await matchesCollection.updateOne(
-      { _id: new ObjectId(req.params.id) },
+    await updateMongoDocument(
+      matchesCollection,
+      req.params.id,
       { $set: updateData }
     );
 
@@ -2099,10 +2072,11 @@ const handleWagerEnded = async (wagerId, agreeIsWinner) => {
    agreeIsWinner: agreeIsWinner,
  };
 
- await wagersCollection.updateOne(
-   { _id: new ObjectId(wager._id) },
-   { $set: updatedWager }
- );
+  await updateMongoDocument(
+    wagersCollection,
+    wager._id,
+    { $set: updatedWager }
+  );
 
  createLog({ type: "Wager Ended", WagerId: wagerId })
 
@@ -2764,14 +2738,11 @@ app.put("/api/match_concluded/:id", async (req, res) => {
     };
 
     // Update the match in the database
-    const updatedMatch = await matchesCollection.updateOne(
-      { _id: new ObjectId(req.params.id) },
+    const updatedMatch = await updateMongoDocument(
+      matchesCollection,
+      req.params.id,
       { $set: updateData }
     );
-
-    if (updatedMatch.matchedCount === 0) {
-      return res.status(404).json({ error: "Match not found" });
-    }
 
     createLog({ type: "Match Ended", matchId: updatedMatch.insertedId, matchOutcomes: matchOutcomes })
 
@@ -2786,8 +2757,9 @@ app.put("/api/match_concluded/:id", async (req, res) => {
 
     // Set first blood if it is not set because this would be the first match
     if (seriesDoc.firstBlood === null) {
-      await seriesCollection.updateOne(
-        { _id: new ObjectId(seriesDoc._id) },
+      await updateMongoDocument(
+        seriesCollection,
+        seriesDoc._id,
         {
           $set: {
             firstBlood: firstBlood
@@ -2822,8 +2794,9 @@ app.put("/api/match_concluded/:id", async (req, res) => {
         loser: new ObjectId(matchOutcomes.losingTeam),
         overtimeCount: overtimeCount,
       };
-      await seriesCollection.updateOne(
-        { _id: new ObjectId(seriesDoc._id) },
+      await updateMongoDocument(
+        seriesCollection,
+        seriesDoc._id,
         {
           $set: seriesUpdateData
         }
@@ -2836,8 +2809,9 @@ app.put("/api/match_concluded/:id", async (req, res) => {
 
     // Set status for Tournament if included in request body
     if (endTournament === true) {
-      await tournamentsCollection.updateOne(
-        { _id: new ObjectId(seriesDoc.tournament) },
+      await updateMongoDocument(
+        tournamentsCollection,
+        seriesDoc.tournament,
         {
           $set: {
             status: "Ended",
@@ -2862,8 +2836,9 @@ app.put("/api/match_concluded/:id", async (req, res) => {
 
       if (seasonDoc) {
         // Update the status of the season to "Ended"
-        await seasonsCollection.updateOne(
-          { _id: seasonDoc._id },
+        await updateMongoDocument(
+          seasonsCollection,
+          seasonDoc._id,
           { $set: { status: "Ended", winner: matchOutcomes.winningTeam } }
         );
       }
@@ -2892,8 +2867,9 @@ app.delete("/api/matches/:id", async (req, res) => {
     }
 
     // Remove the match from the series it belongs to
-    await seriesCollection.updateOne(
-      { _id: new ObjectId(match.series) },
+    await updateMongoDocument(
+      seriesCollection,
+      match.series,
       { $pull: { matches: matchId } }
     );
 
@@ -2986,13 +2962,11 @@ app.get("/api/teams/:id", async (req, res) => {
 app.put("/api/teams/:id", async (req, res) => {
   try {
     const updateData = req.body;
-    const result = await teamsCollection.updateOne(
-      { _id: new ObjectId(req.params.id) },
+    await updateMongoDocument(
+      teamsCollection,
+      req.params.id,
       { $set: updateData }
     );
-    if (result.matchedCount === 0) {
-      return res.status(404).json({ error: "Team not found" });
-    }
     res.status(200).json({ message: "Team updated successfully" });
   } catch (err) {
     res
@@ -3049,8 +3023,9 @@ app.post("/api/players", async (req, res) => {
     const result = await createMongoDocument(playersCollection, playerData);
 
     // Add the player to the corresponding team
-    await teamsCollection.updateOne(
-      { _id: new ObjectId(playerData.team) },
+    await updateMongoDocument(
+      teamsCollection,
+      playerData.team,
       { $push: { players: result.insertedId } }
     );
 
@@ -3098,13 +3073,11 @@ app.get("/api/players/:id", async (req, res) => {
 app.put("/api/players/:id", async (req, res) => {
   try {
     const updateData = req.body;
-    const result = await playersCollection.updateOne(
-      { _id: new ObjectId(req.params.id) },
+    await updateMongoDocument(
+      playersCollection,
+      req.params.id,
       { $set: updateData }
     );
-    if (result.matchedCount === 0) {
-      return res.status(404).json({ error: "Player not found" });
-    }
     res.status(200).json({ message: "Player updated successfully" });
   } catch (err) {
     res
@@ -3125,8 +3098,9 @@ app.delete("/api/players/:id", async (req, res) => {
     }
 
     // Remove the player from the team
-    await teamsCollection.updateOne(
-      { _id: new ObjectId(player.team) },
+    await updateMongoDocument(
+      teamsCollection,
+      player.team,
       { $pull: { players: playerId } }
     );
 
