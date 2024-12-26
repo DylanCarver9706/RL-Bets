@@ -315,14 +315,9 @@ app.post("/api/users", verifyFirebaseToken, async (req, res) => {
     }
 
     // If no matching deleted user is found, create a new user
-    const result = await usersCollection.insertOne(req.body);
+    const newUser = await createMongoDocument(usersCollection, req.body, true);
 
-    if (result.acknowledged && result.insertedId) {
-      const newUser = await usersCollection.findOne({ _id: result.insertedId });
-      res.status(201).json(newUser);
-    } else {
-      res.status(500).json({ error: "Failed to create user" });
-    }
+    res.status(201).json(newUser);
   } catch (err) {
     res
       .status(500)
@@ -475,7 +470,7 @@ app.get("/api/users/firebase/:firebaseUserId", verifyFirebaseToken, async (req, 
 // Function to create a new log
 const createLog = async (logData) => {
   try {
-    const result = await logsCollection.insertOne(logData);
+    const result = await createMongoDocument(logsCollection, logData);
     
     const logs = await getAllLogs()
     io.emit("updatedLogs", logs)
@@ -970,7 +965,7 @@ app.post("/api/jira/create-issue", verifyFirebaseToken, async (req, res) => {
 app.post("/api/wagers", async (req, res) => {
   try {
     
-    const result = await wagersCollection.insertOne(req.body);
+    const result = await createMongoDocument(wagersCollection, req.body);
 
     // Fetch wagers and send them to the client immediately upon connection
     const wagers = await getAllWagers();
@@ -1255,7 +1250,7 @@ app.post("/api/bets", async (req, res) => {
     };
 
     // Insert the bet into the Bets collection
-    const betResult = await betsCollection.insertOne(newBet);
+    const betResult = await createMongoDocument(betsCollection, newBet);
     const betId = betResult.insertedId;
 
     createLog({ ...req.body, type: "Bet Created", betId: betId })
@@ -1380,7 +1375,7 @@ app.delete("/api/bets/:id", async (req, res) => {
 // Create a new Season
 app.post("/api/seasons", async (req, res) => {
   try {
-    const result = await seasonsCollection.insertOne(req.body);
+    const result = await createMongoDocument(seasonsCollection, req.body);
     res
       .status(201)
       .json({
@@ -1495,7 +1490,7 @@ app.post("/api/tournaments", async (req, res) => {
         .json({ error: "Season ID is required to create a Tournament." });
     }
 
-    const result = await tournamentsCollection.insertOne(tournamentData);
+    const result = await createMongoDocument(tournamentsCollection, tournamentData);
 
     // Add the tournament to the respective season
     await seasonsCollection.updateOne(
@@ -1646,7 +1641,7 @@ app.post("/api/series", async (req, res) => {
     };
 
     // Insert the new series document
-    const result = await seriesCollection.insertOne(seriesData);
+    const result = await createMongoDocument(seriesCollection, seriesData);
 
     // Generate matches based on the best_of value
     const matches = Array.from({ length: best_of }, (_, index) => ({
@@ -1806,7 +1801,7 @@ app.post("/api/matches", async (req, res) => {
     }
 
     // Insert the new match document
-    const result = await matchesCollection.insertOne(matchData);
+    const result = await createMongoDocument(matchesCollection, matchData);
 
     // If a series ID is provided, update the Series collection to include this match
     await seriesCollection.updateOne(
@@ -2884,7 +2879,7 @@ app.post("/api/teams", async (req, res) => {
     }
 
     // Insert the new team document
-    const result = await teamsCollection.insertOne(teamData);
+    const result = await createMongoDocument(teamsCollection, teamData);
 
     res.status(201).json({
       message: "Team created successfully",
@@ -3004,7 +2999,7 @@ app.post("/api/players", async (req, res) => {
     }
 
     // Insert the new player document
-    const result = await playersCollection.insertOne(playerData);
+    const result = await createMongoDocument(playersCollection, playerData);
 
     // Add the player to the corresponding team
     await teamsCollection.updateOne(
