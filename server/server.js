@@ -162,6 +162,47 @@ const createMongoDocument = async (collection, data, returnDocument = false) => 
   }
 };
 
+const updateMongoDocument = async (
+  collection,
+  documentId,
+  updateMongoDataObject,
+  returnUpdatedDocument = false
+) => {
+  try {
+    // Merge all `$set` fields, including the updatedAt timestamp
+    const mergedSet = {
+      ...(updateMongoDataObject.$set || {}),
+      updatedAt: getTimestamp(), // Add the updatedAt field
+    };
+
+    // Construct the update object
+    const updateMongoDataObjectWithTimestamp = {
+      ...updateMongoDataObject, // Include other operators like `$push`, `$inc`
+      $set: mergedSet, // Merge the `$set` fields into one
+    };
+
+    // Perform the update operation
+    const result = await collection.updateOne(
+      { _id: new ObjectId(documentId) }, // Ensure `_id` is handled correctly
+      updateMongoDataObjectWithTimestamp // Pass the constructed update object
+    );
+
+    if (returnUpdatedDocument && result.acknowledged && result.matchedCount > 0) {
+      // Fetch and return the updated document
+      const updatedDocument = await collection.findOne({
+        _id: new ObjectId(documentId),
+      });
+      // console.log("Updated Document:", updatedDocument);
+      return updatedDocument;
+    }
+
+    return result; // Return the raw result of the update operation
+  } catch (error) {
+    console.error("Error updating document:", error);
+    throw error;
+  }
+};
+
 // ************************************************************************************************
 // ************************************************************************************************
 // ********************************************FIREBASE********************************************
