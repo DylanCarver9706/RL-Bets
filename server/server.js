@@ -1653,12 +1653,18 @@ app.post("/api/series", async (req, res) => {
     }));
 
     // Insert matches into the matches collection
-    const matchInsertResult = await matchesCollection.insertMany(matches);
+    const insertedIds = [];
+    for (let i = 0; i < matches.length; i++) {
+      const match = matches[i];
+      const matchInsertResult = await createMongoDocument(matchesCollection, match);
+      console.log(matchInsertResult);
+      insertedIds.push(matchInsertResult.insertedId); // Collect the inserted IDs
+    }
 
     // Update the series document to include the generated matches
     await seriesCollection.updateOne(
       { _id: result.insertedId },
-      { $set: { matches: Object.values(matchInsertResult.insertedIds) } }
+      { $set: { matches: insertedIds } } // Use the collected IDs
     );
 
     // Update the tournament document to include this series
