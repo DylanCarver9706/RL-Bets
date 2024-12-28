@@ -135,6 +135,35 @@ const getTimestamp = () => {
 
 };
 
+// /**
+//  * Helper function to generate aliasId from MongoDB _id
+//  * @param {ObjectId} mongoId - The MongoDB ObjectId
+//  * @returns {string} - Base64 encoded aliasId
+//  */
+// const generateAliasId = (mongoId) => {
+//   if (!ObjectId.isValid(mongoId)) {
+//     throw new Error("Invalid MongoDB ObjectId");
+//   }
+//   return Buffer.from(mongoId.toString()).toString("base64");
+// };
+
+// /**
+//  * Helper function to decode aliasId back to MongoDB _id
+//  * @param {string} aliasId - The Base64 encoded aliasId
+//  * @returns {ObjectId} - The MongoDB ObjectId
+//  */
+// const decodeAliasId = (aliasId) => {
+//   try {
+//     const decoded = Buffer.from(aliasId, "base64").toString("utf-8");
+//     if (!ObjectId.isValid(decoded)) {
+//       throw new Error("Decoded aliasId is not a valid MongoDB ObjectId");
+//     }
+//     return new ObjectId(decoded);
+//   } catch (error) {
+//     throw new Error("Failed to decode aliasId: " + error.message);
+//   }
+// };
+
 const createMongoDocument = async (collection, data, returnDocument = false) => {
   try {
     
@@ -143,6 +172,11 @@ const createMongoDocument = async (collection, data, returnDocument = false) => 
       createdAt: getTimestamp(),
       updatedAt: getTimestamp(),
     };
+
+    // // Generate a temporary ObjectId to calculate aliasId before insertion
+    // const tempObjectId = new ObjectId();
+    // documentData._id = tempObjectId; // Manually assign the _id to the document
+    // documentData.aliasId = generateAliasId(tempObjectId); // Generate the aliasId
     
     const result = await collection.insertOne(documentData);
     
@@ -388,6 +422,23 @@ app.get("/api/users/:id", verifyFirebaseToken, async (req, res) => {
     res.status(500).json({ error: "Failed to fetch user", details: err.message });
   }
 });
+
+// // Get a single user by aliasId (GET)
+// app.get("/api/users/alias/:aliasId", async (req, res) => {
+//   try {
+//     const { aliasId } = req.params;
+
+//     // Find the user by aliasId
+//     const user = await usersCollection.findOne({ aliasId });
+//     if (!user) {
+//       return res.status(404).json({ error: "User not found" });
+//     }
+
+//     res.status(200).json(user);
+//   } catch (err) {
+//     res.status(500).json({ error: "Failed to fetch user", details: err.message });
+//   }
+// });
 
 // Update a user by ID (PUT) and emit a WebSocket event to update the client in real time
 app.put("/api/users/:id", verifyFirebaseToken, async (req, res) => {
