@@ -1,4 +1,13 @@
-const firebaseAdmin = require("../services/firebase");
+// server/app/middlewares/firebaseAdmin.js
+const firebaseAdmin = require("firebase-admin");
+const firebaseServiceAccountKey = require(process.env.FIREBASE_SERVICE_ACCOUNT_KEY_PATH);
+
+const initializeFirebase = async () => {
+  firebaseAdmin.initializeApp({
+    credential: firebaseAdmin.credential.cert(firebaseServiceAccountKey),
+  });
+  console.log("Firebase initialized")
+};
 
 const verifyFirebaseToken = async (req, res, next) => {
   const authHeader = req.headers.authorization;
@@ -19,4 +28,4 @@ const verifyFirebaseToken = async (req, res, next) => {
   }
 };
 
-module.exports = { verifyFirebaseToken };
+module.exports = { initializeFirebase, verifyFirebaseToken };
