@@ -3,3 +3,4 @@ node_modules
 Internal_Instructions.md
 .vscode
 firebaseServiceAccountKey.json
+session_secret.txt
