@@ -1,8 +1,8 @@
 const { collections } = require("../../database/mongoCollections");
 const {
-    createMongoDocument,
-    updateMongoDocument,
-  } = require("../../database/middlewares/mongo");
+  createMongoDocument,
+  updateMongoDocument,
+} = require("../../database/middlewares/mongo");
 const { ObjectId } = require("mongodb");
 
 const createTournament = async (tournamentData) => {
@@ -10,7 +10,10 @@ const createTournament = async (tournamentData) => {
     throw new Error("Season ID is required to create a Tournament.");
   }
 
-  const result = await createMongoDocument(collections.tournamentsCollection, tournamentData);
+  const result = await createMongoDocument(
+    collections.tournamentsCollection,
+    tournamentData
+  );
 
   await updateMongoDocument(
     collections.seasonsCollection,
@@ -26,23 +29,36 @@ const getAllTournaments = async () => {
 };
 
 const getTournamentById = async (id) => {
-  return await collections.tournamentsCollection.findOne({ _id: new ObjectId(id) });
+  return await collections.tournamentsCollection.findOne({
+    _id: ObjectId.createFromHexString(id),
+  });
 };
 
 const updateTournament = async (id, updateData) => {
-  if (updateData.winner) updateData.winner = new ObjectId(updateData.winner);
-  if (updateData.loser) updateData.loser = new ObjectId(updateData.loser);
-  if (updateData.season) updateData.season = new ObjectId(updateData.season);
+  if (updateData.winner)
+    updateData.winner = ObjectId.createFromHexString(updateData.winner);
+  if (updateData.loser)
+    updateData.loser = ObjectId.createFromHexString(updateData.loser);
+  if (updateData.season)
+    updateData.season = ObjectId.createFromHexString(updateData.season);
 
-  await updateMongoDocument(collections.tournamentsCollection, id, { $set: updateData });
+  await updateMongoDocument(collections.tournamentsCollection, id, {
+    $set: updateData,
+  });
 
   if (updateData.status) {
-    const wagers = await collections.wagersCollection.find({ rlEventReference: id }).toArray();
+    const wagers = await collections.wagersCollection
+      .find({ rlEventReference: id })
+      .toArray();
     await Promise.all(
       wagers.map((wager) =>
-        updateMongoDocument(collections.wagersCollection, wager._id.toString(), {
-          $set: { status: updateData.status },
-        })
+        updateMongoDocument(
+          collections.wagersCollection,
+          wager._id.toString(),
+          {
+            $set: { status: updateData.status },
+          }
+        )
       )
     );
   }
@@ -53,10 +69,12 @@ const deleteTournament = async (id) => {
   if (!tournament) throw new Error("Tournament not found");
 
   await updateMongoDocument(collections.seasonsCollection, tournament.season, {
-    $pull: { tournaments: new ObjectId(id) },
+    $pull: { tournaments: ObjectId.createFromHexString(id) },
   });
 
-  await collections.tournamentsCollection.deleteOne({ _id: new ObjectId(id) });
+  await collections.tournamentsCollection.deleteOne({
+    _id: ObjectId.createFromHexString(id),
+  });
 };
 
 module.exports = {
