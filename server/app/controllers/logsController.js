@@ -28,7 +28,7 @@ const getLogById = async (req, res) => {
 // Create a new log
 const createLog = async (req, res) => {
   try {
-    const result = await logService.createLog(req.body, req.app.get("io"));
+    const result = await logService.createLog(req.body);
     res.status(201).json({
       message: "Log created successfully",
       logId: result.logId,
