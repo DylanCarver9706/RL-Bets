@@ -6,6 +6,7 @@ const jiraStatusTransitionIds = {
   "Beta Tester Feedback - Enhancement Requests": 3,
   "BETA TESTER FEEDBACK - GENERAL": 14,
   "IDV Failed": 15,
+  "App Error Occurred": 16,
 };
 
 const getAuthorizationHeader = () => {
