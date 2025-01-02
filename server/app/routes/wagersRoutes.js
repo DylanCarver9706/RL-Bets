@@ -8,12 +8,13 @@ const {
   remove,
   removeAll,
 } = require("../controllers/wagersController");
+const { verifyFirebaseToken } = require("../middlewares/firebaseAdmin");
 
-router.get("/", getAll);
-router.get("/:id", getById);
-router.post("/", create);
-router.put("/:id", update);
-router.delete("/:id", remove);
-router.delete("/", removeAll);
+router.get("/", verifyFirebaseToken, getAll);
+router.get("/:id", verifyFirebaseToken, getById);
+router.post("/", verifyFirebaseToken, create);
+router.put("/:id", verifyFirebaseToken, update);
+router.delete("/:id", verifyFirebaseToken, remove);
+router.delete("/", verifyFirebaseToken, removeAll);
 
 module.exports = router;
