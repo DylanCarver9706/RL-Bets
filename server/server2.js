@@ -65,6 +65,9 @@ app.use("/api/series", require("./app/routes/seriesRoutes"));
 app.use("/api/matches", require("./app/routes/matchesRoutes"));
 app.use("/api/teams", require("./app/routes/teamsRoutes"));
 app.use("/api/players", require("./app/routes/playersRoutes"));
+app.use("/api/data-trees", require("./app/routes/dataTreeRoutes"));
+app.use("/api/jira", require("./app/routes/jiraRoutes"));
+app.use("/webhook", require("./app/routes/stripeWebhookRoute"));
 
 // Start server
 const PORT = process.env.DEV_SERVER_URL_PORT;
