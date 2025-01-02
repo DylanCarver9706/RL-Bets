@@ -246,7 +246,7 @@ function App() {
           }
         />
         <Route
-          path="/CreditShop"
+          path="/Credit-Shop"
           element={
             <ProtectedRoute loggedIn={loggedIn}>
               <CreditShop />
@@ -262,7 +262,7 @@ function App() {
           }
         />
         <Route
-          path="/BugForm"
+          path="/Bug-Form"
           element={
             <ProtectedRoute loggedIn={loggedIn}>
               <BugForm />
@@ -270,7 +270,7 @@ function App() {
           }
         />
         <Route
-          path="/FeatureForm"
+          path="/Feature-Form"
           element={
             <ProtectedRoute loggedIn={loggedIn}>
               <FeatureForm />
@@ -278,7 +278,7 @@ function App() {
           }
         />
         <Route
-          path="/FeedbackForm"
+          path="/Feedback-Form"
           element={
             <ProtectedRoute loggedIn={loggedIn}>
               <FeedbackForm />
