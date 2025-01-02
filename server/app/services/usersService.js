@@ -25,7 +25,7 @@ const createUser = async (userData) => {
   // Check if a user with the provided email exists and has been deleted
   const existingUser = await collections.usersCollection.findOne({
     email: userData.email,
-    accountStatus: "deleted",
+    // accountStatus: "deleted",
   });
 
   if (existingUser) {
