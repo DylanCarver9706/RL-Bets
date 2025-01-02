@@ -3,6 +3,7 @@ const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const { collections } = require("../../database/mongoCollections");
 const { ObjectId } = require("mongodb");
 const { updateMongoDocument } = require("../../database/middlewares/mongo");
+const { getSocketIo } = require("../middlewares/socketIO");
 
 const createCheckoutSession = async (
   purchaseItems,
@@ -18,8 +19,20 @@ const createCheckoutSession = async (
     quantity: item.quantity,
   }));
 
+  try {
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      line_items: lineItems,
+      mode: "payment",
       success_url: `${process.env.DEV_CLIENT_URL}/Wagers`,
       cancel_url: `${process.env.DEV_CLIENT_URL}/Credit-Shop`,
+      metadata: { mongoUserId, creditsTotal },
+    });
+    return session;
+  } catch (error) {
+    console.error("Error creating Stripe checkout session:", error.message, error.stack);
+    throw error;
+  }
 };
 
 const handleWebhookEvent = async (event, io) => {
@@ -30,11 +43,16 @@ const handleWebhookEvent = async (event, io) => {
     const userId = session.metadata.mongoUserId;
     const creditsPurchased = session.metadata.creditsTotal;
 
-    const user = await collections.usersCollection.findOne({
-      _id: new ObjectId(userId),
-    });
+    try {
+      const user = await collections.usersCollection.findOne({
+        _id: ObjectId.createFromHexString(userId),
+      });
 
-    if (user) {
+      if (!user) {
+        console.warn("User not found in database for ID:", userId);
+        return;
+      }
+
       const updatedCredits = (user.credits || 0) + parseFloat(creditsPurchased);
 
       const updatedUser = await updateMongoDocument(
@@ -44,12 +62,15 @@ const handleWebhookEvent = async (event, io) => {
         true
       );
 
-      // Emit WebSocket updates
+      io = getSocketIo();
       io.emit("updateUser", updatedUser);
+    } catch (error) {
+      console.error("Error handling 'checkout.session.completed' event:", error.message, error.stack);
+      throw error;
     }
+  } else {
+    console.warn("Unhandled Stripe event type:", event.type);
   }
-
-  return;
 };
 
 module.exports = {
