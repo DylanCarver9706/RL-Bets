@@ -170,6 +170,7 @@ function App() {
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<Hero />} />
+        <Route path="/Bug-Form" element={<BugForm />} />
 
         {/* Protected Routes */}
         <Route
@@ -257,14 +258,6 @@ function App() {
           element={
             <ProtectedRoute loggedIn={loggedIn}>
               <Leaderboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/Bug-Form"
-          element={
-            <ProtectedRoute loggedIn={loggedIn}>
-              <BugForm />
             </ProtectedRoute>
           }
         />
