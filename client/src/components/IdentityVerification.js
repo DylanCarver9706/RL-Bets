@@ -41,13 +41,10 @@ const IdentityVerification = () => {
         }
         
         await updateUser(user.mongoUserId, updateUserObject);
-
-        // Set the user state with the updated user object
-        // NOTE: Needed so Home can access the user object
-        //       when it navigates, but will not be needed if they refresh
-        setUser({ ...user, ...updateUserObject });
-
-        navigate("/Wagers");
+        
+        // Reload App instead of navigating which will do the same thing
+        await wait(5000);
+        window.location.reload();
       } else {
         console.log("IDV failed");
         // Create Jira issue if IDV fails and alert user
