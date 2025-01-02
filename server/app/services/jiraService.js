@@ -1,5 +1,4 @@
 const fetch = require("node-fetch");
-const btoa = require("btoa"); // Ensure you have this dependency installed
 
 const jiraStatusTransitionIds = {
   "Requests For Email Change": 9,
