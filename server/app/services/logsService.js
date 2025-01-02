@@ -4,6 +4,7 @@ const {
   createMongoDocument,
   updateMongoDocument,
 } = require("../../database/middlewares/mongo");
+const { getSocketIo } = require("../middlewares/socketIO");
 
 const getAllLogs = async () => {
   try {
@@ -21,12 +22,13 @@ const getLogById = async (logId) => {
   }
 };
 
-const createLog = async (logData, io) => {
+const createLog = async (logData) => {
   try {
     const result = await createMongoDocument(collections.logsCollection, logData);
 
     // Emit updated logs via WebSocket
     const logs = await getAllLogs();
+    const io = getSocketIo();
     io.emit("updatedLogs", logs);
 
     return { logId: result.insertedId };
