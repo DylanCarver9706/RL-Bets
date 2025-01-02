@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
@@ -13,13 +12,9 @@ import {
   createUserInDatabase,
   updateUser,
   getMongoUserDataByFirebaseId,
-  userLocationLegal,
-  checkGeolocationPermission,
 } from "../services/userService.js";
-import { useUser } from "../context/UserContext.js";
 
 const Auth = () => {
-  const { setUser } = useUser();
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("testuser@example.com");
   const [password, setPassword] = useState("password123");
@@ -28,7 +23,6 @@ const Auth = () => {
   const [error, setError] = useState(null);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -40,35 +34,14 @@ const Auth = () => {
 
       // Email Login
       if (isLogin) {
-        firebaseCredential = await signInWithEmailAndPassword(
+        await signInWithEmailAndPassword(
           auth,
           email,
           password
         );
-        const firebaseUser = firebaseCredential.user;
 
-        // Fetch MongoDB user data
-        const mongoUser = await getMongoUserDataByFirebaseId(firebaseUser.uid);
-
-        const userLocationMeta = await userLocationLegal();
-
-        // Destructure the user object to remove the _id field
-        const { _id, ...userWithoutId } = mongoUser;
-
-        // Set the user state with the updated user object
-        // NOTE: Needed so Home can access the user object
-        //       when it navigates, but will not be needed if they refresh
-        setUser({
-          firebaseUserId: firebaseUser.uid,
-          mongoUserId: _id,
-          ...userWithoutId,
-          locationValid: userLocationMeta?.allowed,
-          currentState: userLocationMeta?.state,
-          locationPermissionGranted: await checkGeolocationPermission(),
-        });
-
-        navigate("/Wagers");
-
+        // Reload App instead of navigating which will do the same thing
+        window.location.reload();
         // Email Signup
       } else {
         firebaseCredential = await createUserWithEmailAndPassword(
@@ -94,47 +67,15 @@ const Auth = () => {
           // Send Email Verification
           await sendEmailVerification(firebaseUser);
 
-          const userLocationMeta = await userLocationLegal();
-
-          // Destructure the user object to remove the _id field
-          const { _id, ...userWithoutId } = mongoUser;
-
-          // Set the user state with the updated user object
-          // NOTE: Needed so Email Verification can access the user object
-          //       when it navigates, but will not be needed if they refresh
-          setUser({
-            firebaseUserId: firebaseUser.uid,
-            mongoUserId: _id,
-            ...userWithoutId,
-            locationValid: userLocationMeta?.allowed,
-            currentState: userLocationMeta?.state,
-            locationPermissionGranted: await checkGeolocationPermission(),
-          });
-
-          navigate("/Email-Verification");
+          // Reload App instead of navigating which will do the same thing
+          window.location.reload();
         } else {
-          const updatedUser = await updateUser(mongoUser._id, {
+          await updateUser(mongoUser._id, {
             emailVerificationStatus: "verified",
           });
 
-          const userLocationMeta = await userLocationLegal();
-
-          // Destructure the user object to remove the _id field
-          const { _id, ...userWithoutId } = updatedUser;
-
-          // Set the user state with the updated user object
-          // NOTE: Needed so Identity Verification can access the user object
-          //       when it navigates, but will not be needed if they refresh
-          setUser({
-            firebaseUserId: firebaseUser.uid,
-            mongoUserId: _id,
-            ...userWithoutId,
-            locationValid: userLocationMeta?.allowed,
-            currentState: userLocationMeta?.state,
-            locationPermissionGranted: await checkGeolocationPermission(),
-          });
-
-          navigate("/Identity-Verification");
+          // Reload App instead of navigating which will do the same thing
+          window.location.reload();
         }
       }
     } catch (error) {
@@ -177,25 +118,8 @@ const Auth = () => {
 
       // Existing user
       if (mongoUser) {
-
-        const userLocationMeta = await userLocationLegal();
-
-        // Destructure the user object to remove the _id field
-        const { _id, ...userWithoutId } = mongoUser;
-
-        // Set the user state with the updated user object
-        // NOTE: Needed so Home can access the user object
-        //       when it navigates, but will not be needed if they refresh
-        setUser({
-          firebaseUserId: firebaseUser.uid,
-          mongoUserId: _id,
-          ...userWithoutId,
-          locationValid: userLocationMeta?.allowed,
-          currentState: userLocationMeta?.state,
-          locationPermissionGranted: await checkGeolocationPermission(),
-        });
-
-        navigate("/Wagers");
+        // Reload App instead of navigating which will do the same thing
+        window.location.reload();
       } else {
         // New user: Create in MongoDB
         try {
@@ -208,31 +132,14 @@ const Auth = () => {
           if (!firebaseUser.emailVerified) {
             // Send Email Verification
             await sendEmailVerification(firebaseUser);
-            navigate("/Email-Verification");
+            // Reload App instead of navigating which will do the same thing
+            window.location.reload();
           } else {
-            const updatedUser = await updateUser(mongoUser._id, {
-              // ...mongoUser,
+            await updateUser(mongoUser._id, {
               emailVerificationStatus: "verified",
             });
-
-            const userLocationMeta = await userLocationLegal();
-
-            // Destructure the user object to remove the _id field
-            const { _id, ...userWithoutId } = updatedUser;
-
-            // Set the user state with the updated user object
-            // NOTE: Needed so Identity Verification can access the user object
-            //       when it navigates, but will not be needed if they refresh
-            setUser({
-              firebaseUserId: firebaseUser.uid,
-              mongoUserId: _id,
-              ...userWithoutId,
-              locationValid: userLocationMeta?.allowed,
-              currentState: userLocationMeta?.state,
-              locationPermissionGranted: await checkGeolocationPermission(),
-            });
-
-            navigate("/Identity-Verification");
+            // Reload App instead of navigating which will do the same thing
+            window.location.reload();
           }
         } catch (error) {
           console.error("Error creating new user:", error.message);
