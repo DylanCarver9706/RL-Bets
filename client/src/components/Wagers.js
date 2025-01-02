@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from "react";
-import io from "socket.io-client";
+import socket from "../services/socket.js";
 import { createBet } from "../services/wagerService.js";
 import { useUser } from "../context/UserContext.js";
-
-const BASE_SERVER_URL = process.env.REACT_APP_BASE_SERVER_URL;
+import { getWagers } from "../services/userService.js";
 
 const WagerOutcomeFormula = (
   betAmount,
@@ -34,21 +33,37 @@ const Wagers = () => {
   const [selectedBet, setSelectedBet] = useState({});
   const [estimatedWinnings, setEstimatedWinnings] = useState(0);
 
+  // Fetch wagers from the server and then listen for updates
   useEffect(() => {
-    // Initialize socket connection
-    const socket = io(BASE_SERVER_URL);
 
-    // Listen for updates from the server
+    const fetchWagers = async () => {
+      try {
+        const wagers = await getWagers();
+        setWagers(wagers);
+        applyFilter("all", wagers);
+      } catch (error) {
+        console.error("Error fetching wagers:", error.message);
+      }
+    }
+
+    fetchWagers();
+    // eslint-disable-next-line
+  }, []);
+
+  // Listen for updates from the server
+  useEffect(() => {
     socket.on("wagersUpdate", (updatedWagers) => {
       setWagers(updatedWagers || []);
-      applyFilter("all", updatedWagers);
+      applyFilter(activeFilter, updatedWagers);
     });
 
+    // Cleanup listener on unmount
     return () => {
+      socket.off("wagersUpdate");
       socket.disconnect();
     };
     // eslint-disable-next-line
-  }, [user.mongoUserId]);
+  }, [user?.mongoUserId]);
 
   useEffect(() => {
     // Recalculate estimated winnings if credits wagered or selected wager's agree/disagree values change
@@ -308,7 +323,7 @@ const Wagers = () => {
                       credits
                     </p>
                     <p>
-                      Credits Earned: ((Bet Amount / (Total Agree Credits Bet +
+                      Credits Earned: ((Bet Amount / (Total Winner's Credits Bet +
                       Bet Amount)) * Total Loser's Credits Bet) + Bet Amount
                     </p>
                     <p>
