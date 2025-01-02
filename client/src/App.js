@@ -8,6 +8,7 @@ import {
 } from "./services/userService";
 import { useUser } from "./context/UserContext";
 import { Routes, Route, useNavigate, Navigate } from "react-router-dom";
+import socket from "./services/socket";
 import Wagers from "./components/Wagers";
 import Auth from "./components/Auth";
 import Profile from "./components/Profile";
@@ -127,6 +128,15 @@ function App() {
     routeUser();
   }, [loading, user, navigate, auth?.currentUser]);
 
+  // Initialize the socket connection when the app mounts
+  useEffect(() => {
+    socket.connect();
+
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
+
   if (loading) {
     return <p>Loading...</p>;
   }
@@ -142,6 +152,7 @@ function App() {
       {user &&
         user?.emailVerificationStatus === "verified" &&
         user?.idvStatus === "verified" && <Navbar />}
+      
       <div>
         {user ? (
           <p>
