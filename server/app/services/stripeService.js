@@ -18,14 +18,8 @@ const createCheckoutSession = async (
     quantity: item.quantity,
   }));
 
-  return await stripe.checkout.sessions.create({
-    payment_method_types: ["card"],
-    line_items: lineItems,
-    mode: "payment",
-    success_url: `${process.env.DEV_CLIENT_URL}`,
-    cancel_url: `${process.env.DEV_CLIENT_URL}/Credits`,
-    metadata: { mongoUserId, creditsTotal },
-  });
+      success_url: `${process.env.DEV_CLIENT_URL}/Wagers`,
+      cancel_url: `${process.env.DEV_CLIENT_URL}/Credit-Shop`,
 };
 
 const handleWebhookEvent = async (event, io) => {
