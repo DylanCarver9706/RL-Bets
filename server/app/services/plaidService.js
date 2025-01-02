@@ -17,7 +17,7 @@ const plaidConfig = new Configuration({
 const plaidClient = new PlaidApi(plaidConfig);
 
 const createLinkToken = async (mongoUserId) => {
-  const user = await collections.users.findOne({
+  const user = await collections.usersCollection.findOne({
     _id: ObjectId.createFromHexString(mongoUserId),
   });
 
