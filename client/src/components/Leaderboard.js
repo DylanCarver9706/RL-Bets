@@ -1,43 +1,43 @@
 import React, { useEffect, useState } from 'react';
-import io from 'socket.io-client';
 import { getUsers } from '../services/userService';
+import socket from '../services/socket';
 
-const BASE_SERVER_URL = process.env.REACT_APP_BASE_SERVER_URL;
+
+// Function to sort users based on earnedCredits in descending order
+const sortUsers = (users) => {
+  return users.sort((a, b) => b.earnedCredits - a.earnedCredits);
+};
 
 const Leaderboard = () => {
   const [sortedUsers, setSortedUsers] = useState([]);
-  
+
   // Fetch users on component mount
   useEffect(() => {
-    
-    // Initialize the socket connection
-    const socket = io(BASE_SERVER_URL); // Adjust the URL if needed
     
     const fetchUsers = async () => {
       try {
         const usersResponse = await getUsers();
-        setSortedUsers(getSortedUsers(usersResponse));
+        setSortedUsers(sortUsers(usersResponse));
       } catch (error) {
         console.error('Error fetching users:', error);
       }
     };
 
     fetchUsers();
+  }, []);
+  
+  // Fetch users on component mount
+  useEffect(() => {
 
     // Listen for the 'updateUser' event from the server
     socket.on("updateUsers", (updatedUsers) => {
-        setSortedUsers(getSortedUsers(updatedUsers));
+        setSortedUsers(sortUsers(updatedUsers));
     })
     
     // Cleanup WebSocket connection on unmount
     return () => socket.disconnect();
 
   }, []);
-
-  // Function to sort users based on earnedCredits in descending order
-  const getSortedUsers = (users) => {
-    return users.sort((a, b) => b.earnedCredits - a.earnedCredits);
-  };
 
   return (
     <div style={styles.container}>
