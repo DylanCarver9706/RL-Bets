@@ -16,8 +16,11 @@ const createSeries = async (seriesData) => {
 
   const series = {
     name,
-    tournament: new ObjectId(tournament),
-    teams: [new ObjectId(team1), new ObjectId(team2)],
+    tournament: ObjectId.createFromHexString(tournament),
+    teams: [
+      ObjectId.createFromHexString(team1),
+      ObjectId.createFromHexString(team2),
+    ],
     best_of: parseInt(best_of, 10),
     type: "series",
     status: "Created",
@@ -32,7 +35,10 @@ const createSeries = async (seriesData) => {
   // Generate matches for the series based on the best_of value
   const matches = Array.from({ length: best_of }, (_, index) => ({
     name: `${name} - Match ${index + 1}`,
-    teams: [new ObjectId(team1), new ObjectId(team2)],
+    teams: [
+      ObjectId.createFromHexString(team1),
+      ObjectId.createFromHexString(team2),
+    ],
     series: seriesResult.insertedId,
     status: "Created",
     type: "match",
@@ -69,16 +75,20 @@ const getAllSeries = async () => {
 };
 
 const getSeriesById = async (id) => {
-  return await collections.seriesCollection.findOne({ _id: new ObjectId(id) });
+  return await collections.seriesCollection.findOne({
+    _id: ObjectId.createFromHexString(id),
+  });
 };
 
 const updateSeries = async (id, updateData) => {
-  if (updateData.winner) updateData.winner = new ObjectId(updateData.winner);
-  if (updateData.loser) updateData.loser = new ObjectId(updateData.loser);
+  if (updateData.winner)
+    updateData.winner = ObjectId.createFromHexString(updateData.winner);
+  if (updateData.loser)
+    updateData.loser = ObjectId.createFromHexString(updateData.loser);
   if (updateData.firstBlood)
-    updateData.firstBlood = new ObjectId(updateData.firstBlood);
+    updateData.firstBlood = ObjectId.createFromHexString(updateData.firstBlood);
   if (updateData.tournament)
-    updateData.tournament = new ObjectId(updateData.tournament);
+    updateData.tournament = ObjectId.createFromHexString(updateData.tournament);
 
   await updateMongoDocument(collections.seriesCollection, id, {
     $set: updateData,
@@ -111,11 +121,13 @@ const deleteSeries = async (id) => {
     collections.tournamentsCollection,
     series.tournament,
     {
-      $pull: { series: new ObjectId(id) },
+      $pull: { series: ObjectId.createFromHexString(id) },
     }
   );
 
-  await collections.seriesCollection.deleteOne({ _id: new ObjectId(id) });
+  await collections.seriesCollection.deleteOne({
+    _id: ObjectId.createFromHexString(id),
+  });
 };
 
 module.exports = {
