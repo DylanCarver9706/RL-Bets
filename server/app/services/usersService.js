@@ -5,6 +5,7 @@ const {
   createMongoDocument,
   updateMongoDocument,
 } = require("../../database/middlewares/mongo");
+const { getSocketIo } = require("../middlewares/socketIO");
 
 const getAllUsers = async () => {
   return await collections.usersCollection.find().toArray();
@@ -39,7 +40,7 @@ const createUser = async (userData) => {
   return await createMongoDocument(collections.usersCollection, userData, true);
 };
 
-const updateUser = async (id, updateData, io) => {
+const updateUser = async (id, updateData) => {
   await updateMongoDocument(collections.usersCollection, id, {
     $set: updateData,
   });
@@ -50,13 +51,14 @@ const updateUser = async (id, updateData, io) => {
 
   // Emit WebSocket updates
   const allUsers = await getAllUsers();
+  const io = getSocketIo();
   io.emit("updateUser", updatedUser);
   io.emit("updateUsers", allUsers);
 
   return updatedUser;
 };
 
-const softDeleteUser = async (id, io) => {
+const softDeleteUser = async (id) => {
   await updateMongoDocument(collections.usersCollection, id, {
     $set: {
       name: null,
@@ -76,6 +78,7 @@ const softDeleteUser = async (id, io) => {
 
   // Emit WebSocket updates
   const allUsers = await getAllUsers();
+  const io = getSocketIo();
   io.emit("updateUser", updatedUser);
   io.emit("updateUsers", allUsers);
 };
