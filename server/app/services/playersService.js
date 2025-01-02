@@ -1,15 +1,18 @@
 const { collections } = require("../../database/mongoCollections");
 const {
-    createMongoDocument,
-    updateMongoDocument,
-  } = require("../../database/middlewares/mongo");
+  createMongoDocument,
+  updateMongoDocument,
+} = require("../../database/middlewares/mongo");
 const { ObjectId } = require("mongodb");
 
 const createPlayer = async (playerData) => {
   if (!playerData.name || !playerData.team) {
     throw new Error("Player name and team ID are required.");
   }
-  const result = await createMongoDocument(collections.playersCollection, playerData);
+  const result = await createMongoDocument(
+    collections.playersCollection,
+    playerData
+  );
   await updateMongoDocument(collections.teamsCollection, playerData.team, {
     $push: { players: result.insertedId },
   });
@@ -21,15 +24,19 @@ const getAllPlayers = async () => {
 };
 
 const getPlayerById = async (id) => {
-  return await collections.playersCollection.findOne({ _id: new ObjectId(id) });
+  return await collections.playersCollection.findOne({
+    _id: ObjectId.createFromHexString(id),
+  });
 };
 
 const updatePlayer = async (id, updateData) => {
-  await updateMongoDocument(collections.playersCollection, id, { $set: updateData });
+  await updateMongoDocument(collections.playersCollection, id, {
+    $set: updateData,
+  });
 };
 
 const deletePlayer = async (id) => {
-  const playerId = new ObjectId(id);
+  const playerId = ObjectId.createFromHexString(id);
 
   const player = await getPlayerById(id);
   if (!player) throw new Error("Player not found");
