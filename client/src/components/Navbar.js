@@ -1,42 +1,8 @@
-import React, { useState, useEffect } from "react";
-import io from "socket.io-client";
 import { Link } from "react-router-dom";
-import { getUserById } from "../services/userService.js";
 import { useUser } from "../context/UserContext.js";
-
-const BASE_SERVER_URL = process.env.REACT_APP_BASE_SERVER_URL;
 
 const Navbar = () => {
   const { user } = useUser();
-  const [userCredits, setUserCredits] = useState(null);
-
-  useEffect(() => {
-    
-    // Initialize the socket connection
-    const socket = io(BASE_SERVER_URL);
-    if (user?.mongoUserId) {
-      const fetchData = async () => {
-        try {
-          const userData = await getUserById(user.mongoUserId);
-          setUserCredits(parseInt(userData.credits));
-        } catch (error) {
-          console.error("Error fetching user data:", error.message);
-        }
-      };
-
-      fetchData();
-
-      // Listen for the 'updateUser' event from the server
-    socket.on("updateUser", (updatedUser) => {
-      if (updatedUser._id === user.mongoUserId) {
-        setUserCredits(updatedUser.credits);
-      }
-    });
-
-    // Cleanup the socket connection on unmount
-    return () => socket.disconnect();
-    }
-  }, [user]);
 
   if (!user) {
     return null; // Hide navbar if no user is logged in
@@ -80,9 +46,9 @@ const Navbar = () => {
         <Link to="/Create_Wager" style={styles.link}>
           Create Wager
         </Link>
-        {userCredits !== null && (
+        {user?.credits !== null && (
           <Link to="/Credit-Shop" style={styles.link}>
-            {userCredits} Credits
+            {user?.credits} Credits
           </Link>
         )}
       </div>
