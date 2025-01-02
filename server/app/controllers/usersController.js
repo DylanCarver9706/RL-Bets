@@ -43,7 +43,7 @@ const createUser = async (req, res) => {
 
 const updateUser = async (req, res) => {
   try {
-    const updatedUser = await userService.updateUser(req.params.id, req.body, req.app.get("io"));
+    const updatedUser = await userService.updateUser(req.params.id, req.body);
     res.status(200).json(updatedUser);
   } catch (err) {
     res.status(500).json({ error: "Failed to update user", details: err.message });
@@ -52,7 +52,7 @@ const updateUser = async (req, res) => {
 
 const softDeleteUser = async (req, res) => {
   try {
-    await userService.softDeleteUser(req.params.id, req.app.get("io"));
+    await userService.softDeleteUser(req.params.id);
     res.status(200).json({ message: "User soft-deleted successfully" });
   } catch (err) {
     res.status(500).json({ error: "Failed to soft delete user", details: err.message });
