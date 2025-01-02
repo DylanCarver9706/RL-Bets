@@ -31,7 +31,7 @@ const createUser = async (userData) => {
   if (existingUser) {
     return await updateMongoDocument(
       collections.usersCollection,
-      existingUser._id,
+      existingUser._id.toString(),
       { $set: { ...userData, accountStatus: "active" } },
       true
     );
