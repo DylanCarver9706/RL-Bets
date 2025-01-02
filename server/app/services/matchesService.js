@@ -5,6 +5,7 @@ const {
 } = require("../../database/middlewares/mongo");
 const { createLog } = require("./logsService");
 const { ObjectId } = require("mongodb");
+const { getSocketIo } = require("../middlewares/socketIO");
 
 const createMatch = async (matchData) => {
   if (!matchData.series) {
@@ -30,15 +31,20 @@ const getAllMatches = async () => {
 };
 
 const getMatchById = async (id) => {
-  return await collections.matchesCollection.findOne({ _id: new ObjectId(id) });
+  return await collections.matchesCollection.findOne({
+    _id: ObjectId.createFromHexString(id),
+  });
 };
 
 const updateMatch = async (id, updateData) => {
-  if (updateData.winner) updateData.winner = new ObjectId(updateData.winner);
-  if (updateData.loser) updateData.loser = new ObjectId(updateData.loser);
+  if (updateData.winner)
+    updateData.winner = ObjectId.createFromHexString(updateData.winner);
+  if (updateData.loser)
+    updateData.loser = ObjectId.createFromHexString(updateData.loser);
   if (updateData.firstBlood)
-    updateData.firstBlood = new ObjectId(updateData.firstBlood);
-  if (updateData.series) updateData.series = new ObjectId(updateData.series);
+    updateData.firstBlood = ObjectId.createFromHexString(updateData.firstBlood);
+  if (updateData.series)
+    updateData.series = ObjectId.createFromHexString(updateData.series);
 
   await updateMongoDocument(collections.matchesCollection, id, {
     $set: updateData,
@@ -68,10 +74,12 @@ const deleteMatch = async (id) => {
 
   // Remove match from the series
   await updateMongoDocument(collections.seriesCollection, match.series, {
-    $pull: { matches: new ObjectId(id) },
+    $pull: { matches: ObjectId.createFromHexString(id) },
   });
 
-  await collections.matchesCollection.deleteOne({ _id: new ObjectId(id) });
+  await collections.matchesCollection.deleteOne({
+    _id: ObjectId.createFromHexString(id),
+  });
 };
 
 // Functions for matches that end
@@ -90,7 +98,7 @@ const WagerOutcomeFormula = (
 const payOutBetWinners = async (wagerId, agreeIsWinner) => {
   // Find all wagers where rlEventReference matches the converted ObjectId
   const wager = await collections.wagersCollection.findOne({
-    _id: new ObjectId(wagerId),
+    _id: ObjectId.createFromHexString(wagerId),
   });
 
   // console.log(wager)
@@ -119,7 +127,7 @@ const payOutBetWinners = async (wagerId, agreeIsWinner) => {
     const bet = wagerBets[index];
     if (bet.agreeBet == agreeIsWinner) {
       const user = await collections.usersCollection.findOne({
-        _id: new ObjectId(bet.user),
+        _id: ObjectId.createFromHexString(bet.user),
       });
       awardedCredits = WagerOutcomeFormula(
         bet.credits,
@@ -152,6 +160,7 @@ const payOutBetWinners = async (wagerId, agreeIsWinner) => {
       });
 
       // Emit 'updateUser' event with updated user data to all connected clients
+      const io = getSocketIo();
       io.emit("updateUser", updatedUser);
     }
   }
@@ -342,7 +351,7 @@ const getMatchOutcomes = async (
 
 const handleWagerEnded = async (wagerId, agreeIsWinner) => {
   const wager = await collections.wagersCollection.findOne({
-    _id: new ObjectId(wagerId),
+    _id: ObjectId.createFromHexString(wagerId),
   });
 
   //  console.log("wager: ", wager)
@@ -360,6 +369,7 @@ const handleWagerEnded = async (wagerId, agreeIsWinner) => {
 
   // Fetch updated wager and statistics
   const updatedWagers = await getAllWagers();
+  const io = getSocketIo();
   io.emit("wagersUpdate", updatedWagers); // Emit updated data to all clients
 
   await payOutBetWinners(wagerId, agreeIsWinner);
@@ -414,7 +424,7 @@ const getSeriesOutcomes = async (
     };
 
     const seriesDoc = await collections.seriesCollection.findOne({
-      _id: new ObjectId(seriesId),
+      _id: ObjectId.createFromHexString(seriesId),
     });
 
     const seriesMatches = await collections.matchesCollection
@@ -764,7 +774,7 @@ const getTournamentOutcomes = async (
 
     // Step 1: Retrieve the tournament document
     const tournamentDoc = await tournamentsCollection.findOne({
-      _id: new ObjectId(tournamentId),
+      _id: ObjectId.createFromHexString(tournamentId),
     });
     if (!tournamentDoc) {
       throw new Error("Tournament not found");
@@ -791,7 +801,9 @@ const getTournamentOutcomes = async (
     });
 
     // Convert Set to an array of ObjectId
-    const teamIdsArray = Array.from(teamIds).map((id) => new ObjectId(id));
+    const teamIdsArray = Array.from(teamIds).map((id) =>
+      ObjectId.createFromHexString(id)
+    );
 
     // Step 5: Get all teams using the collected team IDs
     const teamsArray = await teamsCollection
@@ -952,7 +964,7 @@ const getSeasonOutcomes = async (seasonId, agreeEvaluationObject = null) => {
 
     // Step 1: Retrieve the season document
     const seasonDoc = await seasonsCollection.findOne({
-      _id: new ObjectId(seasonId),
+      _id: ObjectId.createFromHexString(seasonId),
     });
     if (!seasonDoc) {
       throw new Error("Season not found");
@@ -984,7 +996,9 @@ const getSeasonOutcomes = async (seasonId, agreeEvaluationObject = null) => {
     });
 
     // Convert Set to an array of ObjectId
-    const teamIdsArray = Array.from(teamIds).map((id) => new ObjectId(id));
+    const teamIdsArray = Array.from(teamIds).map((id) =>
+      ObjectId.createFromHexString(id)
+    );
 
     // Step 6: Get all teams using the collected team IDs
     const teamsArray = await teamsCollection
@@ -1138,12 +1152,12 @@ const matchConcluded = async (matchId, data) => {
 
   // Find the match by its ID
   const matchDoc = await matchesCollection.findOne({
-    _id: new ObjectId(matchId),
+    _id: ObjectId.createFromHexString(matchId),
   });
 
   // Find the series by its ID
   const seriesDoc = await seriesCollection.findOne({
-    _id: new ObjectId(matchDoc.series),
+    _id: ObjectId.createFromHexString(matchDoc.series),
   });
 
   const matchOutcomes = await getMatchOutcomes(results, matchDoc.teams);
@@ -1153,11 +1167,11 @@ const matchConcluded = async (matchId, data) => {
   // Build the update object for the match
   const updateData = {
     results: results,
-    winner: new ObjectId(matchOutcomes.winningTeam),
-    loser: new ObjectId(matchOutcomes.winningTeam),
+    winner: ObjectId.createFromHexString(matchOutcomes.winningTeam),
+    loser: ObjectId.createFromHexString(matchOutcomes.winningTeam),
     firstBlood: firstBlood,
     wentToOvertime: wentToOvertime,
-    series: new ObjectId(seriesDoc._id),
+    series: ObjectId.createFromHexString(seriesDoc._id),
     status: "Ended",
   };
 
@@ -1206,7 +1220,9 @@ const matchConcluded = async (matchId, data) => {
   seriesMatches.forEach((match) => {
     if (
       match.status === "Ended" &&
-      match.winner.equals(new ObjectId(matchOutcomes.winningTeam))
+      match.winner.equals(
+        ObjectId.createFromHexString(matchOutcomes.winningTeam)
+      )
     ) {
       winnerWinsCount++;
     }
@@ -1220,8 +1236,8 @@ const matchConcluded = async (matchId, data) => {
     message = "Series," + message;
     let seriesUpdateData = {
       status: "Ended",
-      winner: new ObjectId(matchOutcomes.winningTeam),
-      loser: new ObjectId(matchOutcomes.losingTeam),
+      winner: ObjectId.createFromHexString(matchOutcomes.winningTeam),
+      loser: ObjectId.createFromHexString(matchOutcomes.losingTeam),
       overtimeCount: overtimeCount,
     };
     await updateMongoDocument(seriesCollection, seriesDoc._id, {
@@ -1238,8 +1254,8 @@ const matchConcluded = async (matchId, data) => {
     await updateMongoDocument(tournamentsCollection, seriesDoc.tournament, {
       $set: {
         status: "Ended",
-        winner: new ObjectId(matchOutcomes.winningTeam),
-        loser: new ObjectId(matchOutcomes.losingTeam),
+        winner: ObjectId.createFromHexString(matchOutcomes.winningTeam),
+        loser: ObjectId.createFromHexString(matchOutcomes.losingTeam),
       },
     });
     createLog({ type: "Tournament Ended", tournamentId: seriesDoc.tournament });
@@ -1253,7 +1269,9 @@ const matchConcluded = async (matchId, data) => {
   if (endSeason === true) {
     // Find the season that contains the tournament in its tournaments array
     const seasonDoc = await seasonsCollection.findOne({
-      tournaments: { $in: [new ObjectId(seriesDoc.tournament)] },
+      tournaments: {
+        $in: [ObjectId.createFromHexString(seriesDoc.tournament)],
+      },
     });
 
     if (seasonDoc) {
