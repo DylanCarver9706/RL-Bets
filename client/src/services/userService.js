@@ -229,6 +229,32 @@ export const createCheckoutSession = async (purchaseItems, mongoUserId, creditsT
   }
 };
 
+export const getWagers = async () => {
+  try {
+
+    const idToken = await getFirebaseIdToken();
+
+    const response = await fetch(`${BASE_URL}/api/wagers`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${idToken}`, // Include the token in the headers
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Failed to fetch wagers.");
+    }
+
+    return data; // Return the wagers data
+  } catch (err) {
+    console.error("Error fetching wagers:", err.message);
+    throw err;
+  }
+}
+
 // Get all logs
 export const getLogs = async () => {
   try {
