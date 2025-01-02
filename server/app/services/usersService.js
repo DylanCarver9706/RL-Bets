@@ -6,6 +6,7 @@ const {
   updateMongoDocument,
 } = require("../../database/middlewares/mongo");
 const { getSocketIo } = require("../middlewares/socketIO");
+const { sendEmail } = require("../middlewares/nodemailer");
 
 const getAllUsers = async () => {
   return await collections.usersCollection.find().toArray();
@@ -36,6 +37,12 @@ const createUser = async (userData) => {
       true
     );
   }
+
+  await sendEmail(
+    userData.email,
+    "Welcome to RL Bets",
+    `Hello ${userData.name},\n\nWelcome to RL Bets! We're excited to have you on board. Your account is now active, and you can start using our services right away.\n\nIf you have any questions or need assistance, please don't hesitate to reach out to our support team.\n\nBest regards,\nThe RL Bets Team`
+  );
 
   return await createMongoDocument(collections.usersCollection, userData, true);
 };
