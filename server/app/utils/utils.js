@@ -13,7 +13,7 @@ const getTimestamp = () => {
   const hour = String(localDate.getUTCHours()).padStart(2, "0");
   const minute = String(localDate.getUTCMinutes()).padStart(2, "0");
   const second = String(localDate.getUTCSeconds()).padStart(2, "0");
-  console.log(`${year}-${month}-${day}T${hour}:${minute}:${second}Z`);
+  // console.log(`${year}-${month}-${day}T${hour}:${minute}:${second}Z`);
   return new Date(`${year}-${month}-${day}T${hour}:${minute}:${second}Z`);
 };
 
