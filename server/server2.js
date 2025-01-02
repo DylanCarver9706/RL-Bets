@@ -5,20 +5,11 @@ const { Server } = require("socket.io");
 const cors = require("cors");
 require("dotenv").config();
 const { initializeCollections } = require("./database/mongoCollections");
-const { initializeFirebase } = require("./app/services/firebase");
+const { initializeFirebase } = require("./app/middlewares/firebaseAdmin");
+const { initializeSocketIo } = require("./app/middlewares/socketIO");
 
 // Initialize Express app
 const app = express();
-
-// Middleware
-app.use(express.json());
-app.use(
-  cors({
-    origin: process.env.DEV_CLIENT_URL,
-    methods: "GET,PUT,POST,DELETE",
-    credentials: true,
-  })
-);
 
 // WebSocket setup
 const server = http.createServer(app);
@@ -30,25 +21,27 @@ const io = new Server(server, {
 
 app.set("io", io);
 
-// WebSocket setup
-io.on("connection", async (socket) => {
-  console.log("New client connected");
-  
-  try {
-    const wagers = await getAllWagers(); // Fetch wagers on connection
-    socket.emit("wagersUpdate", wagers);
-  } catch (err) {
-    console.error("Error fetching wagers for WebSocket:", err.message);
+// Initialize middleware
+app.use((req, res, next) => {
+  if (req.originalUrl === '/webhook') {
+    next();  // Skip JSON body parsing for the webhook route
+  } else {
+    express.json()(req, res, next);  // Use JSON body parser for all other routes
   }
-  
-  socket.on("disconnect", () => {
-    console.log("Client disconnected");
-  });
 });
 
-// Initialize database
-initializeCollections().then(() => console.log("Collections initialized"));
-initializeFirebase().then(() => console.log("Firebase initialized"));
+app.use(
+  cors({
+    origin: process.env.DEV_CLIENT_URL,
+    methods: "GET,PUT,POST,DELETE",
+    credentials: true,
+  })
+);
+
+initializeCollections()
+  .then(() => initializeFirebase())
+  .then(() => initializeSocketIo(io))
+  .then(() => console.log("Server Ready"));
 
 // Import routes
 app.use("/api/users", require("./app/routes/usersRoutes"));
