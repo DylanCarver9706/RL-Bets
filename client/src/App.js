@@ -50,7 +50,6 @@ function App() {
           console.log("Firebase ID token:", idToken);
           if (!idToken) {
             console.warn("ID token not available");
-            setLoading(false);
             return;
           }
 
@@ -90,7 +89,7 @@ function App() {
     });
 
     return () => unsubscribe();
-  }, [setUser, auth, navigate]);
+  }, [setUser, auth]);
 
   useEffect(() => {
     const routeUser = async () => {
@@ -112,16 +111,16 @@ function App() {
       }
 
       // If user has not verified email or IDV, redirect to respective pages
-      if (auth.currentUser && !user?.locationPermissionGranted) {
+      if (auth.currentUser && !user.locationPermissionGranted) {
         navigate("/Location-Permission-Required");
-      } else if (auth.currentUser && user?.emailVerificationStatus !== "verified") {
+      } else if (auth.currentUser && user.emailVerificationStatus !== "verified") {
         navigate("/Email-Verification");
-      } else if (auth.currentUser && user?.idvStatus !== "verified") {
+      } else if (auth.currentUser && user.idvStatus !== "verified") {
         navigate("/Identity-Verification");
-      } else if (auth.currentUser && !user?.locationValid) {
+      } else if (auth.currentUser && !user.locationValid) {
         navigate("/Illegal-State");
       } else if (auth.currentUser && !user?.ageValid) {
-        navigate("/Illegal-Age")
+        navigate("/Illegal-Age");
       }
 
     };
