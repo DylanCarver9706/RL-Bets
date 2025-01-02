@@ -207,7 +207,7 @@ export const createCheckoutSession = async (purchaseItems, mongoUserId, creditsT
 
     const idToken = await getFirebaseIdToken();
 
-    const response = await fetch(`${BASE_URL}/api/create-checkout-session`, {
+    const response = await fetch(`${BASE_URL}/api/stripe/create-checkout-session`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -278,7 +278,7 @@ export const getUserStateByLatLon = async (lat, lon) => {
 
     // Make the fetch request to your backend API
     const response = await fetch(
-      `${BASE_URL}/api/reverse-geocode`,
+      `${BASE_URL}/api/geofencing/reverse-geocode`,
       {
         method: "POST",
         headers: {
@@ -374,7 +374,7 @@ export const userAgeLegal = async (state, DOB) => {
 
   // Make the fetch request to your backend API
   const response = await fetch(
-    `${BASE_URL}/api/check-legal-age`,
+    `${BASE_URL}/api/age-restriction/check-legal-age`,
     {
       method: "POST",
       headers: {
