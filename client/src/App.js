@@ -30,6 +30,7 @@ import Hero from "./components/Hero";
 import IllegalState from "./components/IllegalState";
 import LocationPermissionRequired from "./components/LocationPermissionRequired";
 import IllegalAge from "./components/IllegalAge";
+import SomethingWentWrong from "./components/SomethingWentWrong";
 
 const ProtectedRoute = ({ loggedIn, redirectTo = "/Auth", children }) => {
   return loggedIn ? children : <Navigate to={redirectTo} />;
@@ -170,6 +171,7 @@ function App() {
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<Hero />} />
+        <Route path="/Whoopsie-Daisy" element={<SomethingWentWrong />} />
         <Route path="/Bug-Form" element={<BugForm />} />
 
         {/* Protected Routes */}
