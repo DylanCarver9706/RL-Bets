@@ -411,15 +411,15 @@ export const userAgeLegal = async (state, DOB) => {
     }
   );
 
-  const data = await response.json();
-
   if (!response.ok) {
-    throw new Error(data.error || "Failed to validate age.");
+    throw new Error("Failed to validate age.");
   }
+  
+  const data = await response.json();
 
   return data.isAllowed; // Return the validation result
   } catch (err) {
     console.error("Error validating age:", err.message);
-    throw err;
+    return false;
   }
 }
