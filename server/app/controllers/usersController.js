@@ -78,5 +78,4 @@ module.exports = {
   updateUser,
   softDeleteUser,
   deleteUser,
-  errorLoggerTest,
 };
