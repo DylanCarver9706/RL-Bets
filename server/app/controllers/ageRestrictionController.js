@@ -1,6 +1,6 @@
 const { checkLegalAge } = require("../services/ageRestrictionService");
 
-const handleCheckLegalAge = (req, res) => {
+const handleCheckLegalAge = (req, res, logError) => {
   try {
     const { state, DOB } = req.body;
 
@@ -19,8 +19,7 @@ const handleCheckLegalAge = (req, res) => {
 
     res.json({ isAllowed: true, message: "User is allowed to make wagers." });
   } catch (error) {
-    console.error("Error checking legal age:", error.message);
-    res.status(500).json({ error: "Failed to check legal age" });
+    logError(error);
   }
 };
 
