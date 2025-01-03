@@ -1,7 +1,10 @@
 // app/controllers/plaidController.js
-const { createLinkToken, completeIDVSession } = require("../services/plaidService");
+const {
+  createLinkToken,
+  completeIDVSession,
+} = require("../services/plaidService");
 
-const generateLinkToken = async (req, res) => {
+const generateLinkToken = async (req, res, logError) => {
   try {
     const { mongoUserId } = req.body;
 
@@ -12,12 +15,11 @@ const generateLinkToken = async (req, res) => {
     const linkToken = await createLinkToken(mongoUserId);
     res.status(200).json(linkToken);
   } catch (error) {
-    console.error("Error creating Plaid Link token:", error.message);
-    res.status(500).json({ error: "Failed to create Link token" });
+    logError(error);
   }
 };
 
-const completeIDV = async (req, res) => {
+const completeIDV = async (req, res, logError) => {
   try {
     const { idvSession } = req.body;
 
@@ -38,8 +40,7 @@ const completeIDV = async (req, res) => {
 
     res.status(200).json(responseBody);
   } catch (error) {
-    console.error("Error completing IDV:", error.message);
-    res.status(500).json({ error: "Failed to update IDV status" });
+    logError(error);
   }
 };
 
