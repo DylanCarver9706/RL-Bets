@@ -43,6 +43,12 @@ initializeCollections()
   .then(() => initializeSocketIo(io))
   .then(() => console.log("Server Ready"));
 
+// Log all requests
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.url}`);
+  next();
+});
+
 // Import routes
 app.use("/api/users", require("./app/routes/usersRoutes"));
 app.use("/api/logs", require("./app/routes/logsRoutes"));
