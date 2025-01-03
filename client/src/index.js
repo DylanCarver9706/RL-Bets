@@ -6,7 +6,6 @@ import reportWebVitals from "./reportWebVitals";
 import { BrowserRouter, useNavigate } from "react-router-dom";
 import { UserProvider, useUser } from "./context/UserContext";
 import ErrorBoundary from "./components/ErrorBoundary";
-import sendCrashReport from "./services/sendCrashReport";
 
 // Capture console logs
 const capturedLogs = [];
@@ -17,11 +16,6 @@ const captureConsoleLog = (type, ...args) => {
     timestamp: new Date().toISOString(),
   };
   capturedLogs.push(logEntry);
-
-  // Send critical logs (errors only) immediately
-  if (type === "error") {
-    sendCrashReport({ logType: "console", ...logEntry });
-  }
 
   // Call the original console function
   console[`_${type}`](...args);
