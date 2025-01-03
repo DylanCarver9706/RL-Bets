@@ -24,10 +24,10 @@ app.set("io", io);
 
 // Initialize middleware
 app.use((req, res, next) => {
-  if (req.originalUrl === '/webhook') {
-    next();  // Skip JSON body parsing for the webhook route
+  if (req.originalUrl === "/webhook") {
+    next(); // Skip JSON body parsing for the webhook route
   } else {
-    express.json()(req, res, next);  // Use JSON body parser for all other routes
+    express.json()(req, res, next); // Use JSON body parser for all other routes
   }
 });
 
@@ -68,6 +68,7 @@ app.use("/api/players", require("./app/routes/playersRoutes"));
 app.use("/api/data-trees", require("./app/routes/dataTreeRoutes"));
 app.use("/api/jira", require("./app/routes/jiraRoutes"));
 app.use("/webhook", require("./app/routes/stripeWebhookRoute"));
+app.use("/api/server-utils", require("./app/routes/serverUtilsRoutes"));
 
 app.use(errorLogger);
 
