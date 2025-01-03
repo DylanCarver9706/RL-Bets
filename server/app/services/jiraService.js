@@ -62,4 +62,34 @@ const createJiraIssue = async (summary, description, issueType) => {
   return response.json();
 };
 
-module.exports = { createJiraIssue, transitionJiraIssueStatus, jiraStatusTransitionIds };
+const createAndTransitionJiraIssue = async (userName, userEmail, mongoUserId, issueType, summary, description, status) => {
+  try {
+    // Construct the detailed description
+    const descriptionHeader = `User: ${userName}\nEmail: ${userEmail}\nMongoId: ${mongoUserId}`;
+    const jiraDescription = description
+      ? `${descriptionHeader}\n\nUser Submission:\n${description}`
+      : descriptionHeader;
+
+    // Step 1: Create the Jira issue
+    console.log("Creating Jira issue...");
+    const jiraIssue = await createJiraIssue(summary, jiraDescription, issueType);
+    console.log(`Jira issue created successfully: ${jiraIssue.key}`);
+
+    // Step 2: Transition the Jira issue's status if applicable
+    if (status && jiraStatusTransitionIds[status]) {
+      console.log(`Transitioning Jira issue status to: ${status} (ID: ${jiraStatusTransitionIds[status]})`);
+      await transitionJiraIssueStatus(jiraIssue.key, jiraStatusTransitionIds[status]);
+      console.log("Jira issue status transitioned successfully.");
+    } else {
+      console.log("No status transition required for this issue.");
+    }
+
+    // Return the Jira issue key for further use
+    return jiraIssue.key;
+  } catch (error) {
+    console.error("Error creating or transitioning Jira issue:", error.message);
+    throw error;
+  }
+};
+
+module.exports = { createJiraIssue, transitionJiraIssueStatus, createAndTransitionJiraIssue, jiraStatusTransitionIds };
