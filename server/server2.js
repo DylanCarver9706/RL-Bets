@@ -7,6 +7,7 @@ require("dotenv").config();
 const { initializeCollections } = require("./database/mongoCollections");
 const { initializeFirebase } = require("./app/middlewares/firebaseAdmin");
 const { initializeSocketIo } = require("./app/middlewares/socketIO");
+const { errorLogger } = require("./app/middlewares/errorLogger");
 
 // Initialize Express app
 const app = express();
@@ -67,6 +68,8 @@ app.use("/api/players", require("./app/routes/playersRoutes"));
 app.use("/api/data-trees", require("./app/routes/dataTreeRoutes"));
 app.use("/api/jira", require("./app/routes/jiraRoutes"));
 app.use("/webhook", require("./app/routes/stripeWebhookRoute"));
+
+app.use(errorLogger);
 
 // Start server
 const PORT = process.env.DEV_SERVER_URL_PORT;
