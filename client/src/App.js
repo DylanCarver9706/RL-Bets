@@ -8,6 +8,7 @@ import {
 } from "./services/userService";
 import { useUser } from "./context/UserContext";
 import { Routes, Route, useNavigate, Navigate } from "react-router-dom";
+import { checkServerStatus } from "./services/appService";
 import socket from "./services/socket";
 import Wagers from "./components/Wagers";
 import Auth from "./components/Auth";
@@ -31,6 +32,7 @@ import IllegalState from "./components/IllegalState";
 import LocationPermissionRequired from "./components/LocationPermissionRequired";
 import IllegalAge from "./components/IllegalAge";
 import SomethingWentWrong from "./components/SomethingWentWrong";
+import AppOutage from "./components/AppOutage";
 
 const ProtectedRoute = ({ loggedIn, redirectTo = "/Auth", children }) => {
   return loggedIn ? children : <Navigate to={redirectTo} />;
@@ -39,8 +41,24 @@ const ProtectedRoute = ({ loggedIn, redirectTo = "/Auth", children }) => {
 function App() {
   const { user, setUser } = useUser();
   const [loading, setLoading] = useState(true);
+  const [serverLive, setServerLive] = useState(true); // Server status
   const auth = getAuth();
   const navigate = useNavigate();
+
+  // Check server status on app mount
+  useEffect(() => {
+    const getServerStatus = async () => {
+      const isLive = await checkServerStatus();
+      setServerLive(isLive);
+
+      if (!isLive) {
+        console.error("Server is down. Redirecting to App-Outage.");
+        navigate("/App-Outage");
+      }
+    };
+
+    getServerStatus();
+  }, [navigate]);
 
   useEffect(() => {
     const handleAuthChange = async (firebaseUser) => {
@@ -95,7 +113,7 @@ function App() {
   useEffect(() => {
     const routeUser = async () => {
       // If still loading, do nothing
-      if (loading) {
+      if (loading || !serverLive) {
         return;
       }
 
@@ -126,7 +144,7 @@ function App() {
 
     };
     routeUser();
-  }, [loading, user, navigate, auth?.currentUser]);
+  }, [loading, user, navigate, auth?.currentUser, serverLive]);
 
   // Initialize the socket connection when the app mounts
   useEffect(() => {
@@ -300,6 +318,14 @@ function App() {
           element={
             <ProtectedRoute loggedIn={loggedIn && !ageValid} redirectTo="/Wagers">
               <IllegalAge />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/App-Outage"
+          element={
+            <ProtectedRoute loggedIn={!serverLive} redirectTo="/Wagers">
+              <AppOutage />
             </ProtectedRoute>
           }
         />
