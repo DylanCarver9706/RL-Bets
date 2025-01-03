@@ -1,8 +1,11 @@
 // app/controllers/stripeController.js
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
-const { createCheckoutSession, handleWebhookEvent } = require("../services/stripeService");
+const {
+  createCheckoutSession,
+  handleWebhookEvent,
+} = require("../services/stripeService");
 
-const createSession = async (req, res) => {
+const createSession = async (req, res, logError) => {
   try {
     const { purchaseItems, mongoUserId, creditsTotal } = req.body;
 
@@ -15,15 +18,23 @@ const createSession = async (req, res) => {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
-    const session = await createCheckoutSession(purchaseItems, mongoUserId, creditsTotal);
+    const session = await createCheckoutSession(
+      purchaseItems,
+      mongoUserId,
+      creditsTotal
+    );
     res.status(200).json(session);
   } catch (error) {
-    console.error("Error creating checkout session:", error.message, error.stack);
-    res.status(500).json({ error: "Failed to create checkout session" });
+    console.error(
+      "Error creating checkout session:",
+      error.message,
+      error.stack
+    );
+    logError(error);
   }
 };
 
-const stripeWebhook = async (req, res) => {
+const stripeWebhook = async (req, res, logError) => {
   const sig = req.headers["stripe-signature"];
 
   try {
@@ -36,9 +47,8 @@ const stripeWebhook = async (req, res) => {
     await handleWebhookEvent(event);
 
     res.status(200).send();
-  } catch (err) {
-    console.error("Webhook Error:", err.message);
-    res.status(400).send(`Webhook Error: ${err.message}`);
+  } catch (error) {
+    logError(error);
   }
 };
 
