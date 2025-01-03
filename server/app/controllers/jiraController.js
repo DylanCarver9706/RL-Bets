@@ -1,7 +1,19 @@
-const { createJiraIssue, transitionJiraIssueStatus, jiraStatusTransitionIds } = require("../services/jiraService");
+const {
+  createJiraIssue,
+  transitionJiraIssueStatus,
+  jiraStatusTransitionIds,
+} = require("../services/jiraService");
 
-const createIssueAndTransitionStatus = async (req, res) => {
-  const { userName, userEmail, mongoUserId, issueType, summary, description, status } = req.body;
+const createIssueAndTransitionStatus = async (req, res, logError) => {
+  const {
+    userName,
+    userEmail,
+    mongoUserId,
+    issueType,
+    summary,
+    description,
+    status,
+  } = req.body;
 
   if (!userName || !userEmail) {
     return res.status(400).json({ error: "User name and email are required." });
@@ -9,12 +21,21 @@ const createIssueAndTransitionStatus = async (req, res) => {
 
   try {
     const descriptionHeader = `User: ${userName}\nEmail: ${userEmail}\nMongoId: ${mongoUserId}`;
-    const jiraDescription = description ? `${descriptionHeader}\n\nUser Submission:\n${description}` : descriptionHeader;
+    const jiraDescription = description
+      ? `${descriptionHeader}\n\nUser Submission:\n${description}`
+      : descriptionHeader;
 
-    const jiraIssue = await createJiraIssue(summary, jiraDescription, issueType);
+    const jiraIssue = await createJiraIssue(
+      summary,
+      jiraDescription,
+      issueType
+    );
 
     if (status && jiraStatusTransitionIds[status]) {
-      await transitionJiraIssueStatus(jiraIssue.key, jiraStatusTransitionIds[status]);
+      await transitionJiraIssueStatus(
+        jiraIssue.key,
+        jiraStatusTransitionIds[status]
+      );
     }
 
     res.status(200).json({
@@ -22,8 +43,7 @@ const createIssueAndTransitionStatus = async (req, res) => {
       issueKey: jiraIssue.key,
     });
   } catch (error) {
-    console.error("Error processing Jira issue:", error.message);
-    res.status(500).json({ error: "Failed to create Jira issue." });
+    logError(error);
   }
 };
 
