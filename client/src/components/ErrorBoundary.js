@@ -69,7 +69,7 @@ class ErrorBoundary extends React.Component {
       this.props.user?.email || "unknown",
       this.props.user?.mongoUserId || "unknown",
       "Problem Report",
-      "App Error Occurred",
+      "Client App Error Occurred",
       JSON.stringify(errorDetails, null, 2),
       "App Error Occurred"
     );
