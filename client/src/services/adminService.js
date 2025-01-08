@@ -1,9 +1,9 @@
-const BASE_URL = process.env.REACT_APP_BASE_SERVER_URL; // Define your backend server URL
+const BASE_SERVER_URL = process.env.REACT_APP_BASE_SERVER_URL; // Define your backend server URL
 
 // Fetch the data tree for a given season ID
 export const fetchAllSeasonsDataTree = async () => {
   try {
-    const response = await fetch(`${BASE_URL}/api/data-trees/season/all`, {
+    const response = await fetch(`${BASE_SERVER_URL}/api/data-trees/season/all`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -25,7 +25,7 @@ export const fetchAllSeasonsDataTree = async () => {
 // Generic function to update a document by ID
 const updateDocumentById = async (endpoint, id, updateData) => {
   try {
-    const response = await fetch(`${BASE_URL}/api/${endpoint}/${id}`, {
+    const response = await fetch(`${BASE_SERVER_URL}/api/${endpoint}/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -67,7 +67,7 @@ export const updateMatchById = async (id, updateData) => {
 
 export const updateMatchResults = async (matchId, updateData) => {
   try {
-    const response = await fetch(`${BASE_URL}/api/match_concluded/${matchId}`, {
+    const response = await fetch(`${BASE_SERVER_URL}/api/match_concluded/${matchId}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -87,7 +87,7 @@ export const updateMatchResults = async (matchId, updateData) => {
 
 export const createSeries = async (seriesData) => {
   try {
-    const response = await fetch(`${BASE_URL}/api/series`, {
+    const response = await fetch(`${BASE_SERVER_URL}/api/series`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
