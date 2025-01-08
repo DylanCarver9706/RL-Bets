@@ -1,6 +1,6 @@
 import { getFirebaseIdToken } from "./firebaseService.js";
 
-const BASE_URL = process.env.REACT_APP_BASE_SERVER_URL; // Define your backend server URL
+const BASE_SERVER_URL = process.env.REACT_APP_BASE_SERVER_URL; // Define your backend server URL
 
 // Function to create a new user in the MongoDB database
 export const createUserInDatabase = async (name, email, firebaseUserId) => {
@@ -8,7 +8,7 @@ export const createUserInDatabase = async (name, email, firebaseUserId) => {
 
     const idToken = await getFirebaseIdToken();
 
-    const response = await fetch(`${BASE_URL}/api/users`, {
+    const response = await fetch(`${BASE_SERVER_URL}/api/users`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -46,7 +46,7 @@ export const getMongoUserDataByFirebaseId = async (firebaseUserId) => {
 
     const idToken = await getFirebaseIdToken();
 
-    const response = await fetch(`${BASE_URL}/api/users/firebase/${firebaseUserId}`, {
+    const response = await fetch(`${BASE_SERVER_URL}/api/users/firebase/${firebaseUserId}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -77,7 +77,7 @@ export const getUsers = async () => {
 
     const idToken = await getFirebaseIdToken();
 
-    const response = await fetch(`${BASE_URL}/api/users`, {
+    const response = await fetch(`${BASE_SERVER_URL}/api/users`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -104,7 +104,7 @@ export const getUserById = async (userId) => {
 
       const idToken = await getFirebaseIdToken();
 
-      const response = await fetch(`${BASE_URL}/api/users/${userId}`, {
+      const response = await fetch(`${BASE_SERVER_URL}/api/users/${userId}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -131,7 +131,7 @@ export const getUserById = async (userId) => {
 
       const idToken = await getFirebaseIdToken();
 
-      const response = await fetch(`${BASE_URL}/api/users/${userId}`, {
+      const response = await fetch(`${BASE_SERVER_URL}/api/users/${userId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -159,7 +159,7 @@ export const getUserById = async (userId) => {
 
       const idToken = await getFirebaseIdToken();
 
-      const response = await fetch(`${BASE_URL}/api/users/${userId}`, {
+      const response = await fetch(`${BASE_SERVER_URL}/api/users/${userId}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -184,7 +184,7 @@ export const getUserById = async (userId) => {
 export const softDeleteUser = async (mongoUserId) => {
   try {
 
-    const response = await fetch(`${BASE_URL}/api/users/soft_delete/${mongoUserId}`, {
+    const response = await fetch(`${BASE_SERVER_URL}/api/users/soft_delete/${mongoUserId}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -207,7 +207,7 @@ export const createCheckoutSession = async (purchaseItems, mongoUserId, creditsT
 
     const idToken = await getFirebaseIdToken();
 
-    const response = await fetch(`${BASE_URL}/api/stripe/create-checkout-session`, {
+    const response = await fetch(`${BASE_SERVER_URL}/api/stripe/create-checkout-session`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -234,7 +234,7 @@ export const getWagers = async () => {
 
     const idToken = await getFirebaseIdToken();
 
-    const response = await fetch(`${BASE_URL}/api/wagers`, {
+    const response = await fetch(`${BASE_SERVER_URL}/api/wagers`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -261,7 +261,7 @@ export const getLogs = async () => {
 
     const idToken = await getFirebaseIdToken();
 
-    const response = await fetch(`${BASE_URL}/api/logs`, {
+    const response = await fetch(`${BASE_SERVER_URL}/api/logs`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -304,7 +304,7 @@ export const getUserStateByLatLon = async (lat, lon) => {
 
     // Make the fetch request to your backend API
     const response = await fetch(
-      `${BASE_URL}/api/geofencing/reverse-geocode`,
+      `${BASE_SERVER_URL}/api/geofencing/reverse-geocode`,
       {
         method: "POST",
         headers: {
@@ -400,7 +400,7 @@ export const userAgeLegal = async (state, DOB) => {
 
   // Make the fetch request to your backend API
   const response = await fetch(
-    `${BASE_URL}/api/age-restriction/check-legal-age`,
+    `${BASE_SERVER_URL}/api/age-restriction/check-legal-age`,
     {
       method: "POST",
       headers: {
