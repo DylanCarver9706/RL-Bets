@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "./firebaseConfig";
+import { usePageTracking } from "./services/firebaseService";
 import {
   getMongoUserDataByFirebaseId,
   userLocationLegal,
@@ -39,10 +41,10 @@ const ProtectedRoute = ({ loggedIn, redirectTo = "/Auth", children }) => {
 };
 
 function App() {
+  usePageTracking();
   const { user, setUser } = useUser();
   const [loading, setLoading] = useState(true);
   const [serverLive, setServerLive] = useState(true); // Server status
-  const auth = getAuth();
   const navigate = useNavigate();
 
   // Check server status on app mount
@@ -108,7 +110,7 @@ function App() {
     });
 
     return () => unsubscribe();
-  }, [setUser, auth]);
+  }, [setUser]);
       
   // Get a potential referral code from the URL
   useEffect(() => {
@@ -158,7 +160,7 @@ function App() {
 
     };
     routeUser();
-  }, [loading, user, navigate, auth?.currentUser, serverLive]);
+  }, [loading, user, navigate, serverLive]);
 
   // Initialize the socket connection when the app mounts
   useEffect(() => {
