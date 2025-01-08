@@ -13,6 +13,8 @@ import {
   updateUser,
   getMongoUserDataByFirebaseId,
 } from "../services/userService.js";
+import { logEvent } from "firebase/analytics";
+import { analytics } from "../firebaseConfig";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -71,6 +73,11 @@ const Auth = () => {
         if (!firebaseUser?.uid) {
           throw new Error("Failed to retrieve Firebase user ID.");
         }
+
+        // Log the sign-up event to Firebase Analytics
+        logEvent(analytics, "sign_up", {
+          method: "email",
+        });
 
         // Create the user in MongoDB
         const mongoUser = await createUserInDatabase(
@@ -147,6 +154,11 @@ const Auth = () => {
             firebaseUser.uid,
             referralCode,
           );
+
+          // Log the sign-up event to Firebase Analytics
+          logEvent(analytics, "sign_up", {
+            method: "google",
+          });
 
           if (!firebaseUser.emailVerified) {
             // Send Email Verification
