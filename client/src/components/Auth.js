@@ -235,6 +235,51 @@ const Auth = () => {
               value={referralCode}
               onChange={(e) => setReferralCode(e.target.value)}
               />
+              <div style={{ position: "relative", display: "inline-block" }}>
+                <span
+                  style={{
+                    display: "inline-block",
+                    width: "20px",
+                    height: "20px",
+                    backgroundColor: "#007BFF",
+                    color: "white",
+                    borderRadius: "50%",
+                    textAlign: "center",
+                    lineHeight: "20px",
+                    cursor: "pointer",
+                    fontSize: "14px",
+                    fontWeight: "bold",
+                  }}
+                  onMouseEnter={(e) => {
+                    const tooltip = e.currentTarget.nextSibling;
+                    tooltip.style.display = "block";
+                  }}
+                  onMouseLeave={(e) => {
+                    const tooltip = e.currentTarget.nextSibling;
+                    tooltip.style.display = "none";
+                  }}
+                >
+                  i
+                </span>
+                <div
+                  style={{
+                    display: "none",
+                    position: "absolute",
+                    top: "30px",
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    backgroundColor: "#333",
+                    color: "#fff",
+                    padding: "8px",
+                    borderRadius: "5px",
+                    fontSize: "12px",
+                    whiteSpace: "nowrap",
+                    zIndex: 10,
+                  }}
+                >
+                  Note that the credits will not be received until the user has completed both email and identity verification
+                </div>
+              </div>
             </div>
             )}
             <button type="submit" disabled={loading}>
