@@ -1,14 +1,14 @@
 // PlaidService.js
 import { getFirebaseIdToken } from "./firebaseService.js";
 
-const BASE_URL = process.env.REACT_APP_BASE_SERVER_URL;
+const BASE_SERVER_URL = process.env.REACT_APP_BASE_SERVER_URL;
 
 // Generate Plaid Link token for IDV
 export const generateLinkTokenForIDV = async (mongoUserId) => {
   try {
     const idToken = await getFirebaseIdToken();
 
-    const response = await fetch(`${BASE_URL}/api/plaid/idv/link-token`, {
+    const response = await fetch(`${BASE_SERVER_URL}/api/plaid/idv/link-token`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -35,7 +35,7 @@ export const completeIDV = async (idvSession) => {
   try {
     const idToken = await getFirebaseIdToken();
 
-    const response = await fetch(`${BASE_URL}/api/plaid/idv/complete`, {
+    const response = await fetch(`${BASE_SERVER_URL}/api/plaid/idv/complete`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
