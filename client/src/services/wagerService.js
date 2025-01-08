@@ -1,8 +1,8 @@
-const BASE_URL = process.env.REACT_APP_BASE_SERVER_URL; // Define your backend server URL
+const BASE_SERVER_URL = process.env.REACT_APP_BASE_SERVER_URL; // Define your backend server URL
 
 export const fetchWagers = async () => {
   try {
-    const response = await fetch(`${BASE_URL}/api/wagers`, {
+    const response = await fetch(`${BASE_SERVER_URL}/api/wagers`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -23,7 +23,7 @@ export const fetchWagers = async () => {
 // Create wager
 export const createWager = async (body) => {
   try {
-    const response = await fetch(`${BASE_URL}/api/wagers`, {
+    const response = await fetch(`${BASE_SERVER_URL}/api/wagers`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -45,7 +45,7 @@ export const createWager = async (body) => {
 // Create bet
 export const createBet = async (body) => {
   try {
-    const response = await fetch(`${BASE_URL}/api/bets`, {
+    const response = await fetch(`${BASE_SERVER_URL}/api/bets`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -67,7 +67,7 @@ export const createBet = async (body) => {
 // Fetch the data tree for a given season ID
 export const fetchSeasonDataTree = async (seasonId) => {
   try {
-    const response = await fetch(`${BASE_URL}/api/data-trees/season/${seasonId}`, {
+    const response = await fetch(`${BASE_SERVER_URL}/api/data-trees/season/${seasonId}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -89,7 +89,7 @@ export const fetchSeasonDataTree = async (seasonId) => {
 // Fetch the teams
 export const fetchTeams = async () => {
   try {
-    const response = await fetch(`${BASE_URL}/api/teams`, {
+    const response = await fetch(`${BASE_SERVER_URL}/api/teams`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -110,7 +110,7 @@ export const fetchTeams = async () => {
 
 export const fetchBetableObjects = async () => {
   try {
-    const response = await fetch(`${BASE_URL}/api/data-trees/betable`, {
+    const response = await fetch(`${BASE_SERVER_URL}/api/data-trees/betable`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
