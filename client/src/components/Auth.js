@@ -18,11 +18,14 @@ const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("testuser@example.com");
   const [password, setPassword] = useState("password123");
+  const [confirmPassword, setConfirmPassword] = useState("password123");
   const [name, setName] = useState("Test User");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -44,6 +47,13 @@ const Auth = () => {
         window.location.reload();
         // Email Signup
       } else {
+
+        // Check if passwords match
+        if (password !== confirmPassword) {
+          setError("Passwords do not match.");
+          return;
+        }
+
         firebaseCredential = await createUserWithEmailAndPassword(
           auth,
           email,
@@ -192,6 +202,19 @@ const Auth = () => {
               <input
                 type="checkbox"
                 onClick={() => setShowPassword(!showPassword)}
+              />
+            </div>
+            <div>
+              <label>Confirm Password:</label>
+              <input
+              type={showConfirmPassword ? "text" : "password"}
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+              />
+              <input
+              type="checkbox"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
               />
             </div>
             <button type="submit" disabled={loading}>
