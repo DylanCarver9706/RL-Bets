@@ -109,6 +109,20 @@ function App() {
 
     return () => unsubscribe();
   }, [setUser, auth]);
+      
+  // Get a potential referral code from the URL
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const referralCode = params.get("ref");
+        
+    if (referralCode) {
+      // Save the referral code in localStorage or state
+      localStorage.setItem("referralCode", referralCode);
+
+      // Optionally navigate to a specific route or process the referral code
+      navigate("/Auth");
+    }
+  }, [navigate]);
 
   useEffect(() => {
     const routeUser = async () => {
