@@ -30,6 +30,7 @@ const createUser = async (userData) => {
   });
 
   if (existingUser) {
+    console.log("User exists, updating account status to active");
     return await updateMongoDocument(
       collections.usersCollection,
       existingUser._id.toString(),
