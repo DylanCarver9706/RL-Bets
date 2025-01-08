@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useUser } from "../context/UserContext";
 import { useNavigate } from "react-router-dom";
-import { updateUser } from "../services/userService";
+import { updateUser, redeemReferralCode } from "../services/userService";
 import {
   generateLinkTokenForIDV,
   openPlaidIDV,
@@ -41,6 +41,10 @@ const IdentityVerification = () => {
         }
         
         await updateUser(user.mongoUserId, updateUserObject);
+        
+        if (user.referralCode !== "") {
+          await redeemReferralCode("Referred User", user.mongoUserId, user.referralCode);
+        }
         
         // Reload App instead of navigating which will do the same thing
         await wait(5000);
