@@ -204,7 +204,8 @@ const Auth = () => {
                 onClick={() => setShowPassword(!showPassword)}
               />
             </div>
-            <div>
+            {!isLogin && (
+              <div>
               <label>Confirm Password:</label>
               <input
               type={showConfirmPassword ? "text" : "password"}
@@ -217,6 +218,8 @@ const Auth = () => {
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
               />
             </div>
+            )}
+            )}
             <button type="submit" disabled={loading}>
               {loading ? "Processing..." : isLogin ? "Login" : "Sign Up"}
             </button>
