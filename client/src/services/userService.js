@@ -424,3 +424,32 @@ export const userAgeLegal = async (state, DOB) => {
     return false;
   }
 }
+
+export const redeemReferralCode = async (promotionType, userId, referralCode = null) => {
+  try {
+    // Retrieve the Firebase ID token
+    const idToken = await getFirebaseIdToken();
+
+    let meta = {};
+
+    if (promotionType === "Referred User") {
+      meta = { existingUserId: referralCode };
+    }
+
+    // Make the fetch request to your backend API
+    const response = await fetch(`${BASE_SERVER_URL}/api/promotions/promotion_redemption`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${idToken}`, // Include the token in the headers
+      },
+      body: JSON.stringify({ promotionType, userId, meta }),
+    });
+    if (!response.ok) {
+      throw new Error("Failed to redeem referral code.");
+    }
+  } catch (err) {
+    console.error("Error redeeming referral code:", err.message);
+    return false;
+  }
+};
