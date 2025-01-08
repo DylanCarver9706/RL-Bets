@@ -69,6 +69,7 @@ app.use("/api/data-trees", require("./app/routes/dataTreeRoutes"));
 app.use("/api/jira", require("./app/routes/jiraRoutes"));
 app.use("/webhook", require("./app/routes/stripeWebhookRoute"));
 app.use("/api/server-utils", require("./app/routes/serverUtilsRoutes"));
+app.use("/api/promotions", require("./app/routes/promotionsRoutes"));
 
 app.use(errorLogger);
 
