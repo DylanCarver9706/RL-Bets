@@ -69,7 +69,8 @@ const Auth = () => {
         const mongoUser = await createUserInDatabase(
           name,
           email,
-          firebaseUser.uid
+          firebaseUser.uid,
+          referralCode,
         );
 
         // if (providerId === "password") {
@@ -136,7 +137,8 @@ const Auth = () => {
           const mongoUser = await createUserInDatabase(
             firebaseUser.displayName,
             firebaseUser.email,
-            firebaseUser.uid
+            firebaseUser.uid,
+            referralCode,
           );
 
           if (!firebaseUser.emailVerified) {
