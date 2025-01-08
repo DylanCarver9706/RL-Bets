@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { updateUser, softDeleteUser } from "../services/userService.js";
+import { updateUser, softDeleteUser, generateReferralCode } from "../services/userService.js";
 import { createJiraIssue } from "../services/jiraService.js";
 import {
   deleteUser,
@@ -21,6 +21,7 @@ const Profile = () => {
   const [editing, setEditing] = useState(false);
   const [password, setPassword] = useState("");
   const [showPasswordInput, setShowPasswordInput] = useState(false);
+  const [copySuccess, setCopySuccess] = useState(false);
   const navigate = useNavigate();
 
   // Handle updating the user information to Firebase and MongoDB
@@ -194,6 +195,17 @@ const Profile = () => {
     setShowPasswordInput(false); // Hide the input field
   };
 
+  const handleCopyReferralLink = async () => {
+    try {
+      await navigator.clipboard.writeText(await generateReferralCode(user.mongoUserId));
+      setCopySuccess("Copied!");
+      setTimeout(() => setCopySuccess(""), 2000); // Reset the success message after 2 seconds
+    } catch (error) {
+      setCopySuccess("Failed to copy!");
+      console.error("Failed to copy text:", error);
+    }
+  };
+
   return (
     <>
       <div>
@@ -257,12 +269,22 @@ const Profile = () => {
                 <button onClick={handleDelete} style={{ marginRight: "10px" }}>
                   Delete User
                 </button>
+                <br />
                 <button onClick={handleLogout} style={{ marginRight: "10px" }}>
                   Logout
                 </button>
+                <br />
                 <button onClick={handleResetPassword} style={{ marginRight: "10px" }}>
                   Reset Password
                 </button>
+                <br />
+                {copySuccess ? (
+                  <p style={{ marginRight: "10px" }}>{copySuccess}</p>
+                ) : (
+                <button onClick={handleCopyReferralLink} style={{ marginRight: "10px" }}>
+                  Copy Referral Link
+                </button>
+                )}
               </div>
             </div>
           )
