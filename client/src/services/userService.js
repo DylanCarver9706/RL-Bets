@@ -1,6 +1,7 @@
 import { getFirebaseIdToken } from "./firebaseService.js";
 
 const BASE_SERVER_URL = process.env.REACT_APP_BASE_SERVER_URL; // Define your backend server URL
+const BASE_CLIENT_URL = process.env.REACT_APP_BASE_CLIENT_URL; // Define your frontend client URL
 
 // Function to create a new user in the MongoDB database
 export const createUserInDatabase = async (name, email, firebaseUserId, referralCode) => {
@@ -453,3 +454,11 @@ export const redeemReferralCode = async (promotionType, userId, referralCode = n
     return false;
   }
 };
+
+export const generateReferralCode = async (userId) => {
+  try {
+    return `${BASE_CLIENT_URL}/Auth?ref=${userId}`;
+  } catch (err) {
+    throw new Error("Error generating referral code:", err.message);
+  }
+}
