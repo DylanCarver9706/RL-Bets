@@ -3,7 +3,7 @@ import { getFirebaseIdToken } from "./firebaseService.js";
 const BASE_SERVER_URL = process.env.REACT_APP_BASE_SERVER_URL; // Define your backend server URL
 
 // Function to create a new user in the MongoDB database
-export const createUserInDatabase = async (name, email, firebaseUserId) => {
+export const createUserInDatabase = async (name, email, firebaseUserId, referralCode) => {
   try {
 
     const idToken = await getFirebaseIdToken();
@@ -24,6 +24,7 @@ export const createUserInDatabase = async (name, email, firebaseUserId) => {
         emailVerificationStatus: "unverified",
         userType: "user",
         accountStatus: "active",
+        referralCode: referralCode,
       }),
     });
 
