@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
@@ -25,7 +25,14 @@ const Auth = () => {
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [referralCode, setReferralCode] = useState("");
 
+  useEffect(() => {
+    const storedCode = localStorage.getItem("referralCode");
+    if (storedCode) {
+      setReferralCode(storedCode);
+    }
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -221,6 +228,14 @@ const Auth = () => {
               />
             </div>
             )}
+            {!isLogin && (
+            <div>
+              <label>Referral Code:</label>
+              <input
+              value={referralCode}
+              onChange={(e) => setReferralCode(e.target.value)}
+              />
+            </div>
             )}
             <button type="submit" disabled={loading}>
               {loading ? "Processing..." : isLogin ? "Login" : "Sign Up"}
