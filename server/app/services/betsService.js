@@ -4,6 +4,7 @@ const {
   updateMongoDocument,
 } = require("../../database/middlewares/mongo");
 const { ObjectId } = require("mongodb");
+const { getSocketIo } = require("../middlewares/socketIO");
 
 const createBet = async (betData) => {
   const { user, credits, agreeBet, rlEventReference, wagerId } = betData;
@@ -25,10 +26,19 @@ const createBet = async (betData) => {
 
   const result = await createMongoDocument(collections.betsCollection, newBet);
 
+  const io = getSocketIo();
+
   // Update wager with the new bet
-  await updateMongoDocument(collections.wagersCollection, wagerId, {
-    $push: { bets: result.insertedId },
-  });
+  const updatedUser = await updateMongoDocument(
+    collections.wagersCollection,
+    wagerId,
+    {
+      $push: { bets: result.insertedId },
+    },
+    true
+  );
+
+  io.emit("updateUser", updatedUser);
 
   // Deduct credits from user
   await updateMongoDocument(collections.usersCollection, user, {
