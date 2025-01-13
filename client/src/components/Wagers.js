@@ -5,7 +5,7 @@ import { useUser } from "../context/UserContext.js";
 import { getWagers } from "../services/userService.js";
 import ToolTip from "./ToolTip.js";
 
-const estimatedWagerOutcome = (
+const estimatedWagerPayout = (
   betAmount,
   totalAgreeCreditsBet,
   totalDisagreeCreditsBet,
@@ -20,7 +20,7 @@ const estimatedWagerOutcome = (
     potentialWinnings = betAmount + (totalAgreeCreditsBet / (disagreeBetsCount + 1));
   }
 
-  console.log("potentialWinnings", potentialWinnings);
+  // console.log("potentialWinnings", potentialWinnings);
 
   if (potentialWinnings < 0) {
     return 0;
@@ -46,6 +46,7 @@ const Wagers = () => {
     const fetchWagers = async () => {
       try {
         const wagers = await getWagers();
+        // console.log("Fetched wagers:", wagers);
         setWagers(wagers);
         applyFilter("all", wagers);
       } catch (error) {
@@ -59,15 +60,19 @@ const Wagers = () => {
 
   // Listen for updates from the server
   useEffect(() => {
-    socket.on("wagersUpdate", (updatedWagers) => {
-      setWagers(updatedWagers || []);
-      applyFilter(activeFilter, updatedWagers);
-    });
-
-    // Cleanup listener on unmount
+    const handleWagersUpdate = (updatedWagers) => {
+      if (Array.isArray(updatedWagers)) {
+        setWagers(updatedWagers || []);
+        applyFilter(activeFilter, updatedWagers);
+      } else {
+        throw new Error("Invalid data received from wagersUpdate:", updatedWagers);
+      }
+    };
+  
+    socket.on("wagersUpdate", handleWagersUpdate);
+  
     return () => {
-      socket.off("wagersUpdate");
-      socket.disconnect();
+      socket.off("wagersUpdate", handleWagersUpdate);
     };
     // eslint-disable-next-line
   }, [user?.mongoUserId]);
@@ -116,10 +121,10 @@ const Wagers = () => {
 
   // Handle input change for each wager
   const handleBetInputChange = (value) => {
-    const betAmount = parseInt(value, 10) || 0;
+    const betAmount = parseFloat(value) || 0;
     setCreditsWagered(betAmount);
     setEstimatedWinnings(
-      estimatedWagerOutcome(
+      estimatedWagerPayout(
         betAmount,
         selectedWager.agreeCreditsBet,
         selectedWager.disagreeCreditsBet,
@@ -147,7 +152,7 @@ const Wagers = () => {
 
     const betPayload = {
       user: user.mongoUserId,
-      credits: parseInt(creditsWagered, 10),
+      credits: parseFloat(creditsWagered),
       agreeBet: wagerCaseSelected,
       rlEventReference: selectedWager.rlEventReference,
       wagerId: selectedWager._id,
@@ -170,7 +175,7 @@ const Wagers = () => {
     setSelectedWager(wager);
     setWagerCaseSelected(agreeBet);
     setEstimatedWinnings(
-      estimatedWagerOutcome(
+      estimatedWagerPayout(
         parseInt(user.credits / 10),
         wager.agreeCreditsBet,
         wager.disagreeCreditsBet,
@@ -235,7 +240,11 @@ const Wagers = () => {
           {filteredWagers?.length === 0 ? (
             <p>No wagers available.</p>
           ) : (
-            filteredWagers?.map((wager) => (
+            filteredWagers?.map((wager) => {
+              let userBet = null;
+              userBet = wager.bets.find(bet => bet.user === user.mongoUserId);
+              console.log(`userBet for ${userBet?.wagerId}`, userBet);
+              return (
               <li key={wager._id} style={styles.wagerItem}>
                 <div style={styles.wagerHeader}>
                   <strong>Wager ID: {wager._id}</strong>
@@ -245,6 +254,13 @@ const Wagers = () => {
                   <strong>Creator: {wager.creator}</strong>
                   <br />
                   <strong>Status: {wager.status}</strong>
+                  <br />
+                  {userBet && wager.status !== "Ended" && (
+                    <strong> Estimated Winnings: {estimatedWagerPayout(userBet.credits, wager.agreeCreditsBet, wager.disagreeCreditsBet, wager.agreeBetsCount, wager.disagreeBetsCount, userBet.agreeBet).toFixed(2)} Credits</strong>
+                  )}
+                  {userBet && wager.status === "Ended" && (
+                    <strong> Payout: {estimatedWagerPayout(userBet.credits, wager.agreeCreditsBet, wager.disagreeCreditsBet, wager.agreeBetsCount, wager.disagreeBetsCount, userBet.agreeBet).toFixed(2)} Credits</strong>
+                  )}
                   <p>
                     <br />
                     {wager.name}
@@ -329,16 +345,16 @@ const Wagers = () => {
                     </strong>{" "}
                     happen
                     <p>
-                      Estimated Winnings: {parseInt(estimatedWinnings) || 0}{" "}
+                      Estimated Winnings: {parseFloat(estimatedWinnings).toFixed(2) || 0}{" "}
                       credits
                     </p>
                     {wagerCaseSelected ? (
                     <p>
-                      Meaning: {creditsWagered} credits bet + {parseInt(estimatedWinnings - creditsWagered) > 0 ? parseInt(estimatedWinnings - creditsWagered) : 0} credits earned = {parseInt(estimatedWinnings) || 0} credits won {<ToolTip infoText={`Bet Amount + ( Total ${wagerCaseSelected ? 'Disagree' : 'Agree'} Credits Bet / ${wagerCaseSelected ? "Agree" : "Disagree"} Bets Count + 1)`}/>} {" "}
+                      Meaning: {creditsWagered} credits bet + {parseFloat(estimatedWinnings - creditsWagered).toFixed(2) > 0 ? parseFloat(estimatedWinnings - creditsWagered).toFixed(2) : 0} credits earned = {parseFloat(estimatedWinnings).toFixed(2) || 0} credits won {<ToolTip infoText={`Bet Amount + ( Total ${wagerCaseSelected ? 'Disagree' : 'Agree'} Credits Bet / ${wagerCaseSelected ? "Agree" : "Disagree"} Bets Count + 1)`}/>} {" "}
                     </p>
                     ) : (
                       <p>
-                        Meaning: {creditsWagered} credits bet + {parseInt(estimatedWinnings - creditsWagered) > 0 ? parseInt(estimatedWinnings - creditsWagered) : 0} credits earned = {parseInt(estimatedWinnings) || 0} credits won {<ToolTip infoText={`Bet Amount + ( Total ${wagerCaseSelected ? 'Disagree' : 'Agree'} Credits Bet / ${wagerCaseSelected ? "Agree" : "Disagree"} Bets Count + 1)`}/>}{" "}
+                        Meaning: {creditsWagered} credits bet + {parseFloat(estimatedWinnings - creditsWagered).toFixed(2) > 0 ? parseFloat(estimatedWinnings - creditsWagered).toFixed(2) : 0} credits earned = {parseFloat(estimatedWinnings).toFixed(2) || 0} credits won {<ToolTip infoText={`Bet Amount + ( Total ${wagerCaseSelected ? 'Disagree' : 'Agree'} Credits Bet / ${wagerCaseSelected ? "Agree" : "Disagree"} Bets Count + 1)`}/>}{" "}
                       </p>
                     )}
                     <button
@@ -358,7 +374,8 @@ const Wagers = () => {
                   </div>
                 )}
               </li>
-            ))
+              )
+            })
           )}
         </ul>
       </div>
