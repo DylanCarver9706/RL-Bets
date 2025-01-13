@@ -1,9 +1,25 @@
+import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useUser } from "../context/UserContext.js";
+import socket from "../services/socket.js";
 
 const Navbar = () => {
-  const { user } = useUser();
+  const { user, setUser } = useUser();
 
+  // Listen for updates from the server
+  useEffect(() => {
+    socket.on("updateUser", (updateUser) => {
+      setUser({...user, credits: updateUser.credits});
+    });
+
+    // Cleanup listener on unmount
+    return () => {
+      socket.off("wagersUpdate");
+      socket.disconnect();
+    };
+    // eslint-disable-next-line
+  }, [user?.mongoUserId]);
+  
   if (!user) {
     return null; // Hide navbar if no user is logged in
   }
