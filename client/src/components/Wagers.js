@@ -4,23 +4,29 @@ import { createBet } from "../services/wagerService.js";
 import { useUser } from "../context/UserContext.js";
 import { getWagers } from "../services/userService.js";
 
-const WagerOutcomeFormula = (
+const estimatedWagerOutcome = (
   betAmount,
-  totalWinnersBetsAmount,
-  totalLosersBetsAmount
+  totalAgreeCreditsBet,
+  totalDisagreeCreditsBet,
+  agreeBetsCount,
+  disagreeBetsCount,
+  agreeBet, // true or false
 ) => {
-  if (
-    totalWinnersBetsAmount === 0 ||
-    totalLosersBetsAmount === 0 ||
-    isNaN(betAmount)
-  ) {
+  let potentialWinnings = 0;
+  if (agreeBet === true) {
+    potentialWinnings = betAmount + (totalDisagreeCreditsBet / (agreeBetsCount + 1)); // The "+ 1" is to account for the new potential bet
+  } else {
+    potentialWinnings = betAmount + (totalAgreeCreditsBet / (disagreeBetsCount + 1));
+  }
+
+  console.log("potentialWinnings", potentialWinnings);
+
+  if (potentialWinnings < 0) {
     return 0;
   }
-  const winnings =
-    (betAmount / totalWinnersBetsAmount) * totalLosersBetsAmount + betAmount;
-  // console.log(`((${betAmount} / (${totalWinnersBetsAmount})) * ${totalLosersBetsAmount}) + ${betAmount} = ${winnings}`)
-  return winnings;
-};
+
+  return potentialWinnings;
+}
 
 const Wagers = () => {
   const { user } = useUser();
