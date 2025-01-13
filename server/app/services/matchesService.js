@@ -6,6 +6,7 @@ const {
 const { createLog } = require("./logsService");
 const { ObjectId } = require("mongodb");
 const { getSocketIo } = require("../middlewares/socketIO");
+const { getAllWagers } = require("./wagersService");
 
 const createMatch = async (matchData) => {
   if (!matchData.series) {
@@ -50,6 +51,7 @@ const updateMatch = async (id, updateData) => {
     $set: updateData,
   });
 
+  // Update the status of all wagers associated with this match
   if (updateData.status) {
     const wagers = await collections.wagersCollection
       .find({ rlEventReference: id })
@@ -65,6 +67,8 @@ const updateMatch = async (id, updateData) => {
         )
       )
     );
+    const io = getSocketIo();
+    io.emit("wagersUpdate", await getAllWagers());
   }
 };
 
