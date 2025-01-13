@@ -9,7 +9,9 @@ const Navbar = () => {
   // Listen for updates from the server
   useEffect(() => {
     socket.on("updateUser", (updateUser) => {
-      setUser({...user, credits: updateUser.credits});
+      if (updateUser._id === user.mongoUserId) {
+        setUser({...user, credits: updateUser.credits});
+      }
     });
 
     // Cleanup listener on unmount
