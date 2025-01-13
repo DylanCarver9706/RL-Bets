@@ -115,8 +115,7 @@ const updateWager = async (id, updateData) => {
     $set: updateData,
   });
   const io = getSocketIo();
-  const allWagers = await collections.wagersCollection.find().toArray();
-  io.emit("wagersUpdate", await wagersWithStats(allWagers));
+  io.emit("wagersUpdate", await getAllWagers());
   return await collections.wagersCollection.findOne({
     _id: ObjectId.createFromHexString(id),
   });
