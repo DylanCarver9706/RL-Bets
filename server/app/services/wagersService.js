@@ -5,10 +5,10 @@ const {
   createMongoDocument,
   updateMongoDocument,
 } = require("../../database/middlewares/mongo");
+const { getSocketIo } = require("../middlewares/socketIO");
 
-const getAllWagers = async () => {
+const wagersWithStats = async (wagers) => {
   try {
-    const wagers = await collections.wagersCollection.find().toArray();
 
     const wagersWithStats = await Promise.all(
       wagers.map(async (wager) => {
@@ -53,6 +53,17 @@ const getAllWagers = async () => {
     );
 
     return wagersWithStats;
+  } catch (error) {
+    console.error("Error fetching wagers:", error.message);
+    throw error;
+  }
+};
+
+const getAllWagers = async () => {
+  try {
+    const wagers = await collections.wagersCollection.find().toArray();
+
+    return wagersWithStats(wagers);
   } catch (error) {
     console.error("Error fetching wagers:", error.message);
     throw error;
