@@ -114,6 +114,9 @@ const updateWager = async (id, updateData) => {
   await updateMongoDocument(collections.wagersCollection, id, {
     $set: updateData,
   });
+  const io = getSocketIo();
+  const allWagers = await collections.wagersCollection.find().toArray();
+  io.emit("wagersUpdate", await wagersWithStats(allWagers));
   return await collections.wagersCollection.findOne({
     _id: ObjectId.createFromHexString(id),
   });
