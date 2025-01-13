@@ -3,6 +3,7 @@ import socket from "../services/socket.js";
 import { createBet } from "../services/wagerService.js";
 import { useUser } from "../context/UserContext.js";
 import { getWagers } from "../services/userService.js";
+import ToolTip from "./ToolTip.js";
 
 const estimatedWagerOutcome = (
   betAmount,
@@ -35,8 +36,8 @@ const Wagers = () => {
   const [activeFilter, setActiveFilter] = useState("all");
   const [showBetInput, setShowBetInput] = useState(false);
   const [creditsWagered, setCreditsWagered] = useState(0);
-  const [betInputs, setBetInputs] = useState({});
-  const [selectedBet, setSelectedBet] = useState({});
+  const [selectedWager, setSelectedWager] = useState(null);
+  const [wagerCaseSelected, setWagerCaseSelected] = useState(null);
   const [estimatedWinnings, setEstimatedWinnings] = useState(0);
 
   // Fetch wagers from the server and then listen for updates
@@ -70,24 +71,6 @@ const Wagers = () => {
     };
     // eslint-disable-next-line
   }, [user?.mongoUserId]);
-
-  useEffect(() => {
-    // Recalculate estimated winnings if credits wagered or selected wager's agree/disagree values change
-    if (selectedBet.wagerId && creditsWagered > 0) {
-      const wager = wagers.find((w) => w._id === selectedBet.wagerId);
-      if (wager) {
-        const { agreeCreditsBet = 0, disagreeCreditsBet = 0 } = wager;
-
-        setEstimatedWinnings(
-          WagerOutcomeFormula(
-            creditsWagered,
-            agreeCreditsBet,
-            disagreeCreditsBet
-          )
-        );
-      }
-    }
-  }, [creditsWagered, wagers, selectedBet]);
 
   // Apply filters based on the selected filter option
   const applyFilter = (filter, allWagers = wagers) => {
@@ -132,49 +115,70 @@ const Wagers = () => {
   };
 
   // Handle input change for each wager
-  const handleBetInputChange = (wagerId, value) => {
+  const handleBetInputChange = (value) => {
     const betAmount = parseInt(value, 10) || 0;
-    setBetInputs((prev) => ({ ...prev, [wagerId]: betAmount }));
     setCreditsWagered(betAmount);
-  };
-
-  // Handle showing bet input
-  const handleShowBetInput = (wagerId, agreeBet) => {
-    setShowBetInput(true);
-    setSelectedBet({ wagerId, agreeBet });
+    setEstimatedWinnings(
+      estimatedWagerOutcome(
+        betAmount,
+        selectedWager.agreeCreditsBet,
+        selectedWager.disagreeCreditsBet,
+        selectedWager.agreeBetsCount,
+        selectedWager.disagreeBetsCount,
+        wagerCaseSelected
+      )
+    );
   };
 
   // Handle cancel bet
   const handleCancelBet = () => {
-    setSelectedBet({});
+    setSelectedWager(null);
+    setWagerCaseSelected(null);
     setShowBetInput(false);
     setEstimatedWinnings(0);
   };
 
   // Handle submit bet
-  const handleSubmitBet = async (wagerId, agreeBet) => {
-    const credits = betInputs[wagerId];
-    if (!credits || isNaN(credits)) {
+  const handleSubmitBet = async () => {
+    // const credits = betInputs[wagerId];
+    if (!creditsWagered || isNaN(creditsWagered)) {
       return alert("Please enter a valid number of credits.");
     }
 
     const betPayload = {
       user: user.mongoUserId,
-      credits: parseInt(credits, 10),
-      agreeBet: agreeBet,
-      rlEventReference: wagerId,
-      wagerId: wagerId,
+      credits: parseInt(creditsWagered, 10),
+      agreeBet: wagerCaseSelected,
+      rlEventReference: selectedWager.rlEventReference,
+      wagerId: selectedWager._id,
     };
 
     try {
       await createBet(betPayload);
       alert("Bet placed successfully!");
-      setSelectedBet({});
-      setBetInputs({});
-      setEstimatedWinnings(0);
+      handleCancelBet();
     } catch (error) {
       console.error("Error placing bet:", error);
     }
+  };
+
+  const handleWagerOptionClick = (wager, agreeBet) => {
+    setCreditsWagered(parseInt(user.credits / 10));
+    setShowBetInput(true);
+
+    console.log("wager", wager);
+    setSelectedWager(wager);
+    setWagerCaseSelected(agreeBet);
+    setEstimatedWinnings(
+      estimatedWagerOutcome(
+        parseInt(user.credits / 10),
+        wager.agreeCreditsBet,
+        wager.disagreeCreditsBet,
+        wager.agreeBetsCount,
+        wager.disagreeBetsCount,
+        agreeBet
+      )
+    );
   };
 
   return (
@@ -228,10 +232,10 @@ const Wagers = () => {
 
       <div style={styles.wagerListContainer}>
         <ul style={styles.wagerList}>
-          {filteredWagers.length === 0 ? (
+          {filteredWagers?.length === 0 ? (
             <p>No wagers available.</p>
           ) : (
-            filteredWagers.map((wager) => (
+            filteredWagers?.map((wager) => (
               <li key={wager._id} style={styles.wagerItem}>
                 <div style={styles.wagerHeader}>
                   <strong>Wager ID: {wager._id}</strong>
@@ -269,7 +273,7 @@ const Wagers = () => {
                       wager.creator !== user.mongoUserId && (
                         <button
                           style={styles.betButton}
-                          onClick={() => handleShowBetInput(wager._id, true)}
+                          onClick={() => handleWagerOptionClick(wager, true)}
                         >
                           Bet on Agree
                         </button>
@@ -297,7 +301,7 @@ const Wagers = () => {
                       wager.creator !== user.mongoUserId && (
                         <button
                           style={styles.betButton}
-                          onClick={() => handleShowBetInput(wager._id, false)}
+                          onClick={() => handleWagerOptionClick(wager, false)}
                         >
                           Bet on Disagree
                         </button>
@@ -306,42 +310,41 @@ const Wagers = () => {
                 </div>
 
                 {/* Show input when Bet button is clicked */}
-                {showBetInput && selectedBet.wagerId === wager._id && (
+                {showBetInput && selectedWager?._id === wager._id && (
                   <div>
                     I bet{" "}
                     <input
                       type="number"
                       id="numberInput"
-                      value={betInputs[wager._id] || ""}
+                      value={creditsWagered}
                       onChange={(e) =>
-                        handleBetInputChange(wager._id, e.target.value)
+                        handleBetInputChange(e.target.value)
                       }
                       min="0"
                       step="1"
                     />{" "}
                     credits that this{" "}
                     <strong>
-                      {selectedBet.agreeBet ? "will" : "will not"}
+                      {wagerCaseSelected ? "will" : "will not"}
                     </strong>{" "}
                     happen
                     <p>
                       Estimated Winnings: {parseInt(estimatedWinnings) || 0}{" "}
                       credits
                     </p>
+                    {wagerCaseSelected ? (
                     <p>
-                      Credits Earned: ((Bet Amount / (Total Winner's Credits Bet +
-                      Bet Amount)) * Total Loser's Credits Bet) + Bet Amount
+                      Meaning: {creditsWagered} credits bet + {parseInt(estimatedWinnings - creditsWagered) > 0 ? parseInt(estimatedWinnings - creditsWagered) : 0} credits earned = {parseInt(estimatedWinnings) || 0} credits won {<ToolTip infoText={`Bet Amount + ( Total ${wagerCaseSelected ? 'Disagree' : 'Agree'} Credits Bet / ${wagerCaseSelected ? "Agree" : "Disagree"} Bets Count + 1)`}/>} {" "}
                     </p>
-                    <p>
-                      Meaning: {creditsWagered} credits bet +{" "}
-                      {parseInt(estimatedWinnings - creditsWagered) || 0}{" "}
-                      credits earned = {parseInt(estimatedWinnings) || 0}{" "}
-                      credits won
-                    </p>
+                    ) : (
+                      <p>
+                        Meaning: {creditsWagered} credits bet + {parseInt(estimatedWinnings - creditsWagered) > 0 ? parseInt(estimatedWinnings - creditsWagered) : 0} credits earned = {parseInt(estimatedWinnings) || 0} credits won {<ToolTip infoText={`Bet Amount + ( Total ${wagerCaseSelected ? 'Disagree' : 'Agree'} Credits Bet / ${wagerCaseSelected ? "Agree" : "Disagree"} Bets Count + 1)`}/>}{" "}
+                      </p>
+                    )}
                     <button
                       style={styles.submitBetButton}
                       onClick={() =>
-                        handleSubmitBet(wager._id, selectedBet.agreeBet)
+                        handleSubmitBet()
                       }
                     >
                       Submit Bet
