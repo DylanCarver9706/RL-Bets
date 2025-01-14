@@ -68,7 +68,7 @@ export const updateMatchById = async (id, updateData) => {
 export const updateMatchResults = async (matchId, updateData) => {
   try {
     const response = await fetch(`${BASE_SERVER_URL}/api/match_concluded/${matchId}`, {
-      method: "PUT",
+      method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
