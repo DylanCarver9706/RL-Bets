@@ -88,21 +88,19 @@ const deleteMatch = async (id) => {
 
 // Functions for matches that end
 
-const WagerOutcomeFormula = (
+const WagerPayoutFormula = (
   betAmount,
   totalWinnersBetsAmount,
-  totalLosersBetsAmount
+  totalLosersBetsAmount,
 ) => {
-  return (
-    (betAmount / totalWinnersBetsAmount) * totalLosersBetsAmount + betAmount
-  );
+  return (betAmount + (totalLosersBetsAmount * (betAmount / totalWinnersBetsAmount)));
 };
 
 // Function to pay out bets
 const payOutBetWinners = async (wagerId, agreeIsWinner) => {
   // Find all wagers where rlEventReference matches the converted ObjectId
   const wager = await collections.wagersCollection.findOne({
-    _id: ObjectId.createFromHexString(wagerId),
+    _id: wagerId,
   });
 
   // console.log(wager)
@@ -115,28 +113,34 @@ const payOutBetWinners = async (wagerId, agreeIsWinner) => {
     .toArray();
 
   // Calculate the total credits for the winner and loser bets
-  let loserCredits = 0;
   let winnerCredits = 0;
+  let loserCredits = 0;
+  let winnerCount = 0;
+  let loserCount = 0;
   for (let index = 0; index < wagerBets.length; index++) {
     const bet = wagerBets[index];
     if (bet.agreeBet !== agreeIsWinner) {
       loserCredits += bet.credits;
+      loserCount++;
     } else {
       winnerCredits += bet.credits;
+      winnerCount++;
     }
   }
+
+  console.log("winnerCredits", winnerCredits, "loserCredits", loserCredits, "winnerCount", winnerCount, "loserCount", loserCount);
 
   // Update users credits field to add the credits they won
   for (let index = 0; index < wagerBets.length; index++) {
     const bet = wagerBets[index];
     if (bet.agreeBet == agreeIsWinner) {
       const user = await collections.usersCollection.findOne({
-        _id: ObjectId.createFromHexString(bet.user),
+        _id: bet.user,
       });
-      awardedCredits = WagerOutcomeFormula(
+      awardedCredits = WagerPayoutFormula(
         bet.credits,
         winnerCredits,
-        loserCredits
+        loserCredits,
       );
       console.log(
         "User Paid Out:",
@@ -146,7 +150,7 @@ const payOutBetWinners = async (wagerId, agreeIsWinner) => {
       );
       const updatedUser = await updateMongoDocument(
         collections.usersCollection,
-        bet.user,
+        bet.user.toString(),
         {
           $set: {
             earnedCredits: user.earnedCredits + awardedCredits,
@@ -157,7 +161,7 @@ const payOutBetWinners = async (wagerId, agreeIsWinner) => {
       );
 
       createLog({
-        wagerId: wagerId,
+        wagerId: wagerId.toString(),
         earnedCredits: awardedCredits,
         type: "User Paid Out",
         user: user._id,
@@ -176,46 +180,25 @@ const getMatchOutcomes = async (
   agreeEvaluationObject = null
 ) => {
   try {
-    // Step 1: Retrieve the teams from the teamsCollection
-    const teamsArray = await collections.teamsCollection
-      .find({ _id: { $in: teams } })
-      .toArray();
-
-    // Step 2: Extract player IDs from the teamsArray
-    const playerIds = teamsArray.flatMap((team) => team.players);
-
-    // Step 3: Retrieve the player metadata from the playersCollection
-    const playersArray = await playersCollection
-      .find({ _id: { $in: playerIds } })
-      .toArray();
 
     // Initialize team goals
-    let teamGoals = {
-      [teams[0].toString()]: 0,
-      [teams[1].toString()]: 0,
-    };
-
-    // Step 1: Retrieve players and their team associations
-    const playerNames = Object.keys(matchResults);
-    const players = await collections.playersCollection
-      .find({ name: { $in: playerNames } })
-      .toArray();
-
-    // Step 2: Map player goals to their respective teams
-    players.forEach((player) => {
-      const playerResult = matchResults[player.name];
-      if (playerResult) {
-        const teamId = player.team.toString();
-        if (teamGoals[teamId] !== undefined) {
-          teamGoals[teamId] += playerResult.goals; // Sum goals per team
-        }
-      }
+    const teamGoals = {};
+    teams.forEach((teamId) => {
+      teamGoals[teamId.toString()] = 0; // Initialize goals for each team
     });
 
-    // Step 3: Determine the winning team
+    // Step 1: Aggregate team goals from matchResults
+    Object.entries(matchResults).forEach(([teamId, players]) => {
+      teamGoals[teamId] = players.reduce((totalGoals, player) => {
+        return totalGoals + player.goals;
+      }, 0);
+    });
+
+    // Step 2: Determine the winning and losing teams
     const [team1, team2] = teams.map((team) => team.toString());
     let winningTeam = null;
     let losingTeam = null;
+
     if (teamGoals[team1] > teamGoals[team2]) {
       winningTeam = team1;
       losingTeam = team2;
@@ -224,24 +207,20 @@ const getMatchOutcomes = async (
       losingTeam = team1;
     }
 
-    // Step 4: Find the MVP (highest score on the winning team)
+    // Step 3: Find the MVP (highest score on the winning team)
     let mvp = null;
     let highestScore = 0;
 
-    players.forEach((player) => {
-      const playerResult = matchResults[player.name];
-      // console.log(player)
-      if (
-        player.team.toString() === winningTeam &&
-        playerResult.score > highestScore
-      ) {
-        highestScore = playerResult.score;
-        // console.log(player)
-        mvp = player._id; // Assign player as MVP
-      }
-    });
+    if (winningTeam) {
+      matchResults[winningTeam].forEach((player) => {
+        if (player.score > highestScore) {
+          highestScore = player.score;
+          mvp = player.playerId; // Assign player ID as MVP
+        }
+      });
+    }
 
-    // Step 5: Get a team goals string to use as the agree evaluation
+    // Step 4: Get a team goals string to use as the agree evaluation
     const teamGoalsString = Object.entries(teamGoals)
       .map(([key, value]) => `${key}: ${value}`)
       .join(" - ");
@@ -249,11 +228,11 @@ const getMatchOutcomes = async (
     const response = {
       winningTeam,
       losingTeam,
-      teamGoals: teamGoalsString,
       mvp,
+      teamGoals: teamGoalsString,
     };
 
-    // Step 6: Optionally determine the agree evaluation of a player/team attributes wager
+    // Step 5: Optionally determine the agree evaluation of a player/team attributes wager
     if (agreeEvaluationObject) {
       const {
         selectedTeamOrPlayerForBet,
@@ -263,69 +242,34 @@ const getMatchOutcomes = async (
       } = agreeEvaluationObject;
 
       let agreeEvaluation = false;
-
-      // Convert attributeBetInput to a number for comparison
       const attributeBetValue = parseInt(attributeBetInput, 10);
       let actualValue = null;
 
-      // Determine if the wager is for a team or a player
-      let teamOrPlayerForBet = null;
-
       // Check if the selected ID corresponds to a team
-      if (
-        teamsArray.some(
-          (team) => team._id.toString() === selectedTeamOrPlayerForBet
-        )
-      ) {
-        // Find the team for the bet
-        teamOrPlayerForBet = teamsArray.find(
-          (team) => team._id.toString() === selectedTeamOrPlayerForBet
-        );
-
-        // Calculate the total for the selected attribute from players on this team
-        actualValue = 0;
-        const teamPlayers = playersArray.filter((player) =>
-          teamOrPlayerForBet.players
-            .map((id) => id.toString())
-            .includes(player._id.toString())
-        );
+      if (Object.keys(matchResults).includes(selectedTeamOrPlayerForBet)) {
+        const teamPlayers = matchResults[selectedTeamOrPlayerForBet];
 
         // Sum the values of the selected attribute for all players on the team
-        for (const player of teamPlayers) {
-          const playerResult = matchResults[player.name];
-          if (
-            playerResult &&
-            selectedAttributeBetType.toLowerCase() in playerResult
-          ) {
-            actualValue += playerResult[selectedAttributeBetType.toLowerCase()];
-          }
-        }
+        actualValue = teamPlayers.reduce((sum, player) => {
+          return (
+            sum +
+            (player[selectedAttributeBetType.toLowerCase()] || 0)
+          );
+        }, 0);
       }
       // Check if the selected ID corresponds to a player
-      else if (
-        playersArray.some(
-          (player) => player._id.toString() === selectedTeamOrPlayerForBet
-        )
-      ) {
-        // Find the player for the bet
-        teamOrPlayerForBet = playersArray.find(
-          (player) => player._id.toString() === selectedTeamOrPlayerForBet
-        );
-
-        // Get the value of the selected attribute for the player
-        const playerResult = matchResults[teamOrPlayerForBet.name];
-        if (
-          playerResult &&
-          selectedAttributeBetType.toLowerCase() in playerResult
-        ) {
-          actualValue = playerResult[selectedAttributeBetType.toLowerCase()];
-        }
-      } else {
-        // Throw an error if neither a team nor a player was found for the bet
-        throw new Error("Team or player not found");
+      else {
+        Object.values(matchResults).forEach((teamPlayers) => {
+          const player = teamPlayers.find(
+            (p) => p.playerId === selectedTeamOrPlayerForBet
+          );
+          if (player) {
+            actualValue =
+              player[selectedAttributeBetType.toLowerCase()] || 0;
+          }
+        });
       }
 
-      // Evaluate the condition if actualValue is valid
       if (actualValue !== null) {
         switch (selectedBetOperator) {
           case "exactly":
@@ -342,30 +286,24 @@ const getMatchOutcomes = async (
         }
       }
 
-      // Add the evaluation result to the response
       response.agreeEvaluation = agreeEvaluation;
     }
 
     return response;
   } catch (error) {
-    console.error("Error determining match winner:", error);
-    throw new Error("Failed to determine match winner");
+    console.error("Error determining match outcomes:", error);
+    throw new Error("Failed to determine match outcomes");
   }
 };
 
 const handleWagerEnded = async (wagerId, agreeIsWinner) => {
-  const wager = await collections.wagersCollection.findOne({
-    _id: ObjectId.createFromHexString(wagerId),
-  });
-
-  //  console.log("wager: ", wager)
 
   const updatedWager = {
     status: "Ended",
     agreeIsWinner: agreeIsWinner,
   };
 
-  await updateMongoDocument(collections.wagersCollection, wager._id, {
+  await updateMongoDocument(collections.wagersCollection, wagerId.toString(), {
     $set: updatedWager,
   });
 
@@ -648,12 +586,11 @@ const getSeriesOutcomes = async (
 const handleMatchWagers = async (
   matchId,
   matchOutcomes,
-  firstBlood,
   matchResults,
   teams
 ) => {
   // Get all wagers associated to this match
-  const matchWagers = await wagersCollection
+  const matchWagers = await collections.wagersCollection
     .find({ rlEventReference: matchId, status: "Ongoing" })
     .toArray();
 
@@ -678,9 +615,6 @@ const handleMatchWagers = async (
         wager._id,
         wager.agreeEvaluation === matchOutcomes.teamGoals
       );
-    } else if (wager.wagerType === "First Blood") {
-      // wager.agreeEvaluation is an Object id of the fist blood team
-      await handleWagerEnded(wager._id, wager.agreeEvaluation === firstBlood);
     } else if (wager.wagerType === "Match MVP") {
       // NOTE: Assign object if of the players n the match results
       // wager.agreeEvaluation is an Object id of the mvp player
@@ -706,7 +640,7 @@ const handleSeriesWagers = async (seriesId) => {
   // console.log("seriesId: ", seriesId)
 
   // Get all wagers associated to this match
-  const seriesWagers = await wagersCollection
+  const seriesWagers = await collections.wagersCollection
     .find({ rlEventReference: seriesId.toString(), status: "Ongoing" })
     .toArray();
 
@@ -777,7 +711,7 @@ const getTournamentOutcomes = async (
     };
 
     // Step 1: Retrieve the tournament document
-    const tournamentDoc = await tournamentsCollection.findOne({
+    const tournamentDoc = await collections.tournamentsCollection.findOne({
       _id: ObjectId.createFromHexString(tournamentId),
     });
     if (!tournamentDoc) {
@@ -788,13 +722,13 @@ const getTournamentOutcomes = async (
     response.losingTeam = tournamentDoc.loser;
 
     // Step 2: Get all series within the tournament
-    const seriesArray = await seriesCollection
+    const seriesArray = await collections.seriesCollection
       .find({ _id: { $in: tournamentDoc.series } })
       .toArray();
     const seriesIds = seriesArray.map((series) => series._id);
 
     // Step 3: Get all matches for these series
-    const matchesArray = await matchesCollection
+    const matchesArray = await collections.matchesCollection
       .find({ series: { $in: seriesIds } })
       .toArray();
 
@@ -810,7 +744,7 @@ const getTournamentOutcomes = async (
     );
 
     // Step 5: Get all teams using the collected team IDs
-    const teamsArray = await teamsCollection
+    const teamsArray = await collections.teamsCollection
       .find({ _id: { $in: teamIdsArray } })
       .toArray();
 
@@ -818,7 +752,7 @@ const getTournamentOutcomes = async (
     const playerIds = teamsArray.flatMap((team) => team.players);
 
     // Step 7: Retrieve the player metadata from the playersCollection
-    const playersArray = await playersCollection
+    const playersArray = await collections.playersCollection
       .find({ _id: { $in: playerIds } })
       .toArray();
 
@@ -923,7 +857,7 @@ const handleTournamentWagers = async (tournamentId) => {
   // console.log("tournamentId: ", tournamentId)
 
   // Get all wagers associated to this match
-  const tournamentWagers = await wagersCollection
+  const tournamentWagers = await collections.wagersCollection
     .find({ rlEventReference: tournamentId.toString(), status: "Ongoing" })
     .toArray();
 
@@ -967,7 +901,7 @@ const getSeasonOutcomes = async (seasonId, agreeEvaluationObject = null) => {
     };
 
     // Step 1: Retrieve the season document
-    const seasonDoc = await seasonsCollection.findOne({
+    const seasonDoc = await collections.seasonsCollection.findOne({
       _id: ObjectId.createFromHexString(seasonId),
     });
     if (!seasonDoc) {
@@ -977,19 +911,19 @@ const getSeasonOutcomes = async (seasonId, agreeEvaluationObject = null) => {
     response.winningTeam = seasonDoc.winner;
 
     // Step 2: Get all tournaments within the season
-    const tournamentsArray = await tournamentsCollection
+    const tournamentsArray = await collections.tournamentsCollection
       .find({ _id: { $in: seasonDoc.tournaments } })
       .toArray();
     const tournamentIds = tournamentsArray.map((tournament) => tournament._id);
 
     // Step 3: Get all series within the tournaments
-    const seriesArray = await seriesCollection
+    const seriesArray = await collections.seriesCollection
       .find({ tournament: { $in: tournamentIds } })
       .toArray();
     const seriesIds = seriesArray.map((series) => series._id);
 
     // Step 4: Get all matches for these series
-    const matchesArray = await matchesCollection
+    const matchesArray = await collections.matchesCollection
       .find({ series: { $in: seriesIds } })
       .toArray();
 
@@ -1005,7 +939,7 @@ const getSeasonOutcomes = async (seasonId, agreeEvaluationObject = null) => {
     );
 
     // Step 6: Get all teams using the collected team IDs
-    const teamsArray = await teamsCollection
+    const teamsArray = await collections.teamsCollection
       .find({ _id: { $in: teamIdsArray } })
       .toArray();
 
@@ -1013,7 +947,7 @@ const getSeasonOutcomes = async (seasonId, agreeEvaluationObject = null) => {
     const playerIds = teamsArray.flatMap((team) => team.players);
 
     // Step 8: Retrieve the player metadata from the playersCollection
-    const playersArray = await playersCollection
+    const playersArray = await collections.playersCollection
       .find({ _id: { $in: playerIds } })
       .toArray();
 
@@ -1116,7 +1050,7 @@ const getSeasonOutcomes = async (seasonId, agreeEvaluationObject = null) => {
 
 const handleSeasonWagers = async (seasonId) => {
   // Get all wagers associated with this season
-  const seasonWagers = await wagersCollection
+  const seasonWagers = await collections.wagersCollection
     .find({ rlEventReference: seasonId.toString(), status: "Ongoing" })
     .toArray();
 
@@ -1149,38 +1083,37 @@ const handleSeasonWagers = async (seasonId) => {
 };
 
 const matchConcluded = async (matchId, data) => {
-  const { results, firstBlood, wentToOvertime, endTournament, endSeason } =
+  const { results, wentToOvertime, endTournament, endSeason } =
     data;
 
   let message = " updated successfully";
 
   // Find the match by its ID
-  const matchDoc = await matchesCollection.findOne({
+  const matchDoc = await collections.matchesCollection.findOne({
     _id: ObjectId.createFromHexString(matchId),
   });
 
   // Find the series by its ID
-  const seriesDoc = await seriesCollection.findOne({
-    _id: ObjectId.createFromHexString(matchDoc.series),
+  const seriesDoc = await collections.seriesCollection.findOne({
+    _id: matchDoc.series,
   });
 
   const matchOutcomes = await getMatchOutcomes(results, matchDoc.teams);
 
-  // console.log("matchOutcomes: ", matchOutcomes)
+  console.log("matchOutcomes: ", matchOutcomes)
 
   // Build the update object for the match
   const updateData = {
     results: results,
     winner: ObjectId.createFromHexString(matchOutcomes.winningTeam),
-    loser: ObjectId.createFromHexString(matchOutcomes.winningTeam),
-    firstBlood: firstBlood,
+    loser: ObjectId.createFromHexString(matchOutcomes.losingTeam),
     wentToOvertime: wentToOvertime,
-    series: ObjectId.createFromHexString(seriesDoc._id),
+    series: seriesDoc._id,
     status: "Ended",
   };
 
   // Update the match in the database
-  const updatedMatch = await updateMongoDocument(matchesCollection, matchId, {
+  const updatedMatch = await updateMongoDocument(collections.matchesCollection, matchId, {
     $set: updateData,
   });
 
@@ -1195,7 +1128,6 @@ const matchConcluded = async (matchId, data) => {
   await handleMatchWagers(
     matchId,
     matchOutcomes,
-    firstBlood,
     results,
     matchDoc.teams
   );
@@ -1203,16 +1135,16 @@ const matchConcluded = async (matchId, data) => {
   // Update the series document if series has ended with this match
 
   // Set first blood if it is not set because this would be the first match
-  if (seriesDoc.firstBlood === null) {
-    await updateMongoDocument(seriesCollection, seriesDoc._id, {
-      $set: {
-        firstBlood: firstBlood,
-      },
-    });
-  }
+  // if (seriesDoc.firstBlood === null) {
+  //   await updateMongoDocument(collections.seriesCollection, seriesDoc._id, {
+  //     $set: {
+  //       firstBlood: firstBlood,
+  //     },
+  //   });
+  // }
 
   // Get all the matches in the series
-  const seriesMatches = await matchesCollection
+  const seriesMatches = await collections.matchesCollection
     .find({
       _id: { $in: seriesDoc.matches }, // Assuming `matches` is an array of match Object IDs in the series
     })
@@ -1244,7 +1176,7 @@ const matchConcluded = async (matchId, data) => {
       loser: ObjectId.createFromHexString(matchOutcomes.losingTeam),
       overtimeCount: overtimeCount,
     };
-    await updateMongoDocument(seriesCollection, seriesDoc._id, {
+    await updateMongoDocument(collections.seriesCollection, seriesDoc._id, {
       $set: seriesUpdateData,
     });
     createLog({ type: "Series Ended", seriesId: seriesDoc._id });
@@ -1255,7 +1187,7 @@ const matchConcluded = async (matchId, data) => {
 
   // Set status for Tournament if included in request body
   if (endTournament === true) {
-    await updateMongoDocument(tournamentsCollection, seriesDoc.tournament, {
+    await updateMongoDocument(collections.tournamentsCollection, seriesDoc.tournament, {
       $set: {
         status: "Ended",
         winner: ObjectId.createFromHexString(matchOutcomes.winningTeam),
@@ -1272,15 +1204,15 @@ const matchConcluded = async (matchId, data) => {
   // Set status for Season if included in request body
   if (endSeason === true) {
     // Find the season that contains the tournament in its tournaments array
-    const seasonDoc = await seasonsCollection.findOne({
+    const seasonDoc = await collections.seasonsCollection.findOne({
       tournaments: {
-        $in: [ObjectId.createFromHexString(seriesDoc.tournament)],
+        $in: [seriesDoc.tournament],
       },
     });
 
     if (seasonDoc) {
       // Update the status of the season to "Ended"
-      await updateMongoDocument(seasonsCollection, seasonDoc._id, {
+      await updateMongoDocument(collections.seasonsCollection, seasonDoc._id, {
         $set: { status: "Ended", winner: matchOutcomes.winningTeam },
       });
     }
