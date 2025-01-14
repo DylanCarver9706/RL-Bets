@@ -12,7 +12,7 @@ const Tooltip = ({ infoText }) => {
   };
 
   return (
-    <div style={{ position: "relative", display: "inline-block" }}>
+    <span style={{ position: "relative", display: "inline-block" }}>
       <span
         style={{
           display: "inline-block",
@@ -33,7 +33,7 @@ const Tooltip = ({ infoText }) => {
         i
       </span>
       {isTooltipVisible && (
-        <div
+        <span
           style={{
             position: "absolute",
             top: "30px",
@@ -49,9 +49,9 @@ const Tooltip = ({ infoText }) => {
           }}
         >
           {infoText}
-        </div>
+        </span>
       )}
-    </div>
+    </span>
   );
 };
 
