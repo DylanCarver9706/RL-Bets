@@ -9,15 +9,13 @@ const estimatedWagerPayout = (
   betAmount,
   totalAgreeCreditsBet,
   totalDisagreeCreditsBet,
-  agreeBetsCount,
-  disagreeBetsCount,
   agreeBet, // true or false
 ) => {
   let potentialWinnings = 0;
   if (agreeBet === true) {
-    potentialWinnings = betAmount + (totalDisagreeCreditsBet / (agreeBetsCount + 1)); // The "+ 1" is to account for the new potential bet
+    potentialWinnings = betAmount + (totalDisagreeCreditsBet * (betAmount / (betAmount + totalAgreeCreditsBet)));
   } else {
-    potentialWinnings = betAmount + (totalAgreeCreditsBet / (disagreeBetsCount + 1));
+    potentialWinnings = betAmount + (totalAgreeCreditsBet * (betAmount / (betAmount + totalDisagreeCreditsBet)));
   }
 
   // console.log("potentialWinnings", potentialWinnings);
@@ -28,6 +26,21 @@ const estimatedWagerPayout = (
 
   return potentialWinnings;
 }
+
+const WagerPayoutFormula = (
+  betAmount,
+  totalWinnersBetsAmount,
+  totalLosersBetsAmount,
+  agreeIsTrue
+) => {
+  let potentialWinnings = 0;
+  if (agreeIsTrue === true) {
+    potentialWinnings = ((totalLosersBetsAmount * (betAmount / totalWinnersBetsAmount)));
+  } else {
+    potentialWinnings = ((totalWinnersBetsAmount * (betAmount / totalLosersBetsAmount)));
+  }
+  return potentialWinnings;
+};
 
 const Wagers = () => {
   const { user } = useUser();
@@ -123,15 +136,14 @@ const Wagers = () => {
   const handleBetInputChange = (value) => {
     const betAmount = parseFloat(value) || 0;
     setCreditsWagered(betAmount);
+    const estimatedPayout = estimatedWagerPayout(
+      betAmount,
+      selectedWager.agreeCreditsBet,
+      selectedWager.disagreeCreditsBet,
+      wagerCaseSelected
+    );
     setEstimatedWinnings(
-      estimatedWagerPayout(
-        betAmount,
-        selectedWager.agreeCreditsBet,
-        selectedWager.disagreeCreditsBet,
-        selectedWager.agreeBetsCount,
-        selectedWager.disagreeBetsCount,
-        wagerCaseSelected
-      )
+      estimatedPayout
     );
   };
 
@@ -174,16 +186,15 @@ const Wagers = () => {
     console.log("wager", wager);
     setSelectedWager(wager);
     setWagerCaseSelected(agreeBet);
-    setEstimatedWinnings(
-      estimatedWagerPayout(
-        parseInt(user.credits / 10),
-        wager.agreeCreditsBet,
-        wager.disagreeCreditsBet,
-        wager.agreeBetsCount,
-        wager.disagreeBetsCount,
-        agreeBet
-      )
+
+    const estimatedPayout = estimatedWagerPayout(
+      parseInt(user.credits / 10),
+      wager.agreeCreditsBet,
+      wager.disagreeCreditsBet,
+      agreeBet
     );
+
+    setEstimatedWinnings(estimatedPayout);
   };
 
   return (
@@ -243,7 +254,7 @@ const Wagers = () => {
             filteredWagers?.map((wager) => {
               let userBet = null;
               userBet = wager.bets.find(bet => bet.user === user.mongoUserId);
-              console.log(`userBet for ${userBet?.wagerId}`, userBet);
+              // console.log(`userBet for ${userBet?.wagerId}`, userBet);
               return (
               <li key={wager._id} style={styles.wagerItem}>
                 <div style={styles.wagerHeader}>
@@ -256,10 +267,10 @@ const Wagers = () => {
                   <strong>Status: {wager.status}</strong>
                   <br />
                   {userBet && wager.status !== "Ended" && (
-                    <strong> Estimated Winnings: {estimatedWagerPayout(userBet.credits, wager.agreeCreditsBet, wager.disagreeCreditsBet, wager.agreeBetsCount, wager.disagreeBetsCount, userBet.agreeBet).toFixed(2)} Credits</strong>
+                    <strong> Current Estimated Winnings: {estimatedWagerPayout(userBet.credits, userBet.agreeBet ? wager.agreeCreditsBet - userBet.credits : wager.agreeCreditsBet, !userBet.agreeBet ? wager.disagreeCreditsBet - userBet.credits : wager.disagreeCreditsBet, userBet.agreeBet).toFixed(2)} Credits {<ToolTip infoText={`Bet Amount: ${userBet.credits} + Current Potential Winnings: ${(estimatedWagerPayout(userBet.credits, userBet.agreeBet ? wager.agreeCreditsBet - userBet.credits : wager.agreeCreditsBet, !userBet.agreeBet ? wager.disagreeCreditsBet - userBet.credits : wager.disagreeCreditsBet, userBet.agreeBet) - userBet.credits).toFixed(2)}`}/>}</strong>
                   )}
                   {userBet && wager.status === "Ended" && (
-                    <strong> Payout: {estimatedWagerPayout(userBet.credits, wager.agreeCreditsBet, wager.disagreeCreditsBet, wager.agreeBetsCount, wager.disagreeBetsCount, userBet.agreeBet).toFixed(2)} Credits</strong>
+                    <strong> Credits Earned: {(WagerPayoutFormula(userBet.credits, userBet.agreeBet ? wager.agreeCreditsBet : wager.disagreeCreditsBet, userBet.agreeBet ? wager.disagreeCreditsBet : wager.agreeCreditsBet, userBet.agreeBet) + userBet.credits).toFixed(2)} Credits {<ToolTip infoText={`Bet Amount: ${userBet.credits} + Bet Winnings: ${(estimatedWagerPayout(userBet.credits, userBet.agreeBet ? wager.agreeCreditsBet - userBet.credits : wager.agreeCreditsBet, !userBet.agreeBet ? wager.disagreeCreditsBet - userBet.credits : wager.disagreeCreditsBet, userBet.agreeBet) - userBet.credits).toFixed(2)}`}/>}</strong>
                   )}
                   <p>
                     <br />
@@ -345,16 +356,16 @@ const Wagers = () => {
                     </strong>{" "}
                     happen
                     <p>
-                      Estimated Winnings: {parseFloat(estimatedWinnings).toFixed(2) || 0}{" "}
-                      credits
+                      Estimated Winnings: {parseFloat(estimatedWinnings - creditsWagered).toFixed(2) || 0}{" "}
+                      credits{" "}{<ToolTip infoText={`Total ${wagerCaseSelected ? 'Disagree' : 'Agree'} Credits Bet x ( Bet Amount / ( Bet Amount + Total ${wagerCaseSelected ? "Agree" : "Disagree"} Credits Bet ))`}/>}
                     </p>
                     {wagerCaseSelected ? (
                     <p>
-                      Meaning: {creditsWagered} credits bet + {parseFloat(estimatedWinnings - creditsWagered).toFixed(2) > 0 ? parseFloat(estimatedWinnings - creditsWagered).toFixed(2) : 0} credits earned = {parseFloat(estimatedWinnings).toFixed(2) || 0} credits won {<ToolTip infoText={`Bet Amount + ( Total ${wagerCaseSelected ? 'Disagree' : 'Agree'} Credits Bet / ${wagerCaseSelected ? "Agree" : "Disagree"} Bets Count + 1)`}/>} {" "}
+                      Meaning: {creditsWagered} credits bet + {parseFloat(estimatedWinnings - creditsWagered).toFixed(2) > 0 ? parseFloat(estimatedWinnings - creditsWagered).toFixed(2) : 0} credits won = {parseFloat(estimatedWinnings).toFixed(2) || 0} credits earned
                     </p>
                     ) : (
                       <p>
-                        Meaning: {creditsWagered} credits bet + {parseFloat(estimatedWinnings - creditsWagered).toFixed(2) > 0 ? parseFloat(estimatedWinnings - creditsWagered).toFixed(2) : 0} credits earned = {parseFloat(estimatedWinnings).toFixed(2) || 0} credits won {<ToolTip infoText={`Bet Amount + ( Total ${wagerCaseSelected ? 'Disagree' : 'Agree'} Credits Bet / ${wagerCaseSelected ? "Agree" : "Disagree"} Bets Count + 1)`}/>}{" "}
+                        Meaning: {creditsWagered} credits bet + {parseFloat(estimatedWinnings - creditsWagered).toFixed(2) > 0 ? parseFloat(estimatedWinnings - creditsWagered).toFixed(2) : 0} credits won = {parseFloat(estimatedWinnings).toFixed(2) || 0} credits earned
                       </p>
                     )}
                     <button
