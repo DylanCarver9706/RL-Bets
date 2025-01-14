@@ -66,7 +66,7 @@ const Navbar = () => {
         </Link>
         {user?.credits !== null && (
           <Link to="/Credit-Shop" style={styles.link}>
-            {user?.credits} Credits
+            {parseInt(user?.credits)} Credits
           </Link>
         )}
       </div>
