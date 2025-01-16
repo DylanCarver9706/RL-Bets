@@ -59,7 +59,6 @@ app.use("/api/geofencing", require("./app/routes/geofencingRoutes"));
 app.use("/api/age-restriction", require("./app/routes/ageRestrictionRoutes"));
 app.use("/api/wagers", require("./app/routes/wagersRoutes"));
 app.use("/api/bets", require("./app/routes/betsRoutes"));
-app.use("/api/seasons", require("./app/routes/seasonsRoutes"));
 app.use("/api/tournaments", require("./app/routes/tournamentsRoutes"));
 app.use("/api/series", require("./app/routes/seriesRoutes"));
 app.use("/api/matches", require("./app/routes/matchesRoutes"));
