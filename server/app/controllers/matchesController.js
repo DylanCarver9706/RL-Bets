@@ -5,6 +5,7 @@ const {
   updateMatch,
   deleteMatch,
   matchConcluded,
+  setFirstBlood,
 } = require("../services/matchesService");
 
 const create = async (req, res, logError) => {
@@ -53,6 +54,15 @@ const concludeMatch = async (req, res, logError) => {
   }
 };
 
+const firstBlood = async (req, res, logError) => {
+  try {
+    await setFirstBlood(req.params.id, req.body);
+    res.status(200).json({ message: "First Blood set successfully" });
+  } catch (error) {
+    logError(error);
+  }
+};
+
 const remove = async (req, res, logError) => {
   try {
     await deleteMatch(req.params.id);
@@ -62,4 +72,4 @@ const remove = async (req, res, logError) => {
   }
 };
 
-module.exports = { create, getAll, getById, update, concludeMatch, remove };
+module.exports = { create, getAll, getById, update, concludeMatch, firstBlood, remove };
