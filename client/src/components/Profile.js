@@ -261,8 +261,8 @@ const Profile = () => {
                     <button onClick={() => setEditing(false)}>Cancel</button>
                   </>
                 )}
-                <p>Credits: {user.credits}</p>
-                <p>Earned Credits: {user.earnedCredits}</p>
+                <p>Credits: {parseFloat(user.credits).toFixed(4)}</p>
+                <p>Earned Credits: {parseFloat(user.earnedCredits).toFixed(4)}</p>
                 <p>Identity Verification Status: {user.idvStatus}</p>
                 <p>Email Verification Status: {user.emailVerificationStatus}</p>
                 <br />
@@ -274,9 +274,11 @@ const Profile = () => {
                   Logout
                 </button>
                 <br />
-                <button onClick={handleResetPassword} style={{ marginRight: "10px" }}>
-                  Reset Password
-                </button>
+                {user.authProvider !== "google" && (
+                  <button onClick={handleResetPassword} style={{ marginRight: "10px" }}>
+                    Reset Password
+                  </button>
+                )}
                 <br />
                 {copySuccess ? (
                   <p style={{ marginRight: "10px" }}>{copySuccess}</p>
