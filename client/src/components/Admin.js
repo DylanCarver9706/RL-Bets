@@ -159,14 +159,33 @@ const Admin = () => {
   };
 
   // Function to handle results input change in the modal
-  const handleResultsChange = (player, key, value) => {
-    setResultsData((prevResults) => ({
-      ...prevResults,
-      [player]: {
-        ...prevResults[player],
-        [key]: value,
-      },
-    }));
+  const handleResultsChange = (teamId, playerId, stat, value) => {
+    setResultsData((prevResults) => {
+      // Ensure the team exists in the results object as an array
+      const updatedTeamResults = prevResults[teamId] || [];
+  
+      // Find the player entry for the team or initialize a new player entry
+      const playerIndex = updatedTeamResults.findIndex(
+        (player) => player.playerId === playerId
+      );
+  
+      if (playerIndex === -1) {
+        // Player not found, initialize new entry
+        updatedTeamResults.push({ playerId, [stat]: value });
+      } else {
+        // Player found, update the stat value
+        updatedTeamResults[playerIndex] = {
+          ...updatedTeamResults[playerIndex],
+          [stat]: value,
+        };
+      }
+  
+      // Return the updated results object
+      return {
+        ...prevResults,
+        [teamId]: updatedTeamResults,
+      };
+    });
   };
 
   // Function to handle saving match results
@@ -175,7 +194,6 @@ const Admin = () => {
       if (currentMatch) {
         const updatePayload = {
           results: resultsData,
-          firstBlood,
           wentToOvertime,
           endTournament,
           endSeason,
@@ -185,7 +203,6 @@ const Admin = () => {
         setData(updatedData);
         setShowResultsModal(false);
         setResultsData({});
-        setFirstBlood(false);
         setWentToOvertime(false);
         setEndTournament(false);
         setEndSeason(false);
