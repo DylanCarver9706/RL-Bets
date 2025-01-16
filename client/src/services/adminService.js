@@ -1,9 +1,9 @@
 const BASE_SERVER_URL = process.env.REACT_APP_BASE_SERVER_URL; // Define your backend server URL
 
 // Fetch the data tree for a given season ID
-export const fetchAllSeasonsDataTree = async () => {
+export const fetchAllTournamentsDataTree = async () => {
   try {
-    const response = await fetch(`${BASE_SERVER_URL}/api/data-trees/season/all`, {
+    const response = await fetch(`${BASE_SERVER_URL}/api/data-trees/tournament/all`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -64,11 +64,6 @@ const updateDocumentById = async (endpoint, id, updateData) => {
     console.error(`Error updating ${endpoint} with ID ${id}:`, err.message);
     throw err;
   }
-};
-
-// Update a season by ID
-export const updateSeasonById = async (id, updateData) => {
-  return updateDocumentById("seasons", id, updateData);
 };
 
 // Update a tournament by ID
