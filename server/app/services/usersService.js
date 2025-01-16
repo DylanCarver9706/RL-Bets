@@ -70,13 +70,18 @@ const softDeleteUser = async (id) => {
   await updateMongoDocument(collections.usersCollection, id, {
     $set: {
       name: null,
-      firebaseUserId: null,
+      // email
+      // mongoUserId
       credits: 0.0,
       earnedCredits: 0.0,
+      firebaseUserId: null,
+      // userType
       idvStatus: "unverified",
       emailVerificationStatus: "unverified",
       accountStatus: "deleted",
       DOB: null,
+      referralCode: null,
+      authProvider: null,
     },
   });
 
