@@ -251,24 +251,6 @@ const Admin = () => {
       <h3>Enter Match Results</h3>
       <div style={{ marginBottom: "15px" }}>
         <label>
-          First Blood:
-          <select
-            value={firstBlood}
-            onChange={(e) => setFirstBlood(e.target.value)}
-            style={{ marginLeft: "10px", padding: "5px" }}
-          >
-            <option value="">Select Team</option>
-            {currentMatch &&
-              currentMatch.teams.map((team) => (
-                <option key={team._id} value={team._id}>
-                  {team.name}
-                </option>
-              ))}
-          </select>
-        </label>
-      </div>
-      <div style={{ marginBottom: "15px" }}>
-        <label>
           <input
             type="checkbox"
             checked={wentToOvertime}
@@ -298,40 +280,72 @@ const Admin = () => {
       </div>
       {currentMatch &&
         currentMatch.teams &&
-        currentMatch.teams.flatMap((team) =>
+        currentMatch.teams.map((team) =>
           team.players.map((player) => (
             <div key={player._id} style={{ marginBottom: "10px" }}>
               <label>{player.name}:</label>
-              <table style={{ width: "100%", marginTop: "5px", borderCollapse: "collapse" }}>
+              <table
+                style={{
+                  width: "100%",
+                  marginTop: "5px",
+                  borderCollapse: "collapse",
+                }}
+              >
                 <thead>
                   <tr>
-                    {["Score", "Goals", "Assists", "Shots", "Saves", "Demos"].map((stat) => (
-                      <th key={stat} style={{ border: "1px solid #ccc", padding: "5px", background: "#ddd" }}>
-                        {stat}
-                      </th>
-                    ))}
+                    {["Score", "Goals", "Assists", "Shots", "Saves", "Demos"].map(
+                      (stat) => (
+                        <th
+                          key={stat}
+                          style={{
+                            border: "1px solid #ccc",
+                            padding: "5px",
+                            background: "#ddd",
+                          }}
+                        >
+                          {stat}
+                        </th>
+                      )
+                    )}
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
-                    {["score", "goals", "assists", "shots", "saves", "demos"].map((stat) => (
-                      <td key={stat} style={{ border: "1px solid #ccc", padding: "5px" }}>
-                        <input
-                          type="number"
-                          placeholder={`Enter ${stat}`}
-                          value={resultsData[player.name]?.[stat] || ""}
-                          onChange={(e) =>
-                            handleResultsChange(player.name, stat, parseInt(e.target.value, 10) || 0)
-                          }
+                    {["score", "goals", "assists", "shots", "saves", "demos"].map(
+                      (stat) => (
+                        <td
+                          key={stat}
                           style={{
-                            width: "100%",
-                            padding: "4px",
-                            borderRadius: "4px",
                             border: "1px solid #ccc",
+                            padding: "5px",
                           }}
-                        />
-                      </td>
-                    ))}
+                        >
+                          <input
+                            type="number"
+                            placeholder={`Enter ${stat}`}
+                            value={
+                              resultsData[team._id]?.find(
+                                (p) => p.playerId === player._id
+                              )?.[stat] || ""
+                            }
+                            onChange={(e) =>
+                              handleResultsChange(
+                                team._id,
+                                player._id,
+                                stat,
+                                parseInt(e.target.value, 10) || 0
+                              )
+                            }
+                            style={{
+                              width: "100%",
+                              padding: "4px",
+                              borderRadius: "4px",
+                              border: "1px solid #ccc",
+                            }}
+                          />
+                        </td>
+                      )
+                    )}
                   </tr>
                 </tbody>
               </table>
@@ -350,7 +364,7 @@ const Admin = () => {
           marginTop: "10px",
         }}
       >
-        Save Results
+        Save Results & Pay Out Wagers
       </button>
       <button
         onClick={() => {
