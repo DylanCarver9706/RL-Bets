@@ -16,13 +16,14 @@ export const UserProvider = ({ children }) => {
     idvStatus: "unverified",
     emailVerificationStatus: "unverified",
     accountStatus: null,
+    DOB: null,
+    referralCode: null,
+    authProvider: null,
+    // End of attributes in the DB
     locationValid: null,
     locationPermissionGranted: null,
     currentState: null,
-    DOB: null,
     ageValid: null,
-    referralCode: null,
-    authProvider: null,
   }); // Global user state
 
   return (
