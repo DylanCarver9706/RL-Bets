@@ -444,38 +444,94 @@ const Admin = () => {
   // Function to render the results object as a table
   const renderResultsTable = (results) => {
     if (!results || typeof results !== "object") return null;
-
-    const playerNames = Object.keys(results);
-    const attributes = Object.keys(results[playerNames[0]] || {});
-
-    const halfIndex = Math.ceil(playerNames.length / 2);
-
+  
+    // Create a map of player IDs to names for quick lookup
+    const playerIdToNameMap = players.reduce((map, player) => {
+      map[player._id] = player.name;
+      return map;
+    }, {});
+  
+    // Extract team IDs and their player data
+    const teamIds = Object.keys(results);
+    const [team1, team2] = teamIds;
+  
+    // Attributes to display
+    const attributes = ["score", "goals", "assists", "shots", "saves", "demos"];
+  
     return (
       <table style={{ borderCollapse: "collapse", width: "100%", marginTop: "10px" }}>
         <thead>
           <tr>
-            {playerNames.map((player, index) => (
-              <React.Fragment key={player}>
-                {index === halfIndex && (
-                  <th style={{ border: "1px solid #ddd", padding: "8px", background: "#b3b1b1" }}>Attribute</th>
-                )}
-                <th style={{ border: "1px solid #ddd", padding: "8px", background: "#b3b1b1" }}>{player}</th>
-              </React.Fragment>
+            {/* Team 1 Player Names */}
+            {results[team1].map((player) => (
+              <th
+                key={player.playerId}
+                style={{
+                  border: "1px solid #ddd",
+                  padding: "8px",
+                  background: "#b3b1b1",
+                }}
+              >
+                {playerIdToNameMap[player.playerId] || "Unknown"}
+              </th>
+            ))}
+            {/* Attribute Column Header */}
+            <th
+              style={{
+                border: "1px solid #ddd",
+                padding: "8px",
+                background: "#b3b1b1",
+              }}
+            >
+              Attribute
+            </th>
+            {/* Team 2 Player Names */}
+            {results[team2].map((player) => (
+              <th
+                key={player.playerId}
+                style={{
+                  border: "1px solid #ddd",
+                  padding: "8px",
+                  background: "#b3b1b1",
+                }}
+              >
+                {playerIdToNameMap[player.playerId] || "Unknown"}
+              </th>
             ))}
           </tr>
         </thead>
         <tbody>
           {attributes.map((attribute) => (
             <tr key={attribute}>
-              {playerNames.map((player, index) => (
-                <React.Fragment key={player}>
-                  {index === halfIndex && (
-                    <td style={{ border: "1px solid #ddd", padding: "8px", background: "#b3b1b1" }}>
-                      <strong>{attribute.charAt(0).toUpperCase() + attribute.slice(1)}</strong>
-                    </td>
-                  )}
-                  <td style={{ border: "1px solid #ddd", padding: "8px" }}>{results[player][attribute]}</td>
-                </React.Fragment>
+              {/* Team 1 Player Stats */}
+              {results[team1].map((player) => (
+                <td
+                  key={`${player.playerId}-${attribute}`}
+                  style={{ border: "1px solid #ddd", padding: "8px" }}
+                >
+                  {player[attribute]}
+                </td>
+              ))}
+              {/* Attribute Name Column */}
+              <td
+                style={{
+                  border: "1px solid #ddd",
+                  padding: "8px",
+                  textAlign: "center",
+                  background: "#b3b1b1",
+                  fontWeight: "bold",
+                }}
+              >
+                {attribute.charAt(0).toUpperCase() + attribute.slice(1)}
+              </td>
+              {/* Team 2 Player Stats */}
+              {results[team2].map((player) => (
+                <td
+                  key={`${player.playerId}-${attribute}`}
+                  style={{ border: "1px solid #ddd", padding: "8px" }}
+                >
+                  {player[attribute]}
+                </td>
               ))}
             </tr>
           ))}
