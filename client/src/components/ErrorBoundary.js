@@ -64,19 +64,24 @@ class ErrorBoundary extends React.Component {
     };
 
     // Send crash report
-    createJiraIssue(
-      this.props.user?.name || "unknown",
-      this.props.user?.email || "unknown",
-      this.props.user?.mongoUserId || "unknown",
-      "Problem Report",
-      "Client App Error Occurred",
-      JSON.stringify(errorDetails, null, 2),
-      "App Error Occurred"
-    );
+    if (process.env.ENV === "production") {
+      createJiraIssue(
+        this.props.user?.name || "unknown",
+        this.props.user?.email || "unknown",
+        this.props.user?.mongoUserId || "unknown",
+        "Problem Report",
+        "Client App Error Occurred",
+        JSON.stringify(errorDetails, null, 2),
+        "App Error Occurred"
+      );
+    } else {
+      console.log("Error logging to Jira skipped in non-production environment");
+    }
+    
   }
 
   render() {
-    if (this.state.hasError) {
+    if (this.state.hasError && process.env.ENV === "production") {
       this.props.navigate("/Whoopsie-Daisy");
       return null;
     }
