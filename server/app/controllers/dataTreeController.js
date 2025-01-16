@@ -1,23 +1,13 @@
 const {
-  getAllSeasonsDataTree,
-  getSeasonDataTree,
+  getAllTournamentsDataTree,
   getTournamentDataTree,
   getSeriesDataTree,
   getBetableDataTree,
 } = require("../services/dataTreeService");
 
-const getAllSeasons = async (req, res, logError) => {
+const getAllTournaments = async (req, res, logError) => {
   try {
-    const data = await getAllSeasonsDataTree();
-    res.status(200).json(data);
-  } catch (error) {
-    logError(error);
-  }
-};
-
-const getSeason = async (req, res, logError) => {
-  try {
-    const data = await getSeasonDataTree(req.params.id);
+    const data = await getAllTournamentsDataTree();
     res.status(200).json(data);
   } catch (error) {
     logError(error);
@@ -51,11 +41,8 @@ const getBetable = async (req, res, logError) => {
   }
 };
 
-// Other methods like getSeason, getTournament, etc.
-
 module.exports = {
-  getAllSeasons,
-  getSeason,
+  getAllTournaments,
   getTournament,
   getSeries,
   getBetable,
