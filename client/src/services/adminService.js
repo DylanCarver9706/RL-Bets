@@ -88,7 +88,7 @@ export const updateMatchById = async (id, updateData) => {
 
 export const updateMatchResults = async (matchId, updateData) => {
   try {
-    const response = await fetch(`${BASE_SERVER_URL}/api/match_concluded/${matchId}`, {
+    const response = await fetch(`${BASE_SERVER_URL}/api/matches/match_concluded/${matchId}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -126,4 +126,24 @@ export const createSeries = async (seriesData) => {
     console.error("Error creating series:", err.message);
     throw err;
   }
+};
+
+export const updateFirstBlood = async (matchId, updateData) => {
+  try {
+    const response = await fetch(`${BASE_SERVER_URL}/api/matches/first_blood/${matchId}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(updateData),
+    });
+    if (!response.ok) {
+      throw new Error(`Failed to update first blood for match ID: ${matchId}`);
+    }
+    const data = await response.json();
+    return data;
+    } catch (err) {
+    console.error(`Error updating first blood for match ID ${matchId}:`, err.message);
+    throw err;
+    }
 };
