@@ -8,7 +8,6 @@ const initializeCollections = async () => {
   collections.logsCollection = db.collection("Logs");
   collections.wagersCollection = db.collection("Wagers");
   collections.betsCollection = db.collection("Bets");
-  collections.seasonsCollection = db.collection("Seasons");
   collections.tournamentsCollection = db.collection("Tournaments");
   collections.seriesCollection = db.collection("Series");
   collections.matchesCollection = db.collection("Matches");
