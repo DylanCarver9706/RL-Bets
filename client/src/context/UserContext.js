@@ -22,6 +22,7 @@ export const UserProvider = ({ children }) => {
     DOB: null,
     ageValid: null,
     referralCode: null,
+    authProvider: null,
   }); // Global user state
 
   return (
