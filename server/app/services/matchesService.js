@@ -366,7 +366,7 @@ const getSeriesOutcomes = async (
     };
 
     const seriesDoc = await collections.seriesCollection.findOne({
-      _id: ObjectId.createFromHexString(seriesId),
+      _id: seriesId,
     });
 
     const seriesMatches = await collections.matchesCollection
@@ -587,7 +587,8 @@ const handleMatchWagers = async (
   matchId,
   matchOutcomes,
   matchResults,
-  teams
+  teams,
+  firstBlood,
 ) => {
   // Get all wagers associated to this match
   const matchWagers = await collections.wagersCollection
@@ -601,6 +602,16 @@ const handleMatchWagers = async (
   // Series: "Series Winner", "Series Score", "First Blood", "Overtime Count", "Player/Team Attributes"
   // Tournament: "Tournament Winner", "Player/Team Attributes", "Player Accolades"
   // Season: "Season Winner", "Player/Team Attributes", "Player Accolades"
+
+  if (firstBlood) {
+    for (const wager of matchWagers) {
+      if (wager.wagerType === "First Blood") {
+        // wager.agreeEvaluation is an Object id of the fist blood team
+        await handleWagerEnded(wager._id, wager.agreeEvaluation === firstBlood);
+      }
+    }
+    return;
+  }
 
   for (const wager of matchWagers) {
     if (wager.wagerType === "Match Winner") {
@@ -636,7 +647,7 @@ const handleMatchWagers = async (
   }
 };
 
-const handleSeriesWagers = async (seriesId) => {
+const handleSeriesWagers = async (seriesId, firstBlood) => {
   // console.log("seriesId: ", seriesId)
 
   // Get all wagers associated to this match
@@ -646,15 +657,25 @@ const handleSeriesWagers = async (seriesId) => {
 
   // console.log("seriesWagers: ", seriesWagers)
 
-  const seriesOutcomes = await getSeriesOutcomes(seriesId);
-
-  // console.log("seriesOutcomes: ", seriesOutcomes)
-
   // Wager types:
   // Match: "Match Winner", "Match Score", "First Blood", "Match MVP", "Player/Team Attributes"
   // Series: "Series Winner", "Series Score", "First Blood", "Overtime Count", "Player/Team Attributes"
   // Tournament: "Tournament Winner", "Player/Team Attributes", "Player Accolades"
   // Season: "Season Winner", "Player/Team Attributes", "Player Accolades"
+  
+  if (firstBlood) {
+    for (const wager of matchWagers) {
+      if (wager.wagerType === "First Blood") {
+        // wager.agreeEvaluation is an Object id of the fist blood team
+        await handleWagerEnded(wager._id, wager.agreeEvaluation === firstBlood);
+      }
+    }
+    return;
+  }
+
+  const seriesOutcomes = await getSeriesOutcomes(seriesId);
+
+  // console.log("seriesOutcomes: ", seriesOutcomes)
 
   for (const wager of seriesWagers) {
     if (wager.wagerType === "Series Winner") {
@@ -668,12 +689,6 @@ const handleSeriesWagers = async (seriesId) => {
       await handleWagerEnded(
         wager._id,
         wager.agreeEvaluation === seriesOutcomes.seriesScore
-      );
-    } else if (wager.wagerType === "First Blood") {
-      // wager.agreeEvaluation is an Object id of the fist blood team
-      await handleWagerEnded(
-        wager._id,
-        wager.agreeEvaluation === seriesOutcomes.firstBlood
       );
     } else if (wager.wagerType === "Overtime Count") {
       // NOTE: Assign object if of the players n the match results
@@ -1129,19 +1144,11 @@ const matchConcluded = async (matchId, data) => {
     matchId,
     matchOutcomes,
     results,
-    matchDoc.teams
+    matchDoc.teams,
+    null,
   );
 
   // Update the series document if series has ended with this match
-
-  // Set first blood if it is not set because this would be the first match
-  // if (seriesDoc.firstBlood === null) {
-  //   await updateMongoDocument(collections.seriesCollection, seriesDoc._id, {
-  //     $set: {
-  //       firstBlood: firstBlood,
-  //     },
-  //   });
-  // }
 
   // Get all the matches in the series
   const seriesMatches = await collections.matchesCollection
@@ -1180,7 +1187,7 @@ const matchConcluded = async (matchId, data) => {
       $set: seriesUpdateData,
     });
     createLog({ type: "Series Ended", seriesId: seriesDoc._id });
-    await handleSeriesWagers(seriesDoc._id);
+    await handleSeriesWagers(seriesDoc._id, null);
   }
 
   // Update the tournament document if tournament has ended with this match
@@ -1224,11 +1231,56 @@ const matchConcluded = async (matchId, data) => {
   return { message: message };
 };
 
+const setFirstBlood = async (matchId, data) => {
+  const { firstBlood } = data;
+
+  // Find the match by its ID and update the firstBlood field
+  const matchDoc = await updateMongoDocument(collections.matchesCollection, matchId, {
+    $set: {
+      firstBlood: firstBlood,
+    }
+  }, true);
+  
+  createLog({
+    type: "Fits Blood Set",
+    matchId: matchId,
+    firstBlood: firstBlood,
+  });
+
+  await handleMatchWagers(
+    matchId,
+    null,
+    null,
+    null,
+    firstBlood
+  );
+  
+  // Find the series by its ID
+  const seriesDoc = await collections.seriesCollection.findOne({
+    _id: matchDoc.series,
+  });
+
+  // Update the series document if there is no first blood set
+  if (!seriesDoc.firstBlood) {
+    let seriesUpdateData = {
+      firstBlood: firstBlood,
+    };
+    await updateMongoDocument(collections.seriesCollection, seriesDoc._id.toString(), {
+      $set: seriesUpdateData,
+    });
+    createLog({ type: "Series First Blood Set", seriesId: seriesDoc._id.toString() });
+    await handleSeriesWagers(seriesDoc._id, firstBlood);
+  }
+
+  return;
+};
+
 module.exports = {
   createMatch,
   getAllMatches,
   getMatchById,
   updateMatch,
   matchConcluded,
+  setFirstBlood,
   deleteMatch,
 };
