@@ -86,6 +86,7 @@ const Auth = () => {
           email,
           firebaseUser.uid,
           referralCode,
+          "email",
         );
 
         // if (providerId === "password") {
@@ -154,6 +155,7 @@ const Auth = () => {
             firebaseUser.email,
             firebaseUser.uid,
             referralCode,
+            "google",
           );
 
           // Log the sign-up event to Firebase Analytics
