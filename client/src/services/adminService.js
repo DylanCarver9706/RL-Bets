@@ -1,6 +1,5 @@
 const BASE_SERVER_URL = process.env.REACT_APP_BASE_SERVER_URL; // Define your backend server URL
 
-// Fetch the data tree for a given season ID
 export const fetchAllTournamentsDataTree = async () => {
   try {
     const response = await fetch(`${BASE_SERVER_URL}/api/data-trees/tournament/all`, {
@@ -11,13 +10,13 @@ export const fetchAllTournamentsDataTree = async () => {
     });
 
     if (!response.ok) {
-      throw new Error(`Failed to fetch data tree for all seasons`);
+      throw new Error(`Failed to fetch data tree for all tournaments`);
     }
 
     const data = await response.json();
     return data;
   } catch (err) {
-    console.error("Error fetching season data tree:", err.message);
+    console.error("Error fetching tournament data tree:", err.message);
     throw err;
   }
 };
