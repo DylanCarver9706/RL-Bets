@@ -17,16 +17,20 @@ const errorLogger = async (error, req, res, next) => {
       - Headers: ${JSON.stringify(req.headers, null, 2)}
     `;
     console.log("Logging error to Jira...");
-    const jiraIssueKey = await createAndTransitionJiraIssue(
-      "admin",
-      "admin",
-      "admin",
-      "Problem Report",
-      summary,
-      description,
-      "App Error Occurred"
-    );
-    console.log(`Logged error as Jira issue: ${jiraIssueKey}`);
+    if (process.env.ENV === "production") {
+      const jiraIssueKey = await createAndTransitionJiraIssue(
+        "admin",
+        "admin",
+        "admin",
+        "Problem Report",
+        summary,
+        description,
+        "App Error Occurred"
+      );
+      console.log(`Logged error as Jira issue: ${jiraIssueKey}`);
+    } else {
+      console.log("Error logging to Jira skipped in non-production environment");
+    }
   } catch (jiraError) {
     console.error("Failed to log error to Jira:", jiraError.message);
   }
