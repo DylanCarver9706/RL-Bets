@@ -14,6 +14,7 @@ const initializeCollections = async () => {
   collections.teamsCollection = db.collection("Teams");
   collections.playersCollection = db.collection("Players");
   collections.promotionsCollection = db.collection("Promotions");
+  collections.leaderboardsCollection = db.collection("Leaderboards");
   console.log("Collections initialized")
 };
 
