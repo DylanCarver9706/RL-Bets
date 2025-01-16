@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import {
-  fetchAllSeasonsDataTree,
-  updateSeasonById,
+  fetchAllTournamentsDataTree,
   updateTournamentById,
   updateSeriesById,
   updateMatchById,
@@ -23,7 +22,6 @@ const Admin = () => {
   const [currentMatch, setCurrentMatch] = useState(null);
   const [wentToOvertime, setWentToOvertime] = useState(false);
   const [endTournament, setEndTournament] = useState(false);
-  const [endSeason, setEndSeason] = useState(false);
   const [firstBlood, setFirstBlood] = useState("");
   const [newSeriesMode, setNewSeriesMode] = useState(null);
   const [newSeriesData, setNewSeriesData] = useState({
@@ -39,7 +37,8 @@ const Admin = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const fetchedData = await fetchAllSeasonsDataTree();
+        const fetchedData = await fetchAllTournamentsDataTree();
+        // console.log("Fetched data:", fetchedData);
         setData(fetchedData);
 
         const fetchedTeams = await fetchTeams();
@@ -57,7 +56,7 @@ const Admin = () => {
 
   // Collapsible component to handle toggling
   const CollapsibleSection = ({ title, children }) => {
-    const [isCollapsed, setIsCollapsed] = useState(false);
+    const [isCollapsed, setIsCollapsed] = useState(true);
 
     return (
       <div style={{ marginTop: "10px" }}>
@@ -110,9 +109,6 @@ const Admin = () => {
   const handleSave = async () => {
     try {
       switch (editMode.type) {
-        case "season":
-          await updateSeasonById(editMode._id, editData);
-          break;
         case "tournament":
           await updateTournamentById(editMode._id, editData);
           break;
@@ -125,7 +121,7 @@ const Admin = () => {
         default:
           throw new Error("Invalid item type");
       }
-      const updatedData = await fetchAllSeasonsDataTree();
+      const updatedData = await fetchAllTournamentsDataTree();
       setData(updatedData);
       setEditMode(null);
     } catch (error) {
@@ -142,9 +138,6 @@ const Admin = () => {
         return;
       } else {
         switch (item.type) {
-          case "season":
-            await updateSeasonById(item._id, { status: newStatus });
-            break;
           case "tournament":
             await updateTournamentById(item._id, { status: newStatus });
             break;
@@ -157,7 +150,7 @@ const Admin = () => {
           default:
             throw new Error("Invalid item type");
         }
-        const updatedData = await fetchAllSeasonsDataTree();
+        const updatedData = await fetchAllTournamentsDataTree();
         setData(updatedData);
       }
     } catch (error) {
@@ -203,16 +196,14 @@ const Admin = () => {
           results: resultsData,
           wentToOvertime,
           endTournament,
-          endSeason,
         };
         await updateMatchResults(currentMatch._id, updatePayload);
-        const updatedData = await fetchAllSeasonsDataTree();
+        const updatedData = await fetchAllTournamentsDataTree();
         setData(updatedData);
         setShowResultsModal(false);
         setResultsData({});
         setWentToOvertime(false);
         setEndTournament(false);
-        setEndSeason(false);
         setCurrentMatch(null);
       }
     } catch (error) {
@@ -291,15 +282,6 @@ const Admin = () => {
             style={{ marginRight: "5px" }}
           />
           End Tournament
-        </label>
-        <label style={{ marginLeft: "15px" }}>
-          <input
-            type="checkbox"
-            checked={endSeason}
-            onChange={(e) => setEndSeason(e.target.checked)}
-            style={{ marginRight: "5px" }}
-          />
-          End Season
         </label>
       </div>
       {currentMatch &&
@@ -494,89 +476,95 @@ const Admin = () => {
   };
 
   // Function to render each event as a card with a log/edit button
-  const renderCard = (title, content, event) => (
-    <div
-    style={{
-      border: "1px solid #ccc",
-      borderRadius: "8px",
-      boxShadow: "2px 2px 8px rgba(0, 0, 0, 0.1)",
-      margin: "10px 0",
-      padding: "15px",
-    }}
-    >
-      <h3 style={{ margin: "0 0 10px" }}>
-        {title}{" "}
-        {["season", "tournament", "series", "match"].includes(event.type.toLowerCase()) && (
-          <button
-          onClick={() => handleEditClick(event)}
-          style={{
-            marginTop: "10px",
-            background: "#007bff",
-            color: "white",
-            border: "none",
-            padding: "5px 10px",
-            cursor: "pointer",
-            borderRadius: "5px",
-          }}
-          >
-            Edit
-          </button>
-        )}
-        {" "}
-        {event.type.toLowerCase() === "match" && (["ongoing", "ended"].includes(event.status.toLowerCase()) && !event.firstBlood) && (
-          <button
-            onClick={() => handleFirstBloodClick(event)}
-            style={{
-              marginTop: "10px",
-              background: "#007bff",
-              color: "white",
-              border: "none",
-              padding: "5px 10px",
-              cursor: "pointer",
-              borderRadius: "5px",
-            }}
-          >
-            Add First Blood
-          </button>
-        )}
-        {event.type.toLowerCase() === "tournament" && (
-          <button
-          onClick={() => handleAddSeriesClick(event)}
-          style={{
-            marginTop: "10px",
-            background: "#007bff",
-            color: "white",
-            border: "none",
-            padding: "5px 10px",
-            cursor: "pointer",
-            borderRadius: "5px",
-          }}
-        >
-          Add Series
-        </button>
-        )}
-      </h3>
-      {/* Dropdown for status change */}
-      {["season", "tournament", "series", "match"].includes(event.type.toLowerCase()) && (
-        <div style={{ marginBottom: "10px" }}>
-          <label>
-            Status:
-            <select
-              value={event.status}
-              onChange={(e) => handleStatusChange(event, e.target.value)}
-              style={{ marginLeft: "10px", padding: "5px" }}
+  const renderCard = (title, content, event) => {
+    const type = event?.type?.toLowerCase() || "unknown"; // Default to "unknown" if type is undefined
+  
+    return (
+      <div
+        style={{
+          border: "1px solid #ccc",
+          borderRadius: "8px",
+          boxShadow: "2px 2px 8px rgba(0, 0, 0, 0.1)",
+          margin: "10px 0",
+          padding: "15px",
+        }}
+      >
+        <h3 style={{ margin: "0 0 10px" }}>
+          {title}{" "}
+          {["tournament", "series", "match"].includes(type) && (
+            <button
+              onClick={() => handleEditClick(event)}
+              style={{
+                marginTop: "10px",
+                background: "#007bff",
+                color: "white",
+                border: "none",
+                padding: "5px 10px",
+                cursor: "pointer",
+                borderRadius: "5px",
+              }}
             >
-              <option value="Created">Created</option>
-              <option value="Betable">Betable</option>
-              <option value="Ongoing">Ongoing</option>
-              <option value="Ended">Ended</option>
-            </select>
-          </label>
-        </div>
-      )}
-      {content}
-    </div>
-  );
+              Edit
+            </button>
+          )}
+          {" "}
+          {type === "match" &&
+            ["ongoing", "ended"].includes(event.status?.toLowerCase() || "") &&
+            !event.firstBlood && (
+              <button
+                onClick={() => handleFirstBloodClick(event)}
+                style={{
+                  marginTop: "10px",
+                  background: "#007bff",
+                  color: "white",
+                  border: "none",
+                  padding: "5px 10px",
+                  cursor: "pointer",
+                  borderRadius: "5px",
+                }}
+              >
+                Add First Blood
+              </button>
+            )}
+          {type === "tournament" && (
+            <button
+              onClick={() => handleAddSeriesClick(event)}
+              style={{
+                marginTop: "10px",
+                background: "#007bff",
+                color: "white",
+                border: "none",
+                padding: "5px 10px",
+                cursor: "pointer",
+                borderRadius: "5px",
+              }}
+            >
+              Add Series
+            </button>
+          )}
+        </h3>
+        {/* Dropdown for status change */}
+        {["tournament", "series", "match"].includes(type) && (
+          <div style={{ marginBottom: "10px" }}>
+            <label>
+              Status:
+              <select
+                value={event.status}
+                onChange={(e) => handleStatusChange(event, e.target.value)}
+                style={{ marginLeft: "10px", padding: "5px" }}
+              >
+                <option value="Created">Created</option>
+                <option value="Betable">Betable</option>
+                <option value="Ongoing">Ongoing</option>
+                <option value="Ended">Ended</option>
+              </select>
+            </label>
+          </div>
+        )}
+        {content}
+      </div>
+    );
+  };
 
   // Function to render the results object as a table
   const renderResultsTable = (results) => {
@@ -742,11 +730,18 @@ const Admin = () => {
     }
   };
 
-  // Function to render top-level seasons as cards
-  const renderSeasons = (seasons) => {
-    return seasons.map((season, index) => (
-      <CollapsibleSection key={index} title={`Season: ${season.name || `Season ${index + 1}`}`}>
-        {renderCard(season.name || `Season ${index + 1}`, renderDataTree(season), season)}
+  // Function to render top-level tournaments as cards
+  const renderTournaments = (tournaments) => {
+    return tournaments.map((tournament, index) => (
+      <CollapsibleSection
+        key={index}
+        title={`Tournament: ${tournament.name || `Tournament ${index + 1}`}`}
+      >
+        {renderCard(
+          tournament.name || `Tournament ${index + 1}`,
+          renderDataTree(tournament),
+          tournament
+        )}
       </CollapsibleSection>
     ));
   };
@@ -776,7 +771,7 @@ const Admin = () => {
       };
       console.log("Payload:", payload);
       await createSeries(payload); // Submit the data to create the new series
-      const updatedData = await fetchAllSeasonsDataTree(); // Refresh the data tree
+      const updatedData = await fetchAllTournamentsDataTree(); // Refresh the data tree
       setData(updatedData);
       setNewSeriesMode(null); // Exit new series mode
       setNewSeriesData({
@@ -918,11 +913,11 @@ const Admin = () => {
 
   return (
     <div>
-      <h1>Admin Page - Season Data Overview</h1>
+      <h1>Admin Page - Tournament Data Overview</h1>
       {showFirstBloodModal && renderFirstBloodModal()}
       {newSeriesMode && renderNewSeriesModal()}
       {showResultsModal && renderResultsModal()}
-      {editMode ? renderEditModal() : data ? renderSeasons(data) : <p>Loading data...</p>}
+      {editMode ? renderEditModal() : data ? renderTournaments(data) : <p>Loading data...</p>}
     </div>
   );
 };
