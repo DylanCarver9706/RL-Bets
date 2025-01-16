@@ -7,6 +7,8 @@ import {
   updateMatchById,
   updateMatchResults,
   createSeries,
+  fetchPlayers,
+  updateFirstBlood,
 } from "../services/adminService";
 import { fetchTeams } from "../services/wagerService";
 
@@ -16,7 +18,8 @@ const Admin = () => {
   const [editMode, setEditMode] = useState(null);
   const [editData, setEditData] = useState({});
   const [showResultsModal, setShowResultsModal] = useState(false);
-  const [resultsData, setResultsData] = useState({});
+  const [showFirstBloodModal, setShowFirstBloodModal] = useState(false);
+  const [resultsData, setResultsData] = useState([]);
   const [currentMatch, setCurrentMatch] = useState(null);
   const [wentToOvertime, setWentToOvertime] = useState(false);
   const [endTournament, setEndTournament] = useState(false);
@@ -30,6 +33,7 @@ const Admin = () => {
     name: "",
   });
   const [teams, setTeams] = useState([]);
+  const [players, setPlayers] = useState([]);
 
   // Fetch data for the admin page
   useEffect(() => {
@@ -40,6 +44,9 @@ const Admin = () => {
 
         const fetchedTeams = await fetchTeams();
         setTeams(fetchedTeams); // Fetch all teams for dropdown
+
+        const fetchedPlayers = await fetchPlayers();
+        setPlayers(fetchedPlayers); // Fetch all players
       } catch (error) {
         console.error("Error fetching data:", error.message);
       }
@@ -404,22 +411,121 @@ const Admin = () => {
     </div>
   );
 
-  // Function to render each event as a card with a log/edit button
-  const renderCard = (title, content, data) => (
-    <div
+  const handleFirstBloodSubmit = async () => {
+    await updateFirstBlood(currentMatch._id, { firstBlood: firstBlood });
+    setShowFirstBloodModal(false);
+  }
+
+  const renderFirstBloodModal = () => (
+    <div style={{ marginBottom: "15px" }}>
+      <div
       style={{
-        border: "1px solid #ccc",
-        borderRadius: "8px",
-        boxShadow: "2px 2px 8px rgba(0, 0, 0, 0.1)",
-        margin: "10px 0",
-        padding: "15px",
+        position: "fixed",
+        top: "50%",
+        left: "50%",
+        transform: "translate(-50%, -50%)",
+        background: "#b3b1b1",
+        padding: "20px",
+        borderRadius: "10px",
+        boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
+        zIndex: 1000,
       }}
+    >
+      <h3>Enter First Blood</h3>
+      <label>
+        First Blood:
+        <select
+          value={firstBlood}
+          onChange={(e) => setFirstBlood(e.target.value)}
+          style={{ marginLeft: "10px", padding: "5px" }}
+        >
+          <option value="">Select Team</option>
+          {currentMatch &&
+            currentMatch.teams.map((team) => (
+              <option key={team._id} value={team._id}>
+                {team.name}
+              </option>
+            ))}
+        </select>
+      </label>
+      <br/>
+      <button
+        onClick={handleFirstBloodSubmit}
+        style={{
+          background: "#28a745",
+          color: "white",
+          padding: "5px 10px",
+          border: "none",
+          borderRadius: "5px",
+          cursor: "pointer",
+          marginTop: "10px",
+        }}
+      >
+        Save Results & Pay Out Wagers
+      </button>
+      <button
+        onClick={() => {
+          setShowFirstBloodModal(false);
+          setCurrentMatch(null);
+        }}
+        style={{
+          marginLeft: "10px",
+          background: "#dc3545",
+          color: "white",
+          padding: "5px 10px",
+          border: "none",
+          borderRadius: "5px",
+          cursor: "pointer",
+          marginTop: "10px",
+        }}
+      >
+        Cancel
+      </button>
+    </div>
+    </div>
+    
+  );
+
+  const handleFirstBloodClick = (event) => {
+    console.log(event);
+    setCurrentMatch(event);
+    setShowFirstBloodModal(true);
+    console.log(currentMatch)
+  };
+
+  // Function to render each event as a card with a log/edit button
+  const renderCard = (title, content, event) => (
+    <div
+    style={{
+      border: "1px solid #ccc",
+      borderRadius: "8px",
+      boxShadow: "2px 2px 8px rgba(0, 0, 0, 0.1)",
+      margin: "10px 0",
+      padding: "15px",
+    }}
     >
       <h3 style={{ margin: "0 0 10px" }}>
         {title}{" "}
-        {["season", "tournament", "series", "match"].includes(data.type.toLowerCase()) && (
+        {["season", "tournament", "series", "match"].includes(event.type.toLowerCase()) && (
           <button
-            onClick={() => handleEditClick(data)}
+          onClick={() => handleEditClick(event)}
+          style={{
+            marginTop: "10px",
+            background: "#007bff",
+            color: "white",
+            border: "none",
+            padding: "5px 10px",
+            cursor: "pointer",
+            borderRadius: "5px",
+          }}
+          >
+            Edit
+          </button>
+        )}
+        {" "}
+        {event.type.toLowerCase() === "match" && (["ongoing", "ended"].includes(event.status.toLowerCase()) && !event.firstBlood) && (
+          <button
+            onClick={() => handleFirstBloodClick(event)}
             style={{
               marginTop: "10px",
               background: "#007bff",
@@ -430,12 +536,12 @@ const Admin = () => {
               borderRadius: "5px",
             }}
           >
-            Edit
+            Add First Blood
           </button>
         )}
-        {data.type.toLowerCase() === "tournament" && (
+        {event.type.toLowerCase() === "tournament" && (
           <button
-          onClick={() => handleAddSeriesClick(data)}
+          onClick={() => handleAddSeriesClick(event)}
           style={{
             marginTop: "10px",
             background: "#007bff",
@@ -451,13 +557,13 @@ const Admin = () => {
         )}
       </h3>
       {/* Dropdown for status change */}
-      {["season", "tournament", "series", "match"].includes(data.type.toLowerCase()) && (
+      {["season", "tournament", "series", "match"].includes(event.type.toLowerCase()) && (
         <div style={{ marginBottom: "10px" }}>
           <label>
             Status:
             <select
-              value={data.status}
-              onChange={(e) => handleStatusChange(data, e.target.value)}
+              value={event.status}
+              onChange={(e) => handleStatusChange(event, e.target.value)}
               style={{ marginLeft: "10px", padding: "5px" }}
             >
               <option value="Created">Created</option>
@@ -813,6 +919,7 @@ const Admin = () => {
   return (
     <div>
       <h1>Admin Page - Season Data Overview</h1>
+      {showFirstBloodModal && renderFirstBloodModal()}
       {newSeriesMode && renderNewSeriesModal()}
       {showResultsModal && renderResultsModal()}
       {editMode ? renderEditModal() : data ? renderSeasons(data) : <p>Loading data...</p>}
