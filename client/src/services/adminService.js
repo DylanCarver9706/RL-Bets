@@ -22,6 +22,27 @@ export const fetchAllSeasonsDataTree = async () => {
   }
 };
 
+export const fetchPlayers = async () => {
+  try {
+    const response = await fetch(`${BASE_SERVER_URL}/api/players`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch all players`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (err) {
+    console.error("Error fetching all players:", err.message);
+    throw err;
+  }
+};
+
 // Generic function to update a document by ID
 const updateDocumentById = async (endpoint, id, updateData) => {
   try {
