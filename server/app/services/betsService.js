@@ -67,6 +67,7 @@ const createBet = async (betData) => {
         $push: { users: ObjectId.createFromHexString(user) },
       }
     );
+    io.emit("updateLeaderboard", await getCurrentLeaderboard());
   }
 
   return {
