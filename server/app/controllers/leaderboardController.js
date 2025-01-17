@@ -64,6 +64,15 @@ const getCurrentLeaderboard = async (req, res, logError) => {
   }
 };
 
+const getLifetimeLeaderboard = async (req, res, logError) => {
+    try {
+      const leaderboard = await leaderboardService.getLifetimeLeaderboard();
+      res.status(200).json(leaderboard);
+    } catch (error) {
+      logError(error);
+    }
+  };
+
 module.exports = {
   getAllLeaderboards,
   getLeaderboardById,
@@ -71,4 +80,5 @@ module.exports = {
   updateLeaderboard,
   deleteLeaderboard,
   getCurrentLeaderboard,
+  getLifetimeLeaderboard,
 };
