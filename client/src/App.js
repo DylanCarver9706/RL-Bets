@@ -20,6 +20,7 @@ import CreateWager from "./components/CreateWager";
 import Schedule from "./components/Schedule";
 import CreditShop from "./components/CreditShop";
 import LifetimeLeaderboard from "./components/LifetimeLeaderboard";
+import TournamentLeaderboard from "./components/TournamentLeaderboard";
 import Log from "./components/Log";
 import Admin from "./components/Admin";
 import EmailVerification from "./components/EmailVerification";
@@ -294,6 +295,14 @@ function App() {
           element={
             <ProtectedRoute loggedIn={loggedIn}>
               <LifetimeLeaderboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/Tournament-Leaderboard"
+          element={
+            <ProtectedRoute loggedIn={loggedIn}>
+              <TournamentLeaderboard />
             </ProtectedRoute>
           }
         />
