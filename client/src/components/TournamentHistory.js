@@ -4,7 +4,7 @@ import {
   fetchPlayers,
 } from "../services/adminService";
 
-const Schedule = () => {
+const TournamentHistory = () => {
   const [data, setData] = useState(null);
   const [players, setPlayers] = useState([]);
 
@@ -238,4 +238,4 @@ const Schedule = () => {
   );
 };
 
-export default Schedule;
+export default TournamentHistory;

@@ -58,12 +58,18 @@ const Navbar = () => {
             <div style={styles.dropdownMenu}>
               {currentTournament && (
                 <Link
-                  to={`/Schedule`}
+                  to={`/Tournament`}
                   style={styles.dropdownLink}
                 >
                   {currentTournament.name}
                 </Link>
               )}
+              <Link
+                  to={`/Tournament-History`}
+                  style={styles.dropdownLink}
+                >
+                  Tournament History
+                </Link>
             </div>
           )}
         </div>

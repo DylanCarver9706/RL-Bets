@@ -17,7 +17,7 @@ import Auth from "./components/Auth";
 import Profile from "./components/Profile";
 import Navbar from "./components/Navbar";
 import CreateWager from "./components/CreateWager";
-import Schedule from "./components/Schedule";
+import TournamentHistory from "./components/TournamentHistory";
 import CreditShop from "./components/CreditShop";
 import LifetimeLeaderboard from "./components/LifetimeLeaderboard";
 import CurrentTournamentLeaderboard from "./components/CurrentTournamentLeaderboard";
@@ -275,10 +275,10 @@ function App() {
           }
         />
         <Route
-          path="/Schedule"
+          path="/Tournament-History"
           element={
             <ProtectedRoute loggedIn={loggedIn}>
-              <Schedule />
+              <TournamentHistory />
             </ProtectedRoute>
           }
         />
