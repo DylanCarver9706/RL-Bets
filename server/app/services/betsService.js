@@ -6,6 +6,7 @@ const {
 const { ObjectId } = require("mongodb");
 const { getSocketIo } = require("../middlewares/socketIO");
 const { getAllWagers } = require("./wagersService");
+const { getCurrentLeaderboard } = require("./leaderboardService");
 
 const createBet = async (betData) => {
   const { user, credits, agreeBet, rlEventReference, wagerId } = betData;
@@ -30,18 +31,13 @@ const createBet = async (betData) => {
   const io = getSocketIo();
 
   // Update wager with the new bet
-  await updateMongoDocument(
-    collections.wagersCollection,
-    wagerId,
-    {
-      $push: { bets: result.insertedId },
-    },
-    true
-  );
+  await updateMongoDocument(collections.wagersCollection, wagerId, {
+    $push: { bets: result.insertedId },
+  });
 
   const allWagers = await getAllWagers();
   io.emit("wagersUpdate", allWagers);
-  
+
   // Deduct credits from user
   const updatedUser = await updateMongoDocument(
     collections.usersCollection,
@@ -51,8 +47,27 @@ const createBet = async (betData) => {
     },
     true
   );
-  
+
   io.emit("updateUser", updatedUser);
+
+  // Update leaderboard with the new user
+  const currentLeaderboard = await getCurrentLeaderboard();
+  const currentLeaderboardId = currentLeaderboard._id.toString();
+
+  // Check if the user is already in the leaderboard
+  const userExists = currentLeaderboard.users.some(
+    (userId) => userId.toString() === user.toString()
+  );
+
+  if (!userExists) {
+    await updateMongoDocument(
+      collections.leaderboardsCollection,
+      currentLeaderboardId,
+      {
+        $push: { users: ObjectId.createFromHexString(user) },
+      }
+    );
+  }
 
   return {
     betId: result.insertedId,
