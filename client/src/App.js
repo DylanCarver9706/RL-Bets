@@ -36,6 +36,7 @@ import LocationPermissionRequired from "./components/LocationPermissionRequired"
 import IllegalAge from "./components/IllegalAge";
 import SomethingWentWrong from "./components/SomethingWentWrong";
 import AppOutage from "./components/AppOutage";
+import CurrentTournament from "./components/CurrentTournament";
 
 const ProtectedRoute = ({ loggedIn, redirectTo = "/Auth", children }) => {
   return loggedIn ? children : <Navigate to={redirectTo} />;
@@ -303,6 +304,14 @@ function App() {
           element={
             <ProtectedRoute loggedIn={loggedIn}>
               <CurrentTournamentLeaderboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/Tournament"
+          element={
+            <ProtectedRoute loggedIn={loggedIn}>
+              <CurrentTournament />
             </ProtectedRoute>
           }
         />
