@@ -55,7 +55,7 @@ const TournamentLeaderboard = () => {
                 <tr key={index} style={styles.tr}>
                   <td style={styles.td}>{index + 1}</td>
                   <td style={styles.td}>{user.name}</td>
-                  <td style={styles.td}>{user.earnedCredits}</td>
+                  <td style={styles.td}>{parseFloat(user.earnedCredits).toFixed(4)}</td>
                 </tr>
               ))}
             </tbody>
