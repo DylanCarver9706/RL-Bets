@@ -50,6 +50,24 @@ const updateTournament = async (id, updateData) => {
         )
       )
     );
+
+    // If the status is "Ongoing" or "Betable", update other tournaments to "Ended"
+    if (["Ongoing", "Betable"].includes(updateData.status)) {
+      const allTournaments = await getAllTournaments();
+
+      await Promise.all(
+        allTournaments.map((tournament) => {
+          if (tournament._id.toString() !== id) {
+            return updateMongoDocument(
+              collections.tournamentsCollection,
+              tournament._id.toString(),
+              { $set: { status: "Ended" } }
+            );
+          }
+          return null; // Skip updating the current tournament
+        })
+      );
+    }
   }
 };
 
