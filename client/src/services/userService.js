@@ -75,60 +75,6 @@ export const getMongoUserDataByFirebaseId = async (firebaseUserId) => {
   }
 };
 
-// Get all users
-export const getUsers = async () => {
-  try {
-
-    const idToken = await getFirebaseIdToken();
-
-    const response = await fetch(`${BASE_SERVER_URL}/api/users`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${idToken}`, // Include the token in the headers
-      },
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.error || "Failed to fetch user's data.");
-    }
-
-    return data; // Return the user data
-  } catch (err) {
-    console.error("Error fetching users:", err.message);
-    throw err;
-  }
-};
-
-// Get a user by their MongoDB ID
-export const getUserById = async (userId) => {
-    try {
-
-      const idToken = await getFirebaseIdToken();
-
-      const response = await fetch(`${BASE_SERVER_URL}/api/users/${userId}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${idToken}`, // Include the token in the headers
-        },
-      });
-  
-      const data = await response.json();
-  
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to fetch user data.");
-      }
-  
-      return data; // Return the user data
-    } catch (err) {
-      console.error("Error fetching user by ID:", err.message);
-      throw err;
-    }
-  };
-  
 // Update a user by their MongoDB ID
   export const updateUser = async (userId, updatedData) => {
     try {
