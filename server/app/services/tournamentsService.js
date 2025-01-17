@@ -7,10 +7,25 @@ const { ObjectId } = require("mongodb");
 
 const createTournament = async (tournamentData) => {
 
+  // Lazy load create leaderboard to avoid circular dependency
+  const { createLeaderboard } = require("./leaderboardService");
+
+  const newLeaderboard = await createLeaderboard({
+    name: tournamentData.name,
+    users: [],
+    status: "Created",
+  })
+
+  tournamentData.leaderboard = newLeaderboard._id;
+
   const result = await createMongoDocument(
     collections.tournamentsCollection,
     tournamentData
   );
+
+  await updateMongoDocument(collections.leaderboardsCollection, newLeaderboard._id.toString(), {
+    $set: { tournament: result.insertedId },
+  });
 
   return result.insertedId;
 };
