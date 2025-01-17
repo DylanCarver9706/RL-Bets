@@ -7,6 +7,7 @@ const { createLog } = require("./logsService");
 const { ObjectId } = require("mongodb");
 const { getSocketIo } = require("../middlewares/socketIO");
 const { getAllWagers } = require("./wagersService");
+const { getCurrentLeaderboard } = require("./leaderboardService");
 
 const createMatch = async (matchData) => {
   if (!matchData.series) {
@@ -154,6 +155,7 @@ const payOutBetWinners = async (wagerId, agreeIsWinner) => {
         {
           $set: {
             earnedCredits: user.earnedCredits + awardedCredits,
+            lifetimeEarnedCredits: user.lifetimeEarnedCredits + awardedCredits,
             credits: user.credits + awardedCredits,
           },
         },
@@ -317,31 +319,36 @@ const handleWagerEnded = async (wagerId, agreeIsWinner) => {
   await payOutBetWinners(wagerId, agreeIsWinner);
 };
 
-const calculatePlayerTotals = (matches) => {
+const calculatePlayerTotals = (matches) => {  
   // Object to keep track of each player's aggregated stats across all matches
   const playerTotals = {};
 
   // Iterate through each match in the series
-  matches.forEach((match) => {
+  testMatches.forEach((match) => {
     const { results } = match;
 
-    // Iterate through each player in the match results
-    Object.entries(results).forEach(([playerName, playerStats]) => {
-      // Initialize the player's total if not already present
-      if (!playerTotals[playerName]) {
-        playerTotals[playerName] = {
-          score: 0,
-          goals: 0,
-          assists: 0,
-          shots: 0,
-          saves: 0,
-          demos: 0,
-        };
-      }
+    // Iterate through each team in the match results
+    Object.values(results).forEach((teamResults) => {
+      // Iterate through each player in the team's results
+      teamResults.forEach((playerStats) => {
+        const { playerId, ...stats } = playerStats;
 
-      // Add the stats of the current match to the player's total
-      Object.keys(playerStats).forEach((stat) => {
-        playerTotals[playerName][stat] += playerStats[stat];
+        // Initialize the player's total if not already present
+        if (!playerTotals[playerId]) {
+          playerTotals[playerId] = {
+            score: 0,
+            goals: 0,
+            assists: 0,
+            shots: 0,
+            saves: 0,
+            demos: 0,
+          };
+        }
+
+        // Add the stats of the current match to the player's total
+        Object.keys(stats).forEach((stat) => {
+          playerTotals[playerId][stat] += stats[stat];
+        });
       });
     });
   });
@@ -725,7 +732,7 @@ const getTournamentOutcomes = async (
 
     // Step 1: Retrieve the tournament document
     const tournamentDoc = await collections.tournamentsCollection.findOne({
-      _id: ObjectId.createFromHexString(tournamentId),
+      _id: tournamentId,
     });
     if (!tournamentDoc) {
       throw new Error("Tournament not found");
@@ -1002,16 +1009,33 @@ const matchConcluded = async (matchId, data) => {
 
   // Set status for Tournament if included in request body
   if (endTournament === true) {
-    await updateMongoDocument(collections.tournamentsCollection, seriesDoc.tournament, {
+    // Update the tournament document
+    await updateMongoDocument(collections.tournamentsCollection, seriesDoc.tournament.toString(), {
       $set: {
         status: "Ended",
         winner: ObjectId.createFromHexString(matchOutcomes.winningTeam),
         loser: ObjectId.createFromHexString(matchOutcomes.losingTeam),
       },
     });
+  
+    // Log the tournament end
     createLog({ type: "Tournament Ended", tournamentId: seriesDoc.tournament });
     message = "Tournament," + message;
+  
+    // Handle tournament wagers
     await handleTournamentWagers(seriesDoc.tournament);
+  
+    // Get the current leaderboard
+    const currentLeaderboard = await getCurrentLeaderboard(true);
+  
+    // Reset earnedCredits for all users in the leaderboard
+    for (const user of currentLeaderboard.users) {
+      await updateMongoDocument(collections.usersCollection, user._id.toString(), {
+        $set: { earnedCredits: 0.0 },
+      });
+    }
+  
+    console.log("Tournament has ended and all user earnedCredits have been reset to 0.00. Congrats RL Bets!");
   }
 
   return { message: message };
