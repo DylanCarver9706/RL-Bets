@@ -52,6 +52,7 @@ const Navbar = () => {
           style={styles.dropdownContainer}
           onMouseEnter={() => setHoveredDropdown("tournaments")}
           onMouseLeave={() => setHoveredDropdown(null)}
+          onClick={() => setHoveredDropdown(null)}
         >
           <span style={styles.link}>Tournaments</span>
           {hoveredDropdown === "tournaments" && (
@@ -77,6 +78,7 @@ const Navbar = () => {
           style={styles.dropdownContainer}
           onMouseEnter={() => setHoveredDropdown("leaderboards")}
           onMouseLeave={() => setHoveredDropdown(null)}
+          onClick={() => setHoveredDropdown(null)}
         >
           <span style={styles.link}>Leaderboards</span>
           {hoveredDropdown === "leaderboards" && (
@@ -100,6 +102,7 @@ const Navbar = () => {
           style={styles.dropdownContainer}
           onMouseEnter={() => setHoveredDropdown("admin")}
           onMouseLeave={() => setHoveredDropdown(null)}
+          onClick={() => setHoveredDropdown(null)}
         >
           <span style={styles.link}>Admin</span>
           {hoveredDropdown === "admin" && (
