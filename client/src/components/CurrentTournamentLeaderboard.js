@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import socket from "../services/socket";
 import { fetchCurrentLeaderboard } from "../services/leaderboardService";
 
-const TournamentLeaderboard = () => {
+const CurrentTournamentLeaderboard = () => {
   const [leaderboardData, setLeaderboardData] = useState(null); // Initialize as null
 
   // Fetch leaderboard on component mount
@@ -65,7 +65,7 @@ const TournamentLeaderboard = () => {
   );
 };
 
-export default TournamentLeaderboard;
+export default CurrentTournamentLeaderboard;
 
 const styles = {
   container: {
