@@ -11,6 +11,7 @@ export const UserProvider = ({ children }) => {
     mongoUserId: null,
     credits: null,
     earnedCredits: null,
+    lifetimeEarnedCredits: null,
     firebaseUserId: null,
     userType: "user",
     idvStatus: "unverified",
