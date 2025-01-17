@@ -77,16 +77,15 @@ const getCurrentLeaderboard = async (returnIds = false) => {
     .project({ name: 1, earnedCredits: 1 }) // Only fetch name and earnedCredits
     .toArray();
 
-    let sortedUsers;
+  let sortedUsers;
 
-    if (returnIds) {
-        sortedUsers = userDocs
-        .sort((a, b) => b.earnedCredits - a.earnedCredits)
-    } else {
-        sortedUsers = userDocs
-        .sort((a, b) => b.earnedCredits - a.earnedCredits)
-        .map(({ name, earnedCredits }) => ({ name, earnedCredits })); // Exclude _id
-    }
+  if (returnIds) {
+    sortedUsers = userDocs.sort((a, b) => b.earnedCredits - a.earnedCredits);
+  } else {
+    sortedUsers = userDocs
+      .sort((a, b) => b.earnedCredits - a.earnedCredits)
+      .map(({ name, earnedCredits }) => ({ name, earnedCredits })); // Exclude _id
+  }
 
   // Update the leaderboard document with the sorted user IDs
   const sortedUserIds = userDocs.map((user) => user._id);
@@ -103,6 +102,27 @@ const getCurrentLeaderboard = async (returnIds = false) => {
   };
 };
 
+const getLifetimeLeaderboard = async (returnIds = false) => {
+  // Populate users and sort by earnedCredits
+  const userDocs = await collections.usersCollection
+    .find()
+    .project({ name: 1, lifetimeEarnedCredits: 1 }) // Only fetch name and lifetimeEarnedCredits
+    .toArray();
+
+  let sortedUsers;
+
+  if (returnIds) {
+    sortedUsers = userDocs.sort((a, b) => b.lifetimeEarnedCredits - a.lifetimeEarnedCredits);
+  } else {
+    sortedUsers = userDocs
+      .sort((a, b) => b.lifetimeEarnedCredits - a.lifetimeEarnedCredits)
+      .map(({ name, lifetimeEarnedCredits }) => ({ name, lifetimeEarnedCredits })); // Exclude _id
+  }
+
+  // Return the updated sorted users (name and earnedCredits only)
+  return sortedUsers;
+};
+
 module.exports = {
   getAllLeaderboards,
   getLeaderboardById,
@@ -110,4 +130,5 @@ module.exports = {
   updateLeaderboard,
   deleteLeaderboard,
   getCurrentLeaderboard,
+  getLifetimeLeaderboard,
 };
