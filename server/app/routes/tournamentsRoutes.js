@@ -1,9 +1,10 @@
 const express = require("express");
 const router = express.Router();
-const { create, getAll, getById, update, remove } = require("../controllers/tournamentsController");
+const { create, getAll, getById, update, remove, getCurrent } = require("../controllers/tournamentsController");
 
 router.post("/", create);
 router.get("/", getAll);
+router.get("/current", getCurrent);
 router.get("/:id", getById);
 router.put("/:id", update);
 router.delete("/:id", remove);
