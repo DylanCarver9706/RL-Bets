@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../context/UserContext.js";
-import { updateUser } from "../services/userService.js";
 import {
   fetchBetableObjects,
   createWager,
@@ -462,10 +461,6 @@ const CreateWager = () => {
     await createBet(betPayload);
 
     console.log("Bet Submitted: ", generatedBetString);
-
-    let userPayload = { credits: remainingCredits };
-    console.log(userPayload);
-    updateUser(user.mongoUserId, userPayload);
 
     handleBetCancel();
     navigate("/Wagers");
