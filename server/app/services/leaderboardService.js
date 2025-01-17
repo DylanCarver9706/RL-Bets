@@ -1,6 +1,7 @@
 const { updateMongoDocument } = require("../../database/middlewares/mongo");
 const { collections } = require("../../database/mongoCollections");
 const { ObjectId } = require("mongodb");
+const { getTournamentById } = require("./tournamentsService");
 
 const getAllLeaderboards = async () => {
   const leaderboards = await collections.leaderboardsCollection
@@ -96,8 +97,10 @@ const getCurrentLeaderboard = async (returnIds = false) => {
   );
 
   // Return the updated leaderboard with sorted users (name and earnedCredits only)
+  const tournament = await getTournamentById(leaderboard.tournament.toString())
   return {
     ...leaderboard,
+    tournamentName: tournament.name,
     users: sortedUsers,
   };
 };
