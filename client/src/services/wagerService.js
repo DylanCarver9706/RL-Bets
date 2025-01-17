@@ -1,3 +1,5 @@
+import { getFirebaseIdToken } from "./firebaseService.js";
+
 const BASE_SERVER_URL = process.env.REACT_APP_BASE_SERVER_URL; // Define your backend server URL
 
 export const fetchWagers = async () => {
@@ -23,10 +25,14 @@ export const fetchWagers = async () => {
 // Create wager
 export const createWager = async (body) => {
   try {
+
+    const idToken = await getFirebaseIdToken();
+
     const response = await fetch(`${BASE_SERVER_URL}/api/wagers`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${idToken}`, // Include the token in the headers
       },
       body: JSON.stringify(body)
     });
@@ -45,10 +51,14 @@ export const createWager = async (body) => {
 // Create bet
 export const createBet = async (body) => {
   try {
+
+    const idToken = await getFirebaseIdToken();
+
     const response = await fetch(`${BASE_SERVER_URL}/api/bets`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${idToken}`, // Include the token in the headers
       },
       body: JSON.stringify(body)
     });
