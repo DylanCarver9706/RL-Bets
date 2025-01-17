@@ -263,6 +263,7 @@ const Profile = () => {
                 )}
                 <p>Credits: {parseFloat(user.credits).toFixed(4)}</p>
                 <p>Earned Credits: {parseFloat(user.earnedCredits).toFixed(4)}</p>
+                <p>Lifetime Earned Credits: {parseFloat(user.lifetimeEarnedCredits).toFixed(4)}</p>
                 <p>Identity Verification Status: {user.idvStatus}</p>
                 <p>Email Verification Status: {user.emailVerificationStatus}</p>
                 <br />
