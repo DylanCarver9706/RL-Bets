@@ -43,8 +43,8 @@ const Navbar = () => {
         <Link to="/Schedule" style={styles.link}>
           Schedule
         </Link>
-        <Link to="/Leaderboard" style={styles.link}>
-          Leaderboard
+        <Link to="/Lifetime-Leaderboard" style={styles.link}>
+        Lifetime Leaderboard
         </Link>
         <Link to="/Settings" style={styles.link}>
           Settings
