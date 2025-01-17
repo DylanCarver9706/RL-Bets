@@ -1036,9 +1036,11 @@ const matchConcluded = async (matchId, data) => {
     }
 
     // Set the status of the leaderboard to "Ended"
-    await updateMongoDocument(collections.leaderboardsCollection, currentLeaderboard._id.toString(), {
-      $set: { status: "Ended" },
-    });
+    // NOTE: This is commented out because there won't be anything to show the users on the leaderboard
+    //       so this status should be manually set before the next tournament starts
+    // await updateMongoDocument(collections.leaderboardsCollection, currentLeaderboard._id.toString(), {
+    //   $set: { status: "Ended" },
+    // });
   
     console.log("Tournament has ended and all user earnedCredits have been reset to 0.00. Congrats RL Bets!");
   }
