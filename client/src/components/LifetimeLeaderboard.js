@@ -1,14 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { getUsers } from '../services/userService';
 import socket from '../services/socket';
+import { fetchLifetimeLeaderboard } from '../services/leaderboardService';
 
-
-// Function to sort users based on earnedCredits in descending order
-const sortUsers = (users) => {
-  return users.sort((a, b) => b.earnedCredits - a.earnedCredits);
-};
-
-const Leaderboard = () => {
+const LifetimeLeaderboard = () => {
   const [sortedUsers, setSortedUsers] = useState([]);
 
   // Fetch users on component mount
@@ -16,8 +10,8 @@ const Leaderboard = () => {
     
     const fetchUsers = async () => {
       try {
-        const usersResponse = await getUsers();
-        setSortedUsers(sortUsers(usersResponse));
+        const usersResponse = await fetchLifetimeLeaderboard();
+        setSortedUsers(usersResponse);
       } catch (error) {
         console.error('Error fetching users:', error);
       }
@@ -31,7 +25,7 @@ const Leaderboard = () => {
 
     // Listen for the 'updateUser' event from the server
     socket.on("updateUsers", (updatedUsers) => {
-        setSortedUsers(sortUsers(updatedUsers));
+        setSortedUsers(updatedUsers);
     })
     
     // Cleanup WebSocket connection on unmount
@@ -41,21 +35,21 @@ const Leaderboard = () => {
 
   return (
     <div style={styles.container}>
-      <h2 style={styles.header}>User Rankings by Earned Credits</h2>
+      <h2 style={styles.header}>User Rankings by Lifetime Earned Credits</h2>
       <table style={styles.table}>
         <thead>
           <tr>
             <th style={styles.th}>Rank</th>
             <th style={styles.th}>Name</th>
-            <th style={styles.th}>Earned Credits</th>
+            <th style={styles.th}>Lifetime Earned Credits</th>
           </tr>
         </thead>
         <tbody>
           {sortedUsers.map((user, index) => (
-            <tr key={user._id} style={styles.tr}>
+            <tr key={index} style={styles.tr}>
               <td style={styles.td}>{index + 1}</td>
               <td style={styles.td}>{user.name}</td>
-              <td style={styles.td}>{user.earnedCredits}</td>
+              <td style={styles.td}>{user.lifetimeEarnedCredits}</td>
             </tr>
           ))}
         </tbody>
@@ -64,7 +58,7 @@ const Leaderboard = () => {
   );
 };
 
-export default Leaderboard;
+export default LifetimeLeaderboard;
 
 const styles = {
   container: {
