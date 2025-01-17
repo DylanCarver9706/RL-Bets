@@ -21,6 +21,27 @@ export const fetchAllTournamentsDataTree = async () => {
   }
 };
 
+export const fetchCurrentTournamentDataTree = async () => {
+  try {
+    const response = await fetch(`${BASE_SERVER_URL}/api/data-trees/tournament/current`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch data tree for current tournament`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (err) {
+    console.error("Error fetching current tournament data tree:", err.message);
+    throw err;
+  }
+};
+
 export const fetchPlayers = async () => {
   try {
     const response = await fetch(`${BASE_SERVER_URL}/api/players`, {
