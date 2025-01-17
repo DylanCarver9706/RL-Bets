@@ -4,6 +4,7 @@ const {
   getTournamentById,
   updateTournament,
   deleteTournament,
+  getCurrentTournament,
 } = require("../services/tournamentsService");
 
 const create = async (req, res, logError) => {
@@ -55,4 +56,15 @@ const remove = async (req, res, logError) => {
   }
 };
 
-module.exports = { create, getAll, getById, update, remove };
+const getCurrent = async (req, res, logError) => {
+  try {
+    const tournament = await getCurrentTournament();
+    if (!tournament)
+      return res.status(404).json({ error: "Tournament not found" });
+    res.status(200).json(tournament);
+  } catch (error) {
+    logError(error);
+  }
+};
+
+module.exports = { create, getAll, getById, update, remove, getCurrent };
