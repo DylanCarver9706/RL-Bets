@@ -46,6 +46,9 @@ const Navbar = () => {
         <Link to="/Lifetime-Leaderboard" style={styles.link}>
         Lifetime Leaderboard
         </Link>
+        <Link to="/Tournament-Leaderboard" style={styles.link}>
+        Tournament Leaderboard
+        </Link>
         <Link to="/Settings" style={styles.link}>
           Settings
         </Link>
