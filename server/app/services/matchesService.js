@@ -8,6 +8,7 @@ const { ObjectId } = require("mongodb");
 const { getSocketIo } = require("../middlewares/socketIO");
 const { getAllWagers } = require("./wagersService");
 const { getCurrentLeaderboard } = require("./leaderboardService");
+const { getAllUsers } = require("./usersService");
 
 const createMatch = async (matchData) => {
   if (!matchData.series) {
@@ -1044,6 +1045,9 @@ const matchConcluded = async (matchId, data) => {
   
     console.log("Tournament has ended and all user earnedCredits have been reset to 0.00. Congrats RL Bets!");
   }
+  const io = getSocketIo();
+  io.emit("updateUsers", await getAllUsers());
+  io.emit("updateLeaderboard", await getCurrentLeaderboard());
 
   return { message: message };
 };
