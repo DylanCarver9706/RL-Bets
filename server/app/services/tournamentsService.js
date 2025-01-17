@@ -95,10 +95,19 @@ const deleteTournament = async (id) => {
   });
 };
 
+// Get the current tournament if the status is "Ongoing" or "Betable"
+const getCurrentTournament = async () => {
+  const currentTournament = await collections.tournamentsCollection.findOne({
+    status: { $in: ["Ongoing", "Betable"] },
+  });
+  return currentTournament;
+};
+
 module.exports = {
   createTournament,
   getAllTournaments,
   getTournamentById,
   updateTournament,
   deleteTournament,
+  getCurrentTournament,
 };
