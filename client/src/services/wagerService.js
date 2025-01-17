@@ -25,16 +25,15 @@ export const fetchWagers = async () => {
 // Create wager
 export const createWager = async (body) => {
   try {
-
     const idToken = await getFirebaseIdToken();
 
     const response = await fetch(`${BASE_SERVER_URL}/api/wagers`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${idToken}`, // Include the token in the headers
+        Authorization: `Bearer ${idToken}`, // Include the token in the headers
       },
-      body: JSON.stringify(body)
+      body: JSON.stringify(body),
     });
 
     if (!response.ok) {
@@ -51,16 +50,15 @@ export const createWager = async (body) => {
 // Create bet
 export const createBet = async (body) => {
   try {
-
     const idToken = await getFirebaseIdToken();
 
     const response = await fetch(`${BASE_SERVER_URL}/api/bets`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${idToken}`, // Include the token in the headers
+        Authorization: `Bearer ${idToken}`, // Include the token in the headers
       },
-      body: JSON.stringify(body)
+      body: JSON.stringify(body),
     });
 
     if (!response.ok) {
@@ -96,9 +94,9 @@ export const fetchTeams = async () => {
   }
 };
 
-export const fetchBetableObjects = async () => {
+export const fetchBettableObjects = async () => {
   try {
-    const response = await fetch(`${BASE_SERVER_URL}/api/data-trees/betable`, {
+    const response = await fetch(`${BASE_SERVER_URL}/api/data-trees/bettable`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

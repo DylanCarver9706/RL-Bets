@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../context/UserContext.js";
 import {
-  fetchBetableObjects,
+  fetchBettableObjects,
   createWager,
   createBet,
   fetchTeams,
@@ -16,7 +16,7 @@ function capitalize(str) {
 const CreateWager = () => {
   // Load data
   const { user } = useUser();
-  const [betableObjects, setBetableObjects] = useState(null);
+  const [bettableObjects, setBettableObjects] = useState(null);
   const [teams, setTeams] = useState(null);
 
   // Betting vars
@@ -48,8 +48,8 @@ const CreateWager = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const fetchedData = await fetchBetableObjects();
-        setBetableObjects(fetchedData);
+        const fetchedData = await fetchBettableObjects();
+        setBettableObjects(fetchedData);
 
         const fetchedTeams = await fetchTeams();
         setTeams(fetchedTeams);
@@ -176,7 +176,7 @@ const CreateWager = () => {
                 <div key={key} style={{ marginBottom: "5px" }}>
                   <strong>{value}</strong>
                   {/* Only show Bet button for tournaments, series, or matches */}
-                  {node.status === "Betable" && (
+                  {node.status === "Bettable" && (
                     <button
                       onClick={() => handleBetClick(node)}
                       style={styles.betButton}
@@ -324,7 +324,7 @@ const CreateWager = () => {
       rlEventReference: betNode._id,
       wagerType: null,
       agreeEvaluation: null,
-      status: "Betable",
+      status: "Bettable",
     };
 
     if (selectedEventTypeForBet === "Match") {
@@ -470,8 +470,8 @@ const CreateWager = () => {
     <div>
       <h2>Welcome to the Create Wager Page</h2>
       <h3>Active Data Tree</h3>
-      {betableObjects ? (
-        <div>{renderDataTree(betableObjects)}</div>
+      {bettableObjects ? (
+        <div>{renderDataTree(bettableObjects)}</div>
       ) : (
         <p>Failed to load data.</p>
       )}

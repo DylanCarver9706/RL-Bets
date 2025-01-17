@@ -9,13 +9,19 @@ const estimatedWagerPayout = (
   betAmount,
   totalAgreeCreditsBet,
   totalDisagreeCreditsBet,
-  agreeBet, // true or false
+  agreeBet // true or false
 ) => {
   let potentialWinnings = 0;
   if (agreeBet === true) {
-    potentialWinnings = betAmount + (totalDisagreeCreditsBet * (betAmount / (betAmount + totalAgreeCreditsBet)));
+    potentialWinnings =
+      betAmount +
+      totalDisagreeCreditsBet *
+        (betAmount / (betAmount + totalAgreeCreditsBet));
   } else {
-    potentialWinnings = betAmount + (totalAgreeCreditsBet * (betAmount / (betAmount + totalDisagreeCreditsBet)));
+    potentialWinnings =
+      betAmount +
+      totalAgreeCreditsBet *
+        (betAmount / (betAmount + totalDisagreeCreditsBet));
   }
 
   // console.log("potentialWinnings", potentialWinnings);
@@ -25,7 +31,7 @@ const estimatedWagerPayout = (
   }
 
   return potentialWinnings;
-}
+};
 
 const WagerPayoutFormula = (
   betAmount,
@@ -35,9 +41,11 @@ const WagerPayoutFormula = (
 ) => {
   let potentialWinnings = 0;
   if (agreeIsTrue === true) {
-    potentialWinnings = ((totalLosersBetsAmount * (betAmount / totalWinnersBetsAmount)));
+    potentialWinnings =
+      totalLosersBetsAmount * (betAmount / totalWinnersBetsAmount);
   } else {
-    potentialWinnings = ((totalWinnersBetsAmount * (betAmount / totalLosersBetsAmount)));
+    potentialWinnings =
+      totalWinnersBetsAmount * (betAmount / totalLosersBetsAmount);
   }
   return potentialWinnings;
 };
@@ -55,7 +63,6 @@ const Wagers = () => {
 
   // Fetch wagers from the server and then listen for updates
   useEffect(() => {
-
     const fetchWagers = async () => {
       try {
         const wagers = await getWagers();
@@ -65,7 +72,7 @@ const Wagers = () => {
       } catch (error) {
         console.error("Error fetching wagers:", error.message);
       }
-    }
+    };
 
     fetchWagers();
     // eslint-disable-next-line
@@ -78,12 +85,15 @@ const Wagers = () => {
         setWagers(updatedWagers || []);
         applyFilter(activeFilter, updatedWagers);
       } else {
-        throw new Error("Invalid data received from wagersUpdate:", updatedWagers);
+        throw new Error(
+          "Invalid data received from wagersUpdate:",
+          updatedWagers
+        );
       }
     };
-  
+
     socket.on("wagersUpdate", handleWagersUpdate);
-  
+
     return () => {
       socket.off("wagersUpdate", handleWagersUpdate);
     };
@@ -98,10 +108,10 @@ const Wagers = () => {
       case "all":
         filtered = allWagers;
         break;
-      case "Betable":
+      case "Bettable":
         filtered = allWagers.filter(
           (wager) =>
-            wager.status === "Betable" &&
+            wager.status === "Bettable" &&
             wager.creator !== user.mongoUserId &&
             wager.bets.every((bet) => bet.user !== user.mongoUserId)
         );
@@ -142,9 +152,7 @@ const Wagers = () => {
       selectedWager.disagreeCreditsBet,
       wagerCaseSelected
     );
-    setEstimatedWinnings(
-      estimatedPayout
-    );
+    setEstimatedWinnings(estimatedPayout);
   };
 
   // Handle cancel bet
@@ -215,10 +223,10 @@ const Wagers = () => {
         <label>
           <input
             type="radio"
-            checked={activeFilter === "Betable"}
-            onChange={() => handleFilterChange("Betable")}
+            checked={activeFilter === "Bettable"}
+            onChange={() => handleFilterChange("Bettable")}
           />
-          Show Betable Wagers
+          Show Bettable Wagers
         </label>
         <label>
           <input
@@ -253,139 +261,231 @@ const Wagers = () => {
           ) : (
             filteredWagers?.map((wager) => {
               let userBet = null;
-              userBet = wager.bets.find(bet => bet.user === user.mongoUserId);
+              userBet = wager.bets.find((bet) => bet.user === user.mongoUserId);
               // console.log(`userBet for ${userBet?.wagerId}`, userBet);
               return (
-              <li key={wager._id} style={styles.wagerItem}>
-                <div style={styles.wagerHeader}>
-                  <strong>Wager ID: {wager._id}</strong>
-                  <br />
-                  <strong>Event ID: {wager.rlEventReference}</strong>
-                  <br />
-                  <strong>Creator: {wager.creator}</strong>
-                  <br />
-                  <strong>Status: {wager.status}</strong>
-                  <br />
-                  {userBet && wager.status !== "Ended" && (
-                    <strong> Current Estimated Winnings: {estimatedWagerPayout(userBet.credits, userBet.agreeBet ? wager.agreeCreditsBet - userBet.credits : wager.agreeCreditsBet, !userBet.agreeBet ? wager.disagreeCreditsBet - userBet.credits : wager.disagreeCreditsBet, userBet.agreeBet).toFixed(2)} Credits {<ToolTip infoText={`Bet Amount: ${userBet.credits} + Current Potential Winnings: ${(estimatedWagerPayout(userBet.credits, userBet.agreeBet ? wager.agreeCreditsBet - userBet.credits : wager.agreeCreditsBet, !userBet.agreeBet ? wager.disagreeCreditsBet - userBet.credits : wager.disagreeCreditsBet, userBet.agreeBet) - userBet.credits).toFixed(2)}`}/>}</strong>
-                  )}
-                  {userBet && wager.status === "Ended" && (
-                    <strong> Credits Earned: {(WagerPayoutFormula(userBet.credits, userBet.agreeBet ? wager.agreeCreditsBet : wager.disagreeCreditsBet, userBet.agreeBet ? wager.disagreeCreditsBet : wager.agreeCreditsBet, userBet.agreeBet) + userBet.credits).toFixed(2)} Credits {<ToolTip infoText={`Bet Amount: ${userBet.credits} + Bet Winnings: ${(estimatedWagerPayout(userBet.credits, userBet.agreeBet ? wager.agreeCreditsBet - userBet.credits : wager.agreeCreditsBet, !userBet.agreeBet ? wager.disagreeCreditsBet - userBet.credits : wager.disagreeCreditsBet, userBet.agreeBet) - userBet.credits).toFixed(2)}`}/>}</strong>
-                  )}
-                  <p>
+                <li key={wager._id} style={styles.wagerItem}>
+                  <div style={styles.wagerHeader}>
+                    <strong>Wager ID: {wager._id}</strong>
                     <br />
-                    {wager.name}
-                  </p>
-                  <br />
-                </div>
-                <div style={styles.wagerBody}>
-                  <div style={styles.agreeSection}>
-                    <div>
-                      <strong>Agree:</strong> {wager.agreePercentage}%
+                    <strong>Event ID: {wager.rlEventReference}</strong>
+                    <br />
+                    <strong>Creator: {wager.creator}</strong>
+                    <br />
+                    <strong>Status: {wager.status}</strong>
+                    <br />
+                    {userBet && wager.status !== "Ended" && (
                       <strong>
-                        <br />
-                        Agree Bets Count:
-                      </strong>{" "}
-                      {wager.agreeBetsCount}
-                      <strong>
-                        <br />
-                        Total Agree Credits Bet:
-                      </strong>{" "}
-                      {wager.agreeCreditsBet}
-                    </div>
-                    {!["Ongoing", "Ended"].includes(wager.status) &&
-                      wager.bets.every(
-                        (bet) => bet.user !== user.mongoUserId
-                      ) &&
-                      wager.creator !== user.mongoUserId && (
-                        <button
-                          style={styles.betButton}
-                          onClick={() => handleWagerOptionClick(wager, true)}
-                        >
-                          Bet on Agree
-                        </button>
-                      )}
-                  </div>
-
-                  <div style={styles.disagreeSection}>
-                    <div>
-                      <strong>Disagree:</strong> {wager.disagreePercentage}%
-                      <strong>
-                        <br />
-                        Disagree Bets Count:
-                      </strong>{" "}
-                      {wager.disagreeBetsCount}
-                      <strong>
-                        <br />
-                        Total Disagree Credits Bet:
-                      </strong>{" "}
-                      {wager.disagreeCreditsBet}
-                    </div>
-                    {!["Ongoing", "Ended"].includes(wager.status) &&
-                      wager.bets.every(
-                        (bet) => bet.user !== user.mongoUserId
-                      ) &&
-                      wager.creator !== user.mongoUserId && (
-                        <button
-                          style={styles.betButton}
-                          onClick={() => handleWagerOptionClick(wager, false)}
-                        >
-                          Bet on Disagree
-                        </button>
-                      )}
-                  </div>
-                </div>
-
-                {/* Show input when Bet button is clicked */}
-                {showBetInput && selectedWager?._id === wager._id && (
-                  <div>
-                    I bet{" "}
-                    <input
-                      type="number"
-                      id="numberInput"
-                      value={creditsWagered}
-                      onChange={(e) =>
-                        handleBetInputChange(e.target.value)
-                      }
-                      min="0"
-                      step="1"
-                    />{" "}
-                    credits that this{" "}
-                    <strong>
-                      {wagerCaseSelected ? "will" : "will not"}
-                    </strong>{" "}
-                    happen
-                    <p>
-                      Estimated Winnings: {parseFloat(estimatedWinnings - creditsWagered).toFixed(2) || 0}{" "}
-                      credits{" "}{<ToolTip infoText={`Total ${wagerCaseSelected ? 'Disagree' : 'Agree'} Credits Bet x ( Bet Amount / ( Bet Amount + Total ${wagerCaseSelected ? "Agree" : "Disagree"} Credits Bet ))`}/>}
-                    </p>
-                    {wagerCaseSelected ? (
-                    <p>
-                      Meaning: {creditsWagered} credits bet + {parseFloat(estimatedWinnings - creditsWagered).toFixed(2) > 0 ? parseFloat(estimatedWinnings - creditsWagered).toFixed(2) : 0} credits won = {parseFloat(estimatedWinnings).toFixed(2) || 0} credits earned
-                    </p>
-                    ) : (
-                      <p>
-                        Meaning: {creditsWagered} credits bet + {parseFloat(estimatedWinnings - creditsWagered).toFixed(2) > 0 ? parseFloat(estimatedWinnings - creditsWagered).toFixed(2) : 0} credits won = {parseFloat(estimatedWinnings).toFixed(2) || 0} credits earned
-                      </p>
+                        {" "}
+                        Current Estimated Winnings:{" "}
+                        {estimatedWagerPayout(
+                          userBet.credits,
+                          userBet.agreeBet
+                            ? wager.agreeCreditsBet - userBet.credits
+                            : wager.agreeCreditsBet,
+                          !userBet.agreeBet
+                            ? wager.disagreeCreditsBet - userBet.credits
+                            : wager.disagreeCreditsBet,
+                          userBet.agreeBet
+                        ).toFixed(2)}{" "}
+                        Credits{" "}
+                        {
+                          <ToolTip
+                            infoText={`Bet Amount: ${
+                              userBet.credits
+                            } + Current Potential Winnings: ${(
+                              estimatedWagerPayout(
+                                userBet.credits,
+                                userBet.agreeBet
+                                  ? wager.agreeCreditsBet - userBet.credits
+                                  : wager.agreeCreditsBet,
+                                !userBet.agreeBet
+                                  ? wager.disagreeCreditsBet - userBet.credits
+                                  : wager.disagreeCreditsBet,
+                                userBet.agreeBet
+                              ) - userBet.credits
+                            ).toFixed(2)}`}
+                          />
+                        }
+                      </strong>
                     )}
-                    <button
-                      style={styles.submitBetButton}
-                      onClick={() =>
-                        handleSubmitBet()
-                      }
-                    >
-                      Submit Bet
-                    </button>
-                    <button
-                      style={styles.submitBetButton}
-                      onClick={() => handleCancelBet()}
-                    >
-                      Cancel
-                    </button>
+                    {userBet && wager.status === "Ended" && (
+                      <strong>
+                        {" "}
+                        Credits Earned:{" "}
+                        {(
+                          WagerPayoutFormula(
+                            userBet.credits,
+                            userBet.agreeBet
+                              ? wager.agreeCreditsBet
+                              : wager.disagreeCreditsBet,
+                            userBet.agreeBet
+                              ? wager.disagreeCreditsBet
+                              : wager.agreeCreditsBet,
+                            userBet.agreeBet
+                          ) + userBet.credits
+                        ).toFixed(2)}{" "}
+                        Credits{" "}
+                        {
+                          <ToolTip
+                            infoText={`Bet Amount: ${
+                              userBet.credits
+                            } + Bet Winnings: ${(
+                              estimatedWagerPayout(
+                                userBet.credits,
+                                userBet.agreeBet
+                                  ? wager.agreeCreditsBet - userBet.credits
+                                  : wager.agreeCreditsBet,
+                                !userBet.agreeBet
+                                  ? wager.disagreeCreditsBet - userBet.credits
+                                  : wager.disagreeCreditsBet,
+                                userBet.agreeBet
+                              ) - userBet.credits
+                            ).toFixed(2)}`}
+                          />
+                        }
+                      </strong>
+                    )}
+                    <p>
+                      <br />
+                      {wager.name}
+                    </p>
+                    <br />
                   </div>
-                )}
-              </li>
-              )
+                  <div style={styles.wagerBody}>
+                    <div style={styles.agreeSection}>
+                      <div>
+                        <strong>Agree:</strong> {wager.agreePercentage}%
+                        <strong>
+                          <br />
+                          Agree Bets Count:
+                        </strong>{" "}
+                        {wager.agreeBetsCount}
+                        <strong>
+                          <br />
+                          Total Agree Credits Bet:
+                        </strong>{" "}
+                        {wager.agreeCreditsBet}
+                      </div>
+                      {!["Ongoing", "Ended"].includes(wager.status) &&
+                        wager.bets.every(
+                          (bet) => bet.user !== user.mongoUserId
+                        ) &&
+                        wager.creator !== user.mongoUserId && (
+                          <button
+                            style={styles.betButton}
+                            onClick={() => handleWagerOptionClick(wager, true)}
+                          >
+                            Bet on Agree
+                          </button>
+                        )}
+                    </div>
+
+                    <div style={styles.disagreeSection}>
+                      <div>
+                        <strong>Disagree:</strong> {wager.disagreePercentage}%
+                        <strong>
+                          <br />
+                          Disagree Bets Count:
+                        </strong>{" "}
+                        {wager.disagreeBetsCount}
+                        <strong>
+                          <br />
+                          Total Disagree Credits Bet:
+                        </strong>{" "}
+                        {wager.disagreeCreditsBet}
+                      </div>
+                      {!["Ongoing", "Ended"].includes(wager.status) &&
+                        wager.bets.every(
+                          (bet) => bet.user !== user.mongoUserId
+                        ) &&
+                        wager.creator !== user.mongoUserId && (
+                          <button
+                            style={styles.betButton}
+                            onClick={() => handleWagerOptionClick(wager, false)}
+                          >
+                            Bet on Disagree
+                          </button>
+                        )}
+                    </div>
+                  </div>
+
+                  {/* Show input when Bet button is clicked */}
+                  {showBetInput && selectedWager?._id === wager._id && (
+                    <div>
+                      I bet{" "}
+                      <input
+                        type="number"
+                        id="numberInput"
+                        value={creditsWagered}
+                        onChange={(e) => handleBetInputChange(e.target.value)}
+                        min="0"
+                        step="1"
+                      />{" "}
+                      credits that this{" "}
+                      <strong>{wagerCaseSelected ? "will" : "will not"}</strong>{" "}
+                      happen
+                      <p>
+                        Estimated Winnings:{" "}
+                        {parseFloat(estimatedWinnings - creditsWagered).toFixed(
+                          2
+                        ) || 0}{" "}
+                        credits{" "}
+                        {
+                          <ToolTip
+                            infoText={`Total ${
+                              wagerCaseSelected ? "Disagree" : "Agree"
+                            } Credits Bet x ( Bet Amount / ( Bet Amount + Total ${
+                              wagerCaseSelected ? "Agree" : "Disagree"
+                            } Credits Bet ))`}
+                          />
+                        }
+                      </p>
+                      {wagerCaseSelected ? (
+                        <p>
+                          Meaning: {creditsWagered} credits bet +{" "}
+                          {parseFloat(
+                            estimatedWinnings - creditsWagered
+                          ).toFixed(2) > 0
+                            ? parseFloat(
+                                estimatedWinnings - creditsWagered
+                              ).toFixed(2)
+                            : 0}{" "}
+                          credits won ={" "}
+                          {parseFloat(estimatedWinnings).toFixed(2) || 0}{" "}
+                          credits earned
+                        </p>
+                      ) : (
+                        <p>
+                          Meaning: {creditsWagered} credits bet +{" "}
+                          {parseFloat(
+                            estimatedWinnings - creditsWagered
+                          ).toFixed(2) > 0
+                            ? parseFloat(
+                                estimatedWinnings - creditsWagered
+                              ).toFixed(2)
+                            : 0}{" "}
+                          credits won ={" "}
+                          {parseFloat(estimatedWinnings).toFixed(2) || 0}{" "}
+                          credits earned
+                        </p>
+                      )}
+                      <button
+                        style={styles.submitBetButton}
+                        onClick={() => handleSubmitBet()}
+                      >
+                        Submit Bet
+                      </button>
+                      <button
+                        style={styles.submitBetButton}
+                        onClick={() => handleCancelBet()}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  )}
+                </li>
+              );
             })
           )}
         </ul>

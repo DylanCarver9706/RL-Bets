@@ -94,7 +94,10 @@ const Admin = () => {
     setEditData(
       Object.fromEntries(
         Object.entries(data).filter(
-          ([key, value]) => key !== "_id" && key !== "status" && (typeof value !== "object" || !Array.isArray(value))
+          ([key, value]) =>
+            key !== "_id" &&
+            key !== "status" &&
+            (typeof value !== "object" || !Array.isArray(value))
         )
       )
     );
@@ -163,12 +166,12 @@ const Admin = () => {
     setResultsData((prevResults) => {
       // Ensure the team exists in the results object as an array
       const updatedTeamResults = prevResults[teamId] || [];
-  
+
       // Find the player entry for the team or initialize a new player entry
       const playerIndex = updatedTeamResults.findIndex(
         (player) => player.playerId === playerId
       );
-  
+
       if (playerIndex === -1) {
         // Player not found, initialize new entry
         updatedTeamResults.push({ playerId, [stat]: value });
@@ -179,7 +182,7 @@ const Admin = () => {
           [stat]: value,
         };
       }
-  
+
       // Return the updated results object
       return {
         ...prevResults,
@@ -229,20 +232,46 @@ const Admin = () => {
       {Object.entries(editData).map(([key, value]) => (
         <div key={key} style={{ marginBottom: "10px" }}>
           <label>
-            {key}: 
+            {key}:
             <input
               type="text"
               value={value}
               onChange={(e) => handleChange(key, e.target.value)}
-              style={{ marginLeft: "10px", padding: "5px", borderRadius: "4px", border: "1px solid #ccc" }}
+              style={{
+                marginLeft: "10px",
+                padding: "5px",
+                borderRadius: "4px",
+                border: "1px solid #ccc",
+              }}
             />
           </label>
         </div>
       ))}
-      <button onClick={handleSave} style={{ background: "#28a745", color: "white", padding: "5px 10px", border: "none", borderRadius: "5px", cursor: "pointer" }}>
+      <button
+        onClick={handleSave}
+        style={{
+          background: "#28a745",
+          color: "white",
+          padding: "5px 10px",
+          border: "none",
+          borderRadius: "5px",
+          cursor: "pointer",
+        }}
+      >
         Save
       </button>
-      <button onClick={() => setEditMode(null)} style={{ marginLeft: "10px", background: "#dc3545", color: "white", padding: "5px 10px", border: "none", borderRadius: "5px", cursor: "pointer" }}>
+      <button
+        onClick={() => setEditMode(null)}
+        style={{
+          marginLeft: "10px",
+          background: "#dc3545",
+          color: "white",
+          padding: "5px 10px",
+          border: "none",
+          borderRadius: "5px",
+          cursor: "pointer",
+        }}
+      >
         Cancel
       </button>
     </div>
@@ -299,59 +328,69 @@ const Admin = () => {
               >
                 <thead>
                   <tr>
-                    {["Score", "Goals", "Assists", "Shots", "Saves", "Demos"].map(
-                      (stat) => (
-                        <th
-                          key={stat}
-                          style={{
-                            border: "1px solid #ccc",
-                            padding: "5px",
-                            background: "#ddd",
-                          }}
-                        >
-                          {stat}
-                        </th>
-                      )
-                    )}
+                    {[
+                      "Score",
+                      "Goals",
+                      "Assists",
+                      "Shots",
+                      "Saves",
+                      "Demos",
+                    ].map((stat) => (
+                      <th
+                        key={stat}
+                        style={{
+                          border: "1px solid #ccc",
+                          padding: "5px",
+                          background: "#ddd",
+                        }}
+                      >
+                        {stat}
+                      </th>
+                    ))}
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
-                    {["score", "goals", "assists", "shots", "saves", "demos"].map(
-                      (stat) => (
-                        <td
-                          key={stat}
+                    {[
+                      "score",
+                      "goals",
+                      "assists",
+                      "shots",
+                      "saves",
+                      "demos",
+                    ].map((stat) => (
+                      <td
+                        key={stat}
+                        style={{
+                          border: "1px solid #ccc",
+                          padding: "5px",
+                        }}
+                      >
+                        <input
+                          type="number"
+                          placeholder={`Enter ${stat}`}
+                          value={
+                            resultsData[team._id]?.find(
+                              (p) => p.playerId === player._id
+                            )?.[stat] || ""
+                          }
+                          onChange={(e) =>
+                            handleResultsChange(
+                              team._id,
+                              player._id,
+                              stat,
+                              parseInt(e.target.value, 10) || 0
+                            )
+                          }
                           style={{
+                            width: "100%",
+                            padding: "4px",
+                            borderRadius: "4px",
                             border: "1px solid #ccc",
-                            padding: "5px",
                           }}
-                        >
-                          <input
-                            type="number"
-                            placeholder={`Enter ${stat}`}
-                            value={
-                              resultsData[team._id]?.find(
-                                (p) => p.playerId === player._id
-                              )?.[stat] || ""
-                            }
-                            onChange={(e) =>
-                              handleResultsChange(
-                                team._id,
-                                player._id,
-                                stat,
-                                parseInt(e.target.value, 10) || 0
-                              )
-                            }
-                            style={{
-                              width: "100%",
-                              padding: "4px",
-                              borderRadius: "4px",
-                              border: "1px solid #ccc",
-                            }}
-                          />
-                        </td>
-                      )
-                    )}
+                        />
+                      </td>
+                    ))}
                   </tr>
                 </tbody>
               </table>
@@ -396,89 +435,88 @@ const Admin = () => {
   const handleFirstBloodSubmit = async () => {
     await updateFirstBlood(currentMatch._id, { firstBlood: firstBlood });
     setShowFirstBloodModal(false);
-  }
+  };
 
   const renderFirstBloodModal = () => (
     <div style={{ marginBottom: "15px" }}>
       <div
-      style={{
-        position: "fixed",
-        top: "50%",
-        left: "50%",
-        transform: "translate(-50%, -50%)",
-        background: "#b3b1b1",
-        padding: "20px",
-        borderRadius: "10px",
-        boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
-        zIndex: 1000,
-      }}
-    >
-      <h3>Enter First Blood</h3>
-      <label>
-        First Blood:
-        <select
-          value={firstBlood}
-          onChange={(e) => setFirstBlood(e.target.value)}
-          style={{ marginLeft: "10px", padding: "5px" }}
+        style={{
+          position: "fixed",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+          background: "#b3b1b1",
+          padding: "20px",
+          borderRadius: "10px",
+          boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
+          zIndex: 1000,
+        }}
+      >
+        <h3>Enter First Blood</h3>
+        <label>
+          First Blood:
+          <select
+            value={firstBlood}
+            onChange={(e) => setFirstBlood(e.target.value)}
+            style={{ marginLeft: "10px", padding: "5px" }}
+          >
+            <option value="">Select Team</option>
+            {currentMatch &&
+              currentMatch.teams.map((team) => (
+                <option key={team._id} value={team._id}>
+                  {team.name}
+                </option>
+              ))}
+          </select>
+        </label>
+        <br />
+        <button
+          onClick={handleFirstBloodSubmit}
+          style={{
+            background: "#28a745",
+            color: "white",
+            padding: "5px 10px",
+            border: "none",
+            borderRadius: "5px",
+            cursor: "pointer",
+            marginTop: "10px",
+          }}
         >
-          <option value="">Select Team</option>
-          {currentMatch &&
-            currentMatch.teams.map((team) => (
-              <option key={team._id} value={team._id}>
-                {team.name}
-              </option>
-            ))}
-        </select>
-      </label>
-      <br/>
-      <button
-        onClick={handleFirstBloodSubmit}
-        style={{
-          background: "#28a745",
-          color: "white",
-          padding: "5px 10px",
-          border: "none",
-          borderRadius: "5px",
-          cursor: "pointer",
-          marginTop: "10px",
-        }}
-      >
-        Save Results & Pay Out Wagers
-      </button>
-      <button
-        onClick={() => {
-          setShowFirstBloodModal(false);
-          setCurrentMatch(null);
-        }}
-        style={{
-          marginLeft: "10px",
-          background: "#dc3545",
-          color: "white",
-          padding: "5px 10px",
-          border: "none",
-          borderRadius: "5px",
-          cursor: "pointer",
-          marginTop: "10px",
-        }}
-      >
-        Cancel
-      </button>
+          Save Results & Pay Out Wagers
+        </button>
+        <button
+          onClick={() => {
+            setShowFirstBloodModal(false);
+            setCurrentMatch(null);
+          }}
+          style={{
+            marginLeft: "10px",
+            background: "#dc3545",
+            color: "white",
+            padding: "5px 10px",
+            border: "none",
+            borderRadius: "5px",
+            cursor: "pointer",
+            marginTop: "10px",
+          }}
+        >
+          Cancel
+        </button>
+      </div>
     </div>
-    </div>
-    
   );
 
   const handleFirstBloodClick = (event) => {
     console.log(event);
     setCurrentMatch(event);
     setShowFirstBloodModal(true);
-    console.log(currentMatch)
+    console.log(currentMatch);
   };
 
   // Function to render each event as a card with a log/edit button
   const renderCard = (title, content, event) => {
     const type = event?.type?.toLowerCase() || "unknown"; // Default to "unknown" if type is undefined
-  
+
     return (
       <div
         style={{
@@ -506,8 +544,7 @@ const Admin = () => {
             >
               Edit
             </button>
-          )}
-          {" "}
+          )}{" "}
           {type === "match" &&
             ["ongoing", "ended"].includes(event.status?.toLowerCase() || "") &&
             !event.firstBlood && (
@@ -554,7 +591,7 @@ const Admin = () => {
                 style={{ marginLeft: "10px", padding: "5px" }}
               >
                 <option value="Created">Created</option>
-                <option value="Betable">Betable</option>
+                <option value="Bettable">Bettable</option>
                 <option value="Ongoing">Ongoing</option>
                 <option value="Ended">Ended</option>
               </select>
@@ -569,22 +606,24 @@ const Admin = () => {
   // Function to render the results object as a table
   const renderResultsTable = (results) => {
     if (!results || typeof results !== "object") return null;
-  
+
     // Create a map of player IDs to names for quick lookup
     const playerIdToNameMap = players.reduce((map, player) => {
       map[player._id] = player.name;
       return map;
     }, {});
-  
+
     // Extract team IDs and their player data
     const teamIds = Object.keys(results);
     const [team1, team2] = teamIds;
-  
+
     // Attributes to display
     const attributes = ["score", "goals", "assists", "shots", "saves", "demos"];
-  
+
     return (
-      <table style={{ borderCollapse: "collapse", width: "100%", marginTop: "10px" }}>
+      <table
+        style={{ borderCollapse: "collapse", width: "100%", marginTop: "10px" }}
+      >
         <thead>
           <tr>
             {/* Team 1 Player Names */}
@@ -674,7 +713,11 @@ const Admin = () => {
         <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
           {node.map((item, index) => (
             <div key={index} style={{ flex: "1 1 300px" }}>
-              {renderCard(item.name || `Item ${index + 1}`, renderDataTree(item), item)}
+              {renderCard(
+                item.name || `Item ${index + 1}`,
+                renderDataTree(item),
+                item
+              )}
             </div>
           ))}
         </div>
@@ -683,17 +726,18 @@ const Admin = () => {
       return (
         <div>
           {Object.entries(node).map(([key, value]) => {
-            let title = value?.name || key.charAt(0).toUpperCase() + key.slice(1);
-            
+            let title =
+              value?.name || key.charAt(0).toUpperCase() + key.slice(1);
+
             // Handle boolean rendering
             if (typeof value === "boolean") {
               return (
                 <div key={key} style={{ marginBottom: "5px" }}>
-                  <strong>{key}:</strong> {value ? 'True' : 'False'}
+                  <strong>{key}:</strong> {value ? "True" : "False"}
                 </div>
               );
             }
-  
+
             if (key === "results" && typeof value === "object") {
               return (
                 <CollapsibleSection key={key} title={title}>
@@ -707,7 +751,11 @@ const Admin = () => {
                 <CollapsibleSection key={key} title={title}>
                   {value.map((item, index) => (
                     <div key={index} style={{ marginBottom: "10px" }}>
-                      {renderCard(item.name || `${title} ${index + 1}`, renderDataTree(item), item)}
+                      {renderCard(
+                        item.name || `${title} ${index + 1}`,
+                        renderDataTree(item),
+                        item
+                      )}
                     </div>
                   ))}
                 </CollapsibleSection>
@@ -917,7 +965,13 @@ const Admin = () => {
       {showFirstBloodModal && renderFirstBloodModal()}
       {newSeriesMode && renderNewSeriesModal()}
       {showResultsModal && renderResultsModal()}
-      {editMode ? renderEditModal() : data ? renderTournaments(data) : <p>Loading data...</p>}
+      {editMode ? (
+        renderEditModal()
+      ) : data ? (
+        renderTournaments(data)
+      ) : (
+        <p>Loading data...</p>
+      )}
     </div>
   );
 };
