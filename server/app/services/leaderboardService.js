@@ -68,7 +68,7 @@ const getCurrentLeaderboard = async (returnIds = false) => {
   });
 
   if (!leaderboard) {
-    throw new Error("No leaderboard with status 'Ongoing' or 'Betable' found");
+    return null;
   }
 
   // Populate users and sort by earnedCredits
