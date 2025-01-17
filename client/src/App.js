@@ -19,7 +19,7 @@ import Navbar from "./components/Navbar";
 import CreateWager from "./components/CreateWager";
 import Schedule from "./components/Schedule";
 import CreditShop from "./components/CreditShop";
-import Leaderboard from "./components/Leaderboard";
+import LifetimeLeaderboard from "./components/LifetimeLeaderboard";
 import Log from "./components/Log";
 import Admin from "./components/Admin";
 import EmailVerification from "./components/EmailVerification";
@@ -290,10 +290,10 @@ function App() {
           }
         />
         <Route
-          path="/Leaderboard"
+          path="/Lifetime-Leaderboard"
           element={
             <ProtectedRoute loggedIn={loggedIn}>
-              <Leaderboard />
+              <LifetimeLeaderboard />
             </ProtectedRoute>
           }
         />
