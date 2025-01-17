@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../context/UserContext.js";
-import { getUserById, updateUser } from "../services/userService.js";
+import { updateUser } from "../services/userService.js";
 import {
   fetchBetableObjects,
   createWager,
@@ -18,7 +18,6 @@ const CreateWager = () => {
   // Load data
   const { user } = useUser();
   const [betableObjects, setBetableObjects] = useState(null);
-  const [userData, setUserData] = useState(0);
   const [teams, setTeams] = useState(null);
 
   // Betting vars
@@ -55,9 +54,6 @@ const CreateWager = () => {
 
         const fetchedTeams = await fetchTeams();
         setTeams(fetchedTeams);
-
-        const userData = await getUserById(user.mongoUserId);
-        setUserData(userData);
       } catch (error) {
         console.error("Error fetching data:", error.message);
       }
@@ -312,7 +308,7 @@ const CreateWager = () => {
       return;
     }
 
-    const remainingCredits = parseFloat(userData.credits) - creditsBet;
+    const remainingCredits = parseFloat(user.credits) - creditsBet;
     if (remainingCredits < 0) {
       alert("Wager amount is more credits than you have available!");
       return;
