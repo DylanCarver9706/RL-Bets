@@ -1034,6 +1034,11 @@ const matchConcluded = async (matchId, data) => {
         $set: { earnedCredits: 0.0 },
       });
     }
+
+    // Set the status of the leaderboard to "Ended"
+    await updateMongoDocument(collections.leaderboardsCollection, currentLeaderboard._id.toString(), {
+      $set: { status: "Ended" },
+    });
   
     console.log("Tournament has ended and all user earnedCredits have been reset to 0.00. Congrats RL Bets!");
   }
