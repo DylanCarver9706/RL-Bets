@@ -74,6 +74,7 @@ const softDeleteUser = async (id) => {
       // mongoUserId
       credits: 0.0,
       earnedCredits: 0.0,
+      lifetimeEarnedCredits: 0.0,
       firebaseUserId: null,
       // userType
       idvStatus: "unverified",
