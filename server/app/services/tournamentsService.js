@@ -6,7 +6,6 @@ const {
 const { ObjectId } = require("mongodb");
 
 const createTournament = async (tournamentData) => {
-
   // Lazy load create leaderboard to avoid circular dependency
   const { createLeaderboard } = require("./leaderboardService");
 
@@ -14,7 +13,7 @@ const createTournament = async (tournamentData) => {
     name: tournamentData.name,
     users: [],
     status: "Created",
-  })
+  });
 
   tournamentData.leaderboard = newLeaderboard._id;
 
@@ -23,9 +22,13 @@ const createTournament = async (tournamentData) => {
     tournamentData
   );
 
-  await updateMongoDocument(collections.leaderboardsCollection, newLeaderboard._id.toString(), {
-    $set: { tournament: result.insertedId },
-  });
+  await updateMongoDocument(
+    collections.leaderboardsCollection,
+    newLeaderboard._id.toString(),
+    {
+      $set: { tournament: result.insertedId },
+    }
+  );
 
   return result.insertedId;
 };
@@ -66,8 +69,8 @@ const updateTournament = async (id, updateData) => {
       )
     );
 
-    // If the status is "Ongoing" or "Betable", update other tournaments to "Ended"
-    if (["Ongoing", "Betable"].includes(updateData.status)) {
+    // If the status is "Ongoing" or "Bettable", update other tournaments to "Ended"
+    if (["Ongoing", "Bettable"].includes(updateData.status)) {
       const allTournaments = await getAllTournaments();
 
       await Promise.all(
@@ -95,10 +98,10 @@ const deleteTournament = async (id) => {
   });
 };
 
-// Get the current tournament if the status is "Ongoing" or "Betable"
+// Get the current tournament if the status is "Ongoing" or "Bettable"
 const getCurrentTournament = async () => {
   const currentTournament = await collections.tournamentsCollection.findOne({
-    status: { $in: ["Ongoing", "Betable"] },
+    status: { $in: ["Ongoing", "Bettable"] },
   });
   return currentTournament;
 };

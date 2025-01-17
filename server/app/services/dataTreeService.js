@@ -181,36 +181,36 @@ const getSeriesDataTree = async (seriesId) => {
   return seriesWithMatches;
 };
 
-const getBetableDataTree = async () => {
-  // Fetch all betable matches
-  const betableMatches = await collections.matchesCollection
-    .find({ status: "Betable" })
+const getBettableDataTree = async () => {
+  // Fetch all Bettable matches
+  const bettableMatches = await collections.matchesCollection
+    .find({ status: "Bettable" })
     .toArray();
 
-  const seriesIds = betableMatches.map((match) => match.series);
+  const seriesIds = bettableMatches.map((match) => match.series);
 
-  // Fetch the series for the betable matches
-  const betableSeries = await collections.seriesCollection
+  // Fetch the series for the Bettable matches
+  const bettableSeries = await collections.seriesCollection
     .find({
-      $or: [{ status: "Betable" }, { _id: { $in: seriesIds } }],
+      $or: [{ status: "Bettable" }, { _id: { $in: seriesIds } }],
     })
     .toArray();
 
-  const tournamentIds = betableSeries.map((series) => series.tournament);
+  const tournamentIds = bettableSeries.map((series) => series.tournament);
 
-  // Fetch the tournaments for the betable series
-  const betableTournaments = await collections.tournamentsCollection
+  // Fetch the tournaments for the Bettable series
+  const bettableTournaments = await collections.tournamentsCollection
     .find({
-      $or: [{ status: "Betable" }, { _id: { $in: tournamentIds } }],
+      $or: [{ status: "Bettable" }, { _id: { $in: tournamentIds } }],
     })
     .toArray();
 
-  // Fetch all teams related to the betable matches and series
+  // Fetch all teams related to the Bettable matches and series
   const allTeamIds = [
     ...new Set(
-      betableMatches
-        .flatMap((match) => match.teams)
-        .concat(betableSeries.flatMap((series) => series.teams))
+      bettableMatches.flatMap((match) => match.teams).concat(
+        bettableSeries.flatMap((series) => series.teams)
+      )
     ),
   ];
 
@@ -232,7 +232,7 @@ const getBetableDataTree = async () => {
   }));
 
   // Map matches with their teams
-  const matchesWithTeams = betableMatches.map((match) => ({
+  const matchesWithTeams = bettableMatches.map((match) => ({
     ...match,
     teams: teamsWithPlayers.filter((team) =>
       match.teams.some((t) => t.equals(team._id))
@@ -240,7 +240,7 @@ const getBetableDataTree = async () => {
   }));
 
   // Map series with their matches and teams
-  const seriesWithMatches = betableSeries.map((series) => ({
+  const seriesWithMatches = bettableSeries.map((series) => ({
     ...series,
     matches: matchesWithTeams.filter((match) =>
       match.series.equals(series._id)
@@ -251,7 +251,7 @@ const getBetableDataTree = async () => {
   }));
 
   // Map tournaments with their series
-  const tournamentsWithSeries = betableTournaments.map((tournament) => ({
+  const tournamentsWithSeries = bettableTournaments.map((tournament) => ({
     ...tournament,
     series: seriesWithMatches.filter((series) =>
       series.tournament.equals(tournament._id)
@@ -265,5 +265,5 @@ module.exports = {
   getAllTournamentsDataTree,
   getTournamentDataTree,
   getSeriesDataTree,
-  getBetableDataTree,
+  getBettableDataTree,
 };

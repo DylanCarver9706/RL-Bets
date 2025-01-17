@@ -65,7 +65,7 @@ const deleteLeaderboard = async (id) => {
 
 const getCurrentLeaderboard = async (returnIds = false) => {
   const leaderboard = await collections.leaderboardsCollection.findOne({
-    status: { $in: ["Ongoing", "Betable"] },
+    status: { $in: ["Ongoing", "Bettable"] },
   });
 
   if (!leaderboard) {
@@ -97,7 +97,7 @@ const getCurrentLeaderboard = async (returnIds = false) => {
   );
 
   // Return the updated leaderboard with sorted users (name and earnedCredits only)
-  const tournament = await getTournamentById(leaderboard.tournament.toString())
+  const tournament = await getTournamentById(leaderboard.tournament.toString());
   return {
     ...leaderboard,
     tournamentName: tournament.name,
@@ -115,11 +115,16 @@ const getLifetimeLeaderboard = async (returnIds = false) => {
   let sortedUsers;
 
   if (returnIds) {
-    sortedUsers = userDocs.sort((a, b) => b.lifetimeEarnedCredits - a.lifetimeEarnedCredits);
+    sortedUsers = userDocs.sort(
+      (a, b) => b.lifetimeEarnedCredits - a.lifetimeEarnedCredits
+    );
   } else {
     sortedUsers = userDocs
       .sort((a, b) => b.lifetimeEarnedCredits - a.lifetimeEarnedCredits)
-      .map(({ name, lifetimeEarnedCredits }) => ({ name, lifetimeEarnedCredits })); // Exclude _id
+      .map(({ name, lifetimeEarnedCredits }) => ({
+        name,
+        lifetimeEarnedCredits,
+      })); // Exclude _id
   }
 
   // Return the updated sorted users (name and earnedCredits only)
