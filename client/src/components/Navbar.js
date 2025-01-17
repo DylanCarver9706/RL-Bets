@@ -1,16 +1,17 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useUser } from "../context/UserContext.js";
 import socket from "../services/socket.js";
 
 const Navbar = () => {
   const { user, setUser } = useUser();
+  const [hovered, setHovered] = useState(false);
 
   // Listen for updates from the server
   useEffect(() => {
     socket.on("updateUser", (updateUser) => {
       if (updateUser._id === user.mongoUserId) {
-        setUser({...user, credits: updateUser.credits});
+        setUser({ ...user, credits: updateUser.credits });
       }
     });
 
@@ -21,7 +22,7 @@ const Navbar = () => {
     };
     // eslint-disable-next-line
   }, [user?.mongoUserId]);
-  
+
   if (!user) {
     return null; // Hide navbar if no user is logged in
   }
@@ -43,12 +44,24 @@ const Navbar = () => {
         <Link to="/Schedule" style={styles.link}>
           Schedule
         </Link>
-        <Link to="/Lifetime-Leaderboard" style={styles.link}>
-        Lifetime Leaderboard
-        </Link>
-        <Link to="/Tournament-Leaderboard" style={styles.link}>
-        Tournament Leaderboard
-        </Link>
+        <div
+          style={styles.dropdownContainer}
+          onMouseEnter={() => setHovered(true)}
+          onMouseLeave={() => setHovered(false)}
+          onClick={() => setHovered(false)}
+        >
+          <span style={styles.link}>Leaderboards</span>
+          {hovered && (
+            <div style={styles.dropdownMenu}>
+              <Link to="/Lifetime-Leaderboard" style={styles.dropdownLink}>
+                Lifetime Leaderboard
+              </Link>
+              <Link to="/Tournament-Leaderboard" style={styles.dropdownLink}>
+                Tournament Leaderboard
+              </Link>
+            </div>
+          )}
+        </div>
         <Link to="/Settings" style={styles.link}>
           Settings
         </Link>
@@ -94,10 +107,36 @@ const styles = {
   navLinks: {
     display: "flex",
     gap: "15px",
+    position: "relative",
   },
   link: {
     color: "#fff",
     textDecoration: "none",
     fontSize: "16px",
+    cursor: "pointer",
+  },
+  dropdownContainer: {
+    position: "relative",
+  },
+  dropdownMenu: {
+    position: "absolute",
+    top: "100%",
+    left: 0,
+    background: "#444",
+    padding: "10px 0",
+    borderRadius: "5px",
+    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+    zIndex: 1000,
+  },
+  dropdownLink: {
+    display: "block",
+    padding: "5px 20px",
+    color: "#fff",
+    textDecoration: "none",
+    fontSize: "14px",
+    cursor: "pointer",
+  },
+  dropdownLinkHover: {
+    background: "#555",
   },
 };
