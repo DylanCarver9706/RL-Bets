@@ -261,9 +261,25 @@ const getBettableDataTree = async () => {
   return tournamentsWithSeries;
 };
 
+const getEndedTournamentsDataTree = async () => {
+  // Fetch all ended tournaments
+  const endedTournaments = await collections.tournamentsCollection
+    .find({ status: "Ended" })
+    .toArray();
+
+  let tournamentDataTrees = [];
+
+  for (const tournament of endedTournaments) {
+    tournamentDataTrees.push(await getTournamentDataTree(tournament._id.toString()));
+  }
+
+  return tournamentDataTrees;
+};
+
 module.exports = {
   getAllTournamentsDataTree,
   getTournamentDataTree,
   getSeriesDataTree,
   getBettableDataTree,
+  getEndedTournamentsDataTree,
 };
