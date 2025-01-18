@@ -103,6 +103,9 @@ const getCurrentTournament = async () => {
   const currentTournament = await collections.tournamentsCollection.findOne({
     status: { $in: ["Ongoing", "Bettable"] },
   });
+
+  if (!currentTournament) return null;
+
   return currentTournament;
 };
 
