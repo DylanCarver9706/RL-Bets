@@ -83,6 +83,7 @@ const softDeleteUser = async (id) => {
       DOB: null,
       referralCode: null,
       authProvider: null,
+      phoneNumber: null,
     },
   });
 
