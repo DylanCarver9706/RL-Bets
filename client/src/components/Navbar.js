@@ -12,7 +12,8 @@ const Navbar = () => {
   useEffect(() => {
     // Fetch the current tournament data
     const fetchTournament = async () => {
-      setCurrentTournament(await fetchCurrentTournament());
+      const tournamentData = await fetchCurrentTournament();
+      setCurrentTournament(tournamentData);
     }
     fetchTournament();
   }, []);
@@ -88,7 +89,7 @@ const Navbar = () => {
                   to={`/Tournament-Leaderboard`}
                   style={styles.dropdownLink}
                 >
-                  {currentTournament.name}
+                  {currentTournament?.name}
                 </Link>
               )}
               <Link to="/Lifetime-Leaderboard" style={styles.dropdownLink}>
