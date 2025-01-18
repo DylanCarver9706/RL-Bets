@@ -39,6 +39,10 @@ const IdentityVerification = () => {
         if (idvResult?.DOB) {
           updateUserObject.DOB = idvResult.DOB;
         }
+
+        if (idvResult?.phoneNumber) {
+          updateUserObject.phoneNumber = idvResult.phoneNumber;
+        }
         
         await updateUser(user.mongoUserId, updateUserObject);
         
