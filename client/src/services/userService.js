@@ -410,3 +410,25 @@ export const generateReferralCode = async (userId) => {
     throw new Error("Error generating referral code:", err.message);
   }
 }
+
+export const fetchTransactionHistory = async (userId) => {
+  try {
+    // Retrieve the Firebase ID token
+    const idToken = await getFirebaseIdToken();
+    const response = await fetch(`${BASE_SERVER_URL}/api/transactions/user/${userId}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${idToken}`, // Include the token in the headers
+      },
+    });
+    if (!response.ok) {
+      throw new Error("Failed to fetch transaction history.");
+    }
+    const data = await response.json();
+    return data;
+  } catch (err) {
+    console.error("Error fetching transaction history:", err.message);
+    return [];
+  }
+}
