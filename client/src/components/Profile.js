@@ -14,6 +14,7 @@ import {
 } from "firebase/auth"; // Import sendPasswordResetEmail
 import { auth } from "../firebaseConfig.js";
 import { useUser } from "../context/UserContext.js";
+import TransactionHistory from "./TransactionHistory.js";
 
 const Profile = () => {
   const { user, setUser } = useUser();
@@ -294,6 +295,9 @@ const Profile = () => {
         ) : (
           <p>Loading user data...</p>
         )}
+      </div>
+      <div>
+        <TransactionHistory />
       </div>
     </>
   );
