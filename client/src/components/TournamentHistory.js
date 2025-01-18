@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import {
-  fetchAllTournamentsDataTree,
+  fetchEndedTournamentDataTree,
   fetchPlayers,
 } from "../services/adminService";
 
@@ -11,7 +11,7 @@ const TournamentHistory = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const fetchedData = await fetchAllTournamentsDataTree();
+        const fetchedData = await fetchEndedTournamentDataTree();
         setData(fetchedData);
 
         const fetchedPlayers = await fetchPlayers();
