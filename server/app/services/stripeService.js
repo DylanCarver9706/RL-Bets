@@ -2,7 +2,7 @@
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const { collections } = require("../../database/mongoCollections");
 const { ObjectId } = require("mongodb");
-const { updateMongoDocument } = require("../../database/middlewares/mongo");
+const { updateMongoDocument, createMongoDocument } = require("../../database/middlewares/mongo");
 const { getSocketIo } = require("../middlewares/socketIO");
 
 const createCheckoutSession = async (
@@ -64,6 +64,14 @@ const handleWebhookEvent = async (event, io) => {
 
       io = getSocketIo();
       io.emit("updateUser", updatedUser);
+
+      // Add credit purchase to the transactions collection
+      await createMongoDocument(collections.transactionsCollection, {
+        user: user._id,
+        credits: parseInt(creditsPurchased),
+        type: "purchase",
+      })
+
     } catch (error) {
       console.error("Error handling 'checkout.session.completed' event:", error.message, error.stack);
       throw error;
