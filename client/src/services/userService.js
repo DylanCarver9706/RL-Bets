@@ -432,3 +432,7 @@ export const fetchTransactionHistory = async (userId) => {
     return [];
   }
 }
+
+export const wait = async (timeInMs) => {
+  return new Promise((resolve) => setTimeout(resolve, timeInMs));
+};
