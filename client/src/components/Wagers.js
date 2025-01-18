@@ -4,6 +4,7 @@ import { createBet } from "../services/wagerService.js";
 import { useUser } from "../context/UserContext.js";
 import { getWagers } from "../services/userService.js";
 import ToolTip from "./ToolTip.js";
+import CreditShop from "./CreditShop.js";
 
 const estimatedWagerPayout = (
   betAmount,
@@ -60,6 +61,7 @@ const Wagers = () => {
   const [selectedWager, setSelectedWager] = useState(null);
   const [wagerCaseSelected, setWagerCaseSelected] = useState(null);
   const [estimatedWinnings, setEstimatedWinnings] = useState(0);
+  const [showCreditShopModal, setShowCreditShopModal] = useState(false);
 
   // Fetch wagers from the server and then listen for updates
   useEffect(() => {
@@ -166,8 +168,13 @@ const Wagers = () => {
   // Handle submit bet
   const handleSubmitBet = async () => {
     // const credits = betInputs[wagerId];
-    if (!creditsWagered || isNaN(creditsWagered)) {
+    if (creditsWagered === 0 || !creditsWagered || isNaN(creditsWagered)) {
       return alert("Please enter a valid number of credits.");
+    }
+
+    if (creditsWagered > user.credits) {
+      setShowCreditShopModal(true);
+      return;
     }
 
     const betPayload = {
@@ -206,6 +213,20 @@ const Wagers = () => {
   };
 
   return (
+    <>
+    {showCreditShopModal ? (
+      <div style={styles.modalOverlay}>
+      <div style={styles.modalContent}>
+        <button
+          onClick={() => setShowCreditShopModal(false)}
+          style={styles.closeButton}
+        >
+          ✖
+        </button>
+        <CreditShop />
+      </div>
+    </div>
+    ) : (
     <div style={styles.container}>
       <h2 style={styles.header}>
         Welcome to the Wager Dashboard, {user.mongoUserId}
@@ -491,6 +512,8 @@ const Wagers = () => {
         </ul>
       </div>
     </div>
+    )}
+    </>
   );
 };
 
@@ -575,5 +598,36 @@ const styles = {
     borderRadius: "5px",
     cursor: "pointer",
     width: "100%",
+  },
+  modalOverlay: {
+    position: "fixed",
+    top: 0,
+    left: 0,
+    width: "100%",
+    height: "100%",
+    backgroundColor: "rgba(0, 0, 0, 0.6)", // Semi-transparent background
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1000, // Ensure it appears on top
+  },
+  modalContent: {
+    backgroundColor: "#635d5d", // Modal background
+    padding: "20px", // Space inside the modal
+    borderRadius: "8px", // Rounded corners
+    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)", // Subtle shadow
+    maxWidth: "500px", // Limit width
+    width: "90%", // Responsive width
+    position: "relative", // For positioning the close button
+  },
+  closeButton: {
+    position: "absolute",
+    top: "10px",
+    right: "10px",
+    background: "none",
+    border: "none",
+    fontSize: "16px",
+    cursor: "pointer",
+    color: "white",
   },
 };

@@ -15,8 +15,6 @@ const Notifications = () => {
   useEffect(() => {
     const fetchData = async () => {
       const data = await fetchUserNotificationLogs(user.mongoUserId);
-      console.log("Fetched data:", data);
-      console.log(Intl.DateTimeFormat().resolvedOptions().timeZone)
       setNotifications(data);
     };
 
