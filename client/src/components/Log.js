@@ -21,7 +21,7 @@ const Log = () => {
   
       fetchLogs();
   
-      socket.on("updatedLogs", (updatedLogs) => {
+      socket.on("updateLogs", (updatedLogs) => {
         setLogs(updatedLogs.reverse() || []);
       });
   
