@@ -1,17 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useUser } from "../context/UserContext";
 import { useNavigate } from "react-router-dom";
-import { updateUser, redeemReferralCode } from "../services/userService";
+import { updateUser, redeemReferralCode, wait } from "../services/userService";
 import {
   generateLinkTokenForIDV,
   openPlaidIDV,
 } from "../services/plaidService.js";
 import { createJiraIssue } from "../services/jiraService.js";
 import { auth } from "../firebaseConfig";
-
-const wait = async (timeInMs) => {
-  return new Promise((resolve) => setTimeout(resolve, timeInMs));
-};
 
 const IdentityVerification = () => {
   const [idvActive, setIdvActive] = useState(false);
