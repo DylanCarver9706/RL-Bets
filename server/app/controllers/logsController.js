@@ -67,6 +67,15 @@ const deleteAllLogs = async (req, res, logError) => {
   }
 };
 
+const getUserNotifications = async (req, res, logError) => {
+  try {
+    const notifications = await logService.getUserNotificationLogs(req.params.id);
+    res.status(200).json(notifications);
+  } catch (error) {
+    logError(error);
+  }
+};
+
 module.exports = {
   getAllLogs,
   getLogById,
@@ -74,4 +83,5 @@ module.exports = {
   updateLogById,
   deleteLogById,
   deleteAllLogs,
+  getUserNotifications,
 };
