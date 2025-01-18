@@ -3,6 +3,7 @@ const {
   getTournamentDataTree,
   getSeriesDataTree,
   getBettableDataTree,
+  getEndedTournamentsDataTree,
 } = require("../services/dataTreeService");
 const { getCurrentTournament } = require("../services/tournamentsService");
 
@@ -52,10 +53,20 @@ const getCurrentDataTree = async (req, res, logError) => {
   }
 };
 
+const getEndedTournaments = async (req, res, logError) => {
+  try {
+    const data = await getEndedTournamentsDataTree();
+    res.status(200).json(data);
+  } catch (error) {
+    logError(error);
+  }
+};
+
 module.exports = {
   getAllTournaments,
   getTournament,
   getSeries,
   getBettable,
   getCurrentDataTree,
+  getEndedTournaments,
 };
