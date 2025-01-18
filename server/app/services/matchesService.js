@@ -93,9 +93,11 @@ const deleteMatch = async (id) => {
 const WagerPayoutFormula = (
   betAmount,
   totalWinnersBetsAmount,
-  totalLosersBetsAmount,
+  totalLosersBetsAmount
 ) => {
-  return (betAmount + (totalLosersBetsAmount * (betAmount / totalWinnersBetsAmount)));
+  return (
+    betAmount + totalLosersBetsAmount * (betAmount / totalWinnersBetsAmount)
+  );
 };
 
 // Function to pay out bets
@@ -130,7 +132,16 @@ const payOutBetWinners = async (wagerId, agreeIsWinner) => {
     }
   }
 
-  console.log("winnerCredits", winnerCredits, "loserCredits", loserCredits, "winnerCount", winnerCount, "loserCount", loserCount);
+  console.log(
+    "winnerCredits",
+    winnerCredits,
+    "loserCredits",
+    loserCredits,
+    "winnerCount",
+    winnerCount,
+    "loserCount",
+    loserCount
+  );
 
   // Update users credits field to add the credits they won
   for (let index = 0; index < wagerBets.length; index++) {
@@ -142,7 +153,7 @@ const payOutBetWinners = async (wagerId, agreeIsWinner) => {
       awardedCredits = WagerPayoutFormula(
         bet.credits,
         winnerCredits,
-        loserCredits,
+        loserCredits
       );
       console.log(
         "User Paid Out:",
@@ -170,7 +181,7 @@ const payOutBetWinners = async (wagerId, agreeIsWinner) => {
         type: "payout",
         wager: wager.name,
         wagerId: wagerId,
-      })
+      });
 
       await createAdminLog({
         wagerId: wagerId.toString(),
@@ -178,6 +189,12 @@ const payOutBetWinners = async (wagerId, agreeIsWinner) => {
         type: "User Paid Out",
         user: user._id.toString(),
       });
+
+      await createUserNotificationLog({
+        user: user._id.toString(),
+        wagerName: wager.name,
+        type: "payout",
+        awardedCredits: parseFloat(awardedCredits).toFixed(4),
       });
 
       // Emit 'updateUser' event with updated user data to all connected clients
@@ -193,7 +210,6 @@ const getMatchOutcomes = async (
   agreeEvaluationObject = null
 ) => {
   try {
-
     // Initialize team goals
     const teamGoals = {};
     teams.forEach((teamId) => {
@@ -264,10 +280,7 @@ const getMatchOutcomes = async (
 
         // Sum the values of the selected attribute for all players on the team
         actualValue = teamPlayers.reduce((sum, player) => {
-          return (
-            sum +
-            (player[selectedAttributeBetType.toLowerCase()] || 0)
-          );
+          return sum + (player[selectedAttributeBetType.toLowerCase()] || 0);
         }, 0);
       }
       // Check if the selected ID corresponds to a player
@@ -277,8 +290,7 @@ const getMatchOutcomes = async (
             (p) => p.playerId === selectedTeamOrPlayerForBet
           );
           if (player) {
-            actualValue =
-              player[selectedAttributeBetType.toLowerCase()] || 0;
+            actualValue = player[selectedAttributeBetType.toLowerCase()] || 0;
           }
         });
       }
@@ -310,7 +322,6 @@ const getMatchOutcomes = async (
 };
 
 const handleWagerEnded = async (wagerId, agreeIsWinner) => {
-
   const updatedWager = {
     status: "Ended",
     agreeIsWinner: agreeIsWinner,
@@ -330,7 +341,7 @@ const handleWagerEnded = async (wagerId, agreeIsWinner) => {
   await payOutBetWinners(wagerId, agreeIsWinner);
 };
 
-const calculatePlayerTotals = (matches) => {  
+const calculatePlayerTotals = (matches) => {
   // Object to keep track of each player's aggregated stats across all matches
   const playerTotals = {};
 
@@ -606,7 +617,7 @@ const handleMatchWagers = async (
   matchOutcomes,
   matchResults,
   teams,
-  firstBlood,
+  firstBlood
 ) => {
   // Get all wagers associated to this match
   const matchWagers = await collections.wagersCollection
@@ -678,7 +689,7 @@ const handleSeriesWagers = async (seriesId, firstBlood) => {
   // Match: "Match Winner", "Match Score", "First Blood", "Match MVP", "Player/Team Attributes"
   // Series: "Series Winner", "Series Score", "First Blood", "Overtime Count", "Player/Team Attributes"
   // Tournament: "Tournament Winner", "Player/Team Attributes", "Player Accolades"
-  
+
   if (firstBlood) {
     for (const wager of matchWagers) {
       if (wager.wagerType === "First Blood") {
@@ -924,8 +935,7 @@ const handleTournamentWagers = async (tournamentId) => {
 };
 
 const matchConcluded = async (matchId, data) => {
-  const { results, wentToOvertime, endTournament } =
-    data;
+  const { results, wentToOvertime, endTournament } = data;
 
   let message = " updated successfully";
 
@@ -941,7 +951,7 @@ const matchConcluded = async (matchId, data) => {
 
   const matchOutcomes = await getMatchOutcomes(results, matchDoc.teams);
 
-  console.log("matchOutcomes: ", matchOutcomes)
+  console.log("matchOutcomes: ", matchOutcomes);
 
   // Build the update object for the match
   const updateData = {
@@ -954,9 +964,13 @@ const matchConcluded = async (matchId, data) => {
   };
 
   // Update the match in the database
-  const updatedMatch = await updateMongoDocument(collections.matchesCollection, matchId, {
-    $set: updateData,
-  });
+  const updatedMatch = await updateMongoDocument(
+    collections.matchesCollection,
+    matchId,
+    {
+      $set: updateData,
+    }
+  );
 
   await createAdminLog({
     type: "Match Ended",
@@ -971,7 +985,7 @@ const matchConcluded = async (matchId, data) => {
     matchOutcomes,
     results,
     matchDoc.teams,
-    null,
+    null
   );
 
   // Update the series document if series has ended with this match
@@ -1021,32 +1035,40 @@ const matchConcluded = async (matchId, data) => {
   // Set status for Tournament if included in request body
   if (endTournament === true) {
     // Update the tournament document
-    await updateMongoDocument(collections.tournamentsCollection, seriesDoc.tournament.toString(), {
-      $set: {
-        status: "Ended",
-        winner: ObjectId.createFromHexString(matchOutcomes.winningTeam),
-        loser: ObjectId.createFromHexString(matchOutcomes.losingTeam),
-      },
-    });
-  
+    await updateMongoDocument(
+      collections.tournamentsCollection,
+      seriesDoc.tournament.toString(),
+      {
+        $set: {
+          status: "Ended",
+          winner: ObjectId.createFromHexString(matchOutcomes.winningTeam),
+          loser: ObjectId.createFromHexString(matchOutcomes.losingTeam),
+        },
+      }
+    );
+
     // Log the tournament end
     await createAdminLog({
       type: "Tournament Ended",
       tournamentId: seriesDoc.tournament,
     });
     message = "Tournament," + message;
-  
+
     // Handle tournament wagers
     await handleTournamentWagers(seriesDoc.tournament);
-  
+
     // Get the current leaderboard
     const currentLeaderboard = await getCurrentLeaderboard(true);
-  
+
     // Reset earnedCredits for all users in the leaderboard
     for (const user of currentLeaderboard.users) {
-      await updateMongoDocument(collections.usersCollection, user._id.toString(), {
-        $set: { earnedCredits: 0.0 },
-      });
+      await updateMongoDocument(
+        collections.usersCollection,
+        user._id.toString(),
+        {
+          $set: { earnedCredits: 0.0 },
+        }
+      );
     }
 
     // Set the status of the leaderboard to "Ended"
@@ -1055,8 +1077,10 @@ const matchConcluded = async (matchId, data) => {
     // await updateMongoDocument(collections.leaderboardsCollection, currentLeaderboard._id.toString(), {
     //   $set: { status: "Ended" },
     // });
-  
-    console.log("Tournament has ended and all user earnedCredits have been reset to 0.00. Congrats RL Bets!");
+
+    console.log(
+      "Tournament has ended and all user earnedCredits have been reset to 0.00. Congrats RL Bets!"
+    );
   }
   const io = getSocketIo();
   io.emit("updateUsers", await getAllUsers());
@@ -1069,20 +1093,25 @@ const setFirstBlood = async (matchId, data) => {
   const { firstBlood } = data;
 
   // Find the match by its ID and update the firstBlood field
+  const matchDoc = await updateMongoDocument(
+    collections.matchesCollection,
+    matchId,
+    {
+      $set: {
+        firstBlood: firstBlood,
+      },
+    },
+    true
+  );
+
   await createAdminLog({
     type: "Fits Blood Set",
     matchId: matchId,
     firstBlood: firstBlood,
   });
 
-  await handleMatchWagers(
-    matchId,
-    null,
-    null,
-    null,
-    firstBlood
-  );
-  
+  await handleMatchWagers(matchId, null, null, null, firstBlood);
+
   // Find the series by its ID
   const seriesDoc = await collections.seriesCollection.findOne({
     _id: matchDoc.series,
@@ -1093,6 +1122,13 @@ const setFirstBlood = async (matchId, data) => {
     let seriesUpdateData = {
       firstBlood: firstBlood,
     };
+    await updateMongoDocument(
+      collections.seriesCollection,
+      seriesDoc._id.toString(),
+      {
+        $set: seriesUpdateData,
+      }
+    );
     await createAdminLog({
       type: "Series First Blood Set",
       seriesId: seriesDoc._id.toString(),
