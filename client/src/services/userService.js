@@ -481,3 +481,29 @@ export const dismissNotification = async (notificationId) => {
 export const wait = async (timeInMs) => {
   return new Promise((resolve) => setTimeout(resolve, timeInMs));
 };
+
+export const formatDateToUserTimezone = (timestamp) => {
+  console.log("Raw timestamp from server:", timestamp);
+
+  // Parse the raw timestamp as if it's in Central Time (manually specify the offset)
+  const centralTimeOffsetInMs = parseInt(process.env.REACT_APP_UTC_TIMEZONE_OFFSET) * 60 * 60 * 1000; // CST offset is UTC-6
+  const parsedDate = new Date(timestamp); // Parse as-is
+  const adjustedDate = new Date(parsedDate.getTime() + centralTimeOffsetInMs); // Adjust for Central Time
+
+  // Get user's timezone
+  const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+  // Format the date in the user's timezone
+  const formattedDate = new Intl.DateTimeFormat('en-US', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hourCycle: 'h12', // Use 12-hour clock for AM/PM
+    timeZone: userTimezone, // Convert to user's local timezone
+  }).format(adjustedDate);
+
+  return formattedDate;
+};
