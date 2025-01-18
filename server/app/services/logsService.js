@@ -26,6 +26,14 @@ const getLogById = async (logId) => {
 
 const createLog = async (logData) => {
   try {
+    
+    if (logData.user) {
+      logData = {
+        ...logData,
+        user: ObjectId.createFromHexString(logData.user),
+      };
+    }
+
     const result = await createMongoDocument(
       collections.logsCollection,
       logData
@@ -35,6 +43,50 @@ const createLog = async (logData) => {
     const logs = await getAllLogs();
     const io = getSocketIo();
     io.emit("updatedLogs", logs);
+
+    return { logId: result.insertedId };
+  } catch (error) {
+    throw new Error("Failed to create log: " + error.message);
+  }
+};
+
+const createAdminLog = async (logData) => {
+  try {
+    const result = await createMongoDocument(
+      collections.logsCollection,
+      logData = {
+        ...logData,
+        logType: "Admin Notification"
+      }
+    );
+
+    // Emit updated logs via WebSocket
+    const logs = await getAllLogs();
+    const io = getSocketIo();
+    io.emit("updateLogs", logs);
+
+    return { logId: result.insertedId };
+  } catch (error) {
+    throw new Error("Failed to create log: " + error.message);
+  }
+};
+
+const createUserNotificationLog = async (logData) => {
+  try {
+    const result = await createMongoDocument(
+      collections.logsCollection,
+      logData = {
+        ...logData,
+        logType: "User Notification",
+        cleared: false,
+        user: ObjectId.createFromHexString(logData.user),
+      }
+    );
+
+    // Emit updated logs via WebSocket
+    const logs = await getUserNotificationLogs(logData.user.toString());
+    const io = getSocketIo();
+    io.emit("updateUserLogs", logs);
 
     return { logId: result.insertedId };
   } catch (error) {
@@ -78,4 +130,6 @@ module.exports = {
   updateLogById,
   deleteLogById,
   deleteAllLogs,
+  createUserNotificationLog,
+  createAdminLog,
 };
