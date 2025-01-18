@@ -31,9 +31,9 @@ const createBet = async (betData) => {
   const io = getSocketIo();
 
   // Update wager with the new bet
-  await updateMongoDocument(collections.wagersCollection, wagerId, {
+  const wager = await updateMongoDocument(collections.wagersCollection, wagerId, {
     $push: { bets: result.insertedId },
-  });
+  }, true);
 
   const allWagers = await getAllWagers();
   io.emit("wagersUpdate", allWagers);
@@ -69,6 +69,15 @@ const createBet = async (betData) => {
     );
     io.emit("updateLeaderboard", await getCurrentLeaderboard());
   }
+
+  // Add bet to the transactions collection
+  await createMongoDocument(collections.transactionsCollection, {
+    user: ObjectId.createFromHexString(user),
+    credits: credits,
+    type: "bet",
+    wager: wager.name,
+    wagerId: ObjectId.createFromHexString(wagerId),
+  })
 
   return {
     betId: result.insertedId,
