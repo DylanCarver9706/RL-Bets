@@ -163,6 +163,15 @@ const payOutBetWinners = async (wagerId, agreeIsWinner) => {
         true
       );
 
+      // Add wager payout to the transactions collection
+      await createMongoDocument(collections.transactionsCollection, {
+        user: user._id,
+        credits: parseFloat(awardedCredits),
+        type: "payout",
+        wager: wager.name,
+        wagerId: wagerId,
+      })
+
       createLog({
         wagerId: wagerId.toString(),
         earnedCredits: awardedCredits,
