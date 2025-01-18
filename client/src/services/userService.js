@@ -433,6 +433,51 @@ export const fetchTransactionHistory = async (userId) => {
   }
 }
 
+export const fetchUserNotificationLogs = async (userId) => {
+  try {
+    // Retrieve the Firebase ID token
+    const idToken = await getFirebaseIdToken();
+    const response = await fetch(`${BASE_SERVER_URL}/api/logs/notifications/user/${userId}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${idToken}`, // Include the token in the headers
+      },
+    });
+    if (!response.ok) {
+      throw new Error("Failed to fetch user notification logs.");
+    }
+    const data = await response.json();
+    return data;
+  } catch (err) {
+    console.error("Error fetching user notification logs:", err.message);
+    return [];
+  }
+}
+
+export const dismissNotification = async (notificationId) => {
+  try {
+    // Retrieve the Firebase ID token
+    const idToken = await getFirebaseIdToken();
+    const response = await fetch(`${BASE_SERVER_URL}/api/logs/${notificationId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${idToken}`, // Include the token in the headers
+      },
+      body: JSON.stringify({ cleared: true }),
+    });
+    if (!response.ok) {
+      throw new Error("Failed to dismiss notification.");
+    }
+    const data = await response.json();
+    return data;
+  } catch (err) {
+    console.error("Error dismissing notification:", err.message);
+    return false;
+  }
+}
+
 export const wait = async (timeInMs) => {
   return new Promise((resolve) => setTimeout(resolve, timeInMs));
 };
