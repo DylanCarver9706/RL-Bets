@@ -38,6 +38,10 @@ const completeIDV = async (req, res, logError) => {
       responseBody.DOB = idvResult.user.date_of_birth;
     }
 
+    if (idvResult.user?.phone_number) {
+      responseBody.phoneNumber = idvResult.user.phone_number;
+    }
+
     res.status(200).json(responseBody);
   } catch (error) {
     logError(error);
