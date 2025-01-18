@@ -70,6 +70,7 @@ app.use("/webhook", require("./app/routes/stripeWebhookRoute"));
 app.use("/api/server-utils", require("./app/routes/serverUtilsRoutes"));
 app.use("/api/promotions", require("./app/routes/promotionsRoutes"));
 app.use("/api/leaderboards", require("./app/routes/leaderboardRoutes"));
+app.use("/api/transactions", require("./app/routes/transactionsRoutes"));
 
 app.use(errorLogger);
 
