@@ -3,7 +3,7 @@ const {
   createMongoDocument,
   updateMongoDocument,
 } = require("../../database/middlewares/mongo");
-const { createLog } = require("./logsService");
+const { createAdminLog, createUserNotificationLog } = require("./logsService");
 const { ObjectId } = require("mongodb");
 const { getSocketIo } = require("../middlewares/socketIO");
 const { getAllWagers } = require("./wagersService");
@@ -172,11 +172,12 @@ const payOutBetWinners = async (wagerId, agreeIsWinner) => {
         wagerId: wagerId,
       })
 
-      createLog({
+      await createAdminLog({
         wagerId: wagerId.toString(),
         earnedCredits: awardedCredits,
         type: "User Paid Out",
-        user: user._id,
+        user: user._id.toString(),
+      });
       });
 
       // Emit 'updateUser' event with updated user data to all connected clients
@@ -319,7 +320,7 @@ const handleWagerEnded = async (wagerId, agreeIsWinner) => {
     $set: updatedWager,
   });
 
-  createLog({ type: "Wager Ended", WagerId: wagerId });
+  await createAdminLog({ type: "Wager Ended", WagerId: wagerId });
 
   // Fetch updated wager and statistics
   const updatedWagers = await getAllWagers();
@@ -957,7 +958,7 @@ const matchConcluded = async (matchId, data) => {
     $set: updateData,
   });
 
-  createLog({
+  await createAdminLog({
     type: "Match Ended",
     matchId: updatedMatch.insertedId,
     matchOutcomes: matchOutcomes,
@@ -1011,7 +1012,7 @@ const matchConcluded = async (matchId, data) => {
     await updateMongoDocument(collections.seriesCollection, seriesDoc._id, {
       $set: seriesUpdateData,
     });
-    createLog({ type: "Series Ended", seriesId: seriesDoc._id });
+    await createAdminLog({ type: "Series Ended", seriesId: seriesDoc._id });
     await handleSeriesWagers(seriesDoc._id, null);
   }
 
@@ -1029,7 +1030,10 @@ const matchConcluded = async (matchId, data) => {
     });
   
     // Log the tournament end
-    createLog({ type: "Tournament Ended", tournamentId: seriesDoc.tournament });
+    await createAdminLog({
+      type: "Tournament Ended",
+      tournamentId: seriesDoc.tournament,
+    });
     message = "Tournament," + message;
   
     // Handle tournament wagers
@@ -1065,13 +1069,7 @@ const setFirstBlood = async (matchId, data) => {
   const { firstBlood } = data;
 
   // Find the match by its ID and update the firstBlood field
-  const matchDoc = await updateMongoDocument(collections.matchesCollection, matchId, {
-    $set: {
-      firstBlood: firstBlood,
-    }
-  }, true);
-  
-  createLog({
+  await createAdminLog({
     type: "Fits Blood Set",
     matchId: matchId,
     firstBlood: firstBlood,
@@ -1095,10 +1093,10 @@ const setFirstBlood = async (matchId, data) => {
     let seriesUpdateData = {
       firstBlood: firstBlood,
     };
-    await updateMongoDocument(collections.seriesCollection, seriesDoc._id.toString(), {
-      $set: seriesUpdateData,
+    await createAdminLog({
+      type: "Series First Blood Set",
+      seriesId: seriesDoc._id.toString(),
     });
-    createLog({ type: "Series First Blood Set", seriesId: seriesDoc._id.toString() });
     await handleSeriesWagers(seriesDoc._id, firstBlood);
   }
 

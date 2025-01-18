@@ -5,12 +5,16 @@ const {
   updateBet,
   deleteBet,
 } = require("../services/betsService");
-const { createLog } = require("../services/logsService");
+const { createAdminLog } = require("../services/logsService");
 
 const create = async (req, res, logError) => {
   try {
     const result = await createBet(req.body);
-    await createLog({ ...req.body, type: "Bet Created", betId: result.betId });
+    await createAdminLog({
+      ...req.body,
+      type: "Bet Created",
+      betId: result.betId,
+    });
     res.status(201).json({ message: "Bet created successfully", ...result });
   } catch (error) {
     logError(error);

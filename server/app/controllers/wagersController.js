@@ -6,7 +6,7 @@ const {
   deleteWager,
   deleteAllWagers,
 } = require("../services/wagersService");
-const { createLog } = require("../services/logsService");
+const { createAdminLog } = require("../services/logsService");
 
 const getAll = async (req, res, logError) => {
   try {
@@ -29,7 +29,7 @@ const getById = async (req, res, logError) => {
 const create = async (req, res, logError) => {
   try {
     const wagerId = await createWager(req.body);
-    await createLog({ ...req.body, type: "Wager Created", wagerId });
+    await createAdminLog({ ...req.body, type: "Wager Created", wagerId });
     res.status(201).json({ message: "Wager created successfully", wagerId });
   } catch (error) {
     logError(error);
