@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useUser } from "../context/UserContext.js";
 import socket from "../services/socket.js";
 import { fetchCurrentTournament } from "../services/leaderboardService.js";
+import Notifications from "./Notifications";
 
 const Navbar = () => {
   const { user, setUser } = useUser();
@@ -134,6 +135,7 @@ const Navbar = () => {
             {parseInt(user?.credits)} Credits
           </Link>
         )}
+        <Notifications />
       </div>
     </nav>
   );
