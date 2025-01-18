@@ -123,6 +123,21 @@ const deleteAllLogs = async () => {
   }
 };
 
+const getUserNotificationLogs = async (userId) => {
+  try {
+    const logs = await collections.logsCollection
+    .find({
+      user: ObjectId.createFromHexString(userId),
+      logType: "User Notification",
+      cleared: false,
+    })
+    .toArray();
+    return logs;
+  } catch (error) {
+    throw new Error("Failed to retrieve user notification logs: " + error.message);
+  }
+};
+
 module.exports = {
   getAllLogs,
   getLogById,
@@ -132,4 +147,5 @@ module.exports = {
   deleteAllLogs,
   createUserNotificationLog,
   createAdminLog,
+  getUserNotificationLogs,
 };
