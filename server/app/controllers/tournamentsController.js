@@ -60,7 +60,7 @@ const getCurrent = async (req, res, logError) => {
   try {
     const tournament = await getCurrentTournament();
     if (!tournament)
-      return res.status(404).json({ error: "Tournament not found" });
+      return res.status(200).json(null);
     res.status(200).json(tournament);
   } catch (error) {
     logError(error);
