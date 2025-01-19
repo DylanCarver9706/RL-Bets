@@ -1,4 +1,4 @@
-// server2.js
+// server.js
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
@@ -8,6 +8,7 @@ const { initializeCollections } = require("./database/mongoCollections");
 const { initializeFirebase } = require("./app/middlewares/firebaseAdmin");
 const { initializeSocketIo } = require("./app/middlewares/socketIO");
 const { errorLogger } = require("./app/middlewares/errorLogger");
+const { scheduleDailyEmail } = require("./app/middlewares/nodeCron");
 
 // Initialize Express app
 const app = express();
@@ -73,6 +74,11 @@ app.use("/api/leaderboards", require("./app/routes/leaderboardRoutes"));
 app.use("/api/transactions", require("./app/routes/transactionsRoutes"));
 
 app.use(errorLogger);
+
+if (process.env.ENV === "production") {
+  // Cron Jobs
+  scheduleDailyEmail();
+}
 
 // Start server
 const PORT = process.env.DEV_SERVER_URL_PORT;
