@@ -1,5 +1,8 @@
-const { getTimestamp } = require("../../app/utils/utils") 
+const { getTimestamp } = require("../../app/utils/utils")
+const fs = require("fs");
+const path = require("path");
 const { ObjectId } = require("mongodb");
+const { collections } = require("../mongoCollections");
 
 const createMongoDocument = async (
   collection,
@@ -80,4 +83,24 @@ const updateMongoDocument = async (
   }
 };
 
-module.exports = { createMongoDocument, updateMongoDocument };
+const fetchAllCollectionsData = async () => {
+  const data = {};
+
+  try {
+    // Fetch all collections
+    for (const [collectionName, collection] of Object.entries(collections)) {
+      const items = await collection.find().toArray();
+      data[collectionName] = items;
+    }
+
+    // Save data to a JSON file
+    const filePath = path.join(process.env.DAILY_BACKUP_JSON_PATH, `all_collections_data_${getTimestamp().toISOString().split("T")[0]}.json`);
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf-8");
+    return filePath;
+  } catch (error) {
+    console.error("Error fetching collections data:", error);
+    throw error;
+  }
+};
+
+module.exports = { createMongoDocument, updateMongoDocument, fetchAllCollectionsData };
