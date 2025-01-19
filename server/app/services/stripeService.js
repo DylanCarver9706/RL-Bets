@@ -77,7 +77,7 @@ const handleWebhookEvent = async (event, io) => {
       throw error;
     }
   } else {
-    console.warn("Unhandled Stripe event type:", event.type);
+    throw new Error("Unhandled Stripe event type:", event.type);
   }
 };
 
