@@ -44,6 +44,7 @@ import TermsOfService from "./components/TermsOfService";
 import Agreements from "./components/Agreements";
 import PageNotFound from "./components/PageNotFound";
 import SuspendedUser from "./components/SuspendedUser";
+import AdminEmail from "./components/AdminEmail";
 
 const ProtectedRoute = ({ loggedIn, redirectTo = "/Auth", children }) => {
   return loggedIn ? children : <Navigate to={redirectTo} />;
@@ -406,6 +407,14 @@ function App() {
           element={
             <ProtectedRoute loggedIn={loggedIn && admin}>
               <Admin />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/Admin-Email"
+          element={
+            <ProtectedRoute loggedIn={loggedIn && admin}>
+              <AdminEmail />
             </ProtectedRoute>
           }
         />
