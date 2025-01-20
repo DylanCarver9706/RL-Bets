@@ -7,6 +7,7 @@ const {
 } = require("../../database/middlewares/mongo");
 const { getSocketIo } = require("../middlewares/socketIO");
 const { sendEmail } = require("../middlewares/nodemailer");
+const { createUserNotificationLog } = require("./logsService");
 
 const getAllUsers = async () => {
   return await collections.usersCollection.find().toArray();
@@ -23,6 +24,9 @@ const getUserByFirebaseId = async (firebaseUserId) => {
 };
 
 const createUser = async (userData) => {
+
+  let userDoc = null;
+
   // Check if a user with the provided email exists and has been deleted
   const existingUser = await collections.usersCollection.findOne({
     email: userData.email,
@@ -31,12 +35,14 @@ const createUser = async (userData) => {
 
   if (existingUser) {
     console.log("User exists, updating account status to active");
-    return await updateMongoDocument(
+    userDoc = await updateMongoDocument(
       collections.usersCollection,
       existingUser._id.toString(),
       { $set: { ...userData, accountStatus: "active" } },
       true
     );
+  } else {
+    userDoc = await createMongoDocument(collections.usersCollection, userData, true) 
   }
 
   await sendEmail(
@@ -45,7 +51,13 @@ const createUser = async (userData) => {
     `Hello ${userData.name},\n\nWelcome to RL Bets! We're excited to have you on board. Your account is now active, and you can start using our services right away.\n\nIf you have any questions or need assistance, please don't hesitate to reach out to our support team.\n\nBest regards,\nThe RL Bets Team`
   );
 
-  return await createMongoDocument(collections.usersCollection, userData, true);
+  await createUserNotificationLog({
+    user: userDoc._id.toString(),
+    type: "welcome",
+    message: "Welcome to RL Bets! Feel free to explore our platform and start betting on your favorite teams or players. Good luck!",
+  });
+
+  return userDoc;
 };
 
 const updateUser = async (id, updateData) => {
