@@ -8,6 +8,7 @@ import {
   checkGeolocationPermission,
   userAgeLegal,
 } from "./services/userService";
+import { getLatestPrivacyPolicy, getLatestTermsOfService } from "./services/agreementsService";
 import { useUser } from "./context/UserContext";
 import { Routes, Route, useNavigate, Navigate } from "react-router-dom";
 import { checkServerStatus } from "./services/appService";
@@ -39,6 +40,7 @@ import AppOutage from "./components/AppOutage";
 import CurrentTournament from "./components/CurrentTournament";
 import PrivacyPolicy from "./components/PrivacyPolicy";
 import TermsOfService from "./components/TermsOfService";
+import Agreements from "./components/Agreements";
 
 const ProtectedRoute = ({ loggedIn, redirectTo = "/Auth", children }) => {
   return loggedIn ? children : <Navigate to={redirectTo} />;
@@ -47,8 +49,12 @@ const ProtectedRoute = ({ loggedIn, redirectTo = "/Auth", children }) => {
 function App() {
   usePageTracking();
   const { user, setUser } = useUser();
+  // eslint-disable-next-line
+  const [unprotectedRoutes, setUnprotectedRoutes] = useState(process.env.REACT_APP_UNPROTECTED_ROUTES.split(","));
   const [loading, setLoading] = useState(true);
   const [serverLive, setServerLive] = useState(true); // Server status
+  const [privacyPolicyVersion, setPrivacyPolicyVersion] = useState(null);
+  const [termsOfServiceVersion, setTermsOfServiceVersion] = useState(null);
   const navigate = useNavigate();
 
   // Check server status on app mount
@@ -64,6 +70,18 @@ function App() {
     };
 
     getServerStatus();
+
+    // Get latest privacy policy and terms of service versions
+    const getLatestAgreements = async () => {
+      const privacyPolicy = await getLatestPrivacyPolicy("privacy-policy");
+      const termsOfService = await getLatestTermsOfService("terms-of-service");
+
+      setPrivacyPolicyVersion(parseInt(privacyPolicy.version));
+      setTermsOfServiceVersion(parseInt(termsOfService.version));
+    }
+
+    getLatestAgreements();
+
   }, [navigate]);
 
   useEffect(() => {
@@ -184,6 +202,8 @@ function App() {
   const ageValid = user?.ageValid;
   const loggedIn = auth?.currentUser !== null && user?.mongoUserId !== null;
   const admin = loggedIn && user?.userType === "admin";
+  const requirePp = parseInt(user?.pp.split("Accepted v")[1].split(" at")[0]) !== privacyPolicyVersion;
+  const requireTos = parseInt(user?.tos.split("Accepted v")[1].split(" at")[0]) !== termsOfServiceVersion;
 
   return (
     <>
@@ -206,6 +226,8 @@ function App() {
           <p>Please log in</p>
         )}
       </div>
+      {/* Show the Agreements banner if the user has not accepted the latest version of the Privacy Policy or Terms of Service */}
+      {(requireTos || requirePp) && !unprotectedRoutes.includes(window.location.pathname) && <Agreements requireTos={requireTos} requirePp={requirePp} tosVersion={termsOfServiceVersion} ppVersion={privacyPolicyVersion} />}
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<Hero />} />
