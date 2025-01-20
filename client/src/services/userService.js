@@ -507,3 +507,20 @@ export const formatDateToUserTimezone = (timestamp) => {
 
   return formattedDate;
 };
+
+export const getTimestamp = () => {
+  const now = new Date();
+
+  // Get the offset for CST in minutes (-360 minutes for CST)
+  const offset = -parseInt(process.env.REACT_APP_UTC_TIMEZONE_OFFSET) * 60; // CST offset is UTC-6
+  const localDate = new Date(now.getTime() + offset * 60 * 1000);
+
+  const year = localDate.getUTCFullYear();
+  const month = String(localDate.getUTCMonth() + 1).padStart(2, "0"); // Months are zero-based
+  const day = String(localDate.getUTCDate()).padStart(2, "0");
+  const hour = String(localDate.getUTCHours()).padStart(2, "0");
+  const minute = String(localDate.getUTCMinutes()).padStart(2, "0");
+  const second = String(localDate.getUTCSeconds()).padStart(2, "0");
+  // console.log(`${year}-${month}-${day}T${hour}:${minute}:${second}Z`);
+  return new Date(`${year}-${month}-${day}T${hour}:${minute}:${second}Z`);
+};
