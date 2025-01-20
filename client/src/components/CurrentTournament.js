@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import {
-    fetchCurrentTournamentDataTree,
+  fetchCurrentTournamentDataTree,
   fetchPlayers,
 } from "../services/adminService";
 
@@ -50,22 +50,24 @@ const CurrentTournament = () => {
 
   const renderResultsTable = (results) => {
     if (!results || typeof results !== "object") return null;
-  
+
     // Create a map of player IDs to names for quick lookup
     const playerIdToNameMap = players.reduce((map, player) => {
       map[player._id] = player.name;
       return map;
     }, {});
-  
+
     // Extract team IDs and their player data
     const teamIds = Object.keys(results);
     const [team1, team2] = teamIds;
-  
+
     // Attributes to display
     const attributes = ["score", "goals", "assists", "shots", "saves", "demos"];
-  
+
     return (
-      <table style={{ borderCollapse: "collapse", width: "100%", marginTop: "10px" }}>
+      <table
+        style={{ borderCollapse: "collapse", width: "100%", marginTop: "10px" }}
+      >
         <thead>
           <tr>
             {/* Team 1 Player Names */}
@@ -233,9 +235,69 @@ const CurrentTournament = () => {
 
   return (
     <div>
+      <div style={styles.container}>
+        <div>
+          <h2 style={styles.header}>
+            Rewards for Leaderboard: "{data?.leaderboard?.name}"
+          </h2>
+          <table style={styles.table}>
+            <thead>
+              <tr>
+                <th style={styles.th}>Rank</th>
+                <th style={styles.th}>Reward</th>
+              </tr>
+            </thead>
+            <tbody>
+              {Object.entries(data?.leaderboard?.rewards || {}).map(
+                ([rank, reward]) => (
+                  <tr key={rank} style={styles.tr}>
+                    <td style={styles.td}>{rank}</td>
+                    <td style={styles.td}>{reward}</td>
+                  </tr>
+                )
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
       {data ? <div>{renderDataTree(data)}</div> : <p>Failed to load data.</p>}
     </div>
   );
 };
 
 export default CurrentTournament;
+
+const styles = {
+  container: {
+    padding: "20px",
+    maxWidth: "800px",
+    margin: "0 auto",
+    backgroundColor: "#635d5d",
+    borderRadius: "8px",
+    boxShadow: "0 0 10px rgba(0, 0, 0, 0.1)",
+    textAlign: "center",
+  },
+  header: {
+    fontSize: "28px",
+    marginBottom: "20px",
+    color: "#fff",
+  },
+  table: {
+    width: "100%",
+    borderCollapse: "collapse",
+  },
+  th: {
+    border: "1px solid #ccc",
+    padding: "10px",
+    backgroundColor: "#333",
+    color: "white",
+  },
+  tr: {
+    borderBottom: "1px solid #ccc",
+  },
+  td: {
+    padding: "10px",
+    borderBottom: "1px solid #ccc",
+    textAlign: "center",
+  },
+};
