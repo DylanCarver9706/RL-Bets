@@ -1,5 +1,7 @@
 const { ObjectId } = require("mongodb");
 const { collections } = require("../../database/mongoCollections");
+const { getCurrentLeaderboard } = require("./leaderboardService");
+const { getCurrentTournament } = require("./tournamentsService");
 
 const getAllTournamentsDataTree = async () => {
   // Fetch all tournaments
@@ -276,10 +278,78 @@ const getEndedTournamentsDataTree = async () => {
   return tournamentDataTrees;
 };
 
+const getCurrentTournamentDataTree = async () => {
+  // Fetch the tournament document
+  const tournament = await getCurrentTournament()
+
+  if (tournament.leaderboard) {
+    tournament.leaderboard = await getCurrentLeaderboard();
+  }
+
+  // Fetch all series for this tournament
+  const seriesList = await collections.seriesCollection
+    .find({ tournament: tournament._id })
+    .toArray();
+
+  // Fetch all matches for the series
+  const seriesIds = seriesList.map((series) => series._id);
+  const matches = await collections.matchesCollection
+    .find({ series: { $in: seriesIds } })
+    .toArray();
+
+  // Fetch all teams for the series and matches
+  const matchTeamIds = matches.flatMap((match) => match.teams);
+  const seriesTeamIds = seriesList.flatMap((series) => series.teams);
+  const allTeamIds = [...new Set([...matchTeamIds, ...seriesTeamIds])];
+  const teams = await collections.teamsCollection
+    .find({ _id: { $in: allTeamIds } })
+    .toArray();
+
+  // Fetch all players for the teams
+  const playerIds = teams.flatMap((team) => team.players);
+  const players = await collections.playersCollection
+    .find({ _id: { $in: playerIds } })
+    .toArray();
+
+  // Map teams with their respective players
+  const teamsWithPlayers = teams.map((team) => ({
+    ...team,
+    players: players.filter((player) => player.team.equals(team._id)),
+  }));
+
+  // Map matches with their respective teams and players
+  const matchesWithTeams = matches.map((match) => ({
+    ...match,
+    teams: teamsWithPlayers.filter((team) =>
+      match.teams.some((t) => t.equals(team._id))
+    ),
+  }));
+
+  // Map series with their respective matches and teams
+  const seriesWithMatches = seriesList.map((series) => ({
+    ...series,
+    teams: teamsWithPlayers.filter((team) =>
+      series.teams.some((t) => t.equals(team._id))
+    ),
+    matches: matchesWithTeams.filter((match) =>
+      match.series.equals(series._id)
+    ),
+  }));
+
+  // Construct the complete tournament object
+  const tournamentWithSeries = {
+    ...tournament,
+    series: seriesWithMatches,
+  };
+
+  return tournamentWithSeries;
+};
+
 module.exports = {
   getAllTournamentsDataTree,
   getTournamentDataTree,
   getSeriesDataTree,
   getBettableDataTree,
   getEndedTournamentsDataTree,
+  getCurrentTournamentDataTree,
 };

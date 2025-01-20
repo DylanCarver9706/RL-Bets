@@ -11,7 +11,6 @@ const getAllLeaderboards = async () => {
   // Populate users for each leaderboard
   return await Promise.all(
     leaderboards.map(async (leaderboard) => {
-      console.log(leaderboard);
       const userDocs = await collections.usersCollection
         .find({ _id: { $in: leaderboard.users } })
         .toArray();
