@@ -4,6 +4,7 @@ const {
   getSeriesDataTree,
   getBettableDataTree,
   getEndedTournamentsDataTree,
+  getCurrentTournamentDataTree,
 } = require("../services/dataTreeService");
 const { getCurrentTournament } = require("../services/tournamentsService");
 
@@ -45,8 +46,7 @@ const getBettable = async (req, res, logError) => {
 
 const getCurrentDataTree = async (req, res, logError) => {
   try {
-    const currentTournament = await getCurrentTournament();
-    const data = await getTournamentDataTree(currentTournament._id.toString());
+    const data = await getCurrentTournamentDataTree();
     res.status(200).json(data);
   } catch (error) {
     logError(error);
