@@ -89,6 +89,9 @@ const Auth = () => {
           "email",
         );
 
+        // Remove referral code from local storage
+        localStorage.removeItem("referralCode");
+
         // if (providerId === "password") {
         if (!firebaseUser.emailVerified) {
           // Send Email Verification
@@ -157,6 +160,9 @@ const Auth = () => {
             referralCode,
             "google",
           );
+
+          // Remove referral code from local storage
+          localStorage.removeItem("referralCode");
 
           // Log the sign-up event to Firebase Analytics
           logEvent(analytics, "sign_up", {
