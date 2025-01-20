@@ -37,6 +37,8 @@ import IllegalAge from "./components/IllegalAge";
 import SomethingWentWrong from "./components/SomethingWentWrong";
 import AppOutage from "./components/AppOutage";
 import CurrentTournament from "./components/CurrentTournament";
+import PrivacyPolicy from "./components/PrivacyPolicy";
+import TermsOfService from "./components/TermsOfService";
 
 const ProtectedRoute = ({ loggedIn, redirectTo = "/Auth", children }) => {
   return loggedIn ? children : <Navigate to={redirectTo} />;
@@ -209,6 +211,8 @@ function App() {
         <Route path="/" element={<Hero />} />
         <Route path="/Whoopsie-Daisy" element={<SomethingWentWrong />} />
         <Route path="/Bug-Form" element={<BugForm />} />
+        <Route path="/Privacy-Policy" element={<PrivacyPolicy />} />
+        <Route path="/Terms-Of-Service" element={<TermsOfService />} />
 
         {/* Protected Routes */}
         <Route
