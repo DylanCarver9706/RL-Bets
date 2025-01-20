@@ -42,6 +42,7 @@ import CurrentTournament from "./components/CurrentTournament";
 import PrivacyPolicy from "./components/PrivacyPolicy";
 import TermsOfService from "./components/TermsOfService";
 import Agreements from "./components/Agreements";
+import PageNotFound from "./components/PageNotFound";
 
 const ProtectedRoute = ({ loggedIn, redirectTo = "/Auth", children }) => {
   return loggedIn ? children : <Navigate to={redirectTo} />;
@@ -239,6 +240,8 @@ function App() {
         <Route path="/Bug-Form" element={<BugForm />} />
         <Route path="/Privacy-Policy" element={<PrivacyPolicy />} />
         <Route path="/Terms-Of-Service" element={<TermsOfService />} />
+        {/* Catch-all route for undefined paths */}
+        <Route path="*" element={<PageNotFound />} />
 
         {/* Protected Routes */}
         <Route
