@@ -203,8 +203,8 @@ function App() {
   const ageValid = user?.ageValid;
   const loggedIn = auth?.currentUser !== null && user?.mongoUserId !== null;
   const admin = loggedIn && user?.userType === "admin";
-  const requirePp = parseInt(user?.pp.split("Accepted v")[1].split(" at")[0]) !== privacyPolicyVersion;
-  const requireTos = parseInt(user?.tos.split("Accepted v")[1].split(" at")[0]) !== termsOfServiceVersion;
+  const requirePp = loggedIn && parseInt(user?.pp.split("Accepted v")[1].split(" at")[0]) !== privacyPolicyVersion;
+  const requireTos = loggedIn && parseInt(user?.tos.split("Accepted v")[1].split(" at")[0]) !== termsOfServiceVersion;
 
   return (
     <div style={styles.container}>
