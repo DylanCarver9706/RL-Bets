@@ -119,6 +119,18 @@ const deleteUser = async (id) => {
   if (result.deletedCount === 0) throw new Error("User not found");
 };
 
+const adminEmailUsers = async (users, subject, body) => {
+  // console.log("Sending email to users:", users);
+  for (const user of users) {
+    await sendEmail(
+      user,
+      subject,
+      null,
+      body
+    );
+  }
+};
+
 module.exports = {
   getAllUsers,
   getUserById,
@@ -127,4 +139,5 @@ module.exports = {
   updateUser,
   softDeleteUser,
   deleteUser,
+  adminEmailUsers,
 };
