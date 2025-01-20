@@ -4,7 +4,7 @@ const BASE_SERVER_URL = process.env.REACT_APP_BASE_SERVER_URL; // Define your ba
 const BASE_CLIENT_URL = process.env.REACT_APP_BASE_CLIENT_URL; // Define your frontend client URL
 
 // Function to create a new user in the MongoDB database
-export const createUserInDatabase = async (name, email, firebaseUserId, referralCode, authProvider) => {
+export const createUserInDatabase = async (name, email, firebaseUserId, referralCode, authProvider, pp, tos) => {
   try {
 
     const idToken = await getFirebaseIdToken();
@@ -28,8 +28,8 @@ export const createUserInDatabase = async (name, email, firebaseUserId, referral
         accountStatus: "active",
         referralCode: referralCode,
         authProvider: authProvider,
-        tos: `Accepted v${localStorage.getItem("termsOfServiceVersion")} at ${formatDateToUserTimezone(getTimestamp())}`,
-        pp: `Accepted v${localStorage.getItem("privacyPolicyVersion")} at ${formatDateToUserTimezone(getTimestamp())}`
+        tos: tos,
+        pp: pp,
       }),
     });
 
@@ -485,8 +485,6 @@ export const wait = async (timeInMs) => {
 };
 
 export const formatDateToUserTimezone = (timestamp) => {
-  console.log("Raw timestamp from server:", timestamp);
-
   // Parse the raw timestamp as if it's in Central Time (manually specify the offset)
   const centralTimeOffsetInMs = parseInt(process.env.REACT_APP_UTC_TIMEZONE_OFFSET) * 60 * 60 * 1000; // CST offset is UTC-6
   const parsedDate = new Date(timestamp); // Parse as-is
