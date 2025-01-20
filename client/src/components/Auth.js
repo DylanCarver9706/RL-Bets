@@ -29,6 +29,10 @@ const Auth = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [referralCode, setReferralCode] = useState("");
+  const [tosClicked, setTosClicked] = useState(false);
+  const [ppClicked, setPpClicked] = useState(false);
+  const [tosChecked, setTosChecked] = useState(false);
+  const [ppChecked, setPpChecked] = useState(false);
 
   useEffect(() => {
     const storedCode = localStorage.getItem("referralCode");
@@ -61,6 +65,12 @@ const Auth = () => {
         // Check if passwords match
         if (password !== confirmPassword) {
           setError("Passwords do not match.");
+          return;
+        }
+
+        // Check if user has agreed to TOS and PP
+        if (!tosChecked || !ppChecked) {
+          setError("You must read and agree to the Terms of Service and Privacy Policy.");
           return;
         }
 
@@ -135,6 +145,13 @@ const Auth = () => {
   const handleGoogleAuth = async () => {
     const provider = new GoogleAuthProvider();
     try {
+
+      // Check if user has agreed to TOS and PP
+      if (!tosChecked || !ppChecked) {
+        setError("You must read and agree to the Terms of Service and Privacy Policy.");
+        return;
+      }
+
       const result = await signInWithPopup(auth, provider);
       const firebaseUser = result.user;
 
@@ -250,6 +267,7 @@ const Auth = () => {
             </div>
             )}
             {!isLogin && (
+              <>
             <div>
               <label>Referral Code:</label>
               <input
@@ -258,6 +276,55 @@ const Auth = () => {
               />
               <ToolTip infoText={"Note that the credits will not be received until the user has completed both email and identity verification."} />
             </div>
+            <div style={styles.agreementSection}>
+          <a
+            href="/Terms-Of-Service"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={styles.link}
+            onClick={(e) => {
+              e.preventDefault(); // Prevent navigation
+              setTosClicked(true); // Mark the link as clicked
+              window.open("/Terms-Of-Service", "_blank", "noopener,noreferrer"); // Open in a new tab
+            }}
+          >
+            View Terms of Service
+          </a>
+          <label style={styles.label}>
+            <input
+              type="checkbox"
+              checked={tosChecked}
+              onChange={(e) => setTosChecked(e.target.checked)}
+              disabled={!tosClicked} // Disable until the link is clicked
+            />
+            I agree to the Terms of Service
+          </label>
+        </div>
+        <div style={styles.agreementSection}>
+          <a
+            href="/Privacy-Policy"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={styles.link}
+            onClick={(e) => {
+              e.preventDefault(); // Prevent navigation
+              setPpClicked(true); // Mark the link as clicked
+              window.open("/Privacy-Policy", "_blank", "noopener,noreferrer"); // Open in a new tab
+            }}
+          >
+            View Privacy Policy
+          </a>
+          <label style={styles.label}>
+            <input
+              type="checkbox"
+              checked={ppChecked}
+              onChange={(e) => setPpChecked(e.target.checked)}
+              disabled={!ppClicked} // Disable until the link is clicked
+            />
+            I agree to the Privacy Policy
+          </label>
+        </div>
+            </>
             )}
             <button type="submit" disabled={loading}>
               {loading ? "Processing..." : isLogin ? "Login" : "Sign Up"}
@@ -324,6 +391,23 @@ const Auth = () => {
       )}
     </div>
   );
+};
+
+const styles = {
+  agreementSection: {
+    marginBottom: "20px",
+  },
+  link: {
+    color: "#007bff",
+    textDecoration: "none",
+    display: "block",
+    marginBottom: "8px",
+  },
+  label: {
+    display: "flex",
+    alignItems: "center",
+    fontSize: "14px",
+  },
 };
 
 export default Auth;
