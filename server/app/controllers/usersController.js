@@ -70,6 +70,20 @@ const deleteUser = async (req, res, logError) => {
   }
 };
 
+const adminEmailUsers = async (req, res, logError) => {
+  try {
+    console.log("req.body", req.body);
+    await userService.adminEmailUsers(
+      req.body.users,
+      req.body.subject,
+      req.body.body
+    );
+    res.status(200).json({ message: "Emails sent successfully" });
+  } catch (error) {
+    logError(error);
+  }
+};
+
 module.exports = {
   getAllUsers,
   getUserById,
@@ -78,4 +92,5 @@ module.exports = {
   updateUser,
   softDeleteUser,
   deleteUser,
+  adminEmailUsers,
 };
