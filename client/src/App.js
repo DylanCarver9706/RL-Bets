@@ -43,6 +43,7 @@ import PrivacyPolicy from "./components/PrivacyPolicy";
 import TermsOfService from "./components/TermsOfService";
 import Agreements from "./components/Agreements";
 import PageNotFound from "./components/PageNotFound";
+import SuspendedUser from "./components/SuspendedUser";
 
 const ProtectedRoute = ({ loggedIn, redirectTo = "/Auth", children }) => {
   return loggedIn ? children : <Navigate to={redirectTo} />;
@@ -165,8 +166,6 @@ function App() {
       // Check current path
       const currentPath = window.location.pathname;
 
-      const unprotectedRoutes = ["/"];
-
       // Allow all users to access unprotected routes
       if (unprotectedRoutes.includes(currentPath)) {
         return;
@@ -183,11 +182,13 @@ function App() {
         navigate("/Illegal-State");
       } else if (auth.currentUser && !user?.ageValid) {
         navigate("/Illegal-Age");
+      } else if (auth.currentUser && user?.accountStatus === "suspended") {
+        navigate("/Account-Suspended");
       }
 
     };
     routeUser();
-  }, [loading, user, navigate, serverLive]);
+  }, [loading, user, navigate, serverLive, unprotectedRoutes]);
 
   // Initialize the socket connection when the app mounts
   useEffect(() => {
@@ -206,6 +207,7 @@ function App() {
   const locationValid = user?.locationValid;
   const ageValid = user?.ageValid;
   const loggedIn = auth?.currentUser !== null && user?.mongoUserId !== null;
+  const accountSuspended = user?.accountStatus === "suspended";
   const admin = loggedIn && user?.userType === "admin";
   const requirePp = loggedIn && parseInt(user?.pp.split("Accepted v")[1].split(" at")[0]) !== privacyPolicyVersion;
   const requireTos = loggedIn && parseInt(user?.tos.split("Accepted v")[1].split(" at")[0]) !== termsOfServiceVersion;
@@ -238,6 +240,8 @@ function App() {
         <Route path="/" element={<Hero />} />
         <Route path="/Whoopsie-Daisy" element={<SomethingWentWrong />} />
         <Route path="/Bug-Form" element={<BugForm />} />
+        <Route path="/Feature-Form" element={<FeatureForm />} />
+        <Route path="/Feedback-Form" element={<FeedbackForm />} />
         <Route path="/Privacy-Policy" element={<PrivacyPolicy />} />
         <Route path="/Terms-Of-Service" element={<TermsOfService />} />
         {/* Catch-all route for undefined paths */}
@@ -349,22 +353,6 @@ function App() {
           }
         />
         <Route
-          path="/Feature-Form"
-          element={
-            <ProtectedRoute loggedIn={loggedIn}>
-              <FeatureForm />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/Feedback-Form"
-          element={
-            <ProtectedRoute loggedIn={loggedIn}>
-              <FeedbackForm />
-            </ProtectedRoute>
-          }
-        />
-        <Route
           path="/Illegal-State"
           element={
             <ProtectedRoute loggedIn={loggedIn && !locationValid} redirectTo="/Wagers">
@@ -385,6 +373,14 @@ function App() {
           element={
             <ProtectedRoute loggedIn={loggedIn && !ageValid} redirectTo="/Wagers">
               <IllegalAge />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/Account-Suspended"
+          element={
+            <ProtectedRoute loggedIn={loggedIn && accountSuspended} redirectTo="/Wagers">
+              <SuspendedUser />
             </ProtectedRoute>
           }
         />
