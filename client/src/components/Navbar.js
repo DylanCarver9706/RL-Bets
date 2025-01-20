@@ -118,6 +118,9 @@ const Navbar = () => {
             <Link to="/Log" style={styles.dropdownLink}>
               Logs
             </Link>
+            <Link to="/Admin-Email" style={styles.dropdownLink}>
+              Email Users
+            </Link>
             </div>
           )}
         </div>
