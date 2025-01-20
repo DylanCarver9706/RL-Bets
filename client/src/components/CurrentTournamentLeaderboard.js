@@ -36,6 +36,32 @@ const CurrentTournamentLeaderboard = () => {
   }
 
   return (
+    <>
+    <div style={styles.container}>
+        <div>
+          <h2 style={styles.header}>
+            Rewards for Leaderboard: "{leaderboardData?.name}"
+          </h2>
+          <table style={styles.table}>
+            <thead>
+              <tr>
+                <th style={styles.th}>Rank</th>
+                <th style={styles.th}>Reward</th>
+              </tr>
+            </thead>
+            <tbody>
+              {Object.entries(leaderboardData?.rewards || {}).map(
+                ([rank, reward]) => (
+                  <tr key={rank} style={styles.tr}>
+                    <td style={styles.td}>{rank}</td>
+                    <td style={styles.td}>{reward}</td>
+                  </tr>
+                )
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
     <div style={styles.container}>
       <div>
         <h2 style={styles.header}>
@@ -65,6 +91,7 @@ const CurrentTournamentLeaderboard = () => {
         </table>
       </div>
     </div>
+    </>
   );
 };
 
