@@ -17,6 +17,7 @@ import Wagers from "./components/Wagers";
 import Auth from "./components/Auth";
 import Profile from "./components/Profile";
 import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
 import CreateWager from "./components/CreateWager";
 import TournamentHistory from "./components/TournamentHistory";
 import CreditShop from "./components/CreditShop";
@@ -206,7 +207,7 @@ function App() {
   const requireTos = parseInt(user?.tos.split("Accepted v")[1].split(" at")[0]) !== termsOfServiceVersion;
 
   return (
-    <>
+    <div style={styles.container}>
       {user &&
         user?.emailVerificationStatus === "verified" &&
         user?.idvStatus === "verified" && <Navbar />}
@@ -407,8 +408,17 @@ function App() {
           }
         />
       </Routes>
-    </>
+      <Footer />
+    </div>
   );
 }
+
+const styles = {
+  container: {
+    display: "flex",
+    flexDirection: "column",
+    minHeight: "100vh",
+  },
+};
 
 export default App;
