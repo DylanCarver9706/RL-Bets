@@ -77,6 +77,9 @@ function App() {
       const privacyPolicy = await getLatestPrivacyPolicy("privacy-policy");
       const termsOfService = await getLatestTermsOfService("terms-of-service");
 
+      localStorage.setItem("termsOfServiceVersion", termsOfService.version);
+      localStorage.setItem("privacyPolicyVersion", privacyPolicy.version);
+
       setPrivacyPolicyVersion(parseInt(privacyPolicy.version));
       setTermsOfServiceVersion(parseInt(termsOfService.version));
     }
