@@ -74,9 +74,11 @@ const Notifications = () => {
                   {notification.type === "payout" && (
                     <p>{`Wager "${notification.wagerName}" paid out ${notification.awardedCredits} Credits. Congrats!`}</p>
                   )}
+                  {notification.type === "welcome" && (
+                    <p>{`${notification.message}`}</p>
+                  )}
                   <span style={styles.timestamp}>
                     {formatDateToUserTimezone(notification.createdAt)}
-                    {/* {notification.createdAt} */}
                   </span>
                   <button
                     onClick={() => handleDismiss(notification._id)}
