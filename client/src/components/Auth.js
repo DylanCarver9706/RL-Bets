@@ -12,6 +12,8 @@ import {
   createUserInDatabase,
   updateUser,
   getMongoUserDataByFirebaseId,
+  formatDateToUserTimezone,
+  getTimestamp,
 } from "../services/userService.js";
 import { logEvent } from "firebase/analytics";
 import { analytics } from "../firebaseConfig";
@@ -146,29 +148,24 @@ const Auth = () => {
     const provider = new GoogleAuthProvider();
     try {
 
-      // Check if user has agreed to TOS and PP
-      if (!tosChecked || !ppChecked) {
-        setError("You must read and agree to the Terms of Service and Privacy Policy.");
-        return;
-      }
-
       const result = await signInWithPopup(auth, provider);
       const firebaseUser = result.user;
 
       // Check if the user exists in MongoDB
-      let mongoUser;
+      let mongoUserFound;
       try {
-        mongoUser = await getMongoUserDataByFirebaseId(firebaseUser.uid);
+        mongoUserFound = await getMongoUserDataByFirebaseId(firebaseUser.uid);
       } catch (error) {
         console.error("Error fetching MongoDB user data:", error.message);
       }
 
       // Existing user
-      if (mongoUser) {
+      if (mongoUserFound) {
         // Reload App instead of navigating which will do the same thing
         window.location.reload();
       } else {
         // New user: Create in MongoDB
+        console.log("MongoUser:", mongoUserFound);
         try {
           const mongoUser = await createUserInDatabase(
             firebaseUser.displayName,
@@ -176,6 +173,8 @@ const Auth = () => {
             firebaseUser.uid,
             referralCode,
             "google",
+            `Accepted v${mongoUserFound ? localStorage.getItem("privacyPolicyVersion") : (ppChecked && tosChecked) ? localStorage.getItem("privacyPolicyVersion") : "0"} at ${formatDateToUserTimezone(getTimestamp())}`,
+            `Accepted v${mongoUserFound ? localStorage.getItem("termsOfServiceVersion") : (ppChecked && tosChecked) ? localStorage.getItem("privacyPolicyVersion") : "0"} at ${formatDateToUserTimezone(getTimestamp())}`
           );
 
           // Remove referral code from local storage
