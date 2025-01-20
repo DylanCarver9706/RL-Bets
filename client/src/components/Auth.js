@@ -70,12 +70,6 @@ const Auth = () => {
           return;
         }
 
-        // Check if user has agreed to TOS and PP
-        if (!tosChecked || !ppChecked) {
-          setError("You must read and agree to the Terms of Service and Privacy Policy.");
-          return;
-        }
-
         firebaseCredential = await createUserWithEmailAndPassword(
           auth,
           email,
@@ -145,9 +139,15 @@ const Auth = () => {
   };
 
   const handleGoogleAuth = async () => {
-    const provider = new GoogleAuthProvider();
     try {
-
+      
+      // Check if user has agreed to TOS and PP
+      if (!isLogin && (!tosChecked || !ppChecked)) {
+        setError("You must read and agree to the Terms of Service and Privacy Policy.");
+        return;
+      }
+      
+      const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
       const firebaseUser = result.user;
 
@@ -165,7 +165,6 @@ const Auth = () => {
         window.location.reload();
       } else {
         // New user: Create in MongoDB
-        console.log("MongoUser:", mongoUserFound);
         try {
           const mongoUser = await createUserInDatabase(
             firebaseUser.displayName,
