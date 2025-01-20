@@ -28,6 +28,8 @@ export const createUserInDatabase = async (name, email, firebaseUserId, referral
         accountStatus: "active",
         referralCode: referralCode,
         authProvider: authProvider,
+        tos: `Accepted v${localStorage.getItem("termsOfServiceVersion")} at ${formatDateToUserTimezone(getTimestamp())}`,
+        pp: `Accepted v${localStorage.getItem("privacyPolicyVersion")} at ${formatDateToUserTimezone(getTimestamp())}`
       }),
     });
 
