@@ -10,7 +10,6 @@ const CurrentTournamentLeaderboard = () => {
     const fetchLeaderboardData = async () => {
       try {
         const leaderboardData = await fetchCurrentLeaderboard();
-        console.log(leaderboardData);
         setLeaderboardData(leaderboardData);
       } catch (error) {
         console.error("Error fetching leaderboard:", error);
@@ -38,29 +37,33 @@ const CurrentTournamentLeaderboard = () => {
 
   return (
     <div style={styles.container}>
-        <div>
-          <h2 style={styles.header}>
-            User Rankings by Earned Credits for "{leaderboardData.name}"
-          </h2>
-          <table style={styles.table}>
-            <thead>
-              <tr>
-                <th style={styles.th}>Rank</th>
-                <th style={styles.th}>Name</th>
-                <th style={styles.th}>Earned Credits</th>
+      <div>
+        <h2 style={styles.header}>
+          User Rankings by Earned Credits for "{leaderboardData.name}"
+        </h2>
+        <table style={styles.table}>
+          <thead>
+            <tr>
+              <th style={styles.th}>Rank</th>
+              <th style={styles.th}>Name</th>
+              <th style={styles.th}>Earned Credits</th>
+              <th style={styles.th}>Reward</th>
+            </tr>
+          </thead>
+          <tbody>
+            {leaderboardData.users.map((user, index) => (
+              <tr key={index} style={styles.tr}>
+                <td style={styles.td}>{index + 1}</td>
+                <td style={styles.td}>{user.name}</td>
+                <td style={styles.td}>
+                  {parseFloat(user.earnedCredits).toFixed(4)}
+                </td>
+                <td style={styles.td}>{leaderboardData.rewards[index + 1]}</td>
               </tr>
-            </thead>
-            <tbody>
-              {leaderboardData.users.map((user, index) => (
-                <tr key={index} style={styles.tr}>
-                  <td style={styles.td}>{index + 1}</td>
-                  <td style={styles.td}>{user.name}</td>
-                  <td style={styles.td}>{parseFloat(user.earnedCredits).toFixed(4)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };
