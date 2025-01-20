@@ -36,9 +36,9 @@ const FeatureForm = () => {
 
     try {
       const response = await createJiraIssue(
-        user.name,
-        user.email,
-        user.mongoUserId,
+        user?.name || "Unknown",
+        user?.email || "Unknown",
+        user?.mongoUserId || "Unknown",
         "Enhancement Request",
         summary,
         description,
