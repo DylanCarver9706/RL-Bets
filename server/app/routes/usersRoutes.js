@@ -7,6 +7,7 @@ const { verifyFirebaseToken } = require("../middlewares/firebaseAdmin");
 router.get("/", verifyFirebaseToken, userController.getAllUsers);
 router.get("/:id", verifyFirebaseToken, userController.getUserById);
 router.get("/firebase/:firebaseUserId", verifyFirebaseToken, userController.getUserByFirebaseId);
+router.post("/send_admin_email", verifyFirebaseToken, userController.adminEmailUsers);
 router.post("/", verifyFirebaseToken, userController.createUser);
 router.put("/:id", verifyFirebaseToken, userController.updateUser);
 // The whole purpose of this route is to allow the user to delete their account without a firebase token
