@@ -1,3 +1,5 @@
+import { getFirebaseIdToken } from "./firebaseService";
+
 const BASE_SERVER_URL = process.env.REACT_APP_BASE_SERVER_URL; // Define your backend server URL
 
 export const fetchAllTournamentsDataTree = async () => {
@@ -182,4 +184,61 @@ export const updateFirstBlood = async (matchId, updateData) => {
     console.error(`Error updating first blood for match ID ${matchId}:`, err.message);
     throw err;
     }
+};
+
+export const getUsers = async () => {
+  try {
+
+    const idToken = await getFirebaseIdToken();
+
+    const response = await fetch(`${BASE_SERVER_URL}/api/users`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${idToken}`, // Include the token in the headers
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Failed to fetch users.");
+    }
+
+    return data; // Return the users data
+  } catch (err) {
+    console.error("Error fetching users:", err.message);
+    throw err;
+  }
+}
+
+export const sendEmailToUsers = async (users, subject, body) => {
+  try {
+
+    const idToken = await getFirebaseIdToken();
+
+    const response = await fetch(`${BASE_SERVER_URL}/api/users/send_admin_email`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${idToken}`, // Include the token in the headers
+      },
+      body: JSON.stringify({
+        users: users,
+        subject: subject,
+        body: body,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Failed to send admin email.");
+    }
+
+    return data;
+  } catch (err) {
+    console.error("Error sending admin email:", err.message);
+    throw err;
+  }
 };
