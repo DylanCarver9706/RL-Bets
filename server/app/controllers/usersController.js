@@ -72,7 +72,6 @@ const deleteUser = async (req, res, logError) => {
 
 const adminEmailUsers = async (req, res, logError) => {
   try {
-    console.log("req.body", req.body);
     await userService.adminEmailUsers(
       req.body.users,
       req.body.subject,
