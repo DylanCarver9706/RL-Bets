@@ -1,13 +1,18 @@
-import React, { useState, useEffect } from "react";
-import { useUser } from "../context/UserContext";
+import React, { useState } from "react";
+import { useUser } from "../contexts/UserContext.js";
 import { useNavigate } from "react-router-dom";
-import { updateUser, redeemReferralCode, wait } from "../services/userService";
+import {
+  updateUser,
+  redeemReferralCode,
+  wait,
+  userAgeLegal,
+  userLocationLegal,
+} from "../services/userService";
 import {
   generateLinkTokenForIDV,
   openPlaidIDV,
 } from "../services/plaidService.js";
 import { createJiraIssue } from "../services/jiraService.js";
-import { auth } from "../firebaseConfig";
 
 const IdentityVerification = () => {
   const [idvActive, setIdvActive] = useState(false);
@@ -29,26 +34,38 @@ const IdentityVerification = () => {
       const idvResult = await openPlaidIDV(linkTokenData.link_token);
 
       if (idvResult?.status === "success") {
-        
         let updateUserObject = { idvStatus: "verified" };
-        
+
         if (idvResult?.DOB) {
           updateUserObject.DOB = idvResult.DOB;
+
+          const userLocationMeta = await userLocationLegal();
+
+          updateUserObject.locationValid = userLocationMeta?.allowed;
+          updateUserObject.currentState = userLocationMeta?.state;
+
+          updateUserObject.ageValid = await userAgeLegal(
+            userLocationMeta?.state,
+            idvResult.DOB
+          );
         }
 
         if (idvResult?.phoneNumber) {
           updateUserObject.phoneNumber = idvResult.phoneNumber;
         }
-        
+
         await updateUser(user.mongoUserId, updateUserObject);
-        
+
         if (user.referralCode !== "") {
-          await redeemReferralCode("Referred User", user.mongoUserId, user.referralCode);
+          await redeemReferralCode(
+            "Referred User",
+            user.mongoUserId,
+            user.referralCode
+          );
         }
-        
-        // Reload App instead of navigating which will do the same thing
-        await wait(5000);
-        window.location.reload();
+
+        await wait(3000);
+        window.location.reload()
       } else {
         console.log("IDV failed");
         // Create Jira issue if IDV fails and alert user
@@ -68,13 +85,9 @@ const IdentityVerification = () => {
         alert(
           "Identity Verification failed. RL Bets will review your information and approve or deny your account manually."
         );
-        await wait(5000);
-        window.location.reload();
       }
     } catch (error) {
-      alert(error.message);
-      // Wait 5 seconds before refreshing the page
-      window.location.reload();
+      throw new Error(error.message);
     }
   };
 
