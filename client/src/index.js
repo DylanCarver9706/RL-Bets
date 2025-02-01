@@ -4,12 +4,16 @@ import "./index.css";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import { BrowserRouter, useNavigate } from "react-router-dom";
-import { UserProvider, useUser } from "./context/UserContext";
+import { UserProvider, useUser } from "./contexts/UserContext";
 import ErrorBoundary from "./components/ErrorBoundary";
 
-// Capture console logs
+// Capture console logs but prevent them from rendering on screen
 const capturedLogs = [];
 const captureConsoleLog = (type, ...args) => {
+  if (type === "error") {
+    return; // Prevent console.error() from displaying errors in React UI
+  }
+
   const logEntry = {
     type, // log, warn, error
     message: args.map((arg) => (typeof arg === "object" ? JSON.stringify(arg) : arg)).join(" "),
@@ -17,7 +21,7 @@ const captureConsoleLog = (type, ...args) => {
   };
   capturedLogs.push(logEntry);
 
-  // Call the original console function
+  // Call the original console function for logging/warning (but not errors)
   console[`_${type}`](...args);
 };
 
@@ -40,11 +44,11 @@ const AppWithErrorBoundary = () => {
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
-  <UserProvider>
-    <BrowserRouter>
-      <AppWithErrorBoundary />
-    </BrowserRouter>
-  </UserProvider>
+  <BrowserRouter>
+      <UserProvider>
+        {process.env.REACT_APP_ENV === "production" ? <AppWithErrorBoundary /> : <App />}
+      </UserProvider>
+  </BrowserRouter>
 );
 
 // If you want to start measuring performance in your app, pass a function
