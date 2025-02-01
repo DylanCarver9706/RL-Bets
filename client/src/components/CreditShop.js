@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { loadStripe } from "@stripe/stripe-js";
-import { useUser } from "../context/UserContext.js";
+import { useUser } from "../contexts/UserContext.js";
 import { createCheckoutSession } from "../services/userService.js"; // Import service
 
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);

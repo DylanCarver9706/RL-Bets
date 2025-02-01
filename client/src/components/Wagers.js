@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import socket from "../services/socket.js";
 import { createBet } from "../services/wagerService.js";
-import { useUser } from "../context/UserContext.js";
+import { useUser } from "../contexts/UserContext.js";
 import { getWagers } from "../services/userService.js";
 import ToolTip from "./ToolTip.js";
 import CreditShop from "./CreditShop.js";
@@ -228,10 +228,6 @@ const Wagers = () => {
     </div>
     ) : (
     <div style={styles.container}>
-      <h2 style={styles.header}>
-        Welcome to the Wager Dashboard, {user.mongoUserId}
-      </h2>
-
       <div style={styles.toggleContainer}>
         <label>
           <input

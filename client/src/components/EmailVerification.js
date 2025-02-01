@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { auth } from "../firebaseConfig";
-import { useUser } from "../context/UserContext";
+import { useUser } from "../contexts/UserContext.js";
 import { useNavigate } from "react-router-dom";
 import { updateUser } from "../services/userService";
 

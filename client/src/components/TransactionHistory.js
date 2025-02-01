@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { fetchTransactionHistory } from "../services/userService";
-import { useUser } from "../context/UserContext.js";
+import { useUser } from "../contexts/UserContext.js";
 import { capitalize } from "../services/wagerService.js";
 
 const TransactionHistory = () => {

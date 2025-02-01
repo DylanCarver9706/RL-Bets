@@ -4,7 +4,7 @@ import {
   dismissNotification,
   formatDateToUserTimezone,
 } from "../services/userService";
-import { useUser } from "../context/UserContext.js";
+import { useUser } from "../contexts/UserContext.js";
 import socket from "../services/socket.js";
 
 const Notifications = () => {

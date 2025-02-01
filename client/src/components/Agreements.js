@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
-import { useUser } from "../context/UserContext";
+import { useUser } from "../contexts/UserContext";
 import { formatDateToUserTimezone, getTimestamp, updateUser } from "../services/userService"; // Assumes updateUser is defined in UserService
 
 const Agreements = ({ requireTos, requirePp, tosVersion, ppVersion }) => {

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useUser } from "../context/UserContext.js";
+import { useUser } from "../contexts/UserContext.js";
 import {
   fetchBettableObjects,
   createWager,
