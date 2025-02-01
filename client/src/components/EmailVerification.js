@@ -41,12 +41,6 @@ const EmailVerification = () => {
       }
     };
 
-    // Disallows the user to navigate to this page if they have already verified their email
-    if (auth.currentUser && user?.emailVerificationStatus === "verified") {
-      navigate("/Wagers");
-      return;
-    }
-
     // Poll every 1.5 seconds to check if the email is verified
     const interval = setInterval(checkEmailVerification, 1500);
 
