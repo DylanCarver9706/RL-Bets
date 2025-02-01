@@ -46,9 +46,6 @@ import PageNotFound from "./components/PageNotFound";
 import SuspendedUser from "./components/SuspendedUser";
 import AdminEmail from "./components/AdminEmail";
 
-const ProtectedRoute = ({ loggedIn, redirectTo = "/Auth", children }) => {
-  return loggedIn ? children : <Navigate to={redirectTo} />;
-};
 
 function App() {
   usePageTracking();
