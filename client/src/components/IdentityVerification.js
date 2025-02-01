@@ -78,14 +78,6 @@ const IdentityVerification = () => {
     }
   };
 
-  // Disallows the user to navigate to this page if they have already verified their identity
-  useEffect(() => {
-    if (auth.currentUser && user?.emailVerificationStatus === "verified") {
-      navigate("/Wagers");
-      return;
-    }
-  }, [user, setUser, navigate]);
-
   return (
     <>
       {!idvActive && (
