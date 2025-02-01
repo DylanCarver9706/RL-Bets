@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { useUser } from "../context/UserContext.js";
+import { useUser } from "../contexts/UserContext.js";
 import socket from "../services/socket.js";
 import { fetchCurrentTournament } from "../services/leaderboardService.js";
 import Notifications from "./Notifications";
@@ -15,14 +15,14 @@ const Navbar = () => {
     const fetchTournament = async () => {
       const tournamentData = await fetchCurrentTournament();
       setCurrentTournament(tournamentData);
-    }
+    };
     fetchTournament();
   }, []);
-  
+
   // Listen for updates from the server
   useEffect(() => {
     socket.on("updateUser", (updateUser) => {
-      if (updateUser._id === user.mongoUserId) {
+      if (updateUser._id === user?.mongoUserId) {
         setUser({ ...user, credits: updateUser.credits });
       }
     });
@@ -34,10 +34,6 @@ const Navbar = () => {
     };
     // eslint-disable-next-line
   }, [user?.mongoUserId]);
-
-  if (!user) {
-    return null; // Hide navbar if no user is logged in
-  }
 
   return (
     <nav style={styles.navbar}>
@@ -60,19 +56,13 @@ const Navbar = () => {
           {hoveredDropdown === "tournaments" && (
             <div style={styles.dropdownMenu}>
               {currentTournament && (
-                <Link
-                  to={`/Tournament`}
-                  style={styles.dropdownLink}
-                >
+                <Link to={`/Tournament`} style={styles.dropdownLink}>
                   {currentTournament.name}
                 </Link>
               )}
-              <Link
-                  to={`/Tournament-History`}
-                  style={styles.dropdownLink}
-                >
-                  Tournament History
-                </Link>
+              <Link to={`/Tournament-History`} style={styles.dropdownLink}>
+                Tournament History
+              </Link>
             </div>
           )}
         </div>
@@ -99,47 +89,53 @@ const Navbar = () => {
             </div>
           )}
         </div>
-        {user.userType === "admin" && (
-        <div
-          style={styles.dropdownContainer}
-          onMouseEnter={() => setHoveredDropdown("admin")}
-          onMouseLeave={() => setHoveredDropdown(null)}
-          onClick={() => setHoveredDropdown(null)}
-        >
-          <span style={styles.link}>Admin</span>
-          {hoveredDropdown === "admin" && (
-            <div style={styles.dropdownMenu}>
-              <Link to="/Admin" style={styles.dropdownLink}>
-              Home
-            </Link>
-            <Link to="/Create_Wager" style={styles.dropdownLink}>
-              Create Wager
-            </Link>
-            <Link to="/Log" style={styles.dropdownLink}>
-              Logs
-            </Link>
-            <Link to="/Admin-Email" style={styles.dropdownLink}>
-              Email Users
-            </Link>
-            </div>
-          )}
-        </div>
+        {user?.userType === "admin" && (
+          <div
+            style={styles.dropdownContainer}
+            onMouseEnter={() => setHoveredDropdown("admin")}
+            onMouseLeave={() => setHoveredDropdown(null)}
+            onClick={() => setHoveredDropdown(null)}
+          >
+            <span style={styles.link}>Admin</span>
+            {hoveredDropdown === "admin" && (
+              <div style={styles.dropdownMenu}>
+                <Link to="/Admin" style={styles.dropdownLink}>
+                  Home
+                </Link>
+                <Link to="/Create_Wager" style={styles.dropdownLink}>
+                  Create Wager
+                </Link>
+                <Link to="/Log" style={styles.dropdownLink}>
+                  Logs
+                </Link>
+                <Link to="/Admin-Email" style={styles.dropdownLink}>
+                  Email Users
+                </Link>
+              </div>
+            )}
+          </div>
         )}
       </div>
-      <div style={styles.navLinks}>
-        <Link to="/Profile" style={styles.link}>
-          Profile
+      {!user ? (
+        <Link to="/Login" style={styles.link}>
+          Login
         </Link>
-        <Link to="/Settings" style={styles.link}>
-          Settings
-        </Link>
-        {user?.credits !== null && (
-          <Link to="/Credit-Shop" style={styles.link}>
-            {parseInt(user?.credits)} Credits
+      ) : (
+        <div style={styles.navLinks}>
+          <Link to="/Profile" style={styles.link}>
+            Profile
           </Link>
-        )}
-        <Notifications />
-      </div>
+          <Link to="/Settings" style={styles.link}>
+            Settings
+          </Link>
+          {user?.credits !== null && (
+            <Link to="/Credit-Shop" style={styles.link}>
+              {parseInt(user?.credits)} Credits
+            </Link>
+          )}
+          <Notifications />
+        </div>
+      )}
     </nav>
   );
 };
