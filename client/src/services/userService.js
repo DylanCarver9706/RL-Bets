@@ -30,6 +30,7 @@ export const createUserInDatabase = async (name, email, firebaseUserId, referral
         authProvider: authProvider,
         tos: tos,
         pp: pp,
+        ageValid: false,
       }),
     });
 
@@ -407,7 +408,7 @@ export const redeemReferralCode = async (promotionType, userId, referralCode = n
 
 export const generateReferralCode = async (userId) => {
   try {
-    return `${BASE_CLIENT_URL}/Auth?ref=${userId}`;
+    return `${BASE_CLIENT_URL}/Signup?ref=${userId}`;
   } catch (err) {
     throw new Error("Error generating referral code:", err.message);
   }
