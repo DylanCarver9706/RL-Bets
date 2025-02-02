@@ -114,8 +114,8 @@ const Wagers = () => {
         filtered = allWagers.filter(
           (wager) =>
             wager.status === "Bettable" &&
-            wager.creator !== user.mongoUserId &&
-            wager.bets.every((bet) => bet.user !== user.mongoUserId)
+            wager.creator !== user?.mongoUserId &&
+            wager.bets.every((bet) => bet.user !== user?.mongoUserId)
         );
         break;
       case "Ongoing":
@@ -126,7 +126,7 @@ const Wagers = () => {
         break;
       case "BetOn":
         filtered = allWagers.filter((wager) =>
-          wager.bets.some((bet) => bet.user === user.mongoUserId)
+          wager.bets.some((bet) => bet.user === user?.mongoUserId)
         );
         break;
       default:
@@ -172,13 +172,13 @@ const Wagers = () => {
       return alert("Please enter a valid number of credits.");
     }
 
-    if (creditsWagered > user.credits) {
+    if (creditsWagered > user?.credits) {
       setShowCreditShopModal(true);
       return;
     }
 
     const betPayload = {
-      user: user.mongoUserId,
+      user: user?.mongoUserId,
       credits: parseFloat(creditsWagered),
       agreeBet: wagerCaseSelected,
       rlEventReference: selectedWager.rlEventReference,
@@ -195,7 +195,7 @@ const Wagers = () => {
   };
 
   const handleWagerOptionClick = (wager, agreeBet) => {
-    setCreditsWagered(parseInt(user.credits / 10));
+    setCreditsWagered(parseInt(user?.credits / 10));
     setShowBetInput(true);
 
     console.log("wager", wager);
@@ -203,7 +203,7 @@ const Wagers = () => {
     setWagerCaseSelected(agreeBet);
 
     const estimatedPayout = estimatedWagerPayout(
-      parseInt(user.credits / 10),
+      parseInt(user?.credits / 10),
       wager.agreeCreditsBet,
       wager.disagreeCreditsBet,
       agreeBet
@@ -278,7 +278,7 @@ const Wagers = () => {
           ) : (
             filteredWagers?.map((wager) => {
               let userBet = null;
-              userBet = wager.bets.find((bet) => bet.user === user.mongoUserId);
+              userBet = wager.bets.find((bet) => bet.user === user?.mongoUserId);
               // console.log(`userBet for ${userBet?.wagerId}`, userBet);
               return (
                 <li key={wager._id} style={styles.wagerItem}>
@@ -386,9 +386,9 @@ const Wagers = () => {
                       </div>
                       {!["Ongoing", "Ended"].includes(wager.status) &&
                         wager.bets.every(
-                          (bet) => bet.user !== user.mongoUserId
+                          (bet) => bet.user !== user?.mongoUserId
                         ) &&
-                        wager.creator !== user.mongoUserId && (
+                        wager.creator !== user?.mongoUserId && (
                           <button
                             style={styles.betButton}
                             onClick={() => handleWagerOptionClick(wager, true)}
@@ -414,9 +414,9 @@ const Wagers = () => {
                       </div>
                       {!["Ongoing", "Ended"].includes(wager.status) &&
                         wager.bets.every(
-                          (bet) => bet.user !== user.mongoUserId
+                          (bet) => bet.user !== user?.mongoUserId
                         ) &&
-                        wager.creator !== user.mongoUserId && (
+                        wager.creator !== user?.mongoUserId && (
                           <button
                             style={styles.betButton}
                             onClick={() => handleWagerOptionClick(wager, false)}
