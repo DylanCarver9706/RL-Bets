@@ -98,6 +98,7 @@ const softDeleteUser = async (id) => {
       phoneNumber: null,
       tos: null,
       pp: null,
+      ageValid: null,
     },
   });
 
