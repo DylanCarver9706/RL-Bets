@@ -73,6 +73,7 @@ app.use("/api/promotions", require("./app/routes/promotionsRoutes"));
 app.use("/api/leaderboards", require("./app/routes/leaderboardRoutes"));
 app.use("/api/transactions", require("./app/routes/transactionsRoutes"));
 app.use("/api/agreements", require("./app/routes/agreementsRoutes"));
+app.use("/api/openai", require("./app/routes/openaiRoutes"));
 
 app.use(errorLogger);
 
