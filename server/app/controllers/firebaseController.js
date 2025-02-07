@@ -2,7 +2,7 @@ const { uploadImageToFirebase, listIdentityVerificationImages, deleteIdentityVer
 
 const uploadIdvDocuments = async (req, res) => {
   try {
-    const { userId, userName, documentType } = req.body;
+    const { userId, documentType } = req.body;
 
     if (!userId || !documentType) {
       return res.status(400).json({ error: "User ID and document type are required" });
@@ -18,17 +18,17 @@ const uploadIdvDocuments = async (req, res) => {
     const uploadPromises = [];
 
     uploadPromises.push(
-        uploadImageToFirebase(files.frontImage[0], userId, userName, documentType, "front")
+        uploadImageToFirebase(files.frontImage[0], userId, documentType, "front")
     );
 
     if (files.backImage) {
       uploadPromises.push(
-        uploadImageToFirebase(files.backImage[0], userId, userName, documentType, "back")
+        uploadImageToFirebase(files.backImage[0], userId, documentType, "back")
       );
     }
 
     uploadPromises.push(
-        uploadImageToFirebase(files.selfieImage[0], userId, userName, documentType, "selfie")
+        uploadImageToFirebase(files.selfieImage[0], userId, documentType, "selfie")
     );
 
     const uploadedFiles = await Promise.all(uploadPromises);

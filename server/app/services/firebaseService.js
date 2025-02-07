@@ -3,7 +3,6 @@ const { bucket } = require("../middlewares/firebaseAdmin");
 const uploadImageToFirebase = async (
   file,
   userId,
-  userName,
   documentType,
   imageType
 ) => {
@@ -15,7 +14,7 @@ const uploadImageToFirebase = async (
     }
 
     // ✅ Generate a properly formatted file name
-    const fileName = `Identity_Verification_Documents/${userName}_${userId}/${documentType}/${imageType}_${file.originalname}`;
+    const fileName = `Identity_Verification_Documents/${userId}/${documentType}/${imageType}_${file.originalname}`;
     const fileUpload = storageBucket.file(fileName);
 
     // ✅ Upload file stream
