@@ -7,7 +7,10 @@ import {
   userLocationLegal,
   checkGeolocationPermission,
 } from "./services/userService";
-import { getLatestPrivacyPolicy, getLatestTermsOfService } from "./services/agreementsService";
+import {
+  getLatestPrivacyPolicy,
+  getLatestTermsOfService,
+} from "./services/agreementsService";
 import { useUser } from "./contexts/UserContext";
 import { Routes, Route, useNavigate } from "react-router-dom";
 import socket from "./services/socket";
@@ -23,7 +26,6 @@ import CurrentTournamentLeaderboard from "./components/CurrentTournamentLeaderbo
 import Log from "./components/Log";
 import Admin from "./components/Admin";
 import EmailVerification from "./components/EmailVerification";
-import IdentityVerification from "./components/IdentityVerification";
 import Settings from "./components/Settings";
 import Credits from "./components/Credits";
 import BugForm from "./components/BugForm";
@@ -46,12 +48,20 @@ import PrivateRoute from "./components/PrivateRoute";
 import Signup from "./components/Signup";
 import Login from "./components/Login";
 import ForgotPassword from "./components/ForgotPassword";
+import AdminIdentityVerification from "./components/AdminIdentityVerification";
+import IdentityVerification from "./components/IdentityVerification";
+
+// Deprecated components
+// import PlaidIdentityVerification from "./components/PlaidIdentityVerification"; Deprecated
+// import OpenAiIdentityVerification from "./components/OpenAiIdentityVerification";
 
 function App() {
   usePageTracking();
   const { user, setUser } = useUser();
   // eslint-disable-next-line
-  const [unprotectedRoutes, setUnprotectedRoutes] = useState(process.env.REACT_APP_UNPROTECTED_ROUTES.split(","));
+  const [unprotectedRoutes, setUnprotectedRoutes] = useState(
+    process.env.REACT_APP_UNPROTECTED_ROUTES.split(",")
+  );
   const [loading, setLoading] = useState(true);
   const [privacyPolicyVersion, setPrivacyPolicyVersion] = useState(null);
   const [termsOfServiceVersion, setTermsOfServiceVersion] = useState(null);
@@ -66,7 +76,6 @@ function App() {
     const handleAuthChange = async (firebaseUser) => {
       if (firebaseUser?.uid) {
         try {
-
           const idToken = await firebaseUser.getIdToken();
           console.log("Firebase ID token:", idToken);
           if (!idToken) {
@@ -95,7 +104,6 @@ function App() {
             currentState: userLocationMeta?.state,
             locationPermissionGranted: await checkGeolocationPermission(),
           });
-
         } catch {}
       } else {
         setUser(null); // User is logged out
@@ -119,12 +127,12 @@ function App() {
       socket.disconnect();
     };
   }, []);
-      
+
   // Get a potential referral code from the URL
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const referralCode = params.get("ref");
-        
+
     if (referralCode) {
       // Save the referral code in localStorage or state
       localStorage.setItem("referralCode", referralCode);
@@ -157,16 +165,15 @@ function App() {
         navigate("/Location-Permission-Required");
       } else if (auth.currentUser && user?.emailVerificationStatus && user?.emailVerificationStatus !== "verified") {
         navigate("/Email-Verification");
-      } else if (auth.currentUser && user?.idvStatus && user?.idvStatus !== "verified") {
+      } else if (auth.currentUser && user?.idvStatus && ["review", "unverified"].includes(user?.idvStatus)) {
         navigate("/Identity-Verification");
-      } else if (auth.currentUser && user?.locationValid && user?.locationValid === false) {
+      } else if (auth.currentUser && user?.locationValid === false) {
         navigate("/Illegal-State");
-      } else if (auth.currentUser && user?.ageValid && user?.ageValid === false) {
+      } else if (auth.currentUser && user?.ageValid === false) {
         navigate("/Illegal-Age");
       } else if (auth.currentUser && user?.accountStatus && user?.accountStatus === "suspended") {
         navigate("/Account-Suspended");
       }
-
     };
     routeUser();
   }, [loading, user, navigate, unprotectedRoutes]);
@@ -203,8 +210,14 @@ function App() {
         let termsOfService = await getLatestTermsOfService("terms-of-service");
 
         // Save to localStorage
-        localStorage.setItem("privacyPolicy", JSON.stringify({lastAccessedByUser: today, ...privacyPolicy}));
-        localStorage.setItem("termsOfService", JSON.stringify({lastAccessedByUser: today, ...termsOfService}));
+        localStorage.setItem(
+          "privacyPolicy",
+          JSON.stringify({ lastAccessedByUser: today, ...privacyPolicy })
+        );
+        localStorage.setItem(
+          "termsOfService",
+          JSON.stringify({ lastAccessedByUser: today, ...termsOfService })
+        );
 
         // Update state
         setPrivacyPolicyVersion(parseInt(privacyPolicy.version, 10));
@@ -224,34 +237,49 @@ function App() {
   const ageValid = user?.ageValid;
   const emailVerified = user?.emailVerificationStatus === "verified";
   const idvVerified = user?.idvStatus === "verified";
-  const loggedIn = !loading && auth?.currentUser !== null && user?.mongoUserId !== null;
+  const loggedIn =
+    !loading && auth?.currentUser !== null && user?.mongoUserId !== null;
   const accountSuspended = user?.accountStatus === "suspended";
   const admin = loggedIn && user?.userType === "admin";
-  const requirePp = loggedIn && user?.pp && parseInt(user?.pp.split("Accepted v")[1].split(" at")[0]) !== privacyPolicyVersion;
-  const requireTos = loggedIn && user?.tos && parseInt(user?.tos.split("Accepted v")[1].split(" at")[0]) !== termsOfServiceVersion;
+  const requirePp =
+    loggedIn &&
+    user?.pp &&
+    parseInt(user?.pp.split("Accepted v")[1].split(" at")[0]) !==
+      privacyPolicyVersion;
+  const requireTos =
+    loggedIn &&
+    user?.tos &&
+    parseInt(user?.tos.split("Accepted v")[1].split(" at")[0]) !==
+      termsOfServiceVersion;
 
   return (
     <div style={styles.container}>
-      
       <Navbar />
-      
+
       <div>
         {loggedIn ? (
           <p>
-            Welcome, Firebase UID: {user?.firebaseUserId} || 
-            MongoId:{" "}{user?.mongoUserId} ||
-            Email Verification Status:{" "}{user?.emailVerificationStatus} ||
-            IDV Status: {user?.idvStatus}{" "} ||
-            Location Permission Granted: {`${user?.locationPermissionGranted}`}{" "} ||
-            Location Valid: {`${user?.locationValid}`}{" "} ||
-            Age Valid: {`${user?.ageValid}`}
+            Welcome, Firebase UID: {user?.firebaseUserId} || MongoId:{" "}
+            {user?.mongoUserId} || Email Verification Status:{" "}
+            {user?.emailVerificationStatus} || IDV Status: {user?.idvStatus} ||
+            Location Permission Granted: {`${user?.locationPermissionGranted}`}{" "}
+            || Location Valid: {`${user?.locationValid}`} || Age Valid:{" "}
+            {`${user?.ageValid}`}
           </p>
         ) : (
           <p>Please log in</p>
         )}
       </div>
       {/* Show the Agreements banner if the user has not accepted the latest version of the Privacy Policy or Terms of Service */}
-      {(requireTos || requirePp) && !unprotectedRoutes.includes(window.location.pathname) && <Agreements requireTos={requireTos} requirePp={requirePp} tosVersion={termsOfServiceVersion} ppVersion={privacyPolicyVersion} />}
+      {(requireTos || requirePp) &&
+        !unprotectedRoutes.includes(window.location.pathname) && (
+          <Agreements
+            requireTos={requireTos}
+            requirePp={requirePp}
+            tosVersion={termsOfServiceVersion}
+            ppVersion={privacyPolicyVersion}
+          />
+        )}
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<Hero />} />
@@ -296,7 +324,10 @@ function App() {
         <Route
           path="/Email-Verification"
           element={
-            <PrivateRoute authorized={loggedIn && !emailVerified} redirectTo="/Wagers">
+            <PrivateRoute
+              authorized={loggedIn && !emailVerified}
+              redirectTo="/Wagers"
+            >
               <EmailVerification />
             </PrivateRoute>
           }
@@ -304,7 +335,10 @@ function App() {
         <Route
           path="/Identity-Verification"
           element={
-            <PrivateRoute authorized={loggedIn && !idvVerified} redirectTo="/Wagers">
+            <PrivateRoute
+              authorized={loggedIn && !idvVerified}
+              redirectTo="/Wagers"
+            >
               <IdentityVerification />
             </PrivateRoute>
           }
@@ -368,7 +402,10 @@ function App() {
         <Route
           path="/Illegal-State"
           element={
-            <PrivateRoute authorized={loggedIn && !locationValid} redirectTo="/Wagers">
+            <PrivateRoute
+              authorized={loggedIn && !locationValid}
+              redirectTo="/Wagers"
+            >
               <IllegalState />
             </PrivateRoute>
           }
@@ -376,7 +413,10 @@ function App() {
         <Route
           path="/Location-Permission-Required"
           element={
-            <PrivateRoute authorized={loggedIn && !locationPermissionGranted} redirectTo="/Wagers">
+            <PrivateRoute
+              authorized={loggedIn && !locationPermissionGranted}
+              redirectTo="/Wagers"
+            >
               <LocationPermissionRequired />
             </PrivateRoute>
           }
@@ -384,7 +424,10 @@ function App() {
         <Route
           path="/Illegal-Age"
           element={
-            <PrivateRoute authorized={loggedIn && !ageValid} redirectTo="/Wagers">
+            <PrivateRoute
+              authorized={loggedIn && !ageValid}
+              redirectTo="/Wagers"
+            >
               <IllegalAge />
             </PrivateRoute>
           }
@@ -392,7 +435,10 @@ function App() {
         <Route
           path="/Account-Suspended"
           element={
-            <PrivateRoute authorized={loggedIn && accountSuspended} redirectTo="/Wagers">
+            <PrivateRoute
+              authorized={loggedIn && accountSuspended}
+              redirectTo="/Wagers"
+            >
               <SuspendedUser />
             </PrivateRoute>
           }
@@ -419,6 +465,14 @@ function App() {
           element={
             <PrivateRoute authorized={loggedIn && admin}>
               <AdminEmail />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/Admin-Identity-Verification"
+          element={
+            <PrivateRoute authorized={loggedIn && admin}>
+              <AdminIdentityVerification />
             </PrivateRoute>
           }
         />
