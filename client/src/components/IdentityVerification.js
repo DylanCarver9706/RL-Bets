@@ -72,7 +72,6 @@ const IdentityVerification = () => {
       const formData = new FormData();
       formData.append("documentType", documentType);
       formData.append("userId", user.mongoUserId);
-      formData.append("userName", user.name);
       formData.append("frontImage", frontImage);
       if (documentsWithBack.has(documentType)) {
         formData.append("backImage", backImage);
