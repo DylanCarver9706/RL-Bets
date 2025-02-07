@@ -19,6 +19,8 @@ const scheduleDailyEmail = () => {
           process.env.NODEMAILER_USER_EMAIL,
           "Daily Database Backup",
           "Please find attached the daily collections data.",
+          null,
+          null,
           [
             {
               filename: `all_collections_data_${getTimestamp().toISOString().split("T")[0]}.json`,

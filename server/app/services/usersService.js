@@ -48,7 +48,9 @@ const createUser = async (userData) => {
   await sendEmail(
     userData.email,
     "Welcome to RL Bets",
-    `Hello ${userData.name},\n\nWelcome to RL Bets! We're excited to have you on board. Your account is now active, and you can start using our services right away.\n\nIf you have any questions or need assistance, please don't hesitate to reach out to our support team.\n\nBest regards,\nThe RL Bets Team`
+    `Hello ${userData.name},\n\nWelcome to RL Bets! We're excited to have you on board. Your account is now active, and you can start using our services right away.\n\nIf you have any questions or need assistance, please don't hesitate to reach out to our support team.\n\nBest regards,\nThe RL Bets Team`,
+    null,
+    null,
   );
 
   await createUserNotificationLog({
@@ -127,7 +129,8 @@ const adminEmailUsers = async (users, subject, body) => {
       user,
       subject,
       null,
-      body
+      body,
+      null,
     );
   }
 };
