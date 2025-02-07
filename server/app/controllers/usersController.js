@@ -83,6 +83,15 @@ const adminEmailUsers = async (req, res, logError) => {
   }
 };
 
+const identityVerificationComplete = async (req, res, logError) => {
+  try {
+    await userService.sendIdentityVerificationResults(req.body);
+    res.status(200).json({ message: "Identity verification results updated" });
+  } catch (error) {
+    logError(error);
+  }
+};
+
 module.exports = {
   getAllUsers,
   getUserById,
@@ -92,4 +101,5 @@ module.exports = {
   softDeleteUser,
   deleteUser,
   adminEmailUsers,
+  identityVerificationComplete,
 };
