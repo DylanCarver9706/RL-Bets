@@ -1,4 +1,4 @@
-// PlaidService.js
+// PlaidService.js/identityVerificationService.js
 import { getFirebaseIdToken } from "./firebaseService.js";
 
 const BASE_SERVER_URL = process.env.REACT_APP_BASE_SERVER_URL;
@@ -78,4 +78,22 @@ export const openPlaidIDV = async (linkToken) => {
     // Open the Plaid widget
     handler.open();
   });
+};
+
+export const analyzeDocument = async (formData) => {
+  try {
+    const response = await fetch(`${BASE_SERVER_URL}/api/openai/analyze`, {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to analyze image.");
+    }
+
+    const data = await response.json();
+    return data.result;
+  } catch (error) {
+    console.error("Error analyzing image:", error);
+  }
 };
