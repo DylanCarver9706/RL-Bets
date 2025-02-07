@@ -111,6 +111,9 @@ const Navbar = () => {
                 <Link to="/Admin-Email" style={styles.dropdownLink}>
                   Email Users
                 </Link>
+                <Link to="/Admin-Identity-Verification" style={styles.dropdownLink}>
+                  Identity Verification
+                </Link>
               </div>
             )}
           </div>
