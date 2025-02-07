@@ -242,3 +242,34 @@ export const sendEmailToUsers = async (users, subject, body) => {
     throw err;
   }
 };
+
+export const validateUserIdv = async (userData) => {
+  try {
+  // Retrieve the Firebase ID token
+  const idToken = await getFirebaseIdToken();
+
+  // Make the fetch request to your backend API
+  const response = await fetch(
+    `${BASE_SERVER_URL}/api/users/identity_verification_complete`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${idToken}`, // Include the token in the headers
+      },
+      body: JSON.stringify(userData),
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to validate user idv.");
+  }
+  
+  const data = await response.json();
+
+  return data; // Return the validation result
+  } catch (err) {
+    console.error("Error validating user idv:", err.message);
+    return false;
+  }
+}
