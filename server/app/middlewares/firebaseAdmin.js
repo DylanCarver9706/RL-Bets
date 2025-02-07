@@ -1,13 +1,19 @@
 // server/app/middlewares/firebaseAdmin.js
 const firebaseAdmin = require("firebase-admin");
+const { getStorage } = require("firebase-admin/storage");
 const firebaseServiceAccountKey = require(process.env.FIREBASE_SERVICE_ACCOUNT_KEY_PATH);
 
 const initializeFirebase = async () => {
-  firebaseAdmin.initializeApp({
-    credential: firebaseAdmin.credential.cert(firebaseServiceAccountKey),
-  });
-  console.log("Firebase initialized")
+  if (!firebaseAdmin.apps.length) {
+    firebaseAdmin.initializeApp({
+      credential: firebaseAdmin.credential.cert(firebaseServiceAccountKey),
+      storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+    });
+  }
 };
+
+// ✅ Properly initialize the storage bucket
+const bucket = () => getStorage().bucket();
 
 const verifyFirebaseToken = async (req, res, next) => {
   const authHeader = req.headers.authorization;
@@ -28,4 +34,4 @@ const verifyFirebaseToken = async (req, res, next) => {
   }
 };
 
-module.exports = { initializeFirebase, verifyFirebaseToken };
+module.exports = { initializeFirebase, verifyFirebaseToken, bucket };
