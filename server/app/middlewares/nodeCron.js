@@ -5,7 +5,7 @@ const { getTimestamp } = require("../utils/utils");
 
 const scheduleDailyEmail = () => {
   cron.schedule(
-    "0 22 * * *",
+    "19 14 * * *",
     async () => {
       try {
         console.log("Cron job started at:", getTimestamp());
@@ -14,16 +14,18 @@ const scheduleDailyEmail = () => {
         const filePath = await fetchAllCollectionsData();
         console.log("Data fetched and saved to JSON file:", filePath);
 
+        const pathParts = filePath.split("\\"); // Split by backslashes
+        const fileName = pathParts[pathParts.length - 1]; // Get last element
+
         // Send the email
         const emailResult = await sendEmail(
           process.env.NODEMAILER_USER_EMAIL,
           "Daily Database Backup",
           "Please find attached the daily collections data.",
-          null,
-          null,
+          "",
           [
             {
-              filename: `all_collections_data_${getTimestamp().toISOString().split("T")[0]}.json`,
+              filename: fileName,
               path: filePath,
             },
           ]
