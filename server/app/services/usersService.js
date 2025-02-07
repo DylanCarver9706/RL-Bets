@@ -101,6 +101,8 @@ const softDeleteUser = async (id) => {
       tos: null,
       pp: null,
       ageValid: null,
+      locationValid: null,
+      currentState: null,
     },
   });
 
@@ -135,6 +137,48 @@ const adminEmailUsers = async (users, subject, body) => {
   }
 };
 
+const sendIdentityVerificationResults = async (submissionData) => {
+
+  let updateUserObject = {
+    idvStatus: submissionData.status, 
+    DOB: submissionData.dob
+  };
+
+  if (submissionData.status === "denied" && submissionData.reason === "Underage") {
+    updateUserObject.ageValid = false;
+  }
+
+  const updatedUser = await updateMongoDocument(collections.usersCollection, submissionData.userId, {
+    $set: updateUserObject,
+  }, true);
+
+  let bodyHtml = "";
+  if (submissionData.status === "verified") {
+    bodyHtml = `
+    <p>Congratulations! Your identity verification has been approved. You can now start betting on <a href="${process.env.DEV_CLIENT_URL}/Wagers">RL bets</a>!</p>
+    </p>
+  `;
+  } else if (submissionData.status === "denied") {
+    bodyHtml = `
+    <p>We're sorry, but your identity verification has been denied due to reason: "${submissionData.reason}". Please contact <a href="${process.env.DEV_CLIENT_URL}/Feedback-Form">Support</a> for further assistance.</p>
+  `;
+  }
+
+  await sendEmail(
+    updatedUser.email,
+    "RL Bets Identity Verification Results",
+    null,
+    bodyHtml,
+    null,
+  );
+
+  await createUserNotificationLog({
+    user: updatedUser._id.toString(),
+    type: "info",
+    message: "Your identity verification status has been updated to: " + (submissionData.status === "verified" ? "Approved" : `Denied due to reason: "${submissionData.reason}"`),
+  });
+};
+
 module.exports = {
   getAllUsers,
   getUserById,
@@ -144,4 +188,5 @@ module.exports = {
   softDeleteUser,
   deleteUser,
   adminEmailUsers,
+  sendIdentityVerificationResults,
 };
