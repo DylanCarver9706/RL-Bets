@@ -77,6 +77,9 @@ const Notifications = () => {
                   {notification.type === "welcome" && (
                     <p>{`${notification.message}`}</p>
                   )}
+                  {notification.type === "info" && (
+                    <p>{`${notification.message}`}</p>
+                  )}
                   <span style={styles.timestamp}>
                     {formatDateToUserTimezone(notification.createdAt)}
                   </span>
