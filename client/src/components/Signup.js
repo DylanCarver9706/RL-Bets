@@ -179,7 +179,7 @@ const Signup = () => {
       {error && <p style={{ color: "red" }}>{error}</p>}
       <form onSubmit={handleSubmit}>
         <div>
-          <label>Name:</label>
+          <label>Name (Please use the name on your form of identification):</label>
           <input
             type="text"
             value={name}
