@@ -97,7 +97,7 @@ const IdentityVerification = () => {
     <div>
       {inReview ? (
         <div>
-          <p>Your identity verification is currently under review. You will receive an email when you are verified.</p>
+          <p>Your identity verification is currently under review. You will receive an email when you are verified. Refresh the page if you have received your email stating your account has been verified.</p>
         </div>
       ) : (
       <div>
