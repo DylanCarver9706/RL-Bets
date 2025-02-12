@@ -54,6 +54,8 @@ import AdminIdentityVerification from "./components/AdminIdentityVerification";
 import IdentityVerification from "./components/IdentityVerification";
 import SmsVerification from "./components/SmsVerification";
 import Instructions from "./components/Instructions";
+import About from "./components/About";
+import Contact from "./components/Contact";
 
 // Deprecated components
 // import PlaidIdentityVerification from "./components/PlaidIdentityVerification"; Deprecated
@@ -313,6 +315,8 @@ function App() {
         <Route path="/Forgot-Password" element={<ForgotPassword />} />
         <Route path="/App-Outage" element={<AppOutage />} />
         <Route path="/Instructions" element={<Instructions />} />
+        <Route path="/About" element={<About />} />
+        <Route path="/Contact" element={<Contact />} />
         {/* Catch-all route for undefined paths */}
         <Route path="*" element={<PageNotFound />} />
 
