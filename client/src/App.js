@@ -53,6 +53,7 @@ import ForgotPassword from "./components/ForgotPassword";
 import AdminIdentityVerification from "./components/AdminIdentityVerification";
 import IdentityVerification from "./components/IdentityVerification";
 import SmsVerification from "./components/SmsVerification";
+import Instructions from "./components/Instructions";
 
 // Deprecated components
 // import PlaidIdentityVerification from "./components/PlaidIdentityVerification"; Deprecated
@@ -174,7 +175,7 @@ function App() {
       }
 
       // If user has not verified email or IDV, redirect to respective pages
-      if (auth.currentUser && user?.locationPermissionGranted && user?.locationPermissionGranted === false) {
+      if (auth.currentUser && user?.locationPermissionGranted === false) {
         navigate("/Location-Permission-Required");
       } else if (auth.currentUser && user?.emailVerificationStatus && user?.emailVerificationStatus !== "verified") {
         navigate("/Email-Verification");
@@ -188,6 +189,8 @@ function App() {
         navigate("/Illegal-Age");
       } else if (auth.currentUser && user?.accountStatus && user?.accountStatus === "suspended") {
         navigate("/Account-Suspended");
+      } else if (auth.currentUser && user?.viewedInstructions === false) {
+        navigate("/Instructions");
       }
     };
     routeUser();
@@ -309,6 +312,7 @@ function App() {
         <Route path="/Signup" element={<Signup />} />
         <Route path="/Forgot-Password" element={<ForgotPassword />} />
         <Route path="/App-Outage" element={<AppOutage />} />
+        <Route path="/Instructions" element={<Instructions />} />
         {/* Catch-all route for undefined paths */}
         <Route path="*" element={<PageNotFound />} />
 
