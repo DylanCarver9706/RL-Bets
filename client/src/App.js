@@ -6,6 +6,8 @@ import {
   getMongoUserDataByFirebaseId,
   userLocationLegal,
   checkGeolocationPermission,
+  userAgeLegal,
+  updateUser,
 } from "./services/userService";
 import {
   getLatestPrivacyPolicy,
@@ -83,28 +85,38 @@ function App() {
             console.warn("ID token not available");
             return;
           }
-
+          
           // Fetch MongoDB user data
           const mongoUser = await getMongoUserDataByFirebaseId(
             firebaseUser.uid
           );
+
           console.log("Mongo User:", mongoUser);
           console.log("firebaseUser", firebaseUser);
-
+          
           const userLocationMeta = await userLocationLegal();
 
           // Destructure the user object to remove the _id field
           const { _id, ...userWithoutId } = mongoUser;
-
-          // Set the user state with the updated user object
-          setUser({
+          
+          let userObj = {
             firebaseUserId: firebaseUser.uid,
             mongoUserId: _id,
             ...userWithoutId,
             locationValid: userLocationMeta?.allowed,
             currentState: userLocationMeta?.state,
             locationPermissionGranted: await checkGeolocationPermission(),
-          });
+          };
+
+          // Check if the user's age is valid
+          if (mongoUser.ageValid === false && mongoUser.DOB) {
+            const userAgeLegalBool = await userAgeLegal(userLocationMeta?.state, mongoUser.DOB)
+            await updateUser(mongoUser._id, { ageValid: userAgeLegalBool });
+            userObj.ageValid = userAgeLegalBool;
+          }
+
+          // Set the user state with the updated user object
+          setUser(userObj);
         } catch {}
       } else {
         setUser(null); // User is logged out
