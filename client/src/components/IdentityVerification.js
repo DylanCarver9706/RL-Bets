@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useUser } from "../contexts/UserContext"; // Get user context
-import { sendImageToAPI } from "../services/firebaseService"; // API request function
+import { sendImagesToAPI } from "../services/firebaseService"; // API request function
 import { updateUser } from "../services/userService";
 
 const documentTypes = [
@@ -78,7 +78,7 @@ const IdentityVerification = () => {
       }
       formData.append("selfieImage", selfieImage);
 
-      await sendImageToAPI(formData);
+      await sendImagesToAPI(formData);
       await updateUser(user.mongoUserId, { idvStatus: "review" });
       setInReview(true);
       setSuccessMessage("Files uploaded successfully to the server!");
