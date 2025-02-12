@@ -63,6 +63,7 @@ const Login = () => {
             firebaseUser.uid,
             null,
             "google",
+            null,
             `Accepted v0 at ${formatDateToUserTimezone(getTimestamp())}`,
             `Accepted v0 at ${formatDateToUserTimezone(getTimestamp())}`
           );
