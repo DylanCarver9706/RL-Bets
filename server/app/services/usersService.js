@@ -103,6 +103,7 @@ const softDeleteUser = async (id) => {
       ageValid: null,
       locationValid: null,
       currentState: null,
+      smsVerificationStatus: null,
     },
   });
 
