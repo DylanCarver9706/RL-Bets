@@ -34,6 +34,7 @@ export const createUserInDatabase = async (name, email, firebaseUserId, referral
         DOB: null,
         phoneNumber: null,
         smsVerificationStatus: "unverified",
+        viewedInstructions: false,
       }),
     });
 
