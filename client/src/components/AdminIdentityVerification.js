@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { deleteUserIdvFiles, fetchIdentityVerificationImages } from "../services/firebaseService";
+import {
+  deleteUserIdvFiles,
+  fetchIdentityVerificationImages,
+} from "../services/firebaseService";
 import { getUsers, validateUserIdv } from "../services/adminService";
 
 const AdminIdentityVerification = () => {
   const [userImages, setUserImages] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [dob, setDob] = useState({});
   const [denyReason, setDenyReason] = useState({});
   const [denyingUserId, setDenyingUserId] = useState({});
 
@@ -21,9 +23,17 @@ const AdminIdentityVerification = () => {
           return;
         }
 
-        // Create a user lookup map { userId: userName }
+        // Create a user lookup map
         const userMap = fetchedUsers.reduce((acc, user) => {
-          acc[user._id] = user.name;
+          acc[user._id] = {
+            name: user.name,
+            address1: user.address1,
+            address2: user.address2,
+            city: user.city,
+            state: user.state,
+            zip: user.zip,
+            DOB: user.DOB,
+          };
           return acc;
         }, {});
 
@@ -36,13 +46,24 @@ const AdminIdentityVerification = () => {
 
           // **Skip images with missing or invalid userId**
           // Skips root directory being returned as a file
-          if (!userId || !userMap[userId]) {
+          if (!userId || !userMap[userId].name) {
             return acc;
           }
 
           if (!acc[userId]) {
             acc[userId] = {
-              userName: userMap[userId],
+              userName: userMap[userId].name,
+              DOB: userMap[userId].DOB,
+              fullAddress:
+                userMap[userId].address1 +
+                " " +
+                userMap[userId].address2 +
+                " " +
+                userMap[userId].city +
+                " " +
+                userMap[userId].state +
+                " " +
+                userMap[userId].zip,
               userId,
               documents: [],
               currentIndex: 0,
@@ -63,7 +84,7 @@ const AdminIdentityVerification = () => {
           user.documents.sort((a, b) => {
             const order = { front: 1, back: 2, selfie: 3 };
             return (
-              (order[a.imageType.split("_")[0]] || 4) - 
+              (order[a.imageType.split("_")[0]] || 4) -
               (order[b.imageType.split("_")[0]] || 4)
             );
           });
@@ -80,30 +101,8 @@ const AdminIdentityVerification = () => {
     getImages();
   }, []);
 
-  // Handle DOB Input with Auto-Formatting (MM/DD/YYYY)
-  const handleDobChange = (userId, value) => {
-    let formattedValue = value
-      .replace(/\D/g, "") // Remove non-numeric characters
-      .slice(0, 8); // Limit to 8 digits
-
-    if (formattedValue.length >= 2) {
-      formattedValue = `${formattedValue.slice(0, 2)}/${formattedValue.slice(2)}`;
-    }
-    if (formattedValue.length >= 5) {
-      formattedValue = `${formattedValue.slice(0, 5)}/${formattedValue.slice(5)}`;
-    }
-
-    setDob((prev) => ({ ...prev, [userId]: formattedValue }));
-  };
-
   // **Combined Function for Approve/Deny**
   const handleSubmit = async (userId, status) => {
-    if (!dob[userId]) {
-      alert("Please enter a valid date of birth.");
-      setError("Please enter a valid date of birth.");
-      return;
-    }
-
     if (status === "denied" && !denyReason[userId]) {
       alert("Please select a deny reason.");
       setError("Please select a deny reason.");
@@ -113,7 +112,6 @@ const AdminIdentityVerification = () => {
     const submissionData = {
       userId,
       status,
-      dob: dob[userId],
       reason: status === "denied" ? denyReason[userId] : null,
     };
 
@@ -151,7 +149,8 @@ const AdminIdentityVerification = () => {
       [userId]: {
         ...user,
         currentIndex:
-          (user.currentIndex - 1 + user.documents.length) % user.documents.length,
+          (user.currentIndex - 1 + user.documents.length) %
+          user.documents.length,
       },
     }));
   };
@@ -169,8 +168,18 @@ const AdminIdentityVerification = () => {
       <div style={styles.grid}>
         {Object.entries(userImages).map(([userId, user]) => (
           <div key={user.userId} style={styles.card}>
-            <p><strong>User Name:</strong> {user.userName}</p>
-            <p><strong>User Mongo ID:</strong> {user.userId}</p>
+            <p>
+              <strong>User Name:</strong> {user.userName}
+            </p>
+            <p>
+              <strong>User Mongo ID:</strong> {user.userId}
+            </p>
+            <p>
+              <strong>Address:</strong> {user.fullAddress}
+            </p>
+            <p>
+              <strong>Date of Birth:</strong> {user.DOB}
+            </p>
 
             {/* Image Slideshow */}
             <div style={styles.imageContainer}>
@@ -181,42 +190,68 @@ const AdminIdentityVerification = () => {
               />
             </div>
             <div style={styles.controls}>
-              <button onClick={() => handlePrev(userId, user)} style={styles.button}>◀</button>
-              <span>{user.currentIndex + 1} / {user.documents.length}</span>
-              <button onClick={() => handleNext(userId, user)} style={styles.button}>▶</button>
+              <button
+                onClick={() => handlePrev(userId, user)}
+                style={styles.button}
+              >
+                ◀
+              </button>
+              <span>
+                {user.currentIndex + 1} / {user.documents.length}
+              </span>
+              <button
+                onClick={() => handleNext(userId, user)}
+                style={styles.button}
+              >
+                ▶
+              </button>
             </div>
-
-            {/* DOB Input */}
-            <label><strong>Date of Birth:</strong></label>
-            <input
-              type="text"
-              placeholder="MM/DD/YYYY"
-              value={dob[user.userId] || ""}
-              onChange={(e) => handleDobChange(user.userId, e.target.value)}
-              maxLength={10}
-              style={styles.dobInput}
-            />
 
             {/* Approve / Deny Options */}
             {!denyingUserId[user.userId] ? (
               <div>
-                <button style={styles.approveButton} onClick={() => handleSubmit(user.userId, "verified")}>Approve</button>
-                <button style={styles.denyButton} onClick={() => setDenyingUserId((prev) => ({ ...prev, [user.userId]: true }))}>Deny</button>
+                <button
+                  style={styles.approveButton}
+                  onClick={() => handleSubmit(user.userId, "verified")}
+                >
+                  Approve
+                </button>
+                <button
+                  style={styles.denyButton}
+                  onClick={() =>
+                    setDenyingUserId((prev) => ({
+                      ...prev,
+                      [user.userId]: true,
+                    }))
+                  }
+                >
+                  Deny
+                </button>
               </div>
             ) : (
               <div>
                 <select
                   onChange={(e) =>
-                    setDenyReason((prev) => ({ ...prev, [user.userId]: e.target.value }))
+                    setDenyReason((prev) => ({
+                      ...prev,
+                      [user.userId]: e.target.value,
+                    }))
                   }
                 >
                   <option value="">Select Deny Reason</option>
                   <option value="Blurry Image">Blurry Image</option>
-                  <option value="Mismatched Information">Mismatched Information</option>
+                  <option value="Address Doesn't Match Document">
+                    Address Doesn't Match Document
+                  </option>
+                  <option value="Date of Birth Doesn't Match Document">
+                    Date of Birth Doesn't Match Document
+                  </option>
                   <option value="Fake Document">Fake Document</option>
                   <option value="Underage">Underage</option>
                 </select>
-                <button onClick={() => handleSubmit(user.userId, "denied")}>Submit Denial</button>
+                <button onClick={() => handleSubmit(user.userId, "denied")}>
+                  Submit Denial
+                </button>
                 <button onClick={() => handleDenyReasonCancel()}>Cancel</button>
               </div>
             )}
