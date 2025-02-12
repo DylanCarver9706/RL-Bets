@@ -50,6 +50,7 @@ import Login from "./components/Login";
 import ForgotPassword from "./components/ForgotPassword";
 import AdminIdentityVerification from "./components/AdminIdentityVerification";
 import IdentityVerification from "./components/IdentityVerification";
+import SmsVerification from "./components/SmsVerification";
 
 // Deprecated components
 // import PlaidIdentityVerification from "./components/PlaidIdentityVerification"; Deprecated
@@ -165,6 +166,8 @@ function App() {
         navigate("/Location-Permission-Required");
       } else if (auth.currentUser && user?.emailVerificationStatus && user?.emailVerificationStatus !== "verified") {
         navigate("/Email-Verification");
+      } else if (auth.currentUser && user?.smsVerificationStatus && user?.smsVerificationStatus !== "verified") {
+        navigate("/SMS-Verification");
       } else if (auth.currentUser && user?.idvStatus && ["review", "unverified"].includes(user?.idvStatus)) {
         navigate("/Identity-Verification");
       } else if (auth.currentUser && user?.locationValid === false) {
@@ -237,6 +240,7 @@ function App() {
   const ageValid = user?.ageValid;
   const emailVerified = user?.emailVerificationStatus === "verified";
   const idvVerified = user?.idvStatus === "verified";
+  const smsVerified = user?.smsVerificationStatus === "verified";
   const loggedIn =
     !loading && auth?.currentUser !== null && user?.mongoUserId !== null;
   const accountSuspended = user?.accountStatus === "suspended";
@@ -340,6 +344,17 @@ function App() {
               redirectTo="/Wagers"
             >
               <IdentityVerification />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/SMS-Verification"
+          element={
+            <PrivateRoute
+              authorized={loggedIn && !smsVerified}
+              redirectTo="/Wagers"
+            >
+              <SmsVerification />
             </PrivateRoute>
           }
         />
