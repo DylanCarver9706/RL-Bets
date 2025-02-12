@@ -75,7 +75,10 @@ const Signup = () => {
         email,
         firebaseUser.uid,
         referralCode,
-        "email"
+        "email",
+        null,
+        `Accepted v0 at ${formatDateToUserTimezone(getTimestamp())}`,
+        `Accepted v0 at ${formatDateToUserTimezone(getTimestamp())}`
       );
 
       // Remove referral code from local storage
