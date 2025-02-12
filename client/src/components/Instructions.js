@@ -62,6 +62,8 @@ const Instructions = () => {
       await updateUser(user.mongoUserId, { viewedInstructions: true });
       setUser({ ...user, viewedInstructions: true }); // Update user state
       navigate("/Wagers");
+    } else {
+      navigate("/");
     }
   };
 
