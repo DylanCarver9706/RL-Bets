@@ -31,6 +31,7 @@ export const createUserInDatabase = async (name, email, firebaseUserId, referral
         tos: tos,
         pp: pp,
         ageValid: false,
+        DOB: null,
         phoneNumber: null,
         smsVerificationStatus: "unverified",
       }),
