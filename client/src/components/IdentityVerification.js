@@ -47,6 +47,8 @@ const IdentityVerification = () => {
   const [state, setState] = useState("");
   const [zip, setZip] = useState("");
 
+  const [selectedDate, setSelectedDate] = useState("");
+
   const [cameraActive, setCameraActive] = useState(false);
   const [captureTarget, setCaptureTarget] = useState(null); // 'selfie', 'front', or 'back'
 
@@ -131,6 +133,11 @@ const IdentityVerification = () => {
       return;
     }
 
+    if (selectedDate === "") {
+      setError("Please select your date of birth.");
+      return;
+    }
+
     if (!documentType) {
       setError("Please select a document type.");
       return;
@@ -163,6 +170,7 @@ const IdentityVerification = () => {
         city: city,
         state: state,
         zip: zip,
+        DOB: selectedDate,
       })
 
       const formData = new FormData();
@@ -235,6 +243,14 @@ const IdentityVerification = () => {
               onChange={(e) => setZip(e.target.value)}
               placeholder="Zip"
               required
+            />
+          </div>
+          <div>
+          <h3>Date of Birth</h3>
+            <input
+              type="date"
+              onChange={(e) => {setSelectedDate(e.target.value)}}
+              style={styles.dateInput}
             />
           </div>
           <h3>Upload Identity Verification Documents</h3>
@@ -339,3 +355,14 @@ const IdentityVerification = () => {
 };
 
 export default IdentityVerification;
+
+const styles = {
+  dateInput: {
+    padding: "8px",
+    fontSize: "16px",
+    marginTop: "5px",
+    borderRadius: "5px",
+    border: "1px solid #ccc",
+    cursor: "pointer",
+  },
+};
