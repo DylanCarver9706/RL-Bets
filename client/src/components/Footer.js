@@ -6,26 +6,26 @@ const Footer = () => {
     <footer style={styles.footer}>
       <div style={styles.column}>
         <h3 style={styles.header}>About</h3>
-        <Link to="/About-Us" style={styles.link}>
+        <Link to="/About" style={styles.link}>
           About Us
-        </Link>
-        <Link to="/Careers" style={styles.link}>
-          Careers
         </Link>
         <Link to="/Contact" style={styles.link}>
           Contact
         </Link>
+        <Link to="/Credits" style={styles.link}>
+          Credits
+        </Link>
       </div>
       <div style={styles.column}>
-        <h3 style={styles.header}>Support</h3>
-        <Link to="/Help" style={styles.link}>
-          Help Center
+        <h3 style={styles.header}>Feedback</h3>
+        <Link to="/Bug-Form" style={styles.link}>
+          Report an Issue
         </Link>
-        <Link to="/FAQ" style={styles.link}>
-          FAQ
+        <Link to="/Feature-Form" style={styles.link}>
+          Suggest a Feature
         </Link>
-        <Link to="/Feedback" style={styles.link}>
-          Feedback
+        <Link to="/Feedback-Form" style={styles.link}>
+          General Feedback
         </Link>
       </div>
       <div style={styles.column}>
@@ -35,9 +35,6 @@ const Footer = () => {
         </Link>
         <Link to="/Terms-Of-Service" style={styles.link}>
           Terms of Service
-        </Link>
-        <Link to="/Cookie-Policy" style={styles.link}>
-          Cookie Policy
         </Link>
       </div>
     </footer>
