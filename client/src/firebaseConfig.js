@@ -1,6 +1,6 @@
 // firebaseConfig.js
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import { getAuth, RecaptchaVerifier } from "firebase/auth";
 import { getAnalytics } from "firebase/analytics";
 
 const firebaseConfig = {
@@ -23,4 +23,4 @@ const auth = getAuth(app)
 const analytics = getAnalytics(app);
 
 // Get the auth instance
-export { auth, analytics };
+export { auth, analytics, RecaptchaVerifier };
