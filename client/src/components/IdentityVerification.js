@@ -3,6 +3,15 @@ import { useUser } from "../contexts/UserContext"; // Get user context
 import { sendImagesToAPI } from "../services/firebaseService"; // API request function
 import { updateUser } from "../services/userService";
 
+const statesList = [
+  "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware", "Florida", 
+  "Georgia", "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana", "Maine", 
+  "Maryland", "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri", "Montana", "Nebraska", 
+  "Nevada", "New Hampshire", "New Jersey", "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio", 
+  "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota", "Tennessee", "Texas", 
+  "Utah", "Vermont", "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming"
+];
+
 const documentTypes = [
   "Driver's License",
   "ID Card",
@@ -214,13 +223,12 @@ const IdentityVerification = () => {
               placeholder="City"
               required
             />
-            <input
-              type="text"
-              value={state}
-              onChange={(e) => setState(e.target.value)}
-              placeholder="State"
-              required
-            />
+            <select value={state} onChange={(e) => setState(e.target.value)}>
+              <option value="">Select a State</option>
+              {statesList.map((state) => (
+                <option key={state} value={state}>{state}</option>
+              ))}
+            </select>
             <input
               type="text"
               value={zip}
