@@ -24,7 +24,7 @@ export const usePageTracking = () => {
 };
 
 // firebaseService.js
-export const sendImageToAPI = async (formData) => {
+export const sendImagesToAPI = async (formData) => {
   try {
     const response = await fetch(`${BASE_SERVER_URL}/api/firebase/storage/upload`, {
       method: "POST",
