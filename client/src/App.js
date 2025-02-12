@@ -178,7 +178,7 @@ function App() {
         navigate("/Location-Permission-Required");
       } else if (auth.currentUser && user?.emailVerificationStatus && user?.emailVerificationStatus !== "verified") {
         navigate("/Email-Verification");
-      } else if (auth.currentUser && user?.smsVerificationStatus && user?.smsVerificationStatus !== "verified") {
+      } else if (auth.currentUser && !user?.phoneNumber && user?.smsVerificationStatus && user?.smsVerificationStatus !== "verified") {
         navigate("/SMS-Verification");
       } else if (auth.currentUser && user?.idvStatus && ["review", "unverified"].includes(user?.idvStatus)) {
         navigate("/Identity-Verification");
