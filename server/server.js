@@ -75,6 +75,7 @@ app.use("/api/transactions", require("./app/routes/transactionsRoutes"));
 app.use("/api/agreements", require("./app/routes/agreementsRoutes"));
 app.use("/api/openai", require("./app/routes/openaiRoutes"));
 app.use("/api/firebase", require("./app/routes/firebaseRoutes"));
+app.use("/api/products", require("./app/routes/productsRoutes"));
 
 app.use(errorLogger);
 
