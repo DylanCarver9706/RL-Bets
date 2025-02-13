@@ -55,7 +55,7 @@ const Wagers = () => {
   const { user } = useUser();
   const [wagers, setWagers] = useState([]);
   const [filteredWagers, setFilteredWagers] = useState([]);
-  const [activeFilter, setActiveFilter] = useState("all");
+  const [activeFilter, setActiveFilter] = useState("Bettable");
   const [showBetInput, setShowBetInput] = useState(false);
   const [creditsWagered, setCreditsWagered] = useState(0);
   const [selectedWager, setSelectedWager] = useState(null);
@@ -70,7 +70,7 @@ const Wagers = () => {
         const wagers = await getWagers();
         // console.log("Fetched wagers:", wagers);
         setWagers(wagers);
-        applyFilter("all", wagers);
+        applyFilter("Bettable", wagers);
       } catch (error) {
         console.error("Error fetching wagers:", error.message);
       }
@@ -82,34 +82,30 @@ const Wagers = () => {
 
   // Listen for updates from the server
   useEffect(() => {
-    const handleWagersUpdate = (updatedWagers) => {
-      if (Array.isArray(updatedWagers)) {
-        setWagers(updatedWagers || []);
-        applyFilter(activeFilter, updatedWagers);
-      } else {
-        throw new Error(
-          "Invalid data received from wagersUpdate:",
-          updatedWagers
-        );
-      }
-    };
+  const handleWagersUpdate = (updatedWagers) => {
+    if (Array.isArray(updatedWagers)) {
+      setWagers(() => {
+        applyFilter(activeFilter, updatedWagers); // Ensure activeFilter is correctly applied
+        return updatedWagers; // Update state with new wagers
+      });
+    } else {
+      console.error("Invalid data received from wagersUpdate:", updatedWagers);
+    }
+  };
 
-    socket.on("wagersUpdate", handleWagersUpdate);
+  socket.on("wagersUpdate", handleWagersUpdate);
 
-    return () => {
-      socket.off("wagersUpdate", handleWagersUpdate);
-    };
-    // eslint-disable-next-line
-  }, [user?.mongoUserId]);
+  return () => {
+    socket.off("wagersUpdate", handleWagersUpdate);
+  };
+  // eslint-disable-next-line
+}, [activeFilter]);
 
   // Apply filters based on the selected filter option
   const applyFilter = (filter, allWagers = wagers) => {
     let filtered = allWagers;
 
     switch (filter) {
-      case "all":
-        filtered = allWagers;
-        break;
       case "Bettable":
         filtered = allWagers.filter(
           (wager) =>
@@ -120,9 +116,6 @@ const Wagers = () => {
         break;
       case "Ongoing":
         filtered = allWagers.filter((wager) => wager.status === "Ongoing");
-        break;
-      case "Ended":
-        filtered = allWagers.filter((wager) => wager.status === "Ended");
         break;
       case "BetOn":
         filtered = allWagers.filter((wager) =>
@@ -232,18 +225,10 @@ const Wagers = () => {
         <label>
           <input
             type="radio"
-            checked={activeFilter === "all"}
-            onChange={() => handleFilterChange("all")}
-          />
-          Show All Wagers
-        </label>
-        <label>
-          <input
-            type="radio"
             checked={activeFilter === "Bettable"}
             onChange={() => handleFilterChange("Bettable")}
           />
-          Show Bettable Wagers
+          Bettable
         </label>
         <label>
           <input
@@ -251,7 +236,7 @@ const Wagers = () => {
             checked={activeFilter === "BetOn"}
             onChange={() => handleFilterChange("BetOn")}
           />
-          Show Wagers You've Bet On
+          Your Picks
         </label>
         <label>
           <input
@@ -259,15 +244,7 @@ const Wagers = () => {
             checked={activeFilter === "Ongoing"}
             onChange={() => handleFilterChange("Ongoing")}
           />
-          Show Ongoing Wagers
-        </label>
-        <label>
-          <input
-            type="radio"
-            checked={activeFilter === "Ended"}
-            onChange={() => handleFilterChange("Ended")}
-          />
-          Show Ended Wagers
+          Live
         </label>
       </div>
 
