@@ -5,21 +5,38 @@ const { ObjectId } = require("mongodb");
 const { updateMongoDocument, createMongoDocument } = require("../../database/middlewares/mongo");
 const { getSocketIo } = require("../middlewares/socketIO");
 
-const createCheckoutSession = async (
-  purchaseItems,
-  mongoUserId,
-  creditsTotal
-) => {
-  const lineItems = purchaseItems.map((item) => ({
-    price_data: {
-      currency: "usd",
-      product_data: { name: item.name },
-      unit_amount: Math.round(item.price * 100), // Convert to cents
-    },
-    quantity: item.quantity,
-  }));
-
+const createCheckoutSession = async (purchaseItems, mongoUserId, creditsTotal) => {
   try {
+    // Fetch product details from the database
+    const productIds = purchaseItems.map(item => ObjectId.createFromHexString(item._id));
+    const productsFromDb = await collections.productsCollection
+      .find({ _id: { $in: productIds } })
+      .toArray();
+
+    // Create a map for quick lookup
+    const productMap = productsFromDb.reduce((acc, product) => {
+      acc[product._id.toString()] = product.price; // Store price for comparison
+      return acc;
+    }, {});
+
+    // Build line items with verified prices
+    const lineItems = purchaseItems.map((item) => {
+      const verifiedPrice = productMap[item._id]; // Get price from DB
+      if (!verifiedPrice) {
+        throw new Error(`Product with ID ${item._id} not found in database`);
+      }
+
+      return {
+        price_data: {
+          currency: "usd",
+          product_data: { name: item.name },
+          unit_amount: Math.round(verifiedPrice * 100), // Convert to cents
+        },
+        quantity: item.quantity,
+      };
+    });
+
+    // Create Stripe checkout session
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       line_items: lineItems,
@@ -28,6 +45,7 @@ const createCheckoutSession = async (
       cancel_url: `${process.env.DEV_CLIENT_URL}/Credit-Shop`,
       metadata: { mongoUserId, creditsTotal },
     });
+
     return session;
   } catch (error) {
     console.error("Error creating Stripe checkout session:", error.message, error.stack);
