@@ -160,7 +160,7 @@ export const softDeleteUser = async (mongoUserId) => {
 };
 
 // Function to connect to the Stripe API to make a purchase
-export const createCheckoutSession = async (purchaseItems, mongoUserId, creditsTotal) => {
+export const createCheckoutSession = async (purchaseItems, mongoUserId, userMadeFirstPurchase) => {
   try {
 
     const idToken = await getFirebaseIdToken();
@@ -171,7 +171,7 @@ export const createCheckoutSession = async (purchaseItems, mongoUserId, creditsT
         "Content-Type": "application/json",
         "Authorization": `Bearer ${idToken}`, // Include the token in the headers
       },
-      body: JSON.stringify({ purchaseItems, mongoUserId, creditsTotal }),
+      body: JSON.stringify({ purchaseItems: purchaseItems, mongoUserId: mongoUserId, userMadeFirstPurchase: userMadeFirstPurchase }),
     });
 
     const data = await response.json();
