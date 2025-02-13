@@ -59,6 +59,12 @@ const createUser = async (userData) => {
     message: "Welcome to RL Bets! Feel free to explore our platform and start betting on your favorite teams or players. Good luck!",
   });
 
+  await createUserNotificationLog({
+    user: userDoc._id.toString(),
+    type: "welcome",
+    message: "Ready to get in on the action? Enjoy 50% off all credits on your first purchase!",
+  });
+
   return userDoc;
 };
 
@@ -105,6 +111,7 @@ const softDeleteUser = async (id) => {
       currentState: null,
       smsVerificationStatus: null,
       viewedInstructions: null,
+      userMadeFirstPurchase: null,
     },
   });
 
