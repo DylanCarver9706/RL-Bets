@@ -235,7 +235,7 @@ const Signup = () => {
             />
             <Tooltip
               infoText={
-                "Note that the credits will not be received until the user has completed both email and identity verification."
+                "Note that the credits will not be received for the referrer until you have completed both email and identity verification."
               }
             />
           </div>
