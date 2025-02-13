@@ -273,3 +273,24 @@ export const validateUserIdv = async (userData) => {
     return false;
   }
 }
+
+export const fetchProducts = async () => {
+  try {
+    const response = await fetch(`${BASE_SERVER_URL}/api/products`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch all products`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (err) {
+    console.error("Error fetching all products:", err.message);
+    throw err;
+  }
+};
