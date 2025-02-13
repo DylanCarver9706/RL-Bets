@@ -7,13 +7,13 @@ const {
 
 const createSession = async (req, res, logError) => {
   try {
-    const { purchaseItems, mongoUserId, creditsTotal } = req.body;
+    const { purchaseItems, mongoUserId, userMadeFirstPurchase } = req.body;
 
-    if (!purchaseItems || !mongoUserId || !creditsTotal) {
+    if (!purchaseItems || !mongoUserId || userMadeFirstPurchase === null) {
       console.error("Missing required fields for create session:", {
         purchaseItems,
         mongoUserId,
-        creditsTotal,
+        userMadeFirstPurchase,
       });
       return res.status(400).json({ error: "Missing required fields" });
     }
@@ -21,7 +21,7 @@ const createSession = async (req, res, logError) => {
     const session = await createCheckoutSession(
       purchaseItems,
       mongoUserId,
-      creditsTotal
+      userMadeFirstPurchase
     );
     res.status(200).json(session);
   } catch (error) {
