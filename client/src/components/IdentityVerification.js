@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useUser } from "../contexts/UserContext"; // Get user context
 import { sendImagesToAPI } from "../services/firebaseService"; // API request function
-import { updateUser } from "../services/userService";
+import { redeemReferralCode, updateUser } from "../services/userService";
 
 const statesList = [
   "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware", "Florida", 
@@ -184,6 +184,15 @@ const IdentityVerification = () => {
 
       await sendImagesToAPI(formData);
       await updateUser(user.mongoUserId, { idvStatus: "review" });
+      
+      // If user has a referral code, redeem it
+      if (user.referralCode !== "") {
+        await redeemReferralCode(
+          "Referred User",
+          user.mongoUserId,
+          user.referralCode
+        );
+      }
       setInReview(true);
       setSuccessMessage("Files uploaded successfully to the server!");
     } catch (apiError) {
