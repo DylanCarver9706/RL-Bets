@@ -73,14 +73,16 @@ const getCurrentLeaderboard = async (returnIds = false) => {
 
   // Populate users and sort by earnedCredits
   const userDocs = await collections.usersCollection
-    .find({ _id: { $in: leaderboard.users } })
+    // Only fetch users with active accounts and non-zero lifetimeEarnedCredits
+    .find({ _id: { $in: leaderboard.users }, accountStatus: "active", earnedCredits: { $gt: 0 } })
     .project({ name: 1, earnedCredits: 1 }) // Only fetch name and earnedCredits
     .toArray();
 
   let sortedUsers;
 
   if (returnIds) {
-    sortedUsers = userDocs.sort((a, b) => b.earnedCredits - a.earnedCredits);
+    sortedUsers = userDocs
+      .sort((a, b) => b.earnedCredits - a.earnedCredits);
   } else {
     sortedUsers = userDocs
       .sort((a, b) => b.earnedCredits - a.earnedCredits)
@@ -107,16 +109,16 @@ const getCurrentLeaderboard = async (returnIds = false) => {
 const getLifetimeLeaderboard = async (returnIds = false) => {
   // Populate users and sort by earnedCredits
   const userDocs = await collections.usersCollection
-    .find()
+    // Only fetch users with active accounts and non-zero lifetimeEarnedCredits
+    .find({ accountStatus: "active", lifetimeEarnedCredits: { $gt: 0 } })
     .project({ name: 1, lifetimeEarnedCredits: 1 }) // Only fetch name and lifetimeEarnedCredits
     .toArray();
 
   let sortedUsers;
 
   if (returnIds) {
-    sortedUsers = userDocs.sort(
-      (a, b) => b.lifetimeEarnedCredits - a.lifetimeEarnedCredits
-    );
+    sortedUsers = userDocs
+      .sort((a, b) => b.lifetimeEarnedCredits - a.lifetimeEarnedCredits);
   } else {
     sortedUsers = userDocs
       .sort((a, b) => b.lifetimeEarnedCredits - a.lifetimeEarnedCredits)
