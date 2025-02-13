@@ -25,6 +25,22 @@ const getUserByFirebaseId = async (firebaseUserId) => {
 
 const createUser = async (userData) => {
 
+  let defaultNewUserValues = {
+    credits: 0.0,
+    earnedCredits: 0.0,
+    lifetimeEarnedCredits: 0.0,
+    idvStatus: "unverified",
+    emailVerificationStatus: "unverified",
+    smsVerificationStatus: "unverified",
+    userType: "user",
+    accountStatus: "active",
+    ageValid: false,
+    DOB: null,
+    phoneNumber: null,
+    viewedInstructions: false,
+    madeFirstPurchase: false,
+  }
+  
   let userDoc = null;
 
   // Check if a user with the provided email exists and has been deleted
@@ -42,7 +58,7 @@ const createUser = async (userData) => {
       true
     );
   } else {
-    userDoc = await createMongoDocument(collections.usersCollection, userData, true) 
+    userDoc = await createMongoDocument(collections.usersCollection, { ...defaultNewUserValues, ...userData }, true) 
   }
 
   await sendEmail(
