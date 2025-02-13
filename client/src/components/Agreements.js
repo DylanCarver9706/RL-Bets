@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
 import { useUser } from "../contexts/UserContext";
-import { formatDateToUserTimezone, getTimestamp, updateUser } from "../services/userService"; // Assumes updateUser is defined in UserService
+import { updateUser } from "../services/userService"; // Assumes updateUser is defined in UserService
 
 const Agreements = ({ requireTos, requirePp, tosVersion, ppVersion }) => {
   const [tosClicked, setTosClicked] = useState(false);
@@ -25,11 +25,11 @@ const Agreements = ({ requireTos, requirePp, tosVersion, ppVersion }) => {
       let updateObject = {}
 
       if (requireTos) {
-        updateObject.tos = `Accepted v${tosVersion} at ${formatDateToUserTimezone(getTimestamp())}`;
+        updateObject.tos = `Accepted v${tosVersion} at ${new Date().toISOString().split("T")[0]}`;
       }
 
       if (requirePp) {
-        updateObject.pp = `Accepted v${ppVersion} at ${formatDateToUserTimezone(getTimestamp())}`;
+        updateObject.pp = `Accepted v${ppVersion} at ${new Date().toISOString().split("T")[0]}`;
       }
 
       await updateUser(user.mongoUserId, updateObject);

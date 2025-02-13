@@ -8,9 +8,7 @@ import {
 import { analytics, auth } from "../firebaseConfig.js";
 import {
   createUserInDatabase,
-  formatDateToUserTimezone,
   getMongoUserDataByFirebaseId,
-  getTimestamp,
   updateUser,
 } from "../services/userService.js";
 import { Link, useNavigate } from "react-router-dom";
@@ -64,8 +62,8 @@ const Login = () => {
             null,
             "google",
             null,
-            `Accepted v0 at ${formatDateToUserTimezone(getTimestamp())}`,
-            `Accepted v0 at ${formatDateToUserTimezone(getTimestamp())}`
+            `Accepted v0 at ${new Date().toISOString().split("T")[0]}`,
+            `Accepted v0 at ${new Date().toISOString().split("T")[0]}`
           );
 
           // Remove referral code from local storage

@@ -478,10 +478,6 @@ export const wait = async (timeInMs) => {
 };
 
 export const formatDateToUserTimezone = (timestamp) => {
-  // Parse the raw timestamp as if it's in Central Time (manually specify the offset)
-  const centralTimeOffsetInMs = parseInt(process.env.REACT_APP_UTC_TIMEZONE_OFFSET) * 60 * 60 * 1000; // CST offset is UTC-6
-  const parsedDate = new Date(timestamp); // Parse as-is
-  const adjustedDate = new Date(parsedDate.getTime() + centralTimeOffsetInMs); // Adjust for Central Time
 
   // Get user's timezone
   const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -496,7 +492,7 @@ export const formatDateToUserTimezone = (timestamp) => {
     second: '2-digit',
     hourCycle: 'h12', // Use 12-hour clock for AM/PM
     timeZone: userTimezone, // Convert to user's local timezone
-  }).format(adjustedDate);
+  }).format(new Date(timestamp));
 
   return formattedDate;
 };

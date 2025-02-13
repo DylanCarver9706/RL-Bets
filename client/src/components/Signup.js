@@ -10,8 +10,6 @@ import {
   createUserInDatabase,
   updateUser,
   getMongoUserDataByFirebaseId,
-  formatDateToUserTimezone,
-  getTimestamp,
 } from "../services/userService.js";
 import { logEvent } from "firebase/analytics";
 import { analytics } from "../firebaseConfig";
@@ -77,8 +75,8 @@ const Signup = () => {
         referralCode,
         "email",
         null,
-        `Accepted v0 at ${formatDateToUserTimezone(getTimestamp())}`,
-        `Accepted v0 at ${formatDateToUserTimezone(getTimestamp())}`
+        `Accepted v0 at ${new Date().toISOString().split("T")[0]}`,
+        `Accepted v0 at ${new Date().toISOString().split("T")[0]}`
       );
 
       // Remove referral code from local storage
@@ -143,8 +141,8 @@ const Signup = () => {
             firebaseUser.uid,
             referralCode,
             "google",
-            `Accepted v${mongoUserFound ? parseInt(storedPrivacyPolicy.version, 10) : ppChecked && tosChecked ? parseInt(storedPrivacyPolicy.version, 10) : "0" } at ${formatDateToUserTimezone(getTimestamp())}`,
-            `Accepted v${ mongoUserFound ? parseInt(storedTermsOfService.version, 10) : ppChecked && tosChecked ? parseInt(storedTermsOfService.version, 10) : "0" } at ${formatDateToUserTimezone(getTimestamp())}`
+            `Accepted v${mongoUserFound ? parseInt(storedPrivacyPolicy.version, 10) : ppChecked && tosChecked ? parseInt(storedPrivacyPolicy.version, 10) : "0" } at ${new Date().toISOString().split("T")[0]}`,
+            `Accepted v${ mongoUserFound ? parseInt(storedTermsOfService.version, 10) : ppChecked && tosChecked ? parseInt(storedTermsOfService.version, 10) : "0" } at ${new Date().toISOString().split("T")[0]}`
           );
 
           // Remove referral code from local storage
