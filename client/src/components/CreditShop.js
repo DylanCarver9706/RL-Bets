@@ -10,6 +10,7 @@ const CreditShop = () => {
   const [products, setProducts] = useState([]);
   const [cart, setCart] = useState({});
   const [totalPrice, setTotalPrice] = useState(0);
+  const [totalDiscountPrice, setTotalDiscountPrice] = useState(0);
   const [errorMessage, setErrorMessage] = useState("");
 
   const { user } = useUser();
@@ -18,7 +19,6 @@ const CreditShop = () => {
     const getProducts = async () => {
       try {
         const products = await fetchProducts();
-        console.log("Fetched products:", products);
         setProducts(products);
       } catch (error) {
         console.error("Error fetching products:", error);
@@ -46,7 +46,12 @@ const CreditShop = () => {
       (acc, item) => acc + item.price * item.quantity,
       0
     );
+    const totalDiscountAmount = Object.values(cart).reduce(
+      (acc, item) => acc + (!user.madeFirstPurchase ? item.firstPurchaseDiscountPrice : item.price) * item.quantity,
+      0
+    );
     setTotalPrice(totalAmount.toFixed(2)); // Keep 2 decimal places
+    setTotalDiscountPrice(totalDiscountAmount.toFixed(2)); // Keep 2 decimal places
   };
 
   // Calculate the total price based on the cart
@@ -72,7 +77,7 @@ const CreditShop = () => {
       const session = await createCheckoutSession(
         purchaseItems,
         user.mongoUserId,
-        calculateTotalCredits(cart)
+        user.madeFirstPurchase,
       );
       const stripe = await stripePromise;
       await stripe.redirectToCheckout({ sessionId: session.id });
@@ -85,37 +90,54 @@ const CreditShop = () => {
   return (
     <div style={styles.container}>
       <h2 style={styles.header}>Purchase Credits</h2>
+      {!user.madeFirstPurchase && <h3>Enjoy 50% off on your first purchase!</h3>}
       {errorMessage && <p style={styles.error}>{errorMessage}</p>}
 
       <ul style={styles.optionList}>
         {products.map((option, index) => (
           <li key={index} style={styles.optionItem}>
-            <strong>{option.name}</strong> ${option.price.toFixed(2)}
-            <div style={styles.quantityContainer}>
-              <button
-                onClick={() =>
-                  updateCart(option, (cart[option._id]?.quantity || 0) - 1)
-                }
-                style={styles.quantityButton}
-              >
-                -
-              </button>
-              <span>{cart[option._id]?.quantity || 0}</span>
-              <button
-                onClick={() =>
-                  updateCart(option, (cart[option._id]?.quantity || 0) + 1)
-                }
-                style={styles.quantityButton}
-              >
-                +
-              </button>
-            </div>
-          </li>
+          <strong>{option.name}</strong> 
+          {!user.madeFirstPurchase ? (
+            <>
+              <s>${option.price.toFixed(2)}</s> ${(option.firstPurchaseDiscountPrice).toFixed(2)}
+            </>
+          ) : (
+            `$${option.price.toFixed(2)}`
+          )}
+          <div style={styles.quantityContainer}>
+            <button
+              onClick={() =>
+                updateCart(option, (cart[option._id]?.quantity || 0) - 1)
+              }
+              style={styles.quantityButton}
+            >
+              -
+            </button>
+            <span>{cart[option._id]?.quantity || 0}</span>
+            <button
+              onClick={() =>
+                updateCart(option, (cart[option._id]?.quantity || 0) + 1)
+              }
+              style={styles.quantityButton}
+            >
+              +
+            </button>
+          </div>
+        </li>
         ))}
       </ul>
 
       <h3>Credits: {calculateTotalCredits(cart)}</h3>
-      <h3>Total: ${totalPrice}</h3>
+      <h3>
+        Total: $
+        {!user.madeFirstPurchase && totalPrice !== 0 ? (
+          <>
+            <s>{totalPrice}</s> {(totalDiscountPrice)}
+          </>
+        ) : (
+          totalPrice
+        )}
+      </h3>
 
       <button onClick={handleCheckout} style={styles.purchaseButton}>
         Checkout
