@@ -1,5 +1,6 @@
 const { ObjectId } = require("mongodb");
 
+// Deprecated: Used to force a date to be in CST
 const getTimestamp = () => {
   const now = new Date();
 

@@ -1,4 +1,3 @@
-const { getTimestamp } = require("../../app/utils/utils")
 const fs = require("fs");
 const path = require("path");
 const { ObjectId } = require("mongodb");
@@ -12,8 +11,8 @@ const createMongoDocument = async (
   try {
     const documentData = {
       ...data,
-      createdAt: getTimestamp(),
-      updatedAt: getTimestamp(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
     };
 
     // // Generate a temporary ObjectId to calculate aliasId before insertion
@@ -48,7 +47,7 @@ const updateMongoDocument = async (
     // Merge all `$set` fields, including the updatedAt timestamp
     const mergedSet = {
       ...(updateMongoDataObject.$set || {}),
-      updatedAt: getTimestamp(), // Add the updatedAt field
+      updatedAt: new Date(), // Add the updatedAt field
     };
 
     // Construct the update object
@@ -94,7 +93,7 @@ const fetchAllCollectionsData = async () => {
     }
 
     // Save data to a JSON file
-    const filePath = path.join(process.env.DAILY_BACKUP_JSON_PATH, `all_collections_data_${getTimestamp().toISOString().split("T")[0]}.json`);
+    const filePath = path.join(process.env.DAILY_BACKUP_JSON_PATH, `all_collections_data_${new Date().toISOString().split("T")[0]}.json`);
     fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf-8");
     return filePath;
   } catch (error) {

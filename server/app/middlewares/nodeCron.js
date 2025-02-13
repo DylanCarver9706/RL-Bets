@@ -1,14 +1,13 @@
 const cron = require("node-cron");
 const { fetchAllCollectionsData } = require("../../database/middlewares/mongo");
 const { sendEmail } = require("../middlewares/nodemailer");
-const { getTimestamp } = require("../utils/utils");
 
 const scheduleDailyEmail = () => {
   cron.schedule(
-    "19 14 * * *",
+    "0 22 * * *",
     async () => {
       try {
-        console.log("Cron job started at:", getTimestamp());
+        console.log("Cron job started at:", new Date());
 
         // Fetch data and generate JSON file
         const filePath = await fetchAllCollectionsData();
@@ -35,7 +34,7 @@ const scheduleDailyEmail = () => {
       } catch (error) {
         console.error("Error during scheduled task:", error.message);
       } finally {
-        console.log("Cron job finished at:", getTimestamp());
+        console.log("Cron job finished at:", new Date());
       }
     },
     {
