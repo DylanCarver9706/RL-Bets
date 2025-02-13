@@ -48,12 +48,12 @@ const redeemPromotion = async (promotionType, userId, meta) => {
 
         const newUserId = userId
         if (!newUserId) {
-            throw new Error("New user id not found");
+          throw new Error("New user id not found");
         }
         
         // if newUserId is not in the given meta object, return an error
         if (!meta.existingUserId) {
-            throw new Error("Existing user id not found");
+          throw new Error("Existing user id not found");
         }
         
         // Update the redeem user object with the promotional credits
@@ -64,15 +64,7 @@ const redeemPromotion = async (promotionType, userId, meta) => {
             }
             await updateMongoDocument(collections.usersCollection, meta.existingUserId, { $set: { credits: (existingUserObject.credits + promotion.promotionalCredits) } });
         } else {
-            throw new Error("Existing user id not found");
-        }
-        
-        // Update the new user object with the promotional credits
-        newUserObject = await getUserById(newUserId);
-        if (newUserObject) {
-            await updateMongoDocument(collections.usersCollection, newUserId, { $set: { credits: (newUserObject.credits + promotion.promotionalCredits) } });
-        } else {
-            throw new Error("New user id not found");
+          throw new Error("Existing user id not found");
         }
 
         // Update the promotion object with the new user id added to the userIdsClaimed array
