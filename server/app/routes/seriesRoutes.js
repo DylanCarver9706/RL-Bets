@@ -1,11 +1,14 @@
 const express = require("express");
 const router = express.Router();
-const { create, getAll, getById, update, remove } = require("../controllers/seriesController");
+const seriesController = require("../controllers/seriesController");
+const { verifyFirebaseToken } = require("../middlewares/firebaseAdmin");
 
-router.post("/", create);
-router.get("/", getAll);
-router.get("/:id", getById);
-router.put("/:id", update);
-router.delete("/:id", remove);
+// Series Routes
+router.post("/", verifyFirebaseToken, seriesController.create);
+router.get("/", verifyFirebaseToken, seriesController.getAll);
+router.get("/:id", verifyFirebaseToken, seriesController.getById);
+router.put("/:id", verifyFirebaseToken, seriesController.update);
+router.delete("/:id", verifyFirebaseToken, seriesController.remove);
 
 module.exports = router;
+

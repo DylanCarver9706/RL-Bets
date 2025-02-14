@@ -1,13 +1,15 @@
 const express = require("express");
 const router = express.Router();
-const { create, getAll, getById, update, concludeMatch, firstBlood, remove } = require("../controllers/matchesController");
+const matchesController = require("../controllers/matchesController");
+const { verifyFirebaseToken } = require("../middlewares/firebaseAdmin");
 
-router.post("/match_concluded/:id", concludeMatch);
-router.post("/first_blood/:id", firstBlood);
-router.post("/", create);
-router.get("/", getAll);
-router.get("/:id", getById);
-router.put("/:id", update);
-router.delete("/:id", remove);
+// Match Routes
+router.post("/match_concluded/:id", verifyFirebaseToken, matchesController.concludeMatch);
+router.post("/first_blood/:id", verifyFirebaseToken, matchesController.firstBlood);
+router.post("/", verifyFirebaseToken, matchesController.create);
+router.get("/", verifyFirebaseToken, matchesController.getAll);
+router.get("/:id", verifyFirebaseToken, matchesController.getById);
+router.put("/:id", verifyFirebaseToken, matchesController.update);
+router.delete("/:id", verifyFirebaseToken, matchesController.remove);
 
 module.exports = router;

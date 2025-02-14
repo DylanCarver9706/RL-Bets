@@ -1,7 +1,9 @@
 const express = require("express");
 const router = express.Router();
-const { createIssueAndTransitionStatus } = require("../controllers/jiraController");
+const jiraController = require("../controllers/jiraController");
+const { verifyFirebaseToken } = require("../middlewares/firebaseAdmin");
 
-router.post("/create-issue", createIssueAndTransitionStatus);
+// Route to create a Jira issue and transition its status
+router.post("/create-issue", verifyFirebaseToken, jiraController.createIssueAndTransitionStatus);
 
 module.exports = router;

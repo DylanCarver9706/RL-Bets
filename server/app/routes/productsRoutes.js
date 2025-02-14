@@ -1,19 +1,13 @@
 const express = require("express");
-const {
-  getAllProducts,
-  getProductById,
-  createProduct,
-  updateProduct,
-  deleteProduct,
-} = require("../controllers/productsController");
-
 const router = express.Router();
+const productsController = require("../controllers/productsController");
+const { verifyFirebaseToken } = require("../middlewares/firebaseAdmin");
 
-// Define routes for CRUD operations
-router.get("/", getAllProducts);
-router.get("/:id", getProductById);
-router.post("/", createProduct);
-router.put("/:id", updateProduct);
-router.delete("/:id", deleteProduct);
+// Product Routes
+router.get("/", verifyFirebaseToken, productsController.getAllProducts);
+router.get("/:id", verifyFirebaseToken, productsController.getProductById);
+router.post("/", verifyFirebaseToken, productsController.createProduct);
+router.put("/:id", verifyFirebaseToken, productsController.updateProduct);
+router.delete("/:id", verifyFirebaseToken, productsController.deleteProduct);
 
 module.exports = router;

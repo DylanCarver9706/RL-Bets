@@ -1,20 +1,13 @@
 const express = require("express");
 const router = express.Router();
-const {
-  getAll,
-  getById,
-  create,
-  update,
-  remove,
-  removeAll,
-} = require("../controllers/wagersController");
+const wagersController = require("../controllers/wagersController");
 const { verifyFirebaseToken } = require("../middlewares/firebaseAdmin");
 
-router.get("/", verifyFirebaseToken, getAll);
-router.get("/:id", verifyFirebaseToken, getById);
-router.post("/", verifyFirebaseToken, create);
-router.put("/:id", verifyFirebaseToken, update);
-router.delete("/:id", verifyFirebaseToken, remove);
-router.delete("/", verifyFirebaseToken, removeAll);
+router.get("/", verifyFirebaseToken, wagersController.getAll);
+router.get("/:id", verifyFirebaseToken, wagersController.getById);
+router.post("/", verifyFirebaseToken, wagersController.create);
+router.put("/:id", verifyFirebaseToken, wagersController.update);
+router.delete("/:id", verifyFirebaseToken, wagersController.remove);
+router.delete("/", verifyFirebaseToken, wagersController.removeAll);
 
 module.exports = router;

@@ -1,11 +1,13 @@
 const express = require("express");
 const router = express.Router();
-const { create, getAll, getById, update, remove } = require("../controllers/teamsController");
+const teamsController = require("../controllers/teamsController");
+const { verifyFirebaseToken } = require("../middlewares/firebaseAdmin");
 
-router.post("/", create);
-router.get("/", getAll);
-router.get("/:id", getById);
-router.put("/:id", update);
-router.delete("/:id", remove);
+// Team Routes
+router.post("/", verifyFirebaseToken, teamsController.create);
+router.get("/", verifyFirebaseToken, teamsController.getAll);
+router.get("/:id", verifyFirebaseToken, teamsController.getById);
+router.put("/:id", verifyFirebaseToken, teamsController.update);
+router.delete("/:id", verifyFirebaseToken, teamsController.remove);
 
 module.exports = router;

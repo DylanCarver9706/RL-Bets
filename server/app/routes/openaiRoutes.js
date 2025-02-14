@@ -1,14 +1,13 @@
 const express = require("express");
 const multer = require("multer");
-const { processImage } = require("../controllers/openaiController");
-
 const router = express.Router();
+const openaiController = require("../controllers/openaiController");
+const { verifyFirebaseToken } = require("../middlewares/firebaseAdmin");
 
-// ✅ **Use Memory Storage Instead of Disk**
+// ✅ Use Memory Storage Instead of Disk
 const upload = multer({ storage: multer.memoryStorage() });
 
-// ✅ **Image Processing Route**
-router.post("/analyze", upload.single("image"), processImage);
+// ✅ Image Processing Route with Firebase Authentication
+router.post("/analyze", verifyFirebaseToken, upload.single("image"), openaiController.processImage);
 
 module.exports = router;
-

@@ -1,13 +1,14 @@
 const express = require("express");
 const router = express.Router();
 const leaderboardController = require("../controllers/leaderboardController");
+const { verifyFirebaseToken } = require("../middlewares/firebaseAdmin");
 
-router.get("/current", leaderboardController.getCurrentLeaderboard);
-router.get("/lifetime", leaderboardController.getLifetimeLeaderboard);
-router.get("/", leaderboardController.getAllLeaderboards);
-router.get("/:id", leaderboardController.getLeaderboardById);
-router.post("/", leaderboardController.createLeaderboard);
-router.put("/:id", leaderboardController.updateLeaderboard);
-router.delete("/:id", leaderboardController.deleteLeaderboard);
+router.get("/current", verifyFirebaseToken, leaderboardController.getCurrentLeaderboard);
+router.get("/lifetime", verifyFirebaseToken, leaderboardController.getLifetimeLeaderboard);
+router.get("/", verifyFirebaseToken, leaderboardController.getAllLeaderboards);
+router.get("/:id", verifyFirebaseToken, leaderboardController.getLeaderboardById);
+router.post("/", verifyFirebaseToken, leaderboardController.createLeaderboard);
+router.put("/:id", verifyFirebaseToken, leaderboardController.updateLeaderboard);
+router.delete("/:id", verifyFirebaseToken, leaderboardController.deleteLeaderboard);
 
 module.exports = router;
