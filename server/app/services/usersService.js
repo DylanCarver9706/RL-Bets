@@ -85,6 +85,34 @@ const createUser = async (userData) => {
 };
 
 const updateUser = async (id, updateData) => {
+  // Fields allowed to be updated from the client
+  const allowedFields = [
+    "pp",
+    "tos",
+    "emailVerificationStatus",
+    "address1",
+    "address2",
+    "city",
+    "state",
+    "zip",
+    "DOB",
+    "idvStatus",
+    "viewedInstructions",
+    "emailVerificationStatus",
+    "ageValid",
+    "phoneNumber",
+    "name",
+    "email",
+    "smsVerificationStatus",
+  ]
+
+  // Check if any of the fields in updateData are not allowed and throw an error saying which field is not allowed to be updated
+  for (const field in updateData) {
+    if (!allowedFields.includes(field)) {
+      throw new Error(`Field ${field} is not allowed to be updated`);
+    }
+  }
+
   await updateMongoDocument(collections.usersCollection, id, {
     $set: updateData,
   });
