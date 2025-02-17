@@ -8,11 +8,15 @@ const BASE_SERVER_URL = process.env.REACT_APP_BASE_SERVER_URL;
 
 // Get ID token from the currently authenticated user
 export const getFirebaseIdToken = async () => {
-  const currentUser = auth.currentUser;
-  if (!currentUser) {
-    throw new Error("User is not authenticated");
+  try {
+    const currentUser = auth.currentUser;
+    if (!currentUser) {
+      // throw new Error("User is not authenticated");
+    }
+    return await currentUser.getIdToken(); // Return a fresh ID token
+  } catch (error) {
+    // throw new Error("Error getting Firebase ID token:", error);
   }
-  return await currentUser.getIdToken(); // Return a fresh ID token
 };
 
 export const usePageTracking = () => {
@@ -26,8 +30,14 @@ export const usePageTracking = () => {
 // firebaseService.js
 export const sendImagesToAPI = async (formData) => {
   try {
+
+    const idToken = await getFirebaseIdToken();
+
     const response = await fetch(`${BASE_SERVER_URL}/api/firebase/storage/upload`, {
       method: "POST",
+      headers: {
+        "Authorization": `Bearer ${idToken}`, // Include the token in the headers
+      },
       body: formData,
     });
 
@@ -44,7 +54,15 @@ export const sendImagesToAPI = async (formData) => {
 
 export const fetchIdentityVerificationImages = async () => {
   try {
-    const response = await fetch(`${BASE_SERVER_URL}/api/firebase/storage/identity-verification-images`);
+
+    const idToken = await getFirebaseIdToken();
+
+    const response = await fetch(`${BASE_SERVER_URL}/api/firebase/storage/identity-verification-images`, {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${idToken}`, // Include the token in the headers
+      },
+    });
     const data = await response.json();
     return data.images;
   } catch (error) {
@@ -54,9 +72,15 @@ export const fetchIdentityVerificationImages = async () => {
 
 export const deleteUserIdvFiles = async (userId, userName) => {
   try {
+
+    const idToken = await getFirebaseIdToken();
+
     const response = await fetch(`${BASE_SERVER_URL}/api/firebase/storage/delete`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${idToken}`, // Include the token in the headers
+      },
       body: JSON.stringify({ userId, userName }),
     });
 

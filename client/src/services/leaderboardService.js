@@ -1,11 +1,17 @@
+import { getFirebaseIdToken } from "./firebaseService.js";
+
 const BASE_SERVER_URL = process.env.REACT_APP_BASE_SERVER_URL;
 
 export const fetchCurrentLeaderboard = async () => {
   try {
+
+    const idToken = await getFirebaseIdToken();
+
     const response = await fetch(`${BASE_SERVER_URL}/api/leaderboards/current`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${idToken}`, // Include the token in the headers
       },
     });
 
@@ -23,10 +29,14 @@ export const fetchCurrentLeaderboard = async () => {
 
 export const fetchCurrentTournament = async () => {
   try {
+
+    const idToken = await getFirebaseIdToken();
+
     const response = await fetch(`${BASE_SERVER_URL}/api/tournaments/current`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${idToken}`, // Include the token in the headers
       },
     });
 
@@ -44,10 +54,14 @@ export const fetchCurrentTournament = async () => {
 
 export const fetchLifetimeLeaderboard = async () => {
   try {
+
+    const idToken = await getFirebaseIdToken();
+
     const response = await fetch(`${BASE_SERVER_URL}/api/leaderboards/lifetime`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${idToken}`, // Include the token in the headers
       },
     });
 

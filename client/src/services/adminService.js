@@ -4,10 +4,14 @@ const BASE_SERVER_URL = process.env.REACT_APP_BASE_SERVER_URL; // Define your ba
 
 export const fetchAllTournamentsDataTree = async () => {
   try {
+
+    const idToken = await getFirebaseIdToken();
+
     const response = await fetch(`${BASE_SERVER_URL}/api/data-trees/tournament/all`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${idToken}`, // Include the token in the headers
       },
     });
 
@@ -25,10 +29,14 @@ export const fetchAllTournamentsDataTree = async () => {
 
 export const fetchCurrentTournamentDataTree = async () => {
   try {
+
+    const idToken = await getFirebaseIdToken();
+
     const response = await fetch(`${BASE_SERVER_URL}/api/data-trees/tournament/current`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${idToken}`, // Include the token in the headers
       },
     });
 
@@ -46,10 +54,14 @@ export const fetchCurrentTournamentDataTree = async () => {
 
 export const fetchEndedTournamentDataTree = async () => {
   try {
+
+    const idToken = await getFirebaseIdToken();
+
     const response = await fetch(`${BASE_SERVER_URL}/api/data-trees/tournament/ended`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${idToken}`, // Include the token in the headers
       },
     });
 
@@ -67,10 +79,14 @@ export const fetchEndedTournamentDataTree = async () => {
 
 export const fetchPlayers = async () => {
   try {
+
+    const idToken = await getFirebaseIdToken();
+
     const response = await fetch(`${BASE_SERVER_URL}/api/players`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${idToken}`, // Include the token in the headers
       },
     });
 
@@ -89,10 +105,14 @@ export const fetchPlayers = async () => {
 // Generic function to update a document by ID
 const updateDocumentById = async (endpoint, id, updateData) => {
   try {
+
+    const idToken = await getFirebaseIdToken();
+
     const response = await fetch(`${BASE_SERVER_URL}/api/${endpoint}/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${idToken}`, // Include the token in the headers
       },
       body: JSON.stringify(updateData),
     });
@@ -126,10 +146,14 @@ export const updateMatchById = async (id, updateData) => {
 
 export const updateMatchResults = async (matchId, updateData) => {
   try {
+
+    const idToken = await getFirebaseIdToken();
+
     const response = await fetch(`${BASE_SERVER_URL}/api/matches/match_concluded/${matchId}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${idToken}`, // Include the token in the headers
       },
       body: JSON.stringify(updateData),
     });
@@ -146,10 +170,14 @@ export const updateMatchResults = async (matchId, updateData) => {
 
 export const createSeries = async (seriesData) => {
   try {
+
+    const idToken = await getFirebaseIdToken();
+
     const response = await fetch(`${BASE_SERVER_URL}/api/series`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${idToken}`, // Include the token in the headers
       },
       body: JSON.stringify(seriesData),
     });
@@ -168,10 +196,14 @@ export const createSeries = async (seriesData) => {
 
 export const updateFirstBlood = async (matchId, updateData) => {
   try {
+
+    const idToken = await getFirebaseIdToken();
+
     const response = await fetch(`${BASE_SERVER_URL}/api/matches/first_blood/${matchId}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${idToken}`, // Include the token in the headers
       },
       body: JSON.stringify(updateData),
     });
@@ -276,10 +308,14 @@ export const validateUserIdv = async (userData) => {
 
 export const fetchProducts = async () => {
   try {
+
+    const idToken = await getFirebaseIdToken();
+
     const response = await fetch(`${BASE_SERVER_URL}/api/products`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${idToken}`, // Include the token in the headers
       },
     });
 

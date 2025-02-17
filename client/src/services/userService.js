@@ -385,7 +385,7 @@ export const redeemReferralCode = async (promotionType, userId, referralCode = n
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${idToken}`, // Include the token in the headers
+        "Authorization": `Bearer ${idToken}`, // Include the token in the headers
       },
       body: JSON.stringify({ promotionType, userId, meta }),
     });
@@ -414,7 +414,7 @@ export const fetchTransactionHistory = async (userId) => {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${idToken}`, // Include the token in the headers
+        "Authorization": `Bearer ${idToken}`, // Include the token in the headers
       },
     });
     if (!response.ok) {
@@ -436,7 +436,7 @@ export const fetchUserNotificationLogs = async (userId) => {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${idToken}`, // Include the token in the headers
+        "Authorization": `Bearer ${idToken}`, // Include the token in the headers
       },
     });
     if (!response.ok) {
@@ -458,7 +458,7 @@ export const dismissNotification = async (notificationId) => {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${idToken}`, // Include the token in the headers
+        "Authorization": `Bearer ${idToken}`, // Include the token in the headers
       },
       body: JSON.stringify({ cleared: true }),
     });

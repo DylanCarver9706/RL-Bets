@@ -4,10 +4,14 @@ const BASE_SERVER_URL = process.env.REACT_APP_BASE_SERVER_URL; // Define your ba
 
 export const fetchWagers = async () => {
   try {
+
+    const idToken = await getFirebaseIdToken();
+
     const response = await fetch(`${BASE_SERVER_URL}/api/wagers`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${idToken}`, // Include the token in the headers
       },
     });
 
@@ -31,7 +35,7 @@ export const createWager = async (body) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${idToken}`, // Include the token in the headers
+        "Authorization": `Bearer ${idToken}`, // Include the token in the headers
       },
       body: JSON.stringify(body),
     });
@@ -56,7 +60,7 @@ export const createBet = async (body) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${idToken}`, // Include the token in the headers
+        "Authorization": `Bearer ${idToken}`, // Include the token in the headers
       },
       body: JSON.stringify(body),
     });
@@ -75,10 +79,14 @@ export const createBet = async (body) => {
 // Fetch the teams
 export const fetchTeams = async () => {
   try {
-    const response = await fetch(`${BASE_SERVER_URL}/api/teams`, {
+
+    const idToken = await getFirebaseIdToken();
+
+    const response = await fetch(`${BASE_SERVER_URL}/api/teams/with_players`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${idToken}`, // Include the token in the headers
       },
     });
 
@@ -96,10 +104,14 @@ export const fetchTeams = async () => {
 
 export const fetchBettableObjects = async () => {
   try {
+
+    const idToken = await getFirebaseIdToken();
+
     const response = await fetch(`${BASE_SERVER_URL}/api/data-trees/bettable`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${idToken}`, // Include the token in the headers
       },
     });
 

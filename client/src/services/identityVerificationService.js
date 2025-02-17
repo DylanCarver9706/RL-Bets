@@ -39,7 +39,7 @@ export const completeIDV = async (idvSession) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${idToken}`,
+        "Authorization": `Bearer ${idToken}`,
       },
       body: JSON.stringify({ idvSession }),
     });
@@ -82,8 +82,14 @@ export const openPlaidIDV = async (linkToken) => {
 
 export const analyzeDocument = async (formData) => {
   try {
+
+    const idToken = await getFirebaseIdToken();
+
     const response = await fetch(`${BASE_SERVER_URL}/api/openai/analyze`, {
       method: "POST",
+      headers: {
+        "Authorization": `Bearer ${idToken}`,
+      },
       body: formData,
     });
 
