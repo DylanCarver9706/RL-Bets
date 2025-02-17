@@ -10,7 +10,7 @@ const upload = multer({ storage: multer.memoryStorage() });
 
 router.post(
   "/storage/upload",
-  verifyFirebaseToken,
+  verifyFirebaseToken(),
   upload.fields([
     { name: "frontImage", maxCount: 1 },
     { name: "backImage", maxCount: 1 },
@@ -19,12 +19,8 @@ router.post(
   firebaseController.uploadIdvDocuments
 );
 
-router.get(
-  "/storage/identity-verification-images",
-  verifyFirebaseToken,
-  firebaseController.getIdentityVerificationImages
-);
+router.get("/storage/identity-verification-images", verifyFirebaseToken(true), firebaseController.getIdentityVerificationImages);
 
-router.post("/storage/delete", verifyFirebaseToken, firebaseController.deleteUserIdvFiles);
+router.post("/storage/delete", verifyFirebaseToken(true), firebaseController.deleteUserIdvFiles);
 
 module.exports = router;

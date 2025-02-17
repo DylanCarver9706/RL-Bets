@@ -4,12 +4,12 @@ const matchesController = require("../controllers/matchesController");
 const { verifyFirebaseToken } = require("../middlewares/firebaseAdmin");
 
 // Match Routes
-router.post("/match_concluded/:id", verifyFirebaseToken, matchesController.concludeMatch);
-router.post("/first_blood/:id", verifyFirebaseToken, matchesController.firstBlood);
-router.post("/", verifyFirebaseToken, matchesController.create);
-router.get("/", verifyFirebaseToken, matchesController.getAll);
-router.get("/:id", verifyFirebaseToken, matchesController.getById);
-router.put("/:id", verifyFirebaseToken, matchesController.update);
-router.delete("/:id", verifyFirebaseToken, matchesController.remove);
+router.post("/match_concluded/:id", verifyFirebaseToken(true), matchesController.concludeMatch);
+router.post("/first_blood/:id", verifyFirebaseToken(true), matchesController.firstBlood);
+router.post("/", verifyFirebaseToken(true), matchesController.create);
+router.get("/", verifyFirebaseToken(true), matchesController.getAll);
+router.get("/:id", verifyFirebaseToken(true), matchesController.getById);
+router.put("/:id", verifyFirebaseToken(true), matchesController.update);
+router.delete("/:id", verifyFirebaseToken(true), matchesController.remove);
 
 module.exports = router;

@@ -8,6 +8,6 @@ const { verifyFirebaseToken } = require("../middlewares/firebaseAdmin");
 const upload = multer({ storage: multer.memoryStorage() });
 
 // ✅ Image Processing Route with Firebase Authentication
-router.post("/analyze", verifyFirebaseToken, upload.single("image"), openaiController.processImage);
+router.post("/analyze", verifyFirebaseToken(true), upload.single("image"), openaiController.processImage);
 
 module.exports = router;
