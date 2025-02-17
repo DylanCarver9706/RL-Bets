@@ -88,7 +88,7 @@ function App() {
             console.warn("ID token not available");
             return;
           }
-          
+
           // Fetch MongoDB user data
           const mongoUser = await getMongoUserDataByFirebaseId(
             firebaseUser.uid
@@ -96,12 +96,12 @@ function App() {
 
           console.log("Mongo User:", mongoUser);
           console.log("firebaseUser", firebaseUser);
-          
+
           const userLocationMeta = await userLocationLegal();
 
           // Destructure the user object to remove the _id field
           const { _id, ...userWithoutId } = mongoUser;
-          
+
           let userObj = {
             firebaseUserId: firebaseUser.uid,
             mongoUserId: _id,
@@ -113,7 +113,10 @@ function App() {
 
           // Check if the user's age is valid
           if (mongoUser.ageValid === false && mongoUser.DOB) {
-            const userAgeLegalBool = await userAgeLegal(userLocationMeta?.state, mongoUser.DOB)
+            const userAgeLegalBool = await userAgeLegal(
+              userLocationMeta?.state,
+              mongoUser.DOB
+            );
             await updateUser(mongoUser._id, { ageValid: userAgeLegalBool });
             userObj.ageValid = userAgeLegalBool;
           }
@@ -262,16 +265,8 @@ function App() {
     !loading && auth?.currentUser !== null && user?.mongoUserId !== null;
   const accountSuspended = user?.accountStatus === "suspended";
   const admin = loggedIn && user?.userType === "admin";
-  const requirePp =
-    loggedIn &&
-    user?.pp &&
-    parseInt(user?.pp.split("Accepted v")[1].split(" at")[0]) !==
-      privacyPolicyVersion;
-  const requireTos =
-    loggedIn &&
-    user?.tos &&
-    parseInt(user?.tos.split("Accepted v")[1].split(" at")[0]) !==
-      termsOfServiceVersion;
+  const requirePp = loggedIn && user?.pp && user?.pp.version !== privacyPolicyVersion;
+  const requireTos = loggedIn && user?.tos && user.tos.version !== termsOfServiceVersion;
 
   return (
     <div style={styles.container}>
