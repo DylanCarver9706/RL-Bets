@@ -6,11 +6,11 @@ const {
 const { ObjectId } = require("mongodb");
 
 const createSeries = async (seriesData) => {
-  const { tournament, team1, team2, best_of, name } = seriesData;
+  const { tournament, team1, team2, best_of, name, historical } = seriesData;
 
-  if (!tournament || !team1 || !team2 || !best_of || !name) {
+  if (!tournament || !team1 || !team2 || !best_of || !name || !historical) {
     throw new Error(
-      "Tournament ID, Team 1, Team 2, Best Of value, and Name are required to create a Series."
+      "Tournament ID, Team 1, Team 2, Best Of value, name, and historical are required to create a Series."
     );
   }
 
@@ -23,7 +23,7 @@ const createSeries = async (seriesData) => {
     ],
     best_of: parseInt(best_of, 10),
     type: "series",
-    status: "Created",
+    status: historical ? "Ended" : "Created",
   };
 
   // Create Series Document
@@ -32,42 +32,44 @@ const createSeries = async (seriesData) => {
     series
   );
 
-  // Generate matches for the series based on the best_of value
-  const matches = Array.from({ length: best_of }, (_, index) => ({
-    name: `${name} - Match ${index + 1}`,
-    teams: [
-      ObjectId.createFromHexString(team1),
-      ObjectId.createFromHexString(team2),
-    ],
-    series: seriesResult.insertedId,
-    status: "Created",
-    type: "match",
-  }));
-
-  const matchIds = [];
-  for (const match of matches) {
-    const matchResult = await createMongoDocument(
-      collections.matchesCollection,
-      match
+  if (!historical) {
+    // Generate matches for the series based on the best_of value
+    const matches = Array.from({ length: best_of }, (_, index) => ({
+      name: `${name} - Match ${index + 1}`,
+      teams: [
+        ObjectId.createFromHexString(team1),
+        ObjectId.createFromHexString(team2),
+      ],
+      series: seriesResult.insertedId,
+      status: "Created",
+      type: "match",
+    }));
+  
+    const matchIds = [];
+    for (const match of matches) {
+      const matchResult = await createMongoDocument(
+        collections.matchesCollection,
+        match
+      );
+      matchIds.push(matchResult.insertedId);
+    }
+  
+    // Update series document with match IDs
+    await updateMongoDocument(
+      collections.seriesCollection,
+      seriesResult.insertedId.toString(),
+      {
+        $set: { matches: matchIds },
+      }
     );
-    matchIds.push(matchResult.insertedId);
+  
+    // Add series to the tournament
+    await updateMongoDocument(collections.tournamentsCollection, tournament, {
+      $push: { series: seriesResult.insertedId },
+    });
   }
 
-  // Update series document with match IDs
-  await updateMongoDocument(
-    collections.seriesCollection,
-    seriesResult.insertedId,
-    {
-      $set: { matches: matchIds },
-    }
-  );
-
-  // Add series to the tournament
-  await updateMongoDocument(collections.tournamentsCollection, tournament, {
-    $push: { series: seriesResult.insertedId },
-  });
-
-  return { seriesId: seriesResult.insertedId, matchIds };
+  return { seriesId: seriesResult.insertedId };
 };
 
 const getAllSeries = async () => {
