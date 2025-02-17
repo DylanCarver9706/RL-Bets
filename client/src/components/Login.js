@@ -62,8 +62,14 @@ const Login = () => {
             null,
             "google",
             null,
-            `Accepted v0 at ${new Date().toISOString().split("T")[0]}`,
-            `Accepted v0 at ${new Date().toISOString().split("T")[0]}`
+            {
+              version: 0,
+              acceptedAt: new Date()
+            },
+            {
+              version: 0,
+              acceptedAt: new Date()
+            }
           );
 
           // Remove referral code from local storage
