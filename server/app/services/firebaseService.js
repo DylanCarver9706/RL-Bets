@@ -78,7 +78,7 @@ const deleteIdentityVerificationFiles = async (userId, userName) => {
         throw new Error("Firebase Storage bucket is not initialized");
       }
   
-      const userDirectory = `Identity_Verification_Documents/${userName}_${userId}/`;
+      const userDirectory = `Identity_Verification_Documents/${userId}/`;
   
       // ✅ Get all files under the user directory
       const [files] = await storageBucket.getFiles({ prefix: userDirectory });
