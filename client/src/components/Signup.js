@@ -127,7 +127,7 @@ const Signup = () => {
         try {
           let storedPrivacyPolicy = localStorage.getItem("privacyPolicy");
           let storedTermsOfService = localStorage.getItem("termsOfService");
-          
+
           if (storedPrivacyPolicy) {
             storedPrivacyPolicy = JSON.parse(storedPrivacyPolicy);
           }
@@ -141,8 +141,23 @@ const Signup = () => {
             firebaseUser.uid,
             referralCode,
             "google",
-            `Accepted v${mongoUserFound ? parseInt(storedPrivacyPolicy.version, 10) : ppChecked && tosChecked ? parseInt(storedPrivacyPolicy.version, 10) : "0" } at ${new Date().toISOString().split("T")[0]}`,
-            `Accepted v${ mongoUserFound ? parseInt(storedTermsOfService.version, 10) : ppChecked && tosChecked ? parseInt(storedTermsOfService.version, 10) : "0" } at ${new Date().toISOString().split("T")[0]}`
+            null,
+            {
+              version: mongoUserFound
+                ? parseInt(storedPrivacyPolicy.version, 10)
+                : ppChecked && tosChecked
+                ? parseInt(storedPrivacyPolicy.version, 10)
+                : 0,
+              acceptedAt: new Date().toISOString(),
+            },
+            {
+              version: mongoUserFound
+                ? parseInt(storedTermsOfService.version, 10)
+                : ppChecked && tosChecked
+                ? parseInt(storedTermsOfService.version, 10)
+                : 0,
+              acceptedAt: new Date().toISOString(),
+            }
           );
 
           // Remove referral code from local storage
@@ -180,7 +195,9 @@ const Signup = () => {
       {error && <p style={{ color: "red" }}>{error}</p>}
       <form onSubmit={handleSubmit}>
         <div>
-          <label>Name (Please use the name on your form of identification):</label>
+          <label>
+            Name (Please use the name on your form of identification):
+          </label>
           <input
             type="text"
             value={name}
