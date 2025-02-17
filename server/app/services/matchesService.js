@@ -15,10 +15,31 @@ const createMatch = async (matchData) => {
     throw new Error("Series ID is required to create a Match.");
   }
 
+  let matchPayload = {
+    name: matchData.name,
+    teams: [
+      ObjectId.createFromHexString(matchData.teams[0]),
+      ObjectId.createFromHexString(matchData.teams[1]),
+    ],
+    series: ObjectId.createFromHexString(matchData.series),
+    status: matchData.status,
+    type: matchData.type,
+    results: matchData.results,
+    wentToOvertime: matchData.wentToOvertime,
+  };
+
+  if (matchData.match_happened_date) {
+    matchPayload.matchHappenedDate = new Date(matchData.match_happened_date);
+  }
+
+  if (matchData.historical) {
+    matchPayload.historical = matchData.historical;
+  }
+
   // Insert the match document
   const matchResult = await createMongoDocument(
     collections.matchesCollection,
-    matchData
+    matchPayload
   );
 
   // Update the Series document to include this match
