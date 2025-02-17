@@ -165,11 +165,7 @@ const IdentityVerification = () => {
 
       // Update the user's address
       await updateUser(user.mongoUserId, {
-        address1: address1,
-        address2: address2,
-        city: city,
-        state: state,
-        zip: zip,
+        address: { address1: address1, address2: address2, city: city, state: state, zip: zip },
         DOB: selectedDate,
       })
 
