@@ -6,14 +6,18 @@ const {
 const { ObjectId } = require("mongodb");
 
 const createPlayer = async (playerData) => {
-  if (!playerData.name || !playerData.team) {
-    throw new Error("Player name and team ID are required.");
+  if (!playerData.names || !playerData.team || !playerData.playerId) {
+    throw new Error("Player names, team ID, and player's id are required.");
   }
+
+  // Convert team ID to ObjectId
+  playerData.team = ObjectId.createFromHexString(playerData.team);
+
   const result = await createMongoDocument(
     collections.playersCollection,
     playerData
   );
-  await updateMongoDocument(collections.teamsCollection, playerData.team, {
+  await updateMongoDocument(collections.teamsCollection, playerData.team.toString(), {
     $push: { players: result.insertedId },
   });
   return { playerId: result.insertedId };
