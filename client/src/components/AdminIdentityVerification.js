@@ -27,11 +27,13 @@ const AdminIdentityVerification = () => {
         const userMap = fetchedUsers.reduce((acc, user) => {
           acc[user._id] = {
             name: user.name,
-            address1: user.address1,
-            address2: user.address2,
-            city: user.city,
-            state: user.state,
-            zip: user.zip,
+            address: {
+              address1: user.address.address1,
+              address2: user.address.address2,
+              city: user.address.city,
+              state: user.address.state,
+              zip: user.address.zip,
+            },
             DOB: user.DOB,
           };
           return acc;
@@ -55,15 +57,15 @@ const AdminIdentityVerification = () => {
               userName: userMap[userId].name,
               DOB: userMap[userId].DOB,
               fullAddress:
-                userMap[userId].address1 +
+                userMap[userId].address.address1 +
                 " " +
-                userMap[userId].address2 +
+                userMap[userId].address.address2 +
                 " " +
-                userMap[userId].city +
+                userMap[userId].address.city +
                 " " +
-                userMap[userId].state +
+                userMap[userId].address.state +
                 " " +
-                userMap[userId].zip,
+                userMap[userId].address.zip,
               userId,
               documents: [],
               currentIndex: 0,
@@ -93,7 +95,7 @@ const AdminIdentityVerification = () => {
         setUserImages(groupedImages);
       } catch (err) {
         setError("Failed to load identity verification images.");
-        console.error(err);
+        throw new Error(err);
       }
       setLoading(false);
     };
