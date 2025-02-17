@@ -2,16 +2,18 @@ import { getFirebaseIdToken } from "./firebaseService.js";
 
 const BASE_SERVER_URL = process.env.REACT_APP_BASE_SERVER_URL; // Define your backend server URL
 
+// Add cache constants at the top of the file
+const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+
 export const fetchWagers = async () => {
   try {
-
     const idToken = await getFirebaseIdToken();
 
     const response = await fetch(`${BASE_SERVER_URL}/api/wagers`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${idToken}`, // Include the token in the headers
+        Authorization: `Bearer ${idToken}`, // Include the token in the headers
       },
     });
 
@@ -35,7 +37,7 @@ export const createWager = async (body) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${idToken}`, // Include the token in the headers
+        Authorization: `Bearer ${idToken}`, // Include the token in the headers
       },
       body: JSON.stringify(body),
     });
@@ -60,7 +62,7 @@ export const createBet = async (body) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${idToken}`, // Include the token in the headers
+        Authorization: `Bearer ${idToken}`, // Include the token in the headers
       },
       body: JSON.stringify(body),
     });
@@ -76,17 +78,27 @@ export const createBet = async (body) => {
   }
 };
 
-// Fetch the teams
+// Updated fetchTeams function
 export const fetchTeams = async () => {
   try {
+    // Check cache first
+    const cache = localStorage.getItem("teamsCache");
+    if (cache) {
+      const { data, timestamp } = JSON.parse(cache);
+      const isValid = Date.now() - timestamp < CACHE_DURATION;
 
+      if (isValid) {
+        return data;
+      }
+    }
+
+    // If no cache or cache expired, fetch new data
     const idToken = await getFirebaseIdToken();
-
     const response = await fetch(`${BASE_SERVER_URL}/api/teams/with_players`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${idToken}`, // Include the token in the headers
+        Authorization: `Bearer ${idToken}`,
       },
     });
 
@@ -95,6 +107,16 @@ export const fetchTeams = async () => {
     }
 
     const data = await response.json();
+
+    // Update cache
+    localStorage.setItem(
+      "teamsCache",
+      JSON.stringify({
+        data,
+        timestamp: Date.now(),
+      })
+    );
+
     return data;
   } catch (err) {
     console.error("Error fetching teams:", err.message);
@@ -104,14 +126,13 @@ export const fetchTeams = async () => {
 
 export const fetchBettableObjects = async () => {
   try {
-
     const idToken = await getFirebaseIdToken();
 
     const response = await fetch(`${BASE_SERVER_URL}/api/data-trees/bettable`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${idToken}`, // Include the token in the headers
+        Authorization: `Bearer ${idToken}`, // Include the token in the headers
       },
     });
 
@@ -130,4 +151,4 @@ export const fetchBettableObjects = async () => {
 export const capitalize = (str) => {
   if (!str) return ""; // Handle empty or null strings
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
-}
+};
