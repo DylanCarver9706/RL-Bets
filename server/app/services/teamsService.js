@@ -28,6 +28,10 @@ const getAllTeamsWithPlayers = async () => {
   );
 };
 
+const getAllTeams = async () => {
+  return await collections.teamsCollection.find().toArray();
+};
+
 const getTeamById = async (id) => {
   return await collections.teamsCollection.findOne({
     _id: ObjectId.createFromHexString(id),
@@ -53,6 +57,7 @@ const deleteTeam = async (id) => {
 module.exports = {
   createTeam,
   getAllTeamsWithPlayers,
+  getAllTeams,
   getTeamById,
   updateTeam,
   deleteTeam,
