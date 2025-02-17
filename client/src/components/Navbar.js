@@ -4,6 +4,7 @@ import { useUser } from "../contexts/UserContext.js";
 import socket from "../services/socket.js";
 import { fetchCurrentTournament } from "../services/leaderboardService.js";
 import Notifications from "./Notifications";
+import { auth } from "../firebaseConfig.js";
 
 const Navbar = () => {
   const { user, setUser } = useUser();
@@ -16,7 +17,10 @@ const Navbar = () => {
       const tournamentData = await fetchCurrentTournament();
       setCurrentTournament(tournamentData);
     };
-    fetchTournament();
+    const currentUser = auth.currentUser;
+    if (currentUser) {
+      fetchTournament();
+    }
   }, []);
 
   // Listen for updates from the server
