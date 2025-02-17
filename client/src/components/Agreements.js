@@ -22,14 +22,20 @@ const Agreements = ({ requireTos, requirePp, tosVersion, ppVersion }) => {
         return;
       }
 
-      let updateObject = {}
+      let updateObject = {};
 
       if (requireTos) {
-        updateObject.tos = `Accepted v${tosVersion} at ${new Date().toISOString().split("T")[0]}`;
+        updateObject.tos = {
+          version: tosVersion,
+          acceptedAt: new Date().toISOString(),
+        };
       }
 
       if (requirePp) {
-        updateObject.pp = `Accepted v${ppVersion} at ${new Date().toISOString().split("T")[0]}`;
+        updateObject.pp = {
+          version: ppVersion,
+          acceptedAt: new Date().toISOString(),
+        };
       }
 
       await updateUser(user.mongoUserId, updateObject);
@@ -41,23 +47,26 @@ const Agreements = ({ requireTos, requirePp, tosVersion, ppVersion }) => {
     }
   };
 
-  console.log((requireTos === requirePp))
+  console.log(requireTos === requirePp);
 
   return (
     <div style={styles.container}>
-      {(requireTos === requirePp) ? (
+      {requireTos === requirePp ? (
         <>
-        <h1>There has been an update to the agreement docs</h1>
-        <h2>Please read each required document and confirm you agree</h2>
+          <h1>There has been an update to the agreement docs</h1>
+          <h2>Please read each required document and confirm you agree</h2>
         </>
       ) : (
         <>
-        <h1>There has been an update to the {requireTos ? "Terms of Service" : "Privacy Policy"}</h1>
-        <h2>Please read the required document and confirm you agree</h2>
+          <h1>
+            There has been an update to the{" "}
+            {requireTos ? "Terms of Service" : "Privacy Policy"}
+          </h1>
+          <h2>Please read the required document and confirm you agree</h2>
         </>
       )}
       {requireTos && (
-          <div style={styles.agreementSection}>
+        <div style={styles.agreementSection}>
           <a
             href="/Terms-Of-Service"
             target="_blank"
