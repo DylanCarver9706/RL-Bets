@@ -1,6 +1,7 @@
 const {
   createTeam,
   getAllTeamsWithPlayers,
+  getAllTeams,
   getTeamById,
   updateTeam,
   deleteTeam,
@@ -15,9 +16,18 @@ const create = async (req, res, logError) => {
   }
 };
 
-const getAll = async (req, res, logError) => {
+const getAllAndPlayers = async (req, res, logError) => {
   try {
     const teams = await getAllTeamsWithPlayers();
+    res.status(200).json(teams);
+  } catch (error) {
+    logError(error);
+  }
+};
+
+const getAll = async (req, res, logError) => {
+  try {
+    const teams = await getAllTeams();
     res.status(200).json(teams);
   } catch (error) {
     logError(error);
@@ -52,4 +62,4 @@ const remove = async (req, res, logError) => {
   }
 };
 
-module.exports = { create, getAll, getById, update, remove };
+module.exports = { create, getAllAndPlayers, getAll, getById, update, remove };
