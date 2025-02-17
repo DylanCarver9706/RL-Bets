@@ -53,7 +53,7 @@ const TournamentHistory = () => {
   
     // Create a map of player IDs to names for quick lookup
     const playerIdToNameMap = players.reduce((map, player) => {
-      map[player._id] = player.name;
+      map[player._id] = player.names.at(-1);
       return map;
     }, {});
   
