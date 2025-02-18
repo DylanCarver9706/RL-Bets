@@ -1,23 +1,18 @@
 // PlaidService.js/identityVerificationService.js
-import { getFirebaseIdToken } from "./firebaseService.js";
+import { makeAuthenticatedRequest } from "./authService";
 
 const BASE_SERVER_URL = process.env.REACT_APP_BASE_SERVER_URL;
 
 // Generate Plaid Link token for IDV
 export const generateLinkTokenForIDV = async (mongoUserId) => {
   try {
-    const idToken = await getFirebaseIdToken();
-
-    const response = await fetch(`${BASE_SERVER_URL}/api/plaid/idv/link-token`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${idToken}`, // Include the token in the headers
-      },
-      body: JSON.stringify({
-        mongoUserId: mongoUserId,
-      }),
-    });
+    const response = await makeAuthenticatedRequest(
+      "/api/plaid/idv/link-token",
+      {
+        method: "POST",
+        body: JSON.stringify({ mongoUserId }),
+      }
+    );
 
     if (!response.ok) {
       throw new Error(`Failed to generate Link token: ${response.statusText}`);
@@ -33,14 +28,8 @@ export const generateLinkTokenForIDV = async (mongoUserId) => {
 // Notify server that IDV is complete
 export const completeIDV = async (idvSession) => {
   try {
-    const idToken = await getFirebaseIdToken();
-
-    const response = await fetch(`${BASE_SERVER_URL}/api/plaid/idv/complete`, {
+    const response = await makeAuthenticatedRequest("/api/plaid/idv/complete", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${idToken}`,
-      },
       body: JSON.stringify({ idvSession }),
     });
 
@@ -62,8 +51,8 @@ export const openPlaidIDV = async (linkToken) => {
       token: linkToken,
       onSuccess: async (publicToken, metadata) => {
         try {
-          const result = await completeIDV(metadata.link_session_id); // Notify server that IDV is complete
-          resolve(result); // Resolve only when the Plaid widget successfully completes
+          const result = await completeIDV(metadata.link_session_id);
+          resolve(result);
         } catch (error) {
           console.error("Error completing IDV:", error);
           reject(error);
@@ -71,24 +60,25 @@ export const openPlaidIDV = async (linkToken) => {
       },
       onExit: (err) => {
         console.error("Exited IDV early:", err);
-        reject(new Error("Identity verification was not completed. Please try again."));
+        reject(
+          new Error(
+            "Identity verification was not completed. Please try again."
+          )
+        );
       },
     });
 
-    // Open the Plaid widget
     handler.open();
   });
 };
 
 export const analyzeDocument = async (formData) => {
   try {
-
-    const idToken = await getFirebaseIdToken();
-
-    const response = await fetch(`${BASE_SERVER_URL}/api/openai/analyze`, {
+    const response = await makeAuthenticatedRequest("/api/openai/analyze", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${idToken}`,
+        // Remove Content-Type header to let browser set it with boundary for FormData
+        "Content-Type": undefined,
       },
       body: formData,
     });
@@ -101,5 +91,6 @@ export const analyzeDocument = async (formData) => {
     return data.result;
   } catch (error) {
     console.error("Error analyzing image:", error);
+    throw error;
   }
 };

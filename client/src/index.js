@@ -1,11 +1,11 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import "./index.css";
+import "./styles/index.css";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import { BrowserRouter, useNavigate } from "react-router-dom";
 import { UserProvider, useUser } from "./contexts/UserContext";
-import ErrorBoundary from "./components/ErrorBoundary";
+import ErrorBoundary from "./components/features/errorHandling/ErrorBoundary";
 
 // Capture console logs but prevent them from rendering on screen
 const capturedLogs = [];
@@ -16,7 +16,9 @@ const captureConsoleLog = (type, ...args) => {
 
   const logEntry = {
     type, // log, warn, error
-    message: args.map((arg) => (typeof arg === "object" ? JSON.stringify(arg) : arg)).join(" "),
+    message: args
+      .map((arg) => (typeof arg === "object" ? JSON.stringify(arg) : arg))
+      .join(" "),
     timestamp: new Date().toISOString(),
   };
   capturedLogs.push(logEntry);
@@ -45,9 +47,13 @@ const AppWithErrorBoundary = () => {
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <BrowserRouter>
-      <UserProvider>
-        {process.env.REACT_APP_ENV === "production" ? <AppWithErrorBoundary /> : <App />}
-      </UserProvider>
+    <UserProvider>
+      {process.env.REACT_APP_ENV === "production" ? (
+        <AppWithErrorBoundary />
+      ) : (
+        <App />
+      )}
+    </UserProvider>
   </BrowserRouter>
 );
 

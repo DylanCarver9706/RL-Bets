@@ -1,31 +1,20 @@
-import { getFirebaseIdToken } from "./firebaseService";
-
-const BASE_SERVER_URL = process.env.REACT_APP_BASE_SERVER_URL; // Define your backend server URL
+import { makeAuthenticatedRequest } from "./authService";
 
 // Add cache constants at the top of the file
 const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 
 export const fetchAllTournamentsDataTree = async () => {
   try {
-    const idToken = await getFirebaseIdToken();
-
-    const response = await fetch(
-      `${BASE_SERVER_URL}/api/data-trees/tournament/all`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${idToken}`, // Include the token in the headers
-        },
-      }
+    const response = await makeAuthenticatedRequest(
+      "/api/data-trees/tournament/all",
+      { method: "GET" }
     );
 
     if (!response.ok) {
       throw new Error(`Failed to fetch data tree for all tournaments`);
     }
 
-    const data = await response.json();
-    return data;
+    return await response.json();
   } catch (err) {
     console.error("Error fetching tournament data tree:", err.message);
     throw err;
@@ -34,25 +23,16 @@ export const fetchAllTournamentsDataTree = async () => {
 
 export const fetchCurrentTournamentDataTree = async () => {
   try {
-    const idToken = await getFirebaseIdToken();
-
-    const response = await fetch(
-      `${BASE_SERVER_URL}/api/data-trees/tournament/current`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${idToken}`, // Include the token in the headers
-        },
-      }
+    const response = await makeAuthenticatedRequest(
+      "/api/data-trees/tournament/current",
+      { method: "GET" }
     );
 
     if (!response.ok) {
       throw new Error(`Failed to fetch data tree for current tournament`);
     }
 
-    const data = await response.json();
-    return data;
+    return await response.json();
   } catch (err) {
     console.error("Error fetching current tournament data tree:", err.message);
     throw err;
@@ -61,25 +41,16 @@ export const fetchCurrentTournamentDataTree = async () => {
 
 export const fetchEndedTournamentDataTree = async () => {
   try {
-    const idToken = await getFirebaseIdToken();
-
-    const response = await fetch(
-      `${BASE_SERVER_URL}/api/data-trees/tournament/ended`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${idToken}`, // Include the token in the headers
-        },
-      }
+    const response = await makeAuthenticatedRequest(
+      "/api/data-trees/tournament/ended",
+      { method: "GET" }
     );
 
     if (!response.ok) {
       throw new Error(`Failed to fetch data tree for ended tournament`);
     }
 
-    const data = await response.json();
-    return data;
+    return await response.json();
   } catch (err) {
     console.error("Error fetching ended tournament data tree:", err.message);
     throw err;
@@ -92,21 +63,13 @@ export const fetchPlayers = async () => {
     const cache = localStorage.getItem("playersCache");
     if (cache) {
       const { data, timestamp } = JSON.parse(cache);
-      const isValid = Date.now() - timestamp < CACHE_DURATION;
-
-      if (isValid) {
+      if (Date.now() - timestamp < CACHE_DURATION) {
         return data;
       }
     }
 
-    // If no cache or cache expired, fetch new data
-    const idToken = await getFirebaseIdToken();
-    const response = await fetch(`${BASE_SERVER_URL}/api/players`, {
+    const response = await makeAuthenticatedRequest("/api/players", {
       method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${idToken}`,
-      },
     });
 
     if (!response.ok) {
@@ -134,14 +97,8 @@ export const fetchPlayers = async () => {
 // Generic function to update a document by ID
 const updateDocumentById = async (endpoint, id, updateData) => {
   try {
-    const idToken = await getFirebaseIdToken();
-
-    const response = await fetch(`${BASE_SERVER_URL}/api/${endpoint}/${id}`, {
+    const response = await makeAuthenticatedRequest(`/api/${endpoint}/${id}`, {
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${idToken}`, // Include the token in the headers
-      },
       body: JSON.stringify(updateData),
     });
 
@@ -149,8 +106,7 @@ const updateDocumentById = async (endpoint, id, updateData) => {
       throw new Error(`Failed to update ${endpoint} with ID: ${id}`);
     }
 
-    const data = await response.json();
-    return data;
+    return await response.json();
   } catch (err) {
     console.error(`Error updating ${endpoint} with ID ${id}:`, err.message);
     throw err;
@@ -174,26 +130,21 @@ export const updateMatchById = async (id, updateData) => {
 
 export const updateMatchResults = async (matchId, updateData) => {
   try {
-    const idToken = await getFirebaseIdToken();
-
-    const response = await fetch(
-      `${BASE_SERVER_URL}/api/matches/match_concluded/${matchId}`,
+    const response = await makeAuthenticatedRequest(
+      `/api/matches/match_concluded/${matchId}`,
       {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${idToken}`, // Include the token in the headers
-        },
         body: JSON.stringify(updateData),
       }
     );
+
     if (!response.ok) {
       throw new Error(
         `Failed to update match results for match ID: ${matchId}`
       );
     }
-    const data = await response.json();
-    return data;
+
+    return await response.json();
   } catch (err) {
     console.error(
       `Error updating match results for match ID ${matchId}:`,
@@ -205,14 +156,8 @@ export const updateMatchResults = async (matchId, updateData) => {
 
 export const createSeries = async (seriesData) => {
   try {
-    const idToken = await getFirebaseIdToken();
-
-    const response = await fetch(`${BASE_SERVER_URL}/api/series`, {
+    const response = await makeAuthenticatedRequest("/api/series", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${idToken}`, // Include the token in the headers
-      },
       body: JSON.stringify(seriesData),
     });
 
@@ -220,8 +165,7 @@ export const createSeries = async (seriesData) => {
       throw new Error("Failed to create series");
     }
 
-    const data = await response.json();
-    return data;
+    return await response.json();
   } catch (err) {
     console.error("Error creating series:", err.message);
     throw err;
@@ -230,24 +174,19 @@ export const createSeries = async (seriesData) => {
 
 export const updateFirstBlood = async (matchId, updateData) => {
   try {
-    const idToken = await getFirebaseIdToken();
-
-    const response = await fetch(
-      `${BASE_SERVER_URL}/api/matches/first_blood/${matchId}`,
+    const response = await makeAuthenticatedRequest(
+      `/api/matches/first_blood/${matchId}`,
       {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${idToken}`, // Include the token in the headers
-        },
         body: JSON.stringify(updateData),
       }
     );
+
     if (!response.ok) {
       throw new Error(`Failed to update first blood for match ID: ${matchId}`);
     }
-    const data = await response.json();
-    return data;
+
+    return await response.json();
   } catch (err) {
     console.error(
       `Error updating first blood for match ID ${matchId}:`,
@@ -259,23 +198,15 @@ export const updateFirstBlood = async (matchId, updateData) => {
 
 export const getUsers = async () => {
   try {
-    const idToken = await getFirebaseIdToken();
-
-    const response = await fetch(`${BASE_SERVER_URL}/api/users`, {
+    const response = await makeAuthenticatedRequest("/api/users", {
       method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${idToken}`, // Include the token in the headers
-      },
     });
 
-    const data = await response.json();
-
     if (!response.ok) {
-      throw new Error(data.error || "Failed to fetch users.");
+      throw new Error("Failed to fetch users.");
     }
 
-    return data; // Return the users data
+    return await response.json();
   } catch (err) {
     console.error("Error fetching users:", err.message);
     throw err;
@@ -284,31 +215,19 @@ export const getUsers = async () => {
 
 export const sendEmailToUsers = async (users, subject, body) => {
   try {
-    const idToken = await getFirebaseIdToken();
-
-    const response = await fetch(
-      `${BASE_SERVER_URL}/api/users/send_admin_email`,
+    const response = await makeAuthenticatedRequest(
+      "/api/users/send_admin_email",
       {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${idToken}`, // Include the token in the headers
-        },
-        body: JSON.stringify({
-          users: users,
-          subject: subject,
-          body: body,
-        }),
+        body: JSON.stringify({ users, subject, body }),
       }
     );
 
-    const data = await response.json();
-
     if (!response.ok) {
-      throw new Error(data.error || "Failed to send admin email.");
+      throw new Error("Failed to send admin email.");
     }
 
-    return data;
+    return await response.json();
   } catch (err) {
     console.error("Error sending admin email:", err.message);
     throw err;
@@ -317,18 +236,10 @@ export const sendEmailToUsers = async (users, subject, body) => {
 
 export const validateUserIdv = async (userData) => {
   try {
-    // Retrieve the Firebase ID token
-    const idToken = await getFirebaseIdToken();
-
-    // Make the fetch request to your backend API
-    const response = await fetch(
-      `${BASE_SERVER_URL}/api/users/identity_verification_complete`,
+    const response = await makeAuthenticatedRequest(
+      "/api/users/identity_verification_complete",
       {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${idToken}`, // Include the token in the headers
-        },
         body: JSON.stringify(userData),
       }
     );
@@ -337,9 +248,7 @@ export const validateUserIdv = async (userData) => {
       throw new Error("Failed to validate user idv.");
     }
 
-    const data = await response.json();
-
-    return data; // Return the validation result
+    return await response.json();
   } catch (err) {
     console.error("Error validating user idv:", err.message);
     return false;
@@ -348,22 +257,15 @@ export const validateUserIdv = async (userData) => {
 
 export const fetchProducts = async () => {
   try {
-    const idToken = await getFirebaseIdToken();
-
-    const response = await fetch(`${BASE_SERVER_URL}/api/products`, {
+    const response = await makeAuthenticatedRequest("/api/products", {
       method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${idToken}`, // Include the token in the headers
-      },
     });
 
     if (!response.ok) {
       throw new Error(`Failed to fetch all products`);
     }
 
-    const data = await response.json();
-    return data;
+    return await response.json();
   } catch (err) {
     console.error("Error fetching all products:", err.message);
     throw err;

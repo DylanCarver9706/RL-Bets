@@ -1,61 +1,63 @@
 import React, { useState, useEffect } from "react";
 import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "./firebaseConfig";
+import { auth } from "./config/firebaseConfig";
 import { usePageTracking } from "./services/firebaseService";
 import {
   getMongoUserDataByFirebaseId,
-  userLocationLegal,
-  checkGeolocationPermission,
   userAgeLegal,
   updateUser,
 } from "./services/userService";
 import {
   getLatestPrivacyPolicy,
   getLatestTermsOfService,
-} from "./services/agreementsService";
+} from "./services/agreementService";
 import { useUser } from "./contexts/UserContext";
 import { Routes, Route, useNavigate } from "react-router-dom";
-import socket from "./services/socket";
-import Wagers from "./components/Wagers";
-import Profile from "./components/Profile";
-import Navbar from "./components/Navbar";
-import Footer from "./components/Footer";
-import CreateWager from "./components/CreateWager";
-import TournamentHistory from "./components/TournamentHistory";
-import CreditShop from "./components/CreditShop";
-import LifetimeLeaderboard from "./components/LifetimeLeaderboard";
-import CurrentTournamentLeaderboard from "./components/CurrentTournamentLeaderboard";
-import Log from "./components/Log";
-import Admin from "./components/Admin";
-import EmailVerification from "./components/EmailVerification";
-import Settings from "./components/Settings";
-import Credits from "./components/Credits";
-import BugForm from "./components/BugForm";
-import FeatureForm from "./components/FeatureForm";
-import FeedbackForm from "./components/FeedbackForm";
-import Hero from "./components/Hero";
-import IllegalState from "./components/IllegalState";
-import LocationPermissionRequired from "./components/LocationPermissionRequired";
-import IllegalAge from "./components/IllegalAge";
-import SomethingWentWrong from "./components/SomethingWentWrong";
-import AppOutage from "./components/AppOutage";
-import CurrentTournament from "./components/CurrentTournament";
-import PrivacyPolicy from "./components/PrivacyPolicy";
-import TermsOfService from "./components/TermsOfService";
-import Agreements from "./components/Agreements";
-import PageNotFound from "./components/PageNotFound";
-import SuspendedUser from "./components/SuspendedUser";
-import AdminEmail from "./components/AdminEmail";
-import PrivateRoute from "./components/PrivateRoute";
-import Signup from "./components/Signup";
-import Login from "./components/Login";
-import ForgotPassword from "./components/ForgotPassword";
-import AdminIdentityVerification from "./components/AdminIdentityVerification";
-import IdentityVerification from "./components/IdentityVerification";
-import SmsVerification from "./components/SmsVerification";
-import Instructions from "./components/Instructions";
-import About from "./components/About";
-import Contact from "./components/Contact";
+import socket from "./services/socketService";
+import Wagers from "./components/features/core/Wagers";
+import Profile from "./components/features/core/Profile";
+import Navbar from "./components/common/Navbar";
+import Footer from "./components/common/Footer";
+import CreateWager from "./components/features/admin/CreateWager";
+import TournamentHistory from "./components/features/tournaments/TournamentHistory";
+import CreditShop from "./components/features/core/CreditShop";
+import LifetimeLeaderboard from "./components/features/leaderboards/LifetimeLeaderboard";
+import CurrentTournamentLeaderboard from "./components/features/leaderboards/CurrentTournamentLeaderboard";
+import Log from "./components/features/admin/Log";
+import Admin from "./components/features/admin/Admin";
+import EmailVerification from "./components/features/userVerification/EmailVerification";
+import Settings from "./components/features/core/Settings";
+import Credits from "./components/features/about/Credits";
+import BugForm from "./components/features/feedback/BugForm";
+import FeatureForm from "./components/features/feedback/FeatureForm";
+import FeedbackForm from "./components/features/feedback/FeedbackForm";
+import Hero from "./components/features/core/Hero";
+import IllegalState from "./components/features/permissionFailure/IllegalState";
+import LocationPermissionRequired from "./components/features/permissionFailure/LocationPermissionRequired";
+import IllegalAge from "./components/features/permissionFailure/IllegalAge";
+import SomethingWentWrong from "./components/features/errorHandling/SomethingWentWrong";
+import AppOutage from "./components/features/errorHandling/AppOutage";
+import CurrentTournament from "./components/features/tournaments/CurrentTournament";
+import PrivacyPolicy from "./components/features/legal/PrivacyPolicy";
+import TermsOfService from "./components/features/legal/TermsOfService";
+import Agreements from "./components/features/legal/Agreements";
+import PageNotFound from "./components/features/errorHandling/PageNotFound";
+import SuspendedUser from "./components/features/permissionFailure/SuspendedUser";
+import AdminEmail from "./components/features/admin/AdminEmail";
+import PrivateRoute from "./components/features/routes/PrivateRoute";
+import Signup from "./components/features/auth/Signup";
+import Login from "./components/features/auth/Login";
+import ForgotPassword from "./components/features/auth/ForgotPassword";
+import AdminIdentityVerification from "./components/features/admin/AdminIdentityVerification";
+import IdentityVerification from "./components/features/userVerification/IdentityVerification";
+import SmsVerification from "./components/features/userVerification/SmsVerification";
+import Instructions from "./components/features/core/Instructions";
+import About from "./components/features/about/About";
+import Contact from "./components/features/about/Contact";
+import {
+  checkGeolocationPermission,
+  userLocationLegal,
+} from "./services/locationService";
 
 // Deprecated components
 // import PlaidIdentityVerification from "./components/PlaidIdentityVerification"; Deprecated
@@ -182,17 +184,34 @@ function App() {
       // If user has not verified email or IDV, redirect to respective pages
       if (auth.currentUser && user?.locationPermissionGranted === false) {
         navigate("/Location-Permission-Required");
-      } else if (auth.currentUser && user?.emailVerificationStatus && user?.emailVerificationStatus !== "verified") {
+      } else if (
+        auth.currentUser &&
+        user?.emailVerificationStatus &&
+        user?.emailVerificationStatus !== "verified"
+      ) {
         navigate("/Email-Verification");
-      } else if (auth.currentUser && !user?.phoneNumber && user?.smsVerificationStatus && user?.smsVerificationStatus !== "verified") {
+      } else if (
+        auth.currentUser &&
+        !user?.phoneNumber &&
+        user?.smsVerificationStatus &&
+        user?.smsVerificationStatus !== "verified"
+      ) {
         navigate("/SMS-Verification");
-      } else if (auth.currentUser && user?.idvStatus && ["review", "unverified"].includes(user?.idvStatus)) {
+      } else if (
+        auth.currentUser &&
+        user?.idvStatus &&
+        ["review", "unverified"].includes(user?.idvStatus)
+      ) {
         navigate("/Identity-Verification");
       } else if (auth.currentUser && user?.locationValid === false) {
         navigate("/Illegal-State");
       } else if (auth.currentUser && user?.ageValid === false) {
         navigate("/Illegal-Age");
-      } else if (auth.currentUser && user?.accountStatus && user?.accountStatus === "suspended") {
+      } else if (
+        auth.currentUser &&
+        user?.accountStatus &&
+        user?.accountStatus === "suspended"
+      ) {
         navigate("/Account-Suspended");
       } else if (auth.currentUser && user?.viewedInstructions === false) {
         navigate("/Instructions");
@@ -265,8 +284,10 @@ function App() {
     !loading && auth?.currentUser !== null && user?.mongoUserId !== null;
   const accountSuspended = user?.accountStatus === "suspended";
   const admin = loggedIn && user?.userType === "admin";
-  const requirePp = loggedIn && user?.pp && user?.pp.version !== privacyPolicyVersion;
-  const requireTos = loggedIn && user?.tos && user.tos.version !== termsOfServiceVersion;
+  const requirePp =
+    loggedIn && user?.pp && user?.pp.version !== privacyPolicyVersion;
+  const requireTos =
+    loggedIn && user?.tos && user.tos.version !== termsOfServiceVersion;
 
   return (
     <div style={styles.container}>

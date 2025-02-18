@@ -1,21 +1,20 @@
-import { auth } from "../firebaseConfig.js";
+import { auth, analytics } from "../config/firebaseConfig.js";
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { logEvent } from "firebase/analytics";
-import { analytics } from "../firebaseConfig";
-
-const BASE_SERVER_URL = process.env.REACT_APP_BASE_SERVER_URL;
+import { makeAuthenticatedRequest } from "./authService";
 
 // Get ID token from the currently authenticated user
 export const getFirebaseIdToken = async () => {
   try {
     const currentUser = auth.currentUser;
     if (!currentUser) {
-      // throw new Error("User is not authenticated");
+      return null;
     }
-    return await currentUser.getIdToken(); // Return a fresh ID token
+    return await currentUser.getIdToken();
   } catch (error) {
-    // throw new Error("Error getting Firebase ID token:", error);
+    console.error("Error getting Firebase ID token:", error);
+    return null;
   }
 };
 
@@ -30,16 +29,17 @@ export const usePageTracking = () => {
 // firebaseService.js
 export const sendImagesToAPI = async (formData) => {
   try {
-
-    const idToken = await getFirebaseIdToken();
-
-    const response = await fetch(`${BASE_SERVER_URL}/api/firebase/storage/upload`, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${idToken}`, // Include the token in the headers
-      },
-      body: formData,
-    });
+    const response = await makeAuthenticatedRequest(
+      "/api/firebase/storage/upload",
+      {
+        method: "POST",
+        // Remove Content-Type header to let browser set it with boundary for FormData
+        headers: {
+          "Content-Type": undefined,
+        },
+        body: formData,
+      }
+    );
 
     if (!response.ok) {
       throw new Error("Failed to upload images to server.");
@@ -54,42 +54,38 @@ export const sendImagesToAPI = async (formData) => {
 
 export const fetchIdentityVerificationImages = async () => {
   try {
+    const response = await makeAuthenticatedRequest(
+      "/api/firebase/storage/identity-verification-images",
+      { method: "GET" }
+    );
 
-    const idToken = await getFirebaseIdToken();
+    if (!response.ok) {
+      throw new Error("Failed to fetch identity verification images.");
+    }
 
-    const response = await fetch(`${BASE_SERVER_URL}/api/firebase/storage/identity-verification-images`, {
-      method: "GET",
-      headers: {
-        "Authorization": `Bearer ${idToken}`, // Include the token in the headers
-      },
-    });
     const data = await response.json();
     return data.images;
   } catch (error) {
     console.error("Error fetching images:", error);
+    throw error;
   }
 };
 
 export const deleteUserIdvFiles = async (userId, userName) => {
   try {
-
-    const idToken = await getFirebaseIdToken();
-
-    const response = await fetch(`${BASE_SERVER_URL}/api/firebase/storage/delete`, {
-      method: "POST",
-      headers: { 
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${idToken}`, // Include the token in the headers
-      },
-      body: JSON.stringify({ userId, userName }),
-    });
+    const response = await makeAuthenticatedRequest(
+      "/api/firebase/storage/delete",
+      {
+        method: "POST",
+        body: JSON.stringify({ userId, userName }),
+      }
+    );
 
     if (!response.ok) {
       throw new Error("Failed to delete identity verification files.");
     }
 
-    const data = await response.json();
-    return data;
+    return await response.json();
   } catch (error) {
     console.error("Error deleting ID verification files:", error);
     throw error;

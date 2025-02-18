@@ -1,4 +1,4 @@
-import { getFirebaseIdToken } from "./firebaseService.js";
+import { makeAuthenticatedRequest } from "./authService";
 
 const BASE_SERVER_URL = process.env.REACT_APP_BASE_SERVER_URL; // Define your backend server URL
 
@@ -7,74 +7,56 @@ const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 
 export const fetchWagers = async () => {
   try {
-    const idToken = await getFirebaseIdToken();
-
-    const response = await fetch(`${BASE_SERVER_URL}/api/wagers`, {
+    const response = await makeAuthenticatedRequest("/api/wagers", {
       method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${idToken}`, // Include the token in the headers
-      },
     });
 
     if (!response.ok) {
       throw new Error("Failed to fetch wagers");
     }
 
-    const data = await response.json();
-    return data;
+    return await response.json();
   } catch (err) {
     console.error("Error fetching wagers:", err.message);
+    throw err;
   }
 };
 
 // Create wager
-export const createWager = async (body) => {
+export const createWager = async (wagerData) => {
   try {
-    const idToken = await getFirebaseIdToken();
-
-    const response = await fetch(`${BASE_SERVER_URL}/api/wagers`, {
+    const response = await makeAuthenticatedRequest("/api/wagers", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${idToken}`, // Include the token in the headers
-      },
-      body: JSON.stringify(body),
+      body: JSON.stringify(wagerData),
     });
 
     if (!response.ok) {
       throw new Error("Failed to create wager");
     }
 
-    const data = await response.json();
-    return data;
+    return await response.json();
   } catch (err) {
     console.error("Error creating wager:", err.message);
+    throw err;
   }
 };
 
 // Create bet
-export const createBet = async (body) => {
+export const createBet = async (betData) => {
   try {
-    const idToken = await getFirebaseIdToken();
-
-    const response = await fetch(`${BASE_SERVER_URL}/api/bets`, {
+    const response = await makeAuthenticatedRequest("/api/bets", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${idToken}`, // Include the token in the headers
-      },
-      body: JSON.stringify(body),
+      body: JSON.stringify(betData),
     });
 
     if (!response.ok) {
       throw new Error("Failed to create bet");
     }
 
-    const data = await response.json();
-    return data;
+    return await response.json();
   } catch (err) {
     console.error("Error creating bet:", err.message);
+    throw err;
   }
 };
 
@@ -85,21 +67,13 @@ export const fetchTeams = async () => {
     const cache = localStorage.getItem("teamsCache");
     if (cache) {
       const { data, timestamp } = JSON.parse(cache);
-      const isValid = Date.now() - timestamp < CACHE_DURATION;
-
-      if (isValid) {
+      if (Date.now() - timestamp < CACHE_DURATION) {
         return data;
       }
     }
 
-    // If no cache or cache expired, fetch new data
-    const idToken = await getFirebaseIdToken();
-    const response = await fetch(`${BASE_SERVER_URL}/api/teams/with_players`, {
+    const response = await makeAuthenticatedRequest("/api/teams/with_players", {
       method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${idToken}`,
-      },
     });
 
     if (!response.ok) {
@@ -126,15 +100,10 @@ export const fetchTeams = async () => {
 
 export const fetchBettableObjects = async () => {
   try {
-    const idToken = await getFirebaseIdToken();
-
-    const response = await fetch(`${BASE_SERVER_URL}/api/data-trees/bettable`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${idToken}`, // Include the token in the headers
-      },
-    });
+    const response = await makeAuthenticatedRequest(
+      `${BASE_SERVER_URL}/api/data-trees/bettable`,
+      { method: "GET" }
+    );
 
     if (!response.ok) {
       throw new Error(`Failed to fetch data tree`);
