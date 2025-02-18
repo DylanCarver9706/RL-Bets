@@ -1,8 +1,6 @@
 // PlaidService.js/identityVerificationService.js
 import { makeAuthenticatedRequest } from "./authService";
 
-const BASE_SERVER_URL = process.env.REACT_APP_BASE_SERVER_URL;
-
 // Generate Plaid Link token for IDV
 export const generateLinkTokenForIDV = async (mongoUserId) => {
   try {

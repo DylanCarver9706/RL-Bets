@@ -223,7 +223,14 @@ export const redeemReferralCode = async (
 };
 
 export const generateReferralCode = async (userId) => {
-  const BASE_CLIENT_URL = process.env.REACT_APP_BASE_CLIENT_URL;
+  
+  let BASE_CLIENT_URL;
+  if (process.env.REACT_APP_ENV === "production") {
+    BASE_CLIENT_URL = process.env.REACT_APP_BASE_PROD_CLIENT_URL;
+  } else {
+    BASE_CLIENT_URL = process.env.REACT_APP_BASE_DEV_CLIENT_URL;
+  }
+
   try {
     return `${BASE_CLIENT_URL}/Signup?ref=${userId}`;
   } catch (err) {

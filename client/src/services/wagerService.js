@@ -1,7 +1,5 @@
 import { makeAuthenticatedRequest } from "./authService";
 
-const BASE_SERVER_URL = process.env.REACT_APP_BASE_SERVER_URL; // Define your backend server URL
-
 // Add cache constants at the top of the file
 const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 
@@ -101,7 +99,7 @@ export const fetchTeams = async () => {
 export const fetchBettableObjects = async () => {
   try {
     const response = await makeAuthenticatedRequest(
-      `${BASE_SERVER_URL}/api/data-trees/bettable`,
+      "api/data-trees/bettable",
       { method: "GET" }
     );
 
