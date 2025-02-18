@@ -8,10 +8,7 @@ const { initializeCollections } = require("./database/mongoCollections");
 const { initializeFirebase } = require("./app/middlewares/firebaseAdmin");
 const { initializeSocketIo } = require("./app/middlewares/socketIO");
 const { errorLogger } = require("./app/middlewares/errorLogger");
-const {
-  scheduleDailyEmail,
-  scheduleSoftDeleteUsersCheck,
-} = require("./app/middlewares/nodeCron");
+const { scheduleDailyEmail, scheduleSoftDeleteUsersCheck } = require("./app/middlewares/nodeCron");
 
 // Initialize Express app
 const app = express();
@@ -20,8 +17,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: [process.env.DEV_CLIENT_URL, process.env.PROD_CLIENT_URL, /\.vercel\.app$/],
-    credentials: true,
+    origin: process.env.DEV_CLIENT_URL,
   },
 });
 
@@ -36,18 +32,13 @@ app.use((req, res, next) => {
   }
 });
 
-// Update CORS configuration to allow requests from your deployed client
-const corsOptions = {
-  origin: [
-    process.env.DEV_CLIENT_URL, // Local development
-    process.env.PROD_CLIENT_URL, // Production client
-  ],
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-};
-
-app.use(cors(corsOptions));
+// app.use(
+//   cors({
+//     origin: process.env.DEV_CLIENT_URL,
+//     methods: "GET,PUT,POST,DELETE",
+//     credentials: true,
+//   })
+// );
 
 initializeCollections()
   .then(() => initializeFirebase())
