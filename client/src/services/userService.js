@@ -1,7 +1,4 @@
-import { getFirebaseIdToken } from "./firebaseService.js";
 import { makeAuthenticatedRequest } from "./authService";
-
-const BASE_SERVER_URL = process.env.REACT_APP_BASE_SERVER_URL; // Define your backend server URL
 
 // Function to create a new user in the MongoDB database
 export const createUserInDatabase = async (userData) => {
@@ -88,7 +85,7 @@ export const deleteUser = async (userId) => {
 
 // Soft delete a user by their MongoDB ID
 // NOTE: Only keeping email to prevent abuse in future new customer promotions
-export const softDeleteUser = async (mongoUserId) => {
+export const softDeleteUserStatusUpdate = async (mongoUserId) => {
   try {
     const response = await makeAuthenticatedRequest(
       `/api/users/soft_delete/${mongoUserId}`,

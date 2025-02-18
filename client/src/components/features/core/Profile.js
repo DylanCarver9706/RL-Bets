@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   updateUser,
-  softDeleteUser,
+  softDeleteUserStatusUpdate,
   generateReferralCode,
 } from "../../../services/userService";
 import {
@@ -97,18 +97,20 @@ const Profile = () => {
       return;
     }
     try {
+      await softDeleteUserStatusUpdate(user.mongoUserId);
       await deleteUser(auth.currentUser);
-      await softDeleteUser(user.mongoUserId);
       setUser(null);
       alert("Your account has been successfully deleted.");
       navigate("/Signup");
     } catch (err) {
       if (err.code === "auth/requires-recent-login") {
+        await updateUser(user.mongoUserId, { accountStatus: "active" });
         alert(
           "Account deletion requires recent login. Please log in again and try again."
         );
         navigate("/Login");
       } else {
+        await updateUser(user.mongoUserId, { accountStatus: "active" });
         console.error("Error deleting user account:", err.message);
         alert(
           "An error occurred while deleting your account. Please try again."
