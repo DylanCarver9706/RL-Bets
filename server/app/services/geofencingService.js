@@ -1,5 +1,5 @@
 const fetch = require("node-fetch");
-const unitedStatesLegalStates = require(process.env.UNITED_STATES_LEGAL_STATES_PATH);
+const { unitedStatesLegalStates } = require("./ageRestrictionService");
 
 const reverseGeocode = async (lat, lon) => {
   const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`;
