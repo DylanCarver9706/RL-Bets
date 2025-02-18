@@ -8,7 +8,7 @@ const scheduleDailyEmail = () => {
     "0 22 * * *",
     async () => {
       try {
-        console.log("Cron job started at:", new Date());
+        console.log("Scheduled daily DB backup at :", new Date());
 
         // Fetch data as JSON string
         const jsonData = await fetchAllCollectionsData();
@@ -43,8 +43,6 @@ const scheduleDailyEmail = () => {
       timezone: "America/Chicago",
     }
   );
-
-  console.log("Scheduled daily email at 10:00 PM CST.");
 };
 
 const scheduleSoftDeleteUsersCheck = () => {
