@@ -8,7 +8,10 @@ const { initializeCollections } = require("./database/mongoCollections");
 const { initializeFirebase } = require("./app/middlewares/firebaseAdmin");
 const { initializeSocketIo } = require("./app/middlewares/socketIO");
 const { errorLogger } = require("./app/middlewares/errorLogger");
-const { scheduleDailyEmail, scheduleSoftDeleteUsersCheck } = require("./app/middlewares/nodeCron");
+const {
+  scheduleDailyEmail,
+  scheduleSoftDeleteUsersCheck,
+} = require("./app/middlewares/nodeCron");
 
 // Initialize Express app
 const app = express();
@@ -53,9 +56,9 @@ app.use((req, res, next) => {
   next();
 });
 
-// Route that returns hello world
+// Move the hello world route before other routes
 app.get("/", (req, res) => {
-  res.json("Hello World!");
+  res.json({ message: "Hello World!" });
 });
 
 // Import routes
