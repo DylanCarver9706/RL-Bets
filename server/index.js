@@ -32,13 +32,15 @@ app.use((req, res, next) => {
   }
 });
 
-// app.use(
-//   cors({
-//     origin: process.env.DEV_CLIENT_URL,
-//     methods: "GET,PUT,POST,DELETE",
-//     credentials: true,
-//   })
-// );
+app.use(
+  cors({
+    // Allow for me to access this from any origin
+    origin: "*",
+    // origin: process.env.DEV_CLIENT_URL,
+    methods: "GET,PUT,POST,DELETE",
+    credentials: true,
+  })
+);
 
 initializeCollections()
   .then(() => initializeFirebase())
@@ -49,6 +51,11 @@ initializeCollections()
 app.use((req, res, next) => {
   console.log(`${req.method} ${req.url}`);
   next();
+});
+
+// Route that returns hello world
+app.get("/", (req, res) => {
+  res.json("Hello World!");
 });
 
 // Import routes
