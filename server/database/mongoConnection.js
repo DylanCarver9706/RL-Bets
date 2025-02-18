@@ -1,17 +1,17 @@
 const { MongoClient, ServerApiVersion } = require("mongodb");
 
-const uri = `${process.env.MONGO_DB_BASE_URI.replace(
-  "MONGO_DB_SECRET_KEY",
-  process.env.MONGO_DB_SECRET
-)}/?retryWrites=true&w=majority&appName=${process.env.MONGO_DB_URI_PARAM_APP_NAME}`;
+const uri = process.env.MONGO_DB_BASE_URI;
 
-const client = new MongoClient(uri, {
-  serverApi: {
-    version: ServerApiVersion.v1,
-    strict: true,
-    deprecationErrors: true,
-  },
-});
+const options = {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  ssl: true,
+  tls: true,
+  tlsInsecure: false,
+  minPoolSize: 1
+};
+
+const client = new MongoClient(uri, options);
 
 const connectToDatabase = async () => {
   try {
