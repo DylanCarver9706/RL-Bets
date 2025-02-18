@@ -1,14 +1,12 @@
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient } = require("mongodb");
 
 const uri = process.env.MONGO_DB_BASE_URI;
 
 const options = {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
   ssl: true,
   tls: true,
   tlsInsecure: false,
-  minPoolSize: 1
+  minPoolSize: 1,
 };
 
 const client = new MongoClient(uri, options);
