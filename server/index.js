@@ -8,7 +8,10 @@ const { initializeCollections } = require("./database/mongoCollections");
 const { initializeFirebase } = require("./app/middlewares/firebaseAdmin");
 const { initializeSocketIo } = require("./app/middlewares/socketIO");
 const { errorLogger } = require("./app/middlewares/errorLogger");
-const { scheduleDailyEmail, scheduleSoftDeleteUsersCheck } = require("./app/middlewares/nodeCron");
+const {
+  scheduleDailyEmail,
+  scheduleSoftDeleteUsersCheck,
+} = require("./app/middlewares/nodeCron");
 
 // Initialize Express app
 const app = express();
@@ -32,13 +35,19 @@ app.use((req, res, next) => {
   }
 });
 
-app.use(
-  cors({
-    origin: process.env.DEV_CLIENT_URL,
-    methods: "GET,PUT,POST,DELETE",
-    credentials: true,
-  })
-);
+// Update CORS configuration to allow requests from your deployed client
+const corsOptions = {
+  origin: [
+    "http://localhost:3000", // Local development
+    "https://your-client-domain.vercel.app", // Add your deployed client URL
+    /\.vercel\.app$/, // This will allow all vercel.app subdomains
+  ],
+  credentials: true, // Important for cookies/auth headers
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
+
+app.use(cors(corsOptions));
 
 initializeCollections()
   .then(() => initializeFirebase())
