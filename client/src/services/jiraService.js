@@ -27,7 +27,7 @@ export const createJiraIssue = async (
       throw new Error("Failed to create Jira issue.");
     }
 
-    return await response.json();
+    return response;
   } catch (error) {
     console.error("Error:", error.message);
     throw new Error("Failed to create Jira issue.");
