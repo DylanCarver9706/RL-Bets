@@ -1,6 +1,7 @@
 const cron = require("node-cron");
 const { fetchAllCollectionsData } = require("../../database/middlewares/mongo");
 const { sendEmail } = require("../middlewares/nodemailer");
+const { getAllUsers, softDeleteUser } = require("../services/usersService");
 
 const scheduleDailyEmail = () => {
   cron.schedule(
@@ -45,4 +46,47 @@ const scheduleDailyEmail = () => {
   console.log("Scheduled daily email at 5:18 PM CST.");
 };
 
-module.exports = { scheduleDailyEmail };
+const scheduleSoftDeleteUsersCheck = () => {
+  cron.schedule(
+    "0 23 * * *", // Runs at 11pm every day
+    async () => {
+      try {
+        console.log("Soft delete users cron job started at:", new Date());
+
+        const users = await getAllUsers();
+        const usersToSoftDelete = users.filter(
+          (user) =>
+            user.accountStatus === "deleted" && user.firebaseUserId !== null
+        );
+
+        for (const user of usersToSoftDelete) {
+          try {
+            await softDeleteUser(user._id.toString());
+            console.log(
+              `Successfully processed deleted user: ${user._id.toString()}`
+            );
+          } catch (error) {
+            console.error(
+              `Error processing deleted user ${user._id.toString()}:`,
+              error.message
+            );
+          }
+        }
+
+        console.log(`Processed ${usersToSoftDelete.length} deleted users`);
+      } catch (error) {
+        console.error("Error during soft delete users check:", error.message);
+      } finally {
+        console.log("Soft delete users cron job finished at:", new Date());
+      }
+    },
+    {
+      timezone: "America/Chicago",
+    }
+  );
+};
+
+module.exports = {
+  scheduleDailyEmail,
+  scheduleSoftDeleteUsersCheck,
+};
