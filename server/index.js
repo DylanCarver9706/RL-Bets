@@ -38,8 +38,8 @@ app.use((req, res, next) => {
 app.use(
   cors({
     // Allow for me to access this from any origin
-    origin: "*",
-    // origin: process.env.DEV_CLIENT_URL,
+    // origin: "*",
+    origin: process.env.DEV_CLIENT_URL,
     methods: "GET,PUT,POST,DELETE",
     credentials: true,
   })
