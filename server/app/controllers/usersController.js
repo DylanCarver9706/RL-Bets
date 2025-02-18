@@ -52,9 +52,9 @@ const updateUser = async (req, res, logError) => {
   }
 };
 
-const softDeleteUser = async (req, res, logError) => {
+const softDeleteUserStatusUpdate = async (req, res, logError) => {
   try {
-    await userService.softDeleteUser(req.params.id);
+    await userService.updateUser(req.params.id, { accountStatus: "deleted" });
     res.status(200).json({ message: "User soft-deleted successfully" });
   } catch (error) {
     logError(error);
@@ -98,7 +98,7 @@ module.exports = {
   getUserByFirebaseId,
   createUser,
   updateUser,
-  softDeleteUser,
+  softDeleteUserStatusUpdate,
   deleteUser,
   adminEmailUsers,
   identityVerificationComplete,
