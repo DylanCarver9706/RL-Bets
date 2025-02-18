@@ -8,7 +8,7 @@ const { initializeCollections } = require("./database/mongoCollections");
 const { initializeFirebase } = require("./app/middlewares/firebaseAdmin");
 const { initializeSocketIo } = require("./app/middlewares/socketIO");
 const { errorLogger } = require("./app/middlewares/errorLogger");
-const { scheduleDailyEmail } = require("./app/middlewares/nodeCron");
+const { scheduleDailyEmail, scheduleSoftDeleteUsersCheck } = require("./app/middlewares/nodeCron");
 
 // Initialize Express app
 const app = express();
@@ -82,6 +82,7 @@ app.use(errorLogger);
 if (process.env.ENV === "production") {
   // Cron Jobs
   scheduleDailyEmail();
+  scheduleSoftDeleteUsersCheck();
 }
 
 // Start server
