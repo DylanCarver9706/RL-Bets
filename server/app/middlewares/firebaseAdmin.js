@@ -1,13 +1,25 @@
 // server/app/middlewares/firebaseAdmin.js
 const firebaseAdmin = require("firebase-admin");
 const { getStorage } = require("firebase-admin/storage");
-const firebaseServiceAccountKey = require(process.env.FIREBASE_SERVICE_ACCOUNT_KEY_PATH);
 const { collections } = require("../../database/mongoCollections");
 
 const initializeFirebase = async () => {
   if (!firebaseAdmin.apps.length) {
     firebaseAdmin.initializeApp({
-      credential: firebaseAdmin.credential.cert(firebaseServiceAccountKey),
+      credential: firebaseAdmin.credential.cert({
+        type: process.env.FIREBASE_TYPE,
+        project_id: process.env.FIREBASE_PROJECT_ID,
+        private_key_id: process.env.FIREBASE_PRIVATE_KEY_ID,
+        private_key: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"),
+        client_email: process.env.FIREBASE_CLIENT_EMAIL,
+        client_id: process.env.FIREBASE_CLIENT_ID,
+        auth_uri: process.env.FIREBASE_AUTH_URI,
+        token_uri: process.env.FIREBASE_TOKEN_URI,
+        auth_provider_x509_cert_url:
+          process.env.FIREBASE_AUTH_PROVIDER_X509_CERT_URL,
+        client_x509_cert_url: process.env.FIREBASE_CLIENT_X509_CERT_URL,
+        universe_domain: process.env.FIREBASE_UNIVERSE_DOMAIN,
+      }),
       storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
     });
   }
@@ -21,7 +33,9 @@ const verifyFirebaseToken = (requireAdmin = false) => {
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res.status(401).json({ message: "Unauthorized: No token provided" });
+      return res
+        .status(401)
+        .json({ message: "Unauthorized: No token provided" });
     }
 
     const token = authHeader.split(" ")[1];
@@ -38,7 +52,9 @@ const verifyFirebaseToken = (requireAdmin = false) => {
         });
 
         if (!user || user.userType !== "admin") {
-          return res.status(403).json({ message: "Forbidden: Admin access required" });
+          return res
+            .status(403)
+            .json({ message: "Forbidden: Admin access required" });
         }
 
         req.user.isAdmin = true; // Mark user as admin
