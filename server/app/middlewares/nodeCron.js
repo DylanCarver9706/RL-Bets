@@ -10,14 +10,14 @@ const scheduleDailyEmail = () => {
       try {
         console.log("Cron job started at:", new Date());
 
-        // Fetch data and generate JSON file
-        const filePath = await fetchAllCollectionsData();
-        console.log("Data fetched and saved to JSON file:", filePath);
+        // Fetch data as JSON string
+        const jsonData = await fetchAllCollectionsData();
 
-        const pathParts = filePath.split("\\"); // Split by backslashes
-        const fileName = pathParts[pathParts.length - 1]; // Get last element
+        // Get current date for filename
+        const currentDate = new Date().toISOString().split("T")[0];
+        const fileName = `all_collections_data_${currentDate}.json`;
 
-        // Send the email
+        // Send the email with JSON data as attachment
         const emailResult = await sendEmail(
           process.env.NODEMAILER_USER_EMAIL,
           "Daily Database Backup",
@@ -26,7 +26,8 @@ const scheduleDailyEmail = () => {
           [
             {
               filename: fileName,
-              path: filePath,
+              content: jsonData, // Send the JSON string directly as content
+              contentType: "application/json",
             },
           ]
         );
@@ -43,7 +44,7 @@ const scheduleDailyEmail = () => {
     }
   );
 
-  console.log("Scheduled daily email at 5:18 PM CST.");
+  console.log("Scheduled daily email at 10:00 PM CST.");
 };
 
 const scheduleSoftDeleteUsersCheck = () => {

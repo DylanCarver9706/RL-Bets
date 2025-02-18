@@ -92,14 +92,15 @@ const fetchAllCollectionsData = async () => {
       data[collectionName] = items;
     }
 
-    // Save data to a JSON file
-    const filePath = path.join(process.env.DAILY_BACKUP_JSON_PATH, `all_collections_data_${new Date().toISOString().split("T")[0]}.json`);
-    fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf-8");
-    return filePath;
+    return JSON.stringify(data, null, 2); // Return the JSON string directly
   } catch (error) {
     console.error("Error fetching collections data:", error);
     throw error;
   }
 };
 
-module.exports = { createMongoDocument, updateMongoDocument, fetchAllCollectionsData };
+module.exports = {
+  createMongoDocument,
+  updateMongoDocument,
+  fetchAllCollectionsData,
+};
