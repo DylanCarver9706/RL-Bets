@@ -20,7 +20,8 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: process.env.DEV_CLIENT_URL,
+    origin: [process.env.DEV_CLIENT_URL, process.env.PROD_CLIENT_URL, /\.vercel\.app$/],
+    credentials: true,
   },
 });
 
@@ -38,11 +39,11 @@ app.use((req, res, next) => {
 // Update CORS configuration to allow requests from your deployed client
 const corsOptions = {
   origin: [
-    "http://localhost:3000", // Local development
-    "https://your-client-domain.vercel.app", // Add your deployed client URL
-    /\.vercel\.app$/, // This will allow all vercel.app subdomains
-  ],
-  credentials: true, // Important for cookies/auth headers
+    process.env.DEV_CLIENT_URL, // Local development
+    process.env.PROD_CLIENT_URL, // Production client
+    /\.vercel\.app$/, // This will allow all vercel.app subdomains for development/preview deployments
+  ].filter(Boolean), // This removes any undefined values
+  credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
 };
