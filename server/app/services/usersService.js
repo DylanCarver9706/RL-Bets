@@ -100,6 +100,7 @@ const updateUser = async (id, updateData) => {
     "name",
     "email",
     "smsVerificationStatus",
+    "accountStatus",
   ]
 
   // Check if any of the fields in updateData are not allowed and throw an error saying which field is not allowed to be updated
@@ -152,6 +153,7 @@ const softDeleteUser = async (id) => {
       smsVerificationStatus: null,
       viewedInstructions: null,
       userMadeFirstPurchase: null,
+      address: null,
     },
   });
 
