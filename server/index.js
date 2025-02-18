@@ -41,8 +41,7 @@ const corsOptions = {
   origin: [
     process.env.DEV_CLIENT_URL, // Local development
     process.env.PROD_CLIENT_URL, // Production client
-    /\.vercel\.app$/, // This will allow all vercel.app subdomains for development/preview deployments
-  ].filter(Boolean), // This removes any undefined values
+  ],
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
