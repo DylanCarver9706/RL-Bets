@@ -9,15 +9,11 @@
     "routes": [
         {
             "src": "/api/(.*)",
-            "dest": "/index.js"
+            "dest": "/api"
         },
         {
             "src": "/webhook",
-            "dest": "/index.js"
-        },
-        {
-            "src": "/(.*)",
-            "dest": "/index.js"
+            "dest": "/api/webhook"
         }
     ]
 }
