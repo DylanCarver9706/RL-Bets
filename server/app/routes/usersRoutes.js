@@ -12,7 +12,7 @@ router.post("/identity_verification_complete", verifyFirebaseToken(), userContro
 router.post("/", verifyFirebaseToken(), userController.createUser);
 router.put("/:id", verifyFirebaseToken(), userController.updateUser);
 // The whole purpose of this route is to allow the user to delete their account without a firebase token
-router.put("/soft_delete/:id", userController.softDeleteUser);
+router.put("/soft_delete/:id", verifyFirebaseToken(), userController.softDeleteUserStatusUpdate);
 router.delete("/:id", verifyFirebaseToken(true), userController.deleteUser);
 
 module.exports = router;
