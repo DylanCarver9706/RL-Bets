@@ -39,7 +39,12 @@ app.use(
   cors({
     // Allow for me to access this from any origin
     // origin: "*",
-    origin: process.env.DEV_CLIENT_URL,
+    
+    // Allow both dev and production client domains in development but only production domains in production
+    origin:
+      process.env.ENV === "development"
+        ? [process.env.DEV_CLIENT_URL, process.env.PROD_CLIENT_URL]
+        : process.env.PROD_CLIENT_URL,
     methods: "GET,PUT,POST,DELETE",
     credentials: true,
   })
