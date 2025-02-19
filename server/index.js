@@ -37,14 +37,30 @@ app.use((req, res, next) => {
 
 app.use(
   cors({
-    // Allow for me to access this from any origin
-    // origin: "*",
-    
-    // Allow both dev and production client domains in development but only production domains in production
-    origin:
-      process.env.ENV === "development"
-        ? [process.env.DEV_CLIENT_URL, process.env.PROD_CLIENT_URL]
-        : process.env.PROD_CLIENT_URL,
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+
+      const allowedOrigins =
+        process.env.ENV === "development"
+          ? [process.env.DEV_CLIENT_URL, process.env.PROD_CLIENT_URL]
+          : [
+              process.env.PROD_CLIENT_URL,
+              // Allow any vercel.app subdomain
+              /\.vercel\.app$/,
+            ];
+
+      // Check if origin is allowed
+      const isAllowed = Array.isArray(allowedOrigins)
+        ? allowedOrigins.includes(origin)
+        : allowedOrigins.test(origin);
+
+      if (isAllowed) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     methods: "GET,PUT,POST,DELETE",
     credentials: true,
   })
