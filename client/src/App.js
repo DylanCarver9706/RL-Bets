@@ -31,7 +31,7 @@ import Credits from "./components/features/about/Credits";
 import BugForm from "./components/features/feedback/BugForm";
 import FeatureForm from "./components/features/feedback/FeatureForm";
 import FeedbackForm from "./components/features/feedback/FeedbackForm";
-import Hero from "./components/features/core/Hero";
+import Hero from "./components/features/about/Hero";
 import IllegalState from "./components/features/permissionFailure/IllegalState";
 import LocationPermissionRequired from "./components/features/permissionFailure/LocationPermissionRequired";
 import IllegalAge from "./components/features/permissionFailure/IllegalAge";
