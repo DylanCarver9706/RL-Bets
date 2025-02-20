@@ -290,255 +290,234 @@ function App() {
     loggedIn && user?.tos && user.tos.version !== termsOfServiceVersion;
 
   return (
-    <div style={styles.container}>
+    <div className="App">
       <Navbar />
+      <div className="main-content">
+        {/* Show the Agreements banner if the user has not accepted the latest version of the Privacy Policy or Terms of Service */}
+        {(requireTos || requirePp) &&
+          !unprotectedRoutes.includes(window.location.pathname) && (
+            <Agreements
+              requireTos={requireTos}
+              requirePp={requirePp}
+              tosVersion={termsOfServiceVersion}
+              ppVersion={privacyPolicyVersion}
+            />
+          )}
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/" element={<Hero />} />
+          <Route path="/Whoopsie-Daisy" element={<SomethingWentWrong />} />
+          <Route path="/Bug-Form" element={<BugForm />} />
+          <Route path="/Feature-Form" element={<FeatureForm />} />
+          <Route path="/Feedback-Form" element={<FeedbackForm />} />
+          <Route path="/Privacy-Policy" element={<PrivacyPolicy />} />
+          <Route path="/Terms-Of-Service" element={<TermsOfService />} />
+          <Route path="/Login" element={<Login />} />
+          <Route path="/Signup" element={<Signup />} />
+          <Route path="/Forgot-Password" element={<ForgotPassword />} />
+          <Route path="/App-Outage" element={<AppOutage />} />
+          <Route path="/Instructions" element={<Instructions />} />
+          <Route path="/About" element={<About />} />
+          <Route path="/Contact" element={<Contact />} />
+          {/* Catch-all route for undefined paths */}
+          <Route path="*" element={<PageNotFound />} />
 
-      <div>
-        {loggedIn ? (
-          <p>
-            Welcome, Firebase UID: {user?.firebaseUserId} || MongoId:{" "}
-            {user?.mongoUserId} || Email Verification Status:{" "}
-            {user?.emailVerificationStatus} || IDV Status: {user?.idvStatus} ||
-            Location Permission Granted: {`${user?.locationPermissionGranted}`}{" "}
-            || Location Valid: {`${user?.locationValid}`} || Age Valid:{" "}
-            {`${user?.ageValid}`}
-          </p>
-        ) : (
-          <p>Please log in</p>
-        )}
-      </div>
-      {/* Show the Agreements banner if the user has not accepted the latest version of the Privacy Policy or Terms of Service */}
-      {(requireTos || requirePp) &&
-        !unprotectedRoutes.includes(window.location.pathname) && (
-          <Agreements
-            requireTos={requireTos}
-            requirePp={requirePp}
-            tosVersion={termsOfServiceVersion}
-            ppVersion={privacyPolicyVersion}
+          {/* Protected Routes */}
+          <Route
+            path="/Wagers"
+            element={
+              <PrivateRoute authorized={loggedIn}>
+                <Wagers />
+              </PrivateRoute>
+            }
           />
-        )}
-      <Routes>
-        {/* Public Routes */}
-        <Route path="/" element={<Hero />} />
-        <Route path="/Whoopsie-Daisy" element={<SomethingWentWrong />} />
-        <Route path="/Bug-Form" element={<BugForm />} />
-        <Route path="/Feature-Form" element={<FeatureForm />} />
-        <Route path="/Feedback-Form" element={<FeedbackForm />} />
-        <Route path="/Privacy-Policy" element={<PrivacyPolicy />} />
-        <Route path="/Terms-Of-Service" element={<TermsOfService />} />
-        <Route path="/Login" element={<Login />} />
-        <Route path="/Signup" element={<Signup />} />
-        <Route path="/Forgot-Password" element={<ForgotPassword />} />
-        <Route path="/App-Outage" element={<AppOutage />} />
-        <Route path="/Instructions" element={<Instructions />} />
-        <Route path="/About" element={<About />} />
-        <Route path="/Contact" element={<Contact />} />
-        {/* Catch-all route for undefined paths */}
-        <Route path="*" element={<PageNotFound />} />
-
-        {/* Protected Routes */}
-        <Route
-          path="/Wagers"
-          element={
-            <PrivateRoute authorized={loggedIn}>
-              <Wagers />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/Create_Wager"
-          element={
-            <PrivateRoute authorized={loggedIn}>
-              <CreateWager />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/Profile"
-          element={
-            <PrivateRoute authorized={loggedIn}>
-              <Profile />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/Email-Verification"
-          element={
-            <PrivateRoute
-              authorized={loggedIn && !emailVerified}
-              redirectTo="/Wagers"
-            >
-              <EmailVerification />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/Identity-Verification"
-          element={
-            <PrivateRoute
-              authorized={loggedIn && !idvVerified}
-              redirectTo="/Wagers"
-            >
-              <IdentityVerification />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/SMS-Verification"
-          element={
-            <PrivateRoute
-              authorized={loggedIn && !smsVerified}
-              redirectTo="/Wagers"
-            >
-              <SmsVerification />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/Settings"
-          element={
-            <PrivateRoute authorized={loggedIn}>
-              <Settings />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/Credits"
-          element={
-            <PrivateRoute authorized={loggedIn}>
-              <Credits />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/Tournament-History"
-          element={
-            <PrivateRoute authorized={loggedIn}>
-              <TournamentHistory />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/Credit-Shop"
-          element={
-            <PrivateRoute authorized={loggedIn}>
-              <CreditShop />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/Lifetime-Leaderboard"
-          element={
-            <PrivateRoute authorized={loggedIn}>
-              <LifetimeLeaderboard />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/Tournament-Leaderboard"
-          element={
-            <PrivateRoute authorized={loggedIn}>
-              <CurrentTournamentLeaderboard />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/Tournament"
-          element={
-            <PrivateRoute authorized={loggedIn}>
-              <CurrentTournament />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/Illegal-State"
-          element={
-            <PrivateRoute
-              authorized={loggedIn && !locationValid}
-              redirectTo="/Wagers"
-            >
-              <IllegalState />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/Location-Permission-Required"
-          element={
-            <PrivateRoute
-              authorized={loggedIn && !locationPermissionGranted}
-              redirectTo="/Wagers"
-            >
-              <LocationPermissionRequired />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/Illegal-Age"
-          element={
-            <PrivateRoute
-              authorized={loggedIn && !ageValid}
-              redirectTo="/Wagers"
-            >
-              <IllegalAge />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/Account-Suspended"
-          element={
-            <PrivateRoute
-              authorized={loggedIn && accountSuspended}
-              redirectTo="/Wagers"
-            >
-              <SuspendedUser />
-            </PrivateRoute>
-          }
-        />
-        {/* Admin Routes */}
-        <Route
-          path="/Log"
-          element={
-            <PrivateRoute authorized={loggedIn && admin}>
-              <Log />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/Admin"
-          element={
-            <PrivateRoute authorized={loggedIn && admin}>
-              <Admin />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/Admin-Email"
-          element={
-            <PrivateRoute authorized={loggedIn && admin}>
-              <AdminEmail />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/Admin-Identity-Verification"
-          element={
-            <PrivateRoute authorized={loggedIn && admin}>
-              <AdminIdentityVerification />
-            </PrivateRoute>
-          }
-        />
-      </Routes>
+          <Route
+            path="/Create_Wager"
+            element={
+              <PrivateRoute authorized={loggedIn}>
+                <CreateWager />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/Profile"
+            element={
+              <PrivateRoute authorized={loggedIn}>
+                <Profile />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/Email-Verification"
+            element={
+              <PrivateRoute
+                authorized={loggedIn && !emailVerified}
+                redirectTo="/Wagers"
+              >
+                <EmailVerification />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/Identity-Verification"
+            element={
+              <PrivateRoute
+                authorized={loggedIn && !idvVerified}
+                redirectTo="/Wagers"
+              >
+                <IdentityVerification />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/SMS-Verification"
+            element={
+              <PrivateRoute
+                authorized={loggedIn && !smsVerified}
+                redirectTo="/Wagers"
+              >
+                <SmsVerification />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/Settings"
+            element={
+              <PrivateRoute authorized={loggedIn}>
+                <Settings />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/Credits"
+            element={
+              <PrivateRoute authorized={loggedIn}>
+                <Credits />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/Tournament-History"
+            element={
+              <PrivateRoute authorized={loggedIn}>
+                <TournamentHistory />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/Credit-Shop"
+            element={
+              <PrivateRoute authorized={loggedIn}>
+                <CreditShop />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/Lifetime-Leaderboard"
+            element={
+              <PrivateRoute authorized={loggedIn}>
+                <LifetimeLeaderboard />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/Tournament-Leaderboard"
+            element={
+              <PrivateRoute authorized={loggedIn}>
+                <CurrentTournamentLeaderboard />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/Tournament"
+            element={
+              <PrivateRoute authorized={loggedIn}>
+                <CurrentTournament />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/Illegal-State"
+            element={
+              <PrivateRoute
+                authorized={loggedIn && !locationValid}
+                redirectTo="/Wagers"
+              >
+                <IllegalState />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/Location-Permission-Required"
+            element={
+              <PrivateRoute
+                authorized={loggedIn && !locationPermissionGranted}
+                redirectTo="/Wagers"
+              >
+                <LocationPermissionRequired />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/Illegal-Age"
+            element={
+              <PrivateRoute
+                authorized={loggedIn && !ageValid}
+                redirectTo="/Wagers"
+              >
+                <IllegalAge />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/Account-Suspended"
+            element={
+              <PrivateRoute
+                authorized={loggedIn && accountSuspended}
+                redirectTo="/Wagers"
+              >
+                <SuspendedUser />
+              </PrivateRoute>
+            }
+          />
+          {/* Admin Routes */}
+          <Route
+            path="/Log"
+            element={
+              <PrivateRoute authorized={loggedIn && admin}>
+                <Log />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/Admin"
+            element={
+              <PrivateRoute authorized={loggedIn && admin}>
+                <Admin />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/Admin-Email"
+            element={
+              <PrivateRoute authorized={loggedIn && admin}>
+                <AdminEmail />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/Admin-Identity-Verification"
+            element={
+              <PrivateRoute authorized={loggedIn && admin}>
+                <AdminIdentityVerification />
+              </PrivateRoute>
+            }
+          />
+        </Routes>
+      </div>
       <Footer />
     </div>
   );
 }
-
-const styles = {
-  container: {
-    display: "flex",
-    flexDirection: "column",
-    minHeight: "100vh",
-  },
-};
 
 export default App;
