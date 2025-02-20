@@ -1,0 +1,257 @@
+/* Common styles for both views */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+  padding: 1rem 2rem;
+  border-bottom: 2px solid #034da4;
+  position: relative;
+}
+
+.brand {
+  color: #fff;
+  margin: 0;
+  font-size: 1.5rem;
+  background: linear-gradient(90deg, #034da4, #fb6a31);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  z-index: 2;
+}
+
+.desktop-nav .brand-link {
+  color: #fff;
+  text-decoration: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: color 0.2s;
+  white-space: nowrap;
+}
+
+/* Desktop-specific styles */
+.desktop-nav {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  width: 100%;
+  gap: 1.5rem;
+}
+
+/* Brand section (left) */
+.desktop-nav .brand {
+  grid-column: 1;
+}
+
+/* Center navigation section */
+.desktop-nav .nav-center {
+  grid-column: 2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+/* User section (right) */
+.desktop-nav .user-controls {
+  grid-column: 3;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  justify-self: end;
+}
+
+.desktop-nav .nav-link {
+  color: #fff;
+  text-decoration: none;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: color 0.2s;
+  white-space: nowrap;
+}
+
+.desktop-nav .nav-link:hover {
+  color: #fb6a31;
+}
+
+.desktop-nav .dropdown-container {
+  position: relative;
+}
+
+.desktop-nav .dropdown-menu {
+  display: none;
+  position: absolute;
+  top: 120%;
+  left: 0;
+  background: #2a2a2a;
+  padding: 0.5rem 0;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  min-width: 180px;
+  border: 1px solid #034da4;
+}
+
+.desktop-nav .dropdown-menu.active {
+  display: block;
+}
+
+.desktop-nav .dropdown-link {
+  display: block;
+  padding: 0.5rem 1.5rem;
+  color: #fff;
+  text-decoration: none;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  white-space: nowrap;
+}
+
+.desktop-nav .dropdown-link:hover {
+  background: #034da4;
+}
+
+.desktop-user-section {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+/* Mobile-specific styles */
+.mobile-nav {
+  display: none;
+}
+
+.mobile-menu-button {
+  display: none;
+}
+
+.credits-display {
+  background: linear-gradient(90deg, #034da4, #fb6a31);
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  color: white;
+  text-decoration: none;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  /* Hide desktop elements */
+  .desktop-nav,
+  .desktop-user-section {
+    display: none;
+  }
+
+  /* Show mobile elements */
+  .mobile-nav {
+    display: grid;
+    grid-template-columns: auto 1fr auto auto;
+    gap: 1rem;
+    align-items: center;
+    width: 100%;
+  }
+
+  .mobile-menu-button {
+    display: block;
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 0.5rem;
+    font-size: 1.5rem;
+    order: 4;
+  }
+
+  .mobile-brand {
+    order: 1;
+  }
+
+  .mobile-credits {
+    order: 2;
+    display: flex;
+    justify-content: center;
+    margin: 0 auto;
+  }
+
+  .mobile-notifications {
+    order: 3;
+    display: flex;
+    align-items: center;
+  }
+
+  .mobile-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #2a2a2a;
+    padding: 1.5rem;
+    display: none;
+    border-top: 2px solid #034da4;
+  }
+
+  .mobile-menu.active {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+
+  .mobile-column-left,
+  .mobile-column-right {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+    align-items: center;
+  }
+
+  .mobile-column-right {
+    border-left: 1px solid #034da4;
+  }
+
+  /* Mobile dropdown styles */
+  .mobile-dropdown {
+    width: 100%;
+    text-align: center;
+  }
+
+  .mobile-dropdown-menu {
+    display: block;
+    width: 100%;
+    max-width: 300px;
+    margin-top: 0.8rem;
+    background: #1a1a1a;
+    border-radius: 8px;
+    border: 1px solid #034da4;
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+
+  .mobile-dropdown-menu.active {
+    opacity: 1;
+    max-height: 500px;
+    margin-bottom: 0.8rem;
+  }
+
+  .mobile-nav-link {
+    color: #fff;
+    text-decoration: none;
+    padding: 0.8rem 0;
+    display: block;
+    width: 100%;
+    text-align: center;
+  }
+
+  .mobile-brand-nav-link {
+    color: #fff;
+    text-decoration: none;
+    padding: 0.8rem 0;
+    display: block;
+    width: 100%;
+    text-align: center;
+    background: linear-gradient(90deg, #034da4, #fb6a31);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+} 

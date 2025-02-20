@@ -5,11 +5,14 @@ import socket from "../../services/socketService.js";
 import { fetchCurrentTournament } from "../../services/leaderboardService.js";
 import Notifications from "../features/core/Notifications.js";
 import { auth } from "../../config/firebaseConfig.js";
+import "../../styles/components/Navbar.css";
 
 const Navbar = () => {
   const { user, setUser } = useUser();
   const [currentTournament, setCurrentTournament] = useState(null);
-  const [hoveredDropdown, setHoveredDropdown] = useState(null); // Manage hover state for each dropdown
+  const [hoveredDropdown, setHoveredDropdown] = useState(null);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [activeDropdown, setActiveDropdown] = useState(null);
 
   useEffect(() => {
     // Fetch the current tournament data
@@ -39,164 +42,313 @@ const Navbar = () => {
     // eslint-disable-next-line
   }, [user?.mongoUserId]);
 
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+    setHoveredDropdown(null);
+    setActiveDropdown(null);
+  };
+
+  const toggleDropdown = (dropdownName) => {
+    if (window.innerWidth <= 768) {
+      setActiveDropdown(activeDropdown === dropdownName ? null : dropdownName);
+    }
+  };
+
+  const handleMouseEnter = (dropdownName) => {
+    if (window.innerWidth > 768) {
+      setHoveredDropdown(dropdownName);
+    }
+  };
+
+  const handleNavLinkClick = () => {
+    setIsMobileMenuOpen(false);
+    setActiveDropdown(null);
+  };
+
   return (
-    <nav style={styles.navbar}>
-      <h2 style={styles.brand}>
-        <Link to="/" style={styles.link}>
-          RLBets.com
-        </Link>
-      </h2>
-      <div style={styles.navLinks}>
-        <Link to="/Wagers" style={styles.link}>
-          Wagers
-        </Link>
-        <div
-          style={styles.dropdownContainer}
-          onMouseEnter={() => setHoveredDropdown("tournaments")}
-          onMouseLeave={() => setHoveredDropdown(null)}
-          onClick={() => setHoveredDropdown(null)}
-        >
-          <span style={styles.link}>Tournaments</span>
-          {hoveredDropdown === "tournaments" && (
-            <div style={styles.dropdownMenu}>
+    <nav className="navbar">
+      {/* Desktop Navigation */}
+      <div className="desktop-nav">
+        <h2 className="brand">
+          <Link to="/" className="brand-link">
+            RLBets
+          </Link>
+        </h2>
+
+        <div className="nav-center">
+          <Link to="/Wagers" className="nav-link">
+            Wagers
+          </Link>
+          <div
+            className="dropdown-container"
+            onMouseEnter={() => handleMouseEnter("tournaments")}
+            onMouseLeave={() => setHoveredDropdown(null)}
+          >
+            <span className="nav-link">Tournaments</span>
+            <div
+              className={`dropdown-menu ${
+                hoveredDropdown === "tournaments" ? "active" : ""
+              }`}
+            >
               {currentTournament && (
-                <Link to={`/Tournament`} style={styles.dropdownLink}>
+                <Link to={`/Tournament`} className="dropdown-link">
                   {currentTournament.name}
                 </Link>
               )}
-              <Link to={`/Tournament-History`} style={styles.dropdownLink}>
+              <Link to={`/Tournament-History`} className="dropdown-link">
                 Tournament History
               </Link>
             </div>
-          )}
-        </div>
-        <div
-          style={styles.dropdownContainer}
-          onMouseEnter={() => setHoveredDropdown("leaderboards")}
-          onMouseLeave={() => setHoveredDropdown(null)}
-          onClick={() => setHoveredDropdown(null)}
-        >
-          <span style={styles.link}>Leaderboards</span>
-          {hoveredDropdown === "leaderboards" && (
-            <div style={styles.dropdownMenu}>
+          </div>
+          <div
+            className="dropdown-container"
+            onMouseEnter={() => handleMouseEnter("leaderboards")}
+            onMouseLeave={() => setHoveredDropdown(null)}
+          >
+            <span className="nav-link">Leaderboards</span>
+            <div
+              className={`dropdown-menu ${
+                hoveredDropdown === "leaderboards" ? "active" : ""
+              }`}
+            >
               {currentTournament && (
-                <Link
-                  to={`/Tournament-Leaderboard`}
-                  style={styles.dropdownLink}
-                >
+                <Link to={`/Tournament-Leaderboard`} className="dropdown-link">
                   {currentTournament?.name}
                 </Link>
               )}
-              <Link to="/Lifetime-Leaderboard" style={styles.dropdownLink}>
+              <Link to="/Lifetime-Leaderboard" className="dropdown-link">
                 Lifetime Leaderboard
               </Link>
             </div>
-          )}
-        </div>
-        {user?.userType === "admin" && (
-          <div
-            style={styles.dropdownContainer}
-            onMouseEnter={() => setHoveredDropdown("admin")}
-            onMouseLeave={() => setHoveredDropdown(null)}
-            onClick={() => setHoveredDropdown(null)}
-          >
-            <span style={styles.link}>Admin</span>
-            {hoveredDropdown === "admin" && (
-              <div style={styles.dropdownMenu}>
-                <Link to="/Admin" style={styles.dropdownLink}>
+          </div>
+          {user?.userType === "admin" && (
+            <div
+              className="dropdown-container"
+              onMouseEnter={() => handleMouseEnter("admin")}
+              onMouseLeave={() => setHoveredDropdown(null)}
+            >
+              <span className="nav-link">Admin</span>
+              <div
+                className={`dropdown-menu ${
+                  hoveredDropdown === "admin" ? "active" : ""
+                }`}
+              >
+                <Link to="/Admin" className="dropdown-link">
                   Home
                 </Link>
-                <Link to="/Create_Wager" style={styles.dropdownLink}>
+                <Link to="/Create_Wager" className="dropdown-link">
                   Create Wager
                 </Link>
-                <Link to="/Log" style={styles.dropdownLink}>
+                <Link to="/Log" className="dropdown-link">
                   Logs
                 </Link>
-                <Link to="/Admin-Email" style={styles.dropdownLink}>
+                <Link to="/Admin-Email" className="dropdown-link">
                   Email Users
                 </Link>
                 <Link
                   to="/Admin-Identity-Verification"
-                  style={styles.dropdownLink}
+                  className="dropdown-link"
                 >
                   Identity Verification
                 </Link>
               </div>
-            )}
+            </div>
+          )}
+          {user && (
+            <>
+              <Link to="/Profile" className="nav-link">
+                Profile
+              </Link>
+              <Link to="/Settings" className="nav-link">
+                Settings
+              </Link>
+            </>
+          )}
+        </div>
+
+        {user && (
+          <div className="user-controls">
+            <Link to="/Credit-Shop" className="credits-display">
+              {parseInt(user?.credits)} Credits
+            </Link>
+            <div className="desktop-notifications">
+              <Notifications />
+            </div>
           </div>
         )}
       </div>
-      {!user ? (
-        <Link to="/Login" style={styles.link}>
-          Login
-        </Link>
-      ) : (
-        <div style={styles.navLinks}>
-          <Link to="/Profile" style={styles.link}>
-            Profile
+
+      {/* Mobile Navigation */}
+      <div className="mobile-nav">
+        <h2 className="mobile-brand">
+          <Link
+            to="/"
+            className="mobile-brand-nav-link"
+            onClick={handleNavLinkClick}
+          >
+            RLBets
           </Link>
-          <Link to="/Settings" style={styles.link}>
-            Settings
-          </Link>
-          {user?.credits !== null && (
-            <Link to="/Credit-Shop" style={styles.link}>
-              {parseInt(user?.credits)} Credits
+        </h2>
+        {user && (
+          <>
+            <div className="mobile-credits">
+              <Link to="/Credit-Shop" className="credits-display">
+                {parseInt(user?.credits)} Credits
+              </Link>
+            </div>
+            <div className="mobile-notifications">
+              <Notifications />
+            </div>
+          </>
+        )}
+        <button className="mobile-menu-button" onClick={toggleMobileMenu}>
+          {isMobileMenuOpen ? "✕" : "☰"}
+        </button>
+        <div className={`mobile-menu ${isMobileMenuOpen ? "active" : ""}`}>
+          <div className="mobile-column-left">
+            <Link
+              to="/Wagers"
+              className="mobile-nav-link"
+              onClick={handleNavLinkClick}
+            >
+              Wagers
             </Link>
-          )}
-          <Notifications />
+            <div className="mobile-dropdown">
+              <span
+                className="mobile-nav-link"
+                onClick={() => toggleDropdown("tournaments")}
+              >
+                Tournaments
+              </span>
+              <div
+                className={`mobile-dropdown-menu ${
+                  activeDropdown === "tournaments" ? "active" : ""
+                }`}
+              >
+                {currentTournament && (
+                  <Link
+                    to={`/Tournament`}
+                    className="mobile-nav-link"
+                    onClick={handleNavLinkClick}
+                  >
+                    {currentTournament.name}
+                  </Link>
+                )}
+                <Link
+                  to={`/Tournament-History`}
+                  className="mobile-nav-link"
+                  onClick={handleNavLinkClick}
+                >
+                  Tournament History
+                </Link>
+              </div>
+            </div>
+            <div className="mobile-dropdown">
+              <span
+                className="mobile-nav-link"
+                onClick={() => toggleDropdown("leaderboards")}
+              >
+                Leaderboards
+              </span>
+              <div
+                className={`mobile-dropdown-menu ${
+                  activeDropdown === "leaderboards" ? "active" : ""
+                }`}
+              >
+                {currentTournament && (
+                  <Link
+                    to={`/Tournament-Leaderboard`}
+                    className="mobile-nav-link"
+                    onClick={handleNavLinkClick}
+                  >
+                    {currentTournament?.name}
+                  </Link>
+                )}
+                <Link
+                  to="/Lifetime-Leaderboard"
+                  className="mobile-nav-link"
+                  onClick={handleNavLinkClick}
+                >
+                  Lifetime Leaderboard
+                </Link>
+              </div>
+            </div>
+          </div>
+          <div className="mobile-column-right">
+            {user && (
+              <>
+                <Link
+                  to="/Profile"
+                  className="mobile-nav-link"
+                  onClick={handleNavLinkClick}
+                >
+                  Profile
+                </Link>
+                <Link
+                  to="/Settings"
+                  className="mobile-nav-link"
+                  onClick={handleNavLinkClick}
+                >
+                  Settings
+                </Link>
+                {user?.userType === "admin" && (
+                  <div className="mobile-dropdown">
+                    <span
+                      className="mobile-nav-link"
+                      onClick={() => toggleDropdown("admin")}
+                    >
+                      Admin
+                    </span>
+                    <div
+                      className={`mobile-dropdown-menu ${
+                        activeDropdown === "admin" ? "active" : ""
+                      }`}
+                    >
+                      <Link
+                        to="/Admin"
+                        className="mobile-nav-link"
+                        onClick={handleNavLinkClick}
+                      >
+                        Home
+                      </Link>
+                      <Link
+                        to="/Create_Wager"
+                        className="mobile-nav-link"
+                        onClick={handleNavLinkClick}
+                      >
+                        Create Wager
+                      </Link>
+                      <Link
+                        to="/Log"
+                        className="mobile-nav-link"
+                        onClick={handleNavLinkClick}
+                      >
+                        Logs
+                      </Link>
+                      <Link
+                        to="/Admin-Email"
+                        className="mobile-nav-link"
+                        onClick={handleNavLinkClick}
+                      >
+                        Email Users
+                      </Link>
+                      <Link
+                        to="/Admin-Identity-Verification"
+                        className="mobile-nav-link"
+                        onClick={handleNavLinkClick}
+                      >
+                        Identity Verification
+                      </Link>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
         </div>
-      )}
+      </div>
     </nav>
   );
 };
 
 export default Navbar;
-
-const styles = {
-  navbar: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    background: "#333",
-    padding: "10px 20px",
-  },
-  brand: {
-    color: "#fff",
-    margin: 0,
-  },
-  navLinks: {
-    display: "flex",
-    gap: "15px",
-    position: "relative",
-  },
-  link: {
-    color: "#fff",
-    textDecoration: "none",
-    fontSize: "16px",
-    cursor: "pointer",
-  },
-  dropdownContainer: {
-    position: "relative",
-  },
-  dropdownMenu: {
-    position: "absolute",
-    top: "100%",
-    left: 0,
-    background: "#444",
-    padding: "10px 0",
-    borderRadius: "5px",
-    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-    zIndex: 1000,
-  },
-  dropdownLink: {
-    display: "block",
-    padding: "5px 20px",
-    color: "#fff",
-    textDecoration: "none",
-    fontSize: "14px",
-    cursor: "pointer",
-  },
-  dropdownLinkHover: {
-    background: "#555",
-  },
-};

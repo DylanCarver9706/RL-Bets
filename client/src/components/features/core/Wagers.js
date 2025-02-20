@@ -517,6 +517,7 @@ const styles = {
     backgroundColor: "#635d5d",
     borderRadius: "8px",
     boxShadow: "0 0 10px rgba(0, 0, 0, 0.1)",
+    minHeight: "calc(100vh - 70px)", // Subtract navbar height
   },
   header: {
     fontSize: "28px",
