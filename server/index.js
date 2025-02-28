@@ -16,11 +16,20 @@ const {
 // Initialize Express app
 const app = express();
 
+// Set CORS origins
+let allowedOrigins = null;
+
+if (process.env.ENV === "production") {
+  allowedOrigins = process.env.PROD_CLIENT_URL;
+} else if (process.env.ENV === "development") {
+  allowedOrigins = [process.env.DEV_CLIENT_URL, process.env.PROD_CLIENT_URL];
+}
+
 // WebSocket setup
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: process.env.DEV_CLIENT_URL,
+    origin: allowedOrigins,
   },
 });
 
@@ -37,9 +46,7 @@ app.use((req, res, next) => {
 
 app.use(
   cors({
-    // Allow for me to access this from any origin
-    // origin: "*",
-    origin: process.env.DEV_CLIENT_URL,
+    origin: allowedOrigins,
     methods: "GET,PUT,POST,DELETE",
     credentials: true,
   })
