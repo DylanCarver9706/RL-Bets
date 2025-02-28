@@ -24,6 +24,7 @@ const createSeries = async (seriesData) => {
     best_of: parseInt(best_of, 10),
     type: "series",
     status: historical ? "Ended" : "Created",
+    historical: historical,
   };
 
   // Create Series Document
@@ -31,6 +32,11 @@ const createSeries = async (seriesData) => {
     collections.seriesCollection,
     series
   );
+
+  // Add series to the tournament
+  await updateMongoDocument(collections.tournamentsCollection, tournament, {
+    $push: { series: seriesResult.insertedId },
+  });
 
   if (!historical) {
     // Generate matches for the series based on the best_of value
@@ -63,10 +69,6 @@ const createSeries = async (seriesData) => {
       }
     );
   
-    // Add series to the tournament
-    await updateMongoDocument(collections.tournamentsCollection, tournament, {
-      $push: { series: seriesResult.insertedId },
-    });
   }
 
   return { seriesId: seriesResult.insertedId };
