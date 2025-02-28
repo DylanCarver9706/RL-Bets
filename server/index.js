@@ -20,7 +20,7 @@ const app = express();
 let allowedOrigins = null;
 
 if (process.env.ENV === "production") {
-  allowedOrigins = process.env.PROD_CLIENT_URL;
+  allowedOrigins = [process.env.PROD_CLIENT_URL];
 } else if (process.env.ENV === "development") {
   allowedOrigins = [process.env.DEV_CLIENT_URL, process.env.PROD_CLIENT_URL];
 }
@@ -30,6 +30,7 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
     origin: allowedOrigins,
+    credentials: true,
   },
 });
 
@@ -44,6 +45,7 @@ app.use((req, res, next) => {
   }
 });
 
+// Update the main CORS middleware
 app.use(
   cors({
     origin: allowedOrigins,
