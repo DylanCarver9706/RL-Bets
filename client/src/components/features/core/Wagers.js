@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import socket from "../../../services/socketService.js";
+// import socket from "../../../services/socketService.js";
 import { createBet } from "../../../services/wagerService.js";
 import { useUser } from "../../../contexts/UserContext.js";
 import { getWagers } from "../../../services/userService.js";
@@ -83,28 +83,28 @@ const Wagers = () => {
   }, []);
 
   // Listen for updates from the server
-  useEffect(() => {
-    const handleWagersUpdate = (updatedWagers) => {
-      if (Array.isArray(updatedWagers)) {
-        setWagers(() => {
-          applyFilter(activeFilter, updatedWagers); // Ensure activeFilter is correctly applied
-          return updatedWagers; // Update state with new wagers
-        });
-      } else {
-        console.error(
-          "Invalid data received from wagersUpdate:",
-          updatedWagers
-        );
-      }
-    };
+  // useEffect(() => {
+  //   const handleWagersUpdate = (updatedWagers) => {
+  //     if (Array.isArray(updatedWagers)) {
+  //       setWagers(() => {
+  //         applyFilter(activeFilter, updatedWagers); // Ensure activeFilter is correctly applied
+  //         return updatedWagers; // Update state with new wagers
+  //       });
+  //     } else {
+  //       console.error(
+  //         "Invalid data received from wagersUpdate:",
+  //         updatedWagers
+  //       );
+  //     }
+  //   };
 
-    socket.on("wagersUpdate", handleWagersUpdate);
+  //   socket.on("wagersUpdate", handleWagersUpdate);
 
-    return () => {
-      socket.off("wagersUpdate", handleWagersUpdate);
-    };
-    // eslint-disable-next-line
-  }, [activeFilter]);
+  //   return () => {
+  //     socket.off("wagersUpdate", handleWagersUpdate);
+  //   };
+  //   // eslint-disable-next-line
+  // }, [activeFilter]);
 
   // Apply filters based on the selected filter option
   const applyFilter = (filter, allWagers = wagers) => {

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import io from "socket.io-client";
+// import io from "socket.io-client";
 import { getLogs } from "../../../services/userService";
 
 let BASE_SERVER_URL;
@@ -13,7 +13,7 @@ const Log = () => {
   const [logs, setLogs] = useState([]);
 
   useEffect(() => {
-    const socket = io(BASE_SERVER_URL);
+    // const socket = io(BASE_SERVER_URL);
 
     const fetchLogs = async () => {
       try {
@@ -26,13 +26,13 @@ const Log = () => {
 
     fetchLogs();
 
-    socket.on("updateLogs", (updatedLogs) => {
-      setLogs(updatedLogs.reverse() || []);
-    });
+    // socket.on("updateLogs", (updatedLogs) => {
+    //   setLogs(updatedLogs.reverse() || []);
+    // });
 
-    return () => {
-      socket.disconnect();
-    };
+    // return () => {
+    //   socket.disconnect();
+    // };
   }, []);
 
   return (

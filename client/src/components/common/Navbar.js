@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useUser } from "../../contexts/UserContext.js";
-import socket from "../../services/socketService.js";
+// import socket from "../../services/socketService.js";
 import { fetchCurrentTournament } from "../../services/leaderboardService.js";
 import Notifications from "../features/core/Notifications.js";
 import { auth } from "../../config/firebaseConfig.js";
@@ -27,20 +27,20 @@ const Navbar = () => {
   }, []);
 
   // Listen for updates from the server
-  useEffect(() => {
-    socket.on("updateUser", (updateUser) => {
-      if (updateUser._id === user?.mongoUserId) {
-        setUser({ ...user, credits: updateUser.credits });
-      }
-    });
+  // useEffect(() => {
+  //   socket.on("updateUser", (updateUser) => {
+  //     if (updateUser._id === user?.mongoUserId) {
+  //       setUser({ ...user, credits: updateUser.credits });
+  //     }
+  //   });
 
-    // Cleanup listener on unmount
-    return () => {
-      socket.off("wagersUpdate");
-      socket.disconnect();
-    };
-    // eslint-disable-next-line
-  }, [user?.mongoUserId]);
+  //   // Cleanup listener on unmount
+  //   return () => {
+  //     socket.off("wagersUpdate");
+  //     socket.disconnect();
+  //   };
+  //   // eslint-disable-next-line
+  // }, [user?.mongoUserId]);
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import socket from "../../../services/socketService";
+// import socket from "../../../services/socketService";
 import { fetchCurrentLeaderboard } from "../../../services/leaderboardService";
 import "../../../styles/components/leaderboards/CurrentTournamentLeaderboard.css";
 import { getUsers } from "../../../services/adminService";
@@ -24,13 +24,13 @@ const CurrentTournamentLeaderboard = () => {
   }, []);
 
   // Listen for updates
-  useEffect(() => {
-    socket.on("updateLeaderboard", (updatedLeaderboard) => {
-      setLeaderboard(updatedLeaderboard);
-    });
+  // useEffect(() => {
+  //   socket.on("updateLeaderboard", (updatedLeaderboard) => {
+  //     setLeaderboard(updatedLeaderboard);
+  //   });
 
-    return () => socket.disconnect();
-  }, []);
+  //   return () => socket.disconnect();
+  // }, []);
 
   const getRankClass = (rank) => {
     if (rank === 1) return "rank-1";
@@ -41,7 +41,10 @@ const CurrentTournamentLeaderboard = () => {
 
   const renderLeaderboardRow = (rank, user, reward) => {
     return (
-      <tr key={user?._id || `placeholder-${rank}`} className="tournament-leaderboard-tr">
+      <tr
+        key={user?._id || `placeholder-${rank}`}
+        className="tournament-leaderboard-tr"
+      >
         <td className={`tournament-leaderboard-td ${getRankClass(rank)}`}>
           {rank}
         </td>
@@ -83,13 +86,12 @@ const CurrentTournamentLeaderboard = () => {
           </tr>
         </thead>
         <tbody>
-          {leaderboard?.rewards && 
+          {leaderboard?.rewards &&
             Object.entries(leaderboard.rewards).map(([rank, reward]) => {
               const rankNum = parseInt(rank);
-              const user = users.find(u => u.rank === rankNum);
+              const user = users.find((u) => u.rank === rankNum);
               return renderLeaderboardRow(rankNum, user, reward);
-            })
-          }
+            })}
         </tbody>
       </table>
     </div>
