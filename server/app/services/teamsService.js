@@ -20,8 +20,9 @@ const getAllTeamsWithPlayers = async () => {
   const teams = await collections.teamsCollection.find().toArray();
   return await Promise.all(
     teams.map(async (team) => {
+      const playerIds = Array.isArray(team.players) ? team.players : [];
       const players = await collections.playersCollection
-        .find({ _id: { $in: team.players } })
+        .find({ _id: { $in: playerIds } })
         .toArray();
       return { ...team, players };
     })
