@@ -20,17 +20,17 @@ const app = express();
 let allowedOrigins = null;
 
 if (process.env.ENV === "production") {
-  allowedOrigins = process.env.PROD_CLIENT_URLS.split(",");
+  allowedOrigins = [process.env.DEV_CLIENT_URL]; // Keep dev URL for testing
 } else if (process.env.ENV === "development") {
-  allowedOrigins = [process.env.DEV_CLIENT_URL, ...process.env.PROD_CLIENT_URLS.split(",")];
+  allowedOrigins = [process.env.DEV_CLIENT_URL];
 }
 
 // WebSocket setup
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: process.env.DEV_CLIENT_URL,
-    // credentials: true,
+    origin: allowedOrigins,
+    credentials: true,
   },
 });
 
@@ -48,9 +48,26 @@ app.use((req, res, next) => {
 // Update the main CORS middleware
 app.use(
   cors({
-    origin: allowedOrigins,
-    methods: "GET,PUT,POST,DELETE",
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+
+      // Allow any subdomain of rlbets.gg
+      if (origin.endsWith("rlbets.gg")) {
+        return callback(null, true);
+      }
+
+      // Allow specific origins (like localhost for development)
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      console.log("Blocked origin:", origin); // For debugging
+      return callback(new Error("CORS not allowed"), false);
+    },
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
     credentials: true,
+    optionsSuccessStatus: 204,
   })
 );
 
