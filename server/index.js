@@ -29,7 +29,7 @@ if (process.env.ENV === "production") {
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: process.env.PROD_CLIENT_URL,
+    origin: process.env.DEV_CLIENT_URL,
     // credentials: true,
   },
 });
