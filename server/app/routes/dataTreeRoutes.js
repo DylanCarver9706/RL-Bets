@@ -9,5 +9,7 @@ router.get("/tournament/ended", verifyFirebaseToken(), dataTreesController.getEn
 router.get("/tournament/:id", verifyFirebaseToken(), dataTreesController.getTournament);
 router.get("/series/:id", verifyFirebaseToken(), dataTreesController.getSeries);
 router.get("/bettable", verifyFirebaseToken(), dataTreesController.getBettable);
+router.get("/events/all", verifyFirebaseToken(), dataTreesController.getAllEvents);
+router.get("/events/current", verifyFirebaseToken(), dataTreesController.getCurrentEvents);
 
 module.exports = router;
