@@ -26,7 +26,6 @@ import CurrentTournamentLeaderboard from "./components/features/leaderboards/Cur
 import Log from "./components/features/admin/Log";
 import Admin from "./components/features/admin/Admin";
 import EmailVerification from "./components/features/userVerification/EmailVerification";
-import Settings from "./components/features/core/Settings";
 import Credits from "./components/features/about/Credits";
 import BugForm from "./components/features/feedback/BugForm";
 import FeatureForm from "./components/features/feedback/FeatureForm";
@@ -203,6 +202,8 @@ function App() {
         ["review", "unverified"].includes(user?.idvStatus)
       ) {
         navigate("/Identity-Verification");
+      } else if (auth.currentUser && (user?.pp.version !== privacyPolicyVersion || user.tos.version !== termsOfServiceVersion)) {
+        navigate("/Agreements");
       } else if (auth.currentUser && user?.locationValid === false) {
         navigate("/Illegal-State");
       } else if (auth.currentUser && user?.ageValid === false) {
@@ -218,7 +219,7 @@ function App() {
       }
     };
     routeUser();
-  }, [loading, user, navigate, unprotectedRoutes]);
+  }, [loading, user, navigate, unprotectedRoutes, privacyPolicyVersion, termsOfServiceVersion]);
 
   // Check terms of service and privacy policy versions
   useEffect(() => {
@@ -293,16 +294,6 @@ function App() {
     <div className="App">
       <Navbar />
       <div className="main-content">
-        {/* Show the Agreements banner if the user has not accepted the latest version of the Privacy Policy or Terms of Service */}
-        {(requireTos || requirePp) &&
-          !unprotectedRoutes.includes(window.location.pathname) && (
-            <Agreements
-              requireTos={requireTos}
-              requirePp={requirePp}
-              tosVersion={termsOfServiceVersion}
-              ppVersion={privacyPolicyVersion}
-            />
-          )}
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<Hero />} />
@@ -381,10 +372,13 @@ function App() {
             }
           />
           <Route
-            path="/Settings"
+            path="/Agreements"
             element={
-              <PrivateRoute authorized={loggedIn}>
-                <Settings />
+              <PrivateRoute
+                authorized={loggedIn && (requireTos || requirePp)}
+                redirectTo="/Wagers"
+              >
+                <Agreements />
               </PrivateRoute>
             }
           />
