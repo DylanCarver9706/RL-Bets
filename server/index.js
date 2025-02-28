@@ -49,24 +49,24 @@ app.use((req, res, next) => {
 });
 
 // Update the main CORS middleware
-app.use(
-  cors({
-    // Allow all origins for development
-    origin: "*",
-    // origin: allowedOrigins,
-    methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
-    // credentials: true,
-  })
-);
+// app.use(
+//   cors({
+//     // Allow all origins for development
+//     origin: "*",
+//     // origin: allowedOrigins,
+//     methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
+//     // credentials: true,
+//   })
+// );
 
 // Add before your routes
-app.use((req, res, next) => {
-  res.setHeader(
-    "Content-Security-Policy",
-    "default-src 'self'; font-src 'self' https://js.stripe.com data:; img-src 'self' data: https:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com; style-src 'self' 'unsafe-inline';"
-  );
-  next();
-});
+// app.use((req, res, next) => {
+//   res.setHeader(
+//     "Content-Security-Policy",
+//     "default-src 'self'; font-src 'self' https://js.stripe.com data:; img-src 'self' data: https:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com; style-src 'self' 'unsafe-inline';"
+//   );
+//   next();
+// });
 
 // Instead of chaining promises, use async/await and initialize everything before setting up routes
 const startServer = async () => {
