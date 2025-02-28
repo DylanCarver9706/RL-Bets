@@ -51,7 +51,7 @@ app.use((req, res, next) => {
 // Update the main CORS middleware
 app.use(
   cors({
-    origin: process.env.PROD_CLIENT_URLS.split(",")[0], // Use the first URL (www.rlbets.gg)
+    origin: allowedOrigins,
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
     credentials: true,
     optionsSuccessStatus: 204,
