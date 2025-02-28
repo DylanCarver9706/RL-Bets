@@ -1,0 +1,72 @@
+.something-wrong-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 2rem;
+  text-align: center;
+}
+
+.something-wrong-card {
+  width: 100%;
+  max-width: 600px;
+  background: #2a2a2a;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 2rem;
+  color: white;
+}
+
+.something-wrong-icon {
+  color: #fb6a31;
+  font-size: 4rem;
+  margin-bottom: 1.5rem;
+}
+
+.something-wrong-title {
+  color: #fb6a31;
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.something-wrong-message {
+  color: #ddd;
+  font-size: 1.2rem;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+}
+
+.something-wrong-button {
+  background: #034da4;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0.8rem 1.5rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.something-wrong-button:hover {
+  background: #023d83;
+}
+
+@media (max-width: 768px) {
+  .something-wrong-container {
+    padding: 1rem;
+  }
+
+  .something-wrong-card {
+    padding: 1.5rem;
+  }
+
+  .something-wrong-title {
+    font-size: 2rem;
+  }
+
+  .something-wrong-message {
+    font-size: 1.1rem;
+  }
+}

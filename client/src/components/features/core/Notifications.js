@@ -6,6 +6,23 @@ import {
 import { useUser } from "../../../contexts/UserContext.js";
 import socket from "../../../services/socketService.js";
 import { formatDateToUserTimezone } from "../../../services/dateService.js";
+import "../../../styles/components/core/Notifications.css";
+
+const BellIcon = () => (
+  <svg 
+    width="28" 
+    height="28" 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2" 
+    strokeLinecap="round" 
+    strokeLinejoin="round"
+  >
+    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+    <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+  </svg>
+);
 
 const Notifications = () => {
   const [notifications, setNotifications] = useState([]);
@@ -47,43 +64,47 @@ const Notifications = () => {
   };
 
   return (
-    <div style={styles.container}>
-      <div style={styles.bellIcon} onClick={() => setIsDropdownVisible(true)}>
-        <span role="img" aria-label="Notifications">
-          🔔
-        </span>
-        {unreadCount > 0 && <span style={styles.badge}>{unreadCount}</span>}
+    <div className="notifications-container">
+      <div className="bell-icon" onClick={() => setIsDropdownVisible(true)}>
+        <BellIcon />
+        {unreadCount > 0 && (
+          <span className="notification-badge">{unreadCount}</span>
+        )}
       </div>
+      
       {isDropdownVisible && (
-        <div style={styles.dropdown}>
-          <div style={styles.dropdownHeader}>
+        <div className="notifications-dropdown">
+          <div className="dropdown-header">
             <h3>Notifications</h3>
             <button
+              className="close-button"
               onClick={() => setIsDropdownVisible(false)}
-              style={styles.closeButton}
             >
               ✖
             </button>
           </div>
+          
           {notifications.length > 0 ? (
-            <ul style={styles.notificationList}>
+            <ul className="notifications-list">
               {notifications.map((notification) => (
-                <li key={notification.id} style={styles.notificationItem}>
-                  {notification.type === "payout" && (
-                    <p>{`Wager "${notification.wagerName}" paid out ${notification.awardedCredits} Credits. Congrats!`}</p>
-                  )}
-                  {notification.type === "welcome" && (
-                    <p>{`${notification.message}`}</p>
-                  )}
-                  {notification.type === "info" && (
-                    <p>{`${notification.message}`}</p>
-                  )}
-                  <span style={styles.timestamp}>
-                    {formatDateToUserTimezone(notification.createdAt)}
-                  </span>
+                <li key={notification._id} className="notification-item">
+                  <div className="notification-content">
+                    {notification.type === "payout" && (
+                      <p>{`Wager "${notification.wagerName}" paid out ${notification.awardedCredits} Credits. Congrats!`}</p>
+                    )}
+                    {notification.type === "welcome" && (
+                      <p>{notification.message}</p>
+                    )}
+                    {notification.type === "info" && (
+                      <p>{notification.message}</p>
+                    )}
+                    <span className="notification-timestamp">
+                      {formatDateToUserTimezone(notification.createdAt)}
+                    </span>
+                  </div>
                   <button
+                    className="dismiss-button"
                     onClick={() => handleDismiss(notification._id)}
-                    style={styles.dismissButton}
                   >
                     ✖
                   </button>
@@ -91,7 +112,7 @@ const Notifications = () => {
               ))}
             </ul>
           ) : (
-            <p style={styles.noNotifications}>No notifications</p>
+            <p className="no-notifications">No notifications</p>
           )}
         </div>
       )}
@@ -100,83 +121,3 @@ const Notifications = () => {
 };
 
 export default Notifications;
-
-const styles = {
-  container: {
-    position: "relative",
-    display: "inline-block",
-  },
-  bellIcon: {
-    position: "relative",
-    cursor: "pointer",
-    fontSize: "20px",
-    color: "#fff",
-  },
-  badge: {
-    position: "absolute",
-    top: "-5px",
-    right: "-5px",
-    backgroundColor: "red",
-    color: "#fff",
-    borderRadius: "50%",
-    padding: "2px 6px",
-    fontSize: "12px",
-  },
-  dropdown: {
-    position: "absolute",
-    top: "120%",
-    right: 0,
-    backgroundColor: "#444",
-    borderRadius: "8px",
-    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-    zIndex: 1000,
-    width: "300px",
-    padding: "10px",
-    color: "#fff",
-  },
-  dropdownHeader: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    borderBottom: "1px solid #666",
-    paddingBottom: "5px",
-    marginBottom: "10px",
-  },
-  closeButton: {
-    background: "none",
-    border: "none",
-    color: "#fff",
-    fontSize: "16px",
-    cursor: "pointer",
-  },
-  notificationList: {
-    listStyle: "none",
-    padding: 0,
-    margin: 0,
-  },
-  notificationItem: {
-    borderBottom: "1px solid #666",
-    padding: "10px 0",
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  timestamp: {
-    display: "block",
-    fontSize: "12px",
-    color: "#aaa",
-    marginTop: "5px",
-  },
-  noNotifications: {
-    textAlign: "center",
-    color: "#aaa",
-  },
-  dismissButton: {
-    background: "none",
-    border: "none",
-    color: "#fff",
-    fontSize: "14px",
-    cursor: "pointer",
-    marginLeft: "10px",
-  },
-};

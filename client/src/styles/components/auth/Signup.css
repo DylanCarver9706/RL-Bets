@@ -1,0 +1,63 @@
+@import "./Auth.css";
+
+.form-input-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.signup-agreements-container {
+  display: flex;
+  gap: 1rem;
+  margin: 0.75rem auto;
+  width: 66.666%;
+  justify-content: center;
+}
+
+.signup-agreement-section {
+  flex: 1;
+  font-size: 0.85rem;
+  margin: 0;
+  text-align: center;
+}
+
+.signup-agreement-link {
+  color: #034da4;
+  text-decoration: none;
+  display: block;
+  margin-bottom: 0.25rem;
+  font-size: 0.8rem;
+}
+
+.signup-agreement-checkbox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  color: #888;
+  font-size: 0.8rem;
+}
+
+.signup-agreement-checkbox input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+}
+
+@media (max-width: 768px) {
+  .signup-agreements-container {
+    width: 100%;
+    gap: 1.5rem;
+    max-width: 400px;
+    margin: 0.75rem auto;
+  }
+
+  .signup-agreement-section {
+    width: auto;
+    min-width: 120px;
+    text-align: center;
+  }
+
+  .signup-agreement-link {
+    font-size: 0.75rem;
+  }
+}

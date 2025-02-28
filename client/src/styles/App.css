@@ -1,16 +1,16 @@
 .App {
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
+  min-height: 100vh;
   background-color: #1a1a1a;
 }
 
 /* This ensures main content takes up at least full viewport height minus header/footer */
 .main-content {
   flex: 1;
-  min-height: calc(100vh - 160px); /* Adjust based on navbar + footer height */
   display: flex;
   flex-direction: column;
+  padding-top: 60px; /* Height of navbar */
 }
 
 /* Remove unused animations and styles */

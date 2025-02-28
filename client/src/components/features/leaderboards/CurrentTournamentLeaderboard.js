@@ -1,135 +1,99 @@
 import React, { useEffect, useState } from "react";
 import socket from "../../../services/socketService";
 import { fetchCurrentLeaderboard } from "../../../services/leaderboardService";
+import "../../../styles/components/leaderboards/CurrentTournamentLeaderboard.css";
+import { getUsers } from "../../../services/adminService";
 
 const CurrentTournamentLeaderboard = () => {
-  const [leaderboardData, setLeaderboardData] = useState(null); // Initialize as null
+  const [leaderboard, setLeaderboard] = useState(null);
+  const [users, setUsers] = useState([]);
 
-  // Fetch leaderboard on component mount
   useEffect(() => {
-    const fetchLeaderboardData = async () => {
+    const fetchData = async () => {
       try {
         const leaderboardData = await fetchCurrentLeaderboard();
-        setLeaderboardData(leaderboardData);
+        setLeaderboard(leaderboardData);
+        const usersData = await getUsers();
+        setUsers(usersData);
       } catch (error) {
         console.error("Error fetching leaderboard:", error);
       }
     };
 
-    fetchLeaderboardData();
+    fetchData();
   }, []);
 
-  // Fetch leaderboard on WebSocket update
+  // Listen for updates
   useEffect(() => {
-    // Listen for the 'updateLeaderboard' event from the server
     socket.on("updateLeaderboard", (updatedLeaderboard) => {
-      setLeaderboardData(updatedLeaderboard);
+      setLeaderboard(updatedLeaderboard);
     });
 
-    // Cleanup WebSocket connection on unmount
     return () => socket.disconnect();
   }, []);
 
-  // Ensure leaderboardData is loaded and has a users array
-  if (!leaderboardData || !Array.isArray(leaderboardData.users)) {
-    return <p>No Active Tournaments At This Time</p>;
+  const getRankClass = (rank) => {
+    if (rank === 1) return "rank-1";
+    if (rank === 2) return "rank-2";
+    if (rank === 3) return "rank-3";
+    return "";
+  };
+
+  const renderLeaderboardRow = (rank, user, reward) => {
+    return (
+      <tr key={user?._id || `placeholder-${rank}`} className="tournament-leaderboard-tr">
+        <td className={`tournament-leaderboard-td ${getRankClass(rank)}`}>
+          {rank}
+        </td>
+        <td className={`tournament-leaderboard-td ${getRankClass(rank)}`}>
+          {user?.username || "—"}
+        </td>
+        <td className={`tournament-leaderboard-td ${getRankClass(rank)}`}>
+          {user?.points ? parseFloat(user.points).toFixed(4) : "—"}
+        </td>
+        <td className={`tournament-leaderboard-td ${getRankClass(rank)}`}>
+          {reward}
+        </td>
+      </tr>
+    );
+  };
+
+  if (!leaderboard || !Array.isArray(leaderboard.users)) {
+    return (
+      <div className="tournament-leaderboard-container">
+        <p className="no-tournament-message">
+          No Active Tournaments At This Time
+        </p>
+      </div>
+    );
   }
 
   return (
-    <>
-      <div style={styles.container}>
-        <div>
-          <h2 style={styles.header}>
-            Rewards for Leaderboard: "{leaderboardData?.name}"
-          </h2>
-          <table style={styles.table}>
-            <thead>
-              <tr>
-                <th style={styles.th}>Rank</th>
-                <th style={styles.th}>Reward</th>
-              </tr>
-            </thead>
-            <tbody>
-              {Object.entries(leaderboardData?.rewards || {}).map(
-                ([rank, reward]) => (
-                  <tr key={rank} style={styles.tr}>
-                    <td style={styles.td}>{rank}</td>
-                    <td style={styles.td}>{reward}</td>
-                  </tr>
-                )
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-      <div style={styles.container}>
-        <div>
-          <h2 style={styles.header}>
-            User Rankings by Earned Credits for "{leaderboardData.name}"
-          </h2>
-          <table style={styles.table}>
-            <thead>
-              <tr>
-                <th style={styles.th}>Rank</th>
-                <th style={styles.th}>Name</th>
-                <th style={styles.th}>Earned Credits</th>
-                <th style={styles.th}>Reward</th>
-              </tr>
-            </thead>
-            <tbody>
-              {leaderboardData.users.map((user, index) => (
-                <tr key={index} style={styles.tr}>
-                  <td style={styles.td}>{index + 1}</td>
-                  <td style={styles.td}>{user.name}</td>
-                  <td style={styles.td}>
-                    {parseFloat(user.earnedCredits).toFixed(4)}
-                  </td>
-                  <td style={styles.td}>
-                    {leaderboardData.rewards[index + 1]}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </>
+    <div className="tournament-leaderboard-container">
+      <h2 className="tournament-leaderboard-header">
+        User Rankings for "{leaderboard.name}"
+      </h2>
+      <table className="tournament-leaderboard-table">
+        <thead>
+          <tr>
+            <th className="tournament-leaderboard-th">Rank</th>
+            <th className="tournament-leaderboard-th">Name</th>
+            <th className="tournament-leaderboard-th">Earned Credits</th>
+            <th className="tournament-leaderboard-th">Reward</th>
+          </tr>
+        </thead>
+        <tbody>
+          {leaderboard?.rewards && 
+            Object.entries(leaderboard.rewards).map(([rank, reward]) => {
+              const rankNum = parseInt(rank);
+              const user = users.find(u => u.rank === rankNum);
+              return renderLeaderboardRow(rankNum, user, reward);
+            })
+          }
+        </tbody>
+      </table>
+    </div>
   );
 };
 
 export default CurrentTournamentLeaderboard;
-
-const styles = {
-  container: {
-    padding: "20px",
-    maxWidth: "800px",
-    margin: "0 auto",
-    backgroundColor: "#635d5d",
-    borderRadius: "8px",
-    boxShadow: "0 0 10px rgba(0, 0, 0, 0.1)",
-    textAlign: "center",
-  },
-  header: {
-    fontSize: "28px",
-    marginBottom: "20px",
-    color: "#fff",
-  },
-  table: {
-    width: "100%",
-    borderCollapse: "collapse",
-  },
-  th: {
-    border: "1px solid #ccc",
-    padding: "10px",
-    backgroundColor: "#333",
-    color: "white",
-  },
-  tr: {
-    borderBottom: "1px solid #ccc",
-  },
-  td: {
-    padding: "10px",
-    borderBottom: "1px solid #ccc",
-    textAlign: "center",
-  },
-};

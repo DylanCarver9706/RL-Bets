@@ -1,0 +1,125 @@
+.instructions-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 100px);
+  padding: 2rem;
+}
+
+.instruction-card {
+  width: 100%;
+  max-width: 600px;
+  background: #2a2a2a;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 2rem;
+  color: white;
+  text-align: center;
+}
+
+.instruction-header {
+  color: #fb6a31;
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid #034da4;
+  padding-bottom: 1rem;
+}
+
+.instruction-image-container {
+  width: 100%;
+  height: 300px;
+  background: #333;
+  border-radius: 8px;
+  margin: 1.5rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px dashed #444;
+}
+
+.instruction-image-placeholder {
+  color: #666;
+  font-size: 1.1rem;
+}
+
+.instruction-description {
+  font-size: 1.2rem;
+  line-height: 1.6;
+  margin: 1.5rem 0;
+  color: #ddd;
+}
+
+.instruction-counter {
+  color: #888;
+  font-size: 1rem;
+  margin: 1.5rem 0;
+}
+
+.instruction-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.instruction-button {
+  padding: 0.8rem 1.5rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.back-button {
+  background: #034da4;
+  color: white;
+}
+
+.back-button:hover {
+  background: #023d83;
+}
+
+.next-button {
+  background: #034da4;
+  color: white;
+}
+
+.next-button:hover {
+  background: #023d83;
+}
+
+.finish-button {
+  background: #28a745;
+  color: white;
+}
+
+.finish-button:hover {
+  background: #218838;
+}
+
+@media (max-width: 768px) {
+  .instructions-container {
+    padding: 1rem;
+  }
+
+  .instruction-card {
+    padding: 1rem;
+  }
+
+  .instruction-header {
+    font-size: 1.75rem;
+  }
+
+  .instruction-image-container {
+    height: 200px;
+  }
+
+  .instruction-description {
+    font-size: 1.1rem;
+  }
+} 

@@ -1,21 +1,22 @@
 import React, { useEffect, useState } from "react";
 import {
-  fetchEndedTournamentDataTree,
+  fetchAllEventsDataTree,
   fetchPlayers,
 } from "../../../services/adminService";
+import "../../../styles/components/tournaments/TournamentHistory.css";
 
 const TournamentHistory = () => {
-  const [data, setData] = useState(null);
+  const [eventData, setEventData] = useState(null);
   const [players, setPlayers] = useState([]);
+  const [expandedNodes, setExpandedNodes] = useState(new Set());
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const fetchedData = await fetchEndedTournamentDataTree();
-        setData(fetchedData);
-
+        const fetchedData = await fetchAllEventsDataTree();
+        setEventData(fetchedData);
         const fetchedPlayers = await fetchPlayers();
-        setPlayers(fetchedPlayers); // Fetch all players
+        setPlayers(fetchedPlayers);
       } catch (error) {
         console.error("Error fetching data:", error.message);
       }
@@ -24,216 +25,208 @@ const TournamentHistory = () => {
     fetchData();
   }, []);
 
-  // Collapsible component to handle toggling
-  const CollapsibleSection = ({ title, children }) => {
-    const [isCollapsed, setIsCollapsed] = useState(true);
+  const toggleNode = (nodeId) => {
+    const newExpanded = new Set(expandedNodes);
+    if (newExpanded.has(nodeId)) {
+      newExpanded.delete(nodeId);
+    } else {
+      newExpanded.add(nodeId);
+    }
+    setExpandedNodes(newExpanded);
+  };
+
+  const renderResultsTable = (match) => {
+    if (!match?.results) return null;
+
+    const team1Id = match.teams[0]._id;
+    const team2Id = match.teams[1]._id;
+    const team1Results = match.results[team1Id];
+    const team2Results = match.results[team2Id];
+    const team1Name = match.teams[0].name;
+    const team2Name = match.teams[1].name;
+
+    const attributes = ["score", "goals", "assists", "shots", "saves", "demos"];
 
     return (
-      <div style={{ marginLeft: "20px", marginTop: "10px" }}>
-        <button
-          style={{
-            marginBottom: "5px",
-            background: "#b3b1b1",
-            color: "white",
-            border: "none",
-            padding: "5px 10px",
-            cursor: "pointer",
-          }}
-          onClick={() => setIsCollapsed(!isCollapsed)}
-        >
-          {isCollapsed ? "▶" : "▼"} {title}
-        </button>
-        {!isCollapsed && <div style={{ paddingLeft: "15px" }}>{children}</div>}
+      <div className="results-table-container">
+        <table className="results-table">
+          <thead>
+            <tr>
+              {/* Team Names Row */}
+              <th
+                colSpan={team1Results.length}
+                className="team-name team1-name"
+              >
+                {team1Name}
+              </th>
+              <th className="attribute-header">Attribute</th>
+              <th
+                colSpan={team2Results.length}
+                className="team-name team2-name"
+              >
+                {team2Name}
+              </th>
+            </tr>
+            <tr>
+              {/* Team 1 Players */}
+              {team1Results.map((player) => (
+                <th key={player.playerId} className="player-name team1-player">
+                  {players
+                    .find((p) => p._id === player.playerId)
+                    ?.names.at(-1) || "Unknown"}
+                </th>
+              ))}
+              {/* Center Column */}
+              <th className="attribute-header"></th>
+              {/* Team 2 Players */}
+              {team2Results.map((player) => (
+                <th key={player.playerId} className="player-name team2-player">
+                  {players
+                    .find((p) => p._id === player.playerId)
+                    ?.names.at(-1) || "Unknown"}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {attributes.map((attribute) => (
+              <tr key={attribute}>
+                {/* Team 1 Stats */}
+                {team1Results.map((player) => (
+                  <td
+                    key={`${player.playerId}-${attribute}`}
+                    className="team1-stats"
+                  >
+                    {player[attribute]}
+                  </td>
+                ))}
+                {/* Attribute Name */}
+                <td className="attribute-name">
+                  {attribute.charAt(0).toUpperCase() + attribute.slice(1)}
+                </td>
+                {/* Team 2 Stats */}
+                {team2Results.map((player) => (
+                  <td
+                    key={`${player.playerId}-${attribute}`}
+                    className="team2-stats"
+                  >
+                    {player[attribute]}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     );
   };
 
-  const renderResultsTable = (results) => {
-    if (!results || typeof results !== "object") return null;
-  
-    // Create a map of player IDs to names for quick lookup
-    const playerIdToNameMap = players.reduce((map, player) => {
-      map[player._id] = player.names.at(-1);
-      return map;
-    }, {});
-  
-    // Extract team IDs and their player data
-    const teamIds = Object.keys(results);
-    const [team1, team2] = teamIds;
-  
-    // Attributes to display
-    const attributes = ["score", "goals", "assists", "shots", "saves", "demos"];
-  
+  const renderMatchDetails = (seriesData) => {
+    if (!seriesData?.teams || !seriesData?.matches) return null;
+
+    const seriesName = seriesData.name.split(" -> ").pop();
+
     return (
-      <table style={{ borderCollapse: "collapse", width: "100%", marginTop: "10px" }}>
-        <thead>
-          <tr>
-            {/* Team 1 Player Names */}
-            {results[team1].map((player) => (
-              <th
-                key={player.playerId}
-                style={{
-                  border: "1px solid #ddd",
-                  padding: "8px",
-                  background: "#b3b1b1",
-                }}
-              >
-                {playerIdToNameMap[player.playerId] || "Unknown"}
-              </th>
-            ))}
-            {/* Attribute Column Header */}
-            <th
-              style={{
-                border: "1px solid #ddd",
-                padding: "8px",
-                background: "#b3b1b1",
-              }}
-            >
-              Attribute
-            </th>
-            {/* Team 2 Player Names */}
-            {results[team2].map((player) => (
-              <th
-                key={player.playerId}
-                style={{
-                  border: "1px solid #ddd",
-                  padding: "8px",
-                  background: "#b3b1b1",
-                }}
-              >
-                {playerIdToNameMap[player.playerId] || "Unknown"}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {attributes.map((attribute) => (
-            <tr key={attribute}>
-              {/* Team 1 Player Stats */}
-              {results[team1].map((player) => (
-                <td
-                  key={`${player.playerId}-${attribute}`}
-                  style={{ border: "1px solid #ddd", padding: "8px" }}
+      <div className="tree-node">
+        <div className="node-header" onClick={() => toggleNode(seriesData._id)}>
+          <span className="expand-icon">
+            {expandedNodes.has(seriesData._id) ? "▼" : "▶"}
+          </span>
+          {seriesName}
+        </div>
+        {expandedNodes.has(seriesData._id) && (
+          <div className="node-children">
+            {seriesData.matches.map((match, index) => (
+              <div key={match._id} className="tree-node">
+                <div
+                  className="node-header match-header"
+                  onClick={() => toggleNode(match._id)}
                 >
-                  {player[attribute]}
-                </td>
-              ))}
-              {/* Attribute Name Column */}
-              <td
-                style={{
-                  border: "1px solid #ddd",
-                  padding: "8px",
-                  textAlign: "center",
-                  background: "#b3b1b1",
-                  fontWeight: "bold",
-                }}
-              >
-                {attribute.charAt(0).toUpperCase() + attribute.slice(1)}
-              </td>
-              {/* Team 2 Player Stats */}
-              {results[team2].map((player) => (
-                <td
-                  key={`${player.playerId}-${attribute}`}
-                  style={{ border: "1px solid #ddd", padding: "8px" }}
-                >
-                  {player[attribute]}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
+                  <span className="expand-icon">
+                    {expandedNodes.has(match._id) ? "▼" : "▶"}
+                  </span>
+                  Match {index + 1}
+                </div>
+                {expandedNodes.has(match._id) && renderResultsTable(match)}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     );
   };
 
-  const renderDataTree = (node, level = 0) => {
-    if (!node || typeof node !== "object") return null;
+  // Helper function to create unique node IDs based on path
+  const createNodeId = (node, parentPath = "") => {
+    const path = parentPath ? `${parentPath} -> ${node.name}` : node.name;
+    return `node-${path}`;
+  };
 
-    if (Array.isArray(node)) {
-      return (
-        <ul
-          style={{
-            listStyleType: "none",
-            paddingLeft: level > 0 ? "20px" : "0",
-          }}
-        >
-          {node.map((item, index) => (
-            <li key={index}>{renderDataTree(item, level + 1)}</li>
-          ))}
-        </ul>
-      );
-    } else {
-      return (
-        <div>
-          {Object.entries(node)
-            .filter(([key, value]) => {
-              const excludedKeys = [
-                "_id",
-                "id",
-                "tournament",
-                "series",
-                "team",
-              ];
-              return !excludedKeys.includes(key) || typeof value !== "string";
-            })
-            .map(([key, value]) => {
-              let title = "";
-              if (key === "tournaments") title = "Tournaments";
-              else if (key === "series") title = "Series";
-              else if (key === "matches") title = "Matches";
-              else if (key === "teams") title = "Teams";
-              else if (key === "players") title = "Players";
-              else if (key === "results") title = "Results";
+  const renderBracketNode = (node, parentPath = "") => {
+    if (!node) return null;
 
-              if (key === "series" && Array.isArray(value)) {
-                return value.map((seriesItem) => {
-                  const seriesId = seriesItem?._id;
-                  const seriesName = seriesItem?.name || "Series";
-                  const teamNames = (seriesItem?.teams || [])
-                    .map((team) => team.name)
-                    .join(" vs ");
-                  const seriesTitle = teamNames
-                    ? `${seriesName}: [${teamNames}]`
-                    : seriesName;
+    const nodeId = node.seriesData?._id || createNodeId(node, parentPath);
 
-                  return (
-                    <CollapsibleSection key={seriesId} title={seriesTitle}>
-                      {renderDataTree(seriesItem, level + 1)}
-                    </CollapsibleSection>
-                  );
-                });
-              }
-
-              if (key === "teams") {
-                return null;
-              }
-
-              if (key === "results" && typeof value === "object") {
-                return (
-                  <CollapsibleSection key={key} title={title || key}>
-                    {renderResultsTable(value)}
-                  </CollapsibleSection>
-                );
-              }
-
-              return typeof value === "object" ? (
-                <CollapsibleSection key={key} title={title || key}>
-                  {renderDataTree(value, level + 1)}
-                </CollapsibleSection>
-              ) : (
-                <div key={key} style={{ marginBottom: "5px" }}>
-                  <strong>{value || "-"}</strong>
+    return (
+      <div className="tree-node">
+        {node.seriesData ? (
+          renderMatchDetails(node.seriesData)
+        ) : (
+          <>
+            <div className="node-header" onClick={() => toggleNode(nodeId)}>
+              <span className="expand-icon">
+                {expandedNodes.has(nodeId) ? "▼" : "▶"}
+              </span>
+              {node.name}
+            </div>
+            {expandedNodes.has(nodeId) &&
+              node.children &&
+              node.children.length > 0 && (
+                <div className="node-children">
+                  {node.children.map((child, index) => (
+                    <div key={index}>{renderBracketNode(child, nodeId)}</div>
+                  ))}
                 </div>
-              );
-            })}
-        </div>
-      );
-    }
+              )}
+          </>
+        )}
+      </div>
+    );
   };
 
   return (
-    <div>
-      {data ? <div>{renderDataTree(data)}</div> : <p>Failed to load data.</p>}
+    <div className="tournament-history">
+      {eventData ? (
+        <div className="tournament-tree">
+          {eventData.tournaments.map((tournament) => (
+            <div key={tournament.name} className="tree-node">
+              <div
+                className="node-header tournament-header"
+                onClick={() => toggleNode(`tournament-${tournament.name}`)}
+              >
+                <span className="expand-icon">
+                  {expandedNodes.has(`tournament-${tournament.name}`)
+                    ? "▼"
+                    : "▶"}
+                </span>
+                {tournament.name}
+              </div>
+              {expandedNodes.has(`tournament-${tournament.name}`) &&
+                tournament.children && (
+                  <div className="node-children">
+                    {tournament.children.map((child, index) => (
+                      <div key={index}>
+                        {renderBracketNode(child, tournament.name)}
+                      </div>
+                    ))}
+                  </div>
+                )}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p>Loading tournament data...</p>
+      )}
     </div>
   );
 };

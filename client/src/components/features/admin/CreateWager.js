@@ -4,7 +4,7 @@ import { useUser } from "../../../contexts/UserContext.js";
 import {
   fetchBettableObjects,
   createWager,
-  createBet,
+  // createBet, // Deprecated/Future Use: Users can't make wagers, only admins can make wagers
   fetchTeams,
   capitalize,
 } from "../../../services/wagerService";
@@ -26,7 +26,7 @@ const CreateWager = () => {
   const [selectedAttributeBetType, setSelectedAttributeBetType] = useState("");
   const [selectedAccoladeBetType, setSelectedAccoladeBetType] = useState("");
   const [attributeBetInput, setAttributeBetInput] = useState(0);
-  const [creditsBet, setCreditsBet] = useState(0);
+  // const [creditsBet, setCreditsBet] = useState(0);
 
   // Tournament bet
   const [selectedTournamentBetType, setSelectedTournamentBetType] =
@@ -55,7 +55,7 @@ const CreateWager = () => {
     };
 
     fetchData();
-  }, [user.mongoUserId]);
+  }, []);
 
   const handleBetClick = async (node) => {
     console.log(node);
@@ -123,7 +123,13 @@ const CreateWager = () => {
                 "loser",
                 "firstBlood",
                 "bestOf",
+                "best_of",
                 "overtimeCount",
+                "createdAt",
+                "updatedAt",
+                "historical",
+                "season",
+                "matches"
               ];
               return (
                 !excludedKeys.includes(key) ||
@@ -203,7 +209,7 @@ const CreateWager = () => {
     setSelectedAttributeBetType("");
     setSelectedAccoladeBetType("");
     setAttributeBetInput(0);
-    setCreditsBet(0);
+    // setCreditsBet(0);
   };
 
   const generateBetString = () => {
@@ -298,16 +304,16 @@ const CreateWager = () => {
   };
 
   const handleBetSubmit = async () => {
-    if (creditsBet === 0) {
-      alert("Please enter a valid wager amount.");
-      return;
-    }
+    // if (creditsBet === 0) {
+    //   alert("Please enter a valid wager amount.");
+    //   return;
+    // }
 
-    const remainingCredits = parseFloat(user.credits) - creditsBet;
-    if (remainingCredits < 0) {
-      alert("Wager amount is more credits than you have available!");
-      return;
-    }
+    // const remainingCredits = parseFloat(user.credits) - creditsBet;
+    // if (remainingCredits < 0) {
+    //   alert("Wager amount is more credits than you have available!");
+    //   return;
+    // }
 
     // Generate the bet string
     const generatedBetString = generateBetString();
@@ -446,17 +452,19 @@ const CreateWager = () => {
     const wagerResponse = await createWager(wagerPayload);
     console.log(wagerResponse);
 
-    let betPayload = {
-      user: user.mongoUserId,
-      credits: creditsBet,
-      agreeBet: true,
-      rlEventReference: betNode._id,
-      wagerId: wagerResponse.wagerId,
-    };
+    // Deprecated/Future Use: Users can't make wagers, only admins can make wagers
 
-    await createBet(betPayload);
+    // let betPayload = {
+    //   user: user.mongoUserId,
+    //   credits: creditsBet,
+    //   agreeBet: true,
+    //   rlEventReference: betNode._id,
+    //   wagerId: wagerResponse.wagerId,
+    // };
 
-    console.log("Bet Submitted: ", generatedBetString);
+    // await createBet(betPayload);
+
+    console.log("Wager Submitted: ", generatedBetString);
 
     handleBetCancel();
     navigate("/Wagers");
@@ -469,7 +477,7 @@ const CreateWager = () => {
       {bettableObjects ? (
         <div>{renderDataTree(bettableObjects)}</div>
       ) : (
-        <p>Failed to load data.</p>
+        <p>No bettable objects found.</p>
       )}
 
       {/* User inputs for bet */}
@@ -502,7 +510,7 @@ const CreateWager = () => {
           <div style={styles.marginTop}>
             <h3>
               I bet{" "}
-              <input
+              {/* <input
                 type="number"
                 id="numberInput"
                 value={creditsBet}
@@ -510,7 +518,8 @@ const CreateWager = () => {
                 min="0"
                 step="1"
               />{" "}
-              credits that the team{" "}
+              credits  */}
+              that the team{" "}
               <select
                 value={selectedTeamOrPlayerForBet || ""}
                 onChange={(e) => setSelectedTeamOrPlayerForBet(e.target.value)}
@@ -526,7 +535,7 @@ const CreateWager = () => {
               will win the {betNode.name}
             </h3>
             <button onClick={handleBetSubmit} style={styles.confirmButton}>
-              Confirm Bet
+              Confirm Wager
             </button>
             <button onClick={handleBetCancel} style={styles.cancelButton}>
               Cancel
@@ -538,7 +547,7 @@ const CreateWager = () => {
           <div style={styles.marginTop}>
             <h3>
               I bet{" "}
-              <input
+              {/* <input
                 type="number"
                 id="numberInput"
                 value={creditsBet}
@@ -546,7 +555,8 @@ const CreateWager = () => {
                 min="0"
                 step="1"
               />{" "}
-              credits that{" "}
+              credits  */}
+              that{" "}
               <select
                 value={selectedTeamOrPlayerForBet || ""}
                 onChange={(e) => setSelectedTeamOrPlayerForBet(e.target.value)}
@@ -604,7 +614,7 @@ const CreateWager = () => {
               in the '{betNode.name}' Tournament
             </h3>
             <button onClick={handleBetSubmit} style={styles.confirmButton}>
-              Confirm Bet
+              Confirm Wager
             </button>
             <button onClick={handleBetCancel} style={styles.cancelButton}>
               Cancel
@@ -691,7 +701,7 @@ const CreateWager = () => {
           <div style={styles.marginTop}>
             <h3>
               I bet{" "}
-              <input
+              {/* <input
                 type="number"
                 id="numberInput"
                 value={creditsBet}
@@ -699,7 +709,8 @@ const CreateWager = () => {
                 min="0"
                 step="1"
               />{" "}
-              credits that the team{" "}
+              credits  */}
+              that the team{" "}
               <select
                 value={selectedTeamOrPlayerForBet || ""}
                 onChange={(e) => setSelectedTeamOrPlayerForBet(e.target.value)}
@@ -715,7 +726,7 @@ const CreateWager = () => {
               will win the {betNode.name}
             </h3>
             <button onClick={handleBetSubmit} style={styles.confirmButton}>
-              Confirm Bet
+              Confirm Wager
             </button>
             <button onClick={handleBetCancel} style={styles.cancelButton}>
               Cancel
@@ -727,7 +738,7 @@ const CreateWager = () => {
           <div style={styles.marginTop}>
             <h3>
               I bet{" "}
-              <input
+              {/* <input
                 type="number"
                 id="numberInput"
                 value={creditsBet}
@@ -735,7 +746,8 @@ const CreateWager = () => {
                 min="0"
                 step="1"
               />{" "}
-              credits that the team {betNode.teams[0].name} will win{" "}
+              credits  */}
+              that the team {betNode.teams[0].name} will win{" "}
               <input
                 type="number"
                 id="numberInput"
@@ -756,7 +768,7 @@ const CreateWager = () => {
               game(s) in the {betNode.name}
             </h3>
             <button onClick={handleBetSubmit} style={styles.confirmButton}>
-              Confirm Bet
+              Confirm Wager
             </button>
             <button onClick={handleBetCancel} style={styles.cancelButton}>
               Cancel
@@ -768,7 +780,7 @@ const CreateWager = () => {
           <div style={styles.marginTop}>
             <h3>
               I bet{" "}
-              <input
+              {/* <input
                 type="number"
                 id="numberInput"
                 value={creditsBet}
@@ -776,7 +788,8 @@ const CreateWager = () => {
                 min="0"
                 step="1"
               />{" "}
-              credits that the team{" "}
+              credits  */}
+              that the team{" "}
               <select
                 value={selectedTeamOrPlayerForBet || ""}
                 onChange={(e) => setSelectedTeamOrPlayerForBet(e.target.value)}
@@ -792,7 +805,7 @@ const CreateWager = () => {
               will score the first goal in the '{betNode.name}' series
             </h3>
             <button onClick={handleBetSubmit} style={styles.confirmButton}>
-              Confirm Bet
+              Confirm Wager
             </button>
             <button onClick={handleBetCancel} style={styles.cancelButton}>
               Cancel
@@ -804,7 +817,7 @@ const CreateWager = () => {
           <div style={styles.marginTop}>
             <h3>
               I bet{" "}
-              <input
+              {/* <input
                 type="number"
                 id="numberInput"
                 value={creditsBet}
@@ -812,7 +825,8 @@ const CreateWager = () => {
                 min="0"
                 step="1"
               />{" "}
-              credits that there will be{" "}
+              credits  */}
+              that there will be{" "}
               <select
                 value={selectedBetOperator}
                 onChange={(e) => setSelectedBetOperator(e.target.value)}
@@ -833,7 +847,7 @@ const CreateWager = () => {
               overtime(s) in the '{betNode.name}' series
             </h3>
             <button onClick={handleBetSubmit} style={styles.confirmButton}>
-              Confirm Bet
+              Confirm Wager
             </button>
             <button onClick={handleBetCancel} style={styles.cancelButton}>
               Cancel
@@ -845,7 +859,7 @@ const CreateWager = () => {
           <div style={styles.marginTop}>
             <h3>
               I bet{" "}
-              <input
+              {/* <input
                 type="number"
                 id="numberInput"
                 value={creditsBet}
@@ -853,7 +867,8 @@ const CreateWager = () => {
                 min="0"
                 step="1"
               />{" "}
-              credits that{" "}
+              credits  */}
+              that{" "}
               <select
                 value={selectedTeamOrPlayerForBet || ""}
                 onChange={(e) => setSelectedTeamOrPlayerForBet(e.target.value)}
@@ -911,7 +926,7 @@ const CreateWager = () => {
               in the '{betNode.name}' series
             </h3>
             <button onClick={handleBetSubmit} style={styles.confirmButton}>
-              Confirm Bet
+              Confirm Wager
             </button>
             <button onClick={handleBetCancel} style={styles.cancelButton}>
               Cancel
@@ -948,7 +963,7 @@ const CreateWager = () => {
           <div style={styles.marginTop}>
             <h3>
               I bet{" "}
-              <input
+              {/* <input
                 type="number"
                 id="numberInput"
                 value={creditsBet}
@@ -956,7 +971,8 @@ const CreateWager = () => {
                 min="0"
                 step="1"
               />{" "}
-              credits that the team{" "}
+              credits  */}
+              that the team{" "}
               <select
                 value={selectedTeamOrPlayerForBet || ""}
                 onChange={(e) => setSelectedTeamOrPlayerForBet(e.target.value)}
@@ -972,7 +988,7 @@ const CreateWager = () => {
               will win the {betNode.name}
             </h3>
             <button onClick={handleBetSubmit} style={styles.confirmButton}>
-              Confirm Bet
+              Confirm Wager
             </button>
             <button onClick={handleBetCancel} style={styles.cancelButton}>
               Cancel
@@ -984,7 +1000,7 @@ const CreateWager = () => {
           <div style={styles.marginTop}>
             <h3>
               I bet{" "}
-              <input
+              {/* <input
                 type="number"
                 id="numberInput"
                 value={creditsBet}
@@ -992,7 +1008,8 @@ const CreateWager = () => {
                 min="0"
                 step="1"
               />{" "}
-              credits that the team {betNode.teams[0].name} will score{" "}
+              credits  */}
+              that the team {betNode.teams[0].name} will score{" "}
               <input
                 type="number"
                 id="numberInput"
@@ -1013,7 +1030,7 @@ const CreateWager = () => {
               goal(s) in the {betNode.name}
             </h3>
             <button onClick={handleBetSubmit} style={styles.confirmButton}>
-              Confirm Bet
+              Confirm Wager
             </button>
             <button onClick={handleBetCancel} style={styles.cancelButton}>
               Cancel
@@ -1025,7 +1042,7 @@ const CreateWager = () => {
           <div style={styles.marginTop}>
             <h3>
               I bet{" "}
-              <input
+              {/* <input
                 type="number"
                 id="numberInput"
                 value={creditsBet}
@@ -1033,7 +1050,8 @@ const CreateWager = () => {
                 min="0"
                 step="1"
               />{" "}
-              credits that the team{" "}
+              credits  */}
+              that the team{" "}
               <select
                 value={selectedTeamOrPlayerForBet || ""}
                 onChange={(e) => setSelectedTeamOrPlayerForBet(e.target.value)}
@@ -1049,7 +1067,7 @@ const CreateWager = () => {
               will score the first goal in the '{betNode.name}' match
             </h3>
             <button onClick={handleBetSubmit} style={styles.confirmButton}>
-              Confirm Bet
+              Confirm Wager
             </button>
             <button onClick={handleBetCancel} style={styles.cancelButton}>
               Cancel
@@ -1061,7 +1079,7 @@ const CreateWager = () => {
           <div style={styles.marginTop}>
             <h3>
               I bet{" "}
-              <input
+              {/* <input
                 type="number"
                 id="numberInput"
                 value={creditsBet}
@@ -1069,7 +1087,8 @@ const CreateWager = () => {
                 min="0"
                 step="1"
               />{" "}
-              credits that the player{" "}
+              credits  */}
+              that the player{" "}
               <select
                 value={selectedTeamOrPlayerForBet || ""}
                 onChange={(e) => setSelectedTeamOrPlayerForBet(e.target.value)}
@@ -1090,7 +1109,7 @@ const CreateWager = () => {
               points) in the '{betNode.name}' match
             </h3>
             <button onClick={handleBetSubmit} style={styles.confirmButton}>
-              Confirm Bet
+              Confirm Wager
             </button>
             <button onClick={handleBetCancel} style={styles.cancelButton}>
               Cancel
@@ -1102,7 +1121,7 @@ const CreateWager = () => {
           <div style={styles.marginTop}>
             <h3>
               I bet{" "}
-              <input
+              {/* <input
                 type="number"
                 id="numberInput"
                 value={creditsBet}
@@ -1110,7 +1129,8 @@ const CreateWager = () => {
                 min="0"
                 step="1"
               />{" "}
-              credits that{" "}
+              credits  */}
+              that{" "}
               <select
                 value={selectedTeamOrPlayerForBet || ""}
                 onChange={(e) => setSelectedTeamOrPlayerForBet(e.target.value)}
@@ -1168,7 +1188,7 @@ const CreateWager = () => {
               in the '{betNode.name}' match
             </h3>
             <button onClick={handleBetSubmit} style={styles.confirmButton}>
-              Confirm Bet
+              Confirm Wager
             </button>
             <button onClick={handleBetCancel} style={styles.cancelButton}>
               Cancel

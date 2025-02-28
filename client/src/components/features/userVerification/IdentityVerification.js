@@ -2,15 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { useUser } from "../../../contexts/UserContext"; // Get user context
 import { sendImagesToAPI } from "../../../services/firebaseService"; // API request function
 import { redeemReferralCode, updateUser } from "../../../services/userService";
-
-const statesList = [
-  "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware", "Florida", 
-  "Georgia", "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana", "Maine", 
-  "Maryland", "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri", "Montana", "Nebraska", 
-  "Nevada", "New Hampshire", "New Jersey", "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio", 
-  "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota", "Tennessee", "Texas", 
-  "Utah", "Vermont", "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming"
-];
+import "../../../styles/components/userVerification/IdentityVerification.css";
 
 const documentTypes = [
   "Driver's License",
@@ -39,15 +31,6 @@ const IdentityVerification = () => {
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
   const [inReview, setInReview] = useState(false);
-
-  // Address
-  const [address1, setAddress1] = useState("");
-  const [address2, setAddress2] = useState("");
-  const [city, setCity] = useState("");
-  const [state, setState] = useState("");
-  const [zip, setZip] = useState("");
-
-  const [selectedDate, setSelectedDate] = useState("");
 
   const [cameraActive, setCameraActive] = useState(false);
   const [captureTarget, setCaptureTarget] = useState(null); // 'selfie', 'front', or 'back'
@@ -123,21 +106,6 @@ const IdentityVerification = () => {
 
   // Handle file upload
   const handleUpload = async () => {
-    if (
-      address1 === "" ||
-      city === "" ||
-      state === "" ||
-      zip === ""
-    ) {
-      setError("Please fill in all required address fields.");
-      return;
-    }
-
-    if (selectedDate === "") {
-      setError("Please select your date of birth.");
-      return;
-    }
-
     if (!documentType) {
       setError("Please select a document type.");
       return;
@@ -162,13 +130,6 @@ const IdentityVerification = () => {
     setError(null);
 
     try {
-
-      // Update the user's address
-      await updateUser(user.mongoUserId, {
-        address: { address1: address1, address2: address2, city: city, state: state, zip: zip },
-        DOB: selectedDate,
-      })
-
       const formData = new FormData();
       formData.append("documentType", documentType);
       formData.append("userId", user.mongoUserId);
@@ -180,7 +141,7 @@ const IdentityVerification = () => {
 
       await sendImagesToAPI(formData);
       await updateUser(user.mongoUserId, { idvStatus: "review" });
-      
+
       // If user has a referral code, redeem it
       if (user.referralCode !== "") {
         await redeemReferralCode(
@@ -203,7 +164,7 @@ const IdentityVerification = () => {
   };
 
   return (
-    <div>
+    <div className="identity-verification-container">
       {inReview ? (
         <div>
           <p>
@@ -213,52 +174,10 @@ const IdentityVerification = () => {
           </p>
         </div>
       ) : (
-        <div>
-          <div>
-            <h3>Address</h3>
-            <input
-              type="text"
-              value={address1}
-              onChange={(e) => setAddress1(e.target.value)}
-              placeholder="Address Line 1"
-              required
-            />
-            <input
-              type="text"
-              value={address2}
-              onChange={(e) => setAddress2(e.target.value)}
-              placeholder="Address Line 2"
-            />
-            <input
-              type="text"
-              value={city}
-              onChange={(e) => setCity(e.target.value)}
-              placeholder="City"
-              required
-            />
-            <select value={state} onChange={(e) => setState(e.target.value)}>
-              <option value="">Select a State</option>
-              {statesList.map((state) => (
-                <option key={state} value={state}>{state}</option>
-              ))}
-            </select>
-            <input
-              type="text"
-              value={zip}
-              onChange={(e) => setZip(e.target.value)}
-              placeholder="Zip"
-              required
-            />
-          </div>
-          <div>
-          <h3>Date of Birth</h3>
-            <input
-              type="date"
-              onChange={(e) => {setSelectedDate(e.target.value)}}
-              style={styles.dateInput}
-            />
-          </div>
-          <h3>Upload Identity Verification Documents</h3>
+        <div className="identity-verification-card">
+          <h3 className="identity-verification-title">
+            Upload Identity Verification Documents
+          </h3>
           {error && <p style={{ color: "red" }}>{error}</p>}
           {successMessage && <p style={{ color: "green" }}>{successMessage}</p>}
 
@@ -267,6 +186,7 @@ const IdentityVerification = () => {
             <select
               value={documentType}
               onChange={(e) => setDocumentType(e.target.value)}
+              className="identity-verification-input"
             >
               <option value="">Select Document Type</option>
               {documentTypes.map((doc) => (
@@ -279,55 +199,80 @@ const IdentityVerification = () => {
 
           {documentType !== "" && (
             <>
-              <div>
+              <div className="document-section">
                 <label>Front of Document:</label>
-                <button
-                  onClick={() => {
-                    setCameraActive(true);
-                    setCaptureTarget("front");
-                  }}
-                >
-                  Take a Picture
-                </button>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => handleFileChange(e, setFrontImage)}
-                />
-                {frontImage && <p>Front captured successfully!</p>}
-              </div>
-
-              {documentsWithBack.has(documentType) && (
-                <div>
-                  <label>Back of Document:</label>
+                <div className="file-upload-container">
                   <button
                     onClick={() => {
                       setCameraActive(true);
-                      setCaptureTarget("back");
+                      setCaptureTarget("front");
                     }}
+                    className="identity-verification-button"
                   >
                     Take a Picture
                   </button>
                   <input
                     type="file"
                     accept="image/*"
-                    onChange={(e) => handleFileChange(e, setBackImage)}
+                    onChange={(e) => handleFileChange(e, setFrontImage)}
+                    style={{ display: "none" }}
+                    id="frontImageInput"
                   />
-                  {backImage && <p>Back captured successfully!</p>}
+                  <label
+                    htmlFor="frontImageInput"
+                    className="identity-verification-button"
+                  >
+                    Choose File
+                  </label>
+                </div>
+                {frontImage && <p>Front completed!</p>}
+              </div>
+
+              {documentsWithBack.has(documentType) && (
+                <div className="document-section">
+                  <label>Back of Document:</label>
+                  <div className="file-upload-container">
+                    <button
+                      onClick={() => {
+                        setCameraActive(true);
+                        setCaptureTarget("back");
+                      }}
+                      className="identity-verification-button"
+                    >
+                      Take a Picture
+                    </button>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleFileChange(e, setBackImage)}
+                      style={{ display: "none" }}
+                      id="backImageInput"
+                    />
+                    <label
+                      htmlFor="backImageInput"
+                      className="identity-verification-button"
+                    >
+                      Choose File
+                    </label>
+                  </div>
+                  {backImage && <p>Back completed!</p>}
                 </div>
               )}
 
-              <div>
-                <label>Take a Selfie (Required):</label>
-                <button
-                  onClick={() => {
-                    setCameraActive(true);
-                    setCaptureTarget("selfie");
-                  }}
-                >
-                  Open Camera
-                </button>
-                {selfieImage && <p>Selfie captured successfully!</p>}
+              <div className="document-section">
+                <label>Selfie:</label>
+                <div className="file-upload-container">
+                  <button
+                    onClick={() => {
+                      setCameraActive(true);
+                      setCaptureTarget("selfie");
+                    }}
+                    className="identity-verification-button"
+                  >
+                    Take a Picture
+                  </button>
+                </div>
+                {selfieImage && <p>Selfie completed!</p>}
               </div>
 
               {cameraActive && (
@@ -342,15 +287,29 @@ const IdentityVerification = () => {
                     }}
                   ></video>
                   <div>
-                    <button onClick={captureImage}>Capture</button>
-                    <button onClick={stopCamera}>Cancel</button>
+                    <button
+                      onClick={captureImage}
+                      className="identity-verification-button"
+                    >
+                      Capture
+                    </button>
+                    <button
+                      onClick={stopCamera}
+                      className="identity-verification-button"
+                    >
+                      Cancel
+                    </button>
                   </div>
                   <canvas ref={canvasRef} style={{ display: "none" }}></canvas>
                 </div>
               )}
             </>
           )}
-          <button onClick={handleUpload} disabled={uploading}>
+          <button
+            onClick={handleUpload}
+            disabled={uploading}
+            className="identity-verification-button"
+          >
             {uploading ? "Uploading..." : "Submit Verification"}
           </button>
         </div>
@@ -360,14 +319,3 @@ const IdentityVerification = () => {
 };
 
 export default IdentityVerification;
-
-const styles = {
-  dateInput: {
-    padding: "8px",
-    fontSize: "16px",
-    marginTop: "5px",
-    borderRadius: "5px",
-    border: "1px solid #ccc",
-    cursor: "pointer",
-  },
-};

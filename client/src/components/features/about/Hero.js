@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import "../../../styles/components/Hero.css";
+import "../../../styles/components/about/Hero.css";
 
 const Hero = () => {
   const [currentSlide, setCurrentSlide] = useState(0);

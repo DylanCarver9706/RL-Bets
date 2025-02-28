@@ -99,7 +99,7 @@ export const fetchTeams = async () => {
 export const fetchBettableObjects = async () => {
   try {
     const response = await makeAuthenticatedRequest(
-      "api/data-trees/bettable",
+      "/api/data-trees/bettable",
       { method: "GET" }
     );
 

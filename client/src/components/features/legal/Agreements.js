@@ -1,24 +1,55 @@
-import React, { useState } from "react";
-import PropTypes from "prop-types";
+import React, { useState, useEffect } from "react";
 import { useUser } from "../../../contexts/UserContext";
-import { updateUser } from "../../../services/userService"; // Assumes updateUser is defined in UserService
+import { updateUser } from "../../../services/userService";
+import {
+  getLatestPrivacyPolicy,
+  getLatestTermsOfService,
+} from "../../../services/agreementService";
+import "../../../styles/components/legal/Agreements.css";
 
-const Agreements = ({ requireTos, requirePp, tosVersion, ppVersion }) => {
+const Agreements = () => {
   const [tosClicked, setTosClicked] = useState(false);
   const [ppClicked, setPpClicked] = useState(false);
   const [tosChecked, setTosChecked] = useState(false);
   const [ppChecked, setPpChecked] = useState(false);
   const [error, setError] = useState(null);
+  const [latestVersions, setLatestVersions] = useState({ tos: null, pp: null });
   const { user } = useUser();
+
+  // Fetch latest versions on mount
+  useEffect(() => {
+    const fetchLatestVersions = async () => {
+      try {
+        const [tosDoc, ppDoc] = await Promise.all([
+          getLatestTermsOfService(),
+          getLatestPrivacyPolicy(),
+        ]);
+        setLatestVersions({
+          tos: parseInt(tosDoc.version),
+          pp: parseInt(ppDoc.version),
+        });
+      } catch (err) {
+        console.error("Error fetching latest versions:", err);
+        setError("Failed to load agreement versions. Please try again.");
+      }
+    };
+
+    fetchLatestVersions();
+  }, []);
+
+  // Check which agreements need to be updated
+  const requireTos = user?.tos?.version !== latestVersions.tos;
+  const requirePp = user?.pp?.version !== latestVersions.pp;
 
   const handleSubmit = async () => {
     try {
-      if (requireTos && !tosChecked) {
-        setError("You must agree to the Terms of Service.");
+      // Validate that required agreements have been read and accepted
+      if (requireTos && (!tosClicked || !tosChecked)) {
+        setError("Please read and accept the Terms of Service");
         return;
       }
-      if (requirePp && !ppChecked) {
-        setError("You must agree to the Privacy Policy.");
+      if (requirePp && (!ppClicked || !ppChecked)) {
+        setError("Please read and accept the Privacy Policy");
         return;
       }
 
@@ -26,20 +57,19 @@ const Agreements = ({ requireTos, requirePp, tosVersion, ppVersion }) => {
 
       if (requireTos) {
         updateObject.tos = {
-          version: tosVersion,
+          version: parseInt(latestVersions.tos),
           acceptedAt: new Date().toISOString(),
         };
       }
 
       if (requirePp) {
         updateObject.pp = {
-          version: ppVersion,
+          version: parseInt(latestVersions.pp),
           acceptedAt: new Date().toISOString(),
         };
       }
 
       await updateUser(user.mongoUserId, updateObject);
-      alert("Agreements updated successfully!");
       window.location.reload();
     } catch (err) {
       console.error("Error updating agreements:", err);
@@ -47,126 +77,118 @@ const Agreements = ({ requireTos, requirePp, tosVersion, ppVersion }) => {
     }
   };
 
-  console.log(requireTos === requirePp);
+  // Don't render until we have the latest versions
+  if (!latestVersions.tos || !latestVersions.pp) {
+    return null;
+  }
 
   return (
-    <div style={styles.container}>
-      {requireTos === requirePp ? (
-        <>
-          <h1>There has been an update to the agreement docs</h1>
-          <h2>Please read each required document and confirm you agree</h2>
-        </>
-      ) : (
-        <>
-          <h1>
-            There has been an update to the{" "}
-            {requireTos ? "Terms of Service" : "Privacy Policy"}
+    <div className="agreements-container">
+      <div className="agreements-card">
+        <div className="agreements-header">
+          <h1 className="agreements-title">
+            {requireTos && requirePp
+              ? "Agreement Updates Required"
+              : `${
+                  requireTos ? "Terms of Service" : "Privacy Policy"
+                } Update Required`}
           </h1>
-          <h2>Please read the required document and confirm you agree</h2>
-        </>
-      )}
-      {requireTos && (
-        <div style={styles.agreementSection}>
-          <a
-            href="/Terms-Of-Service"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={styles.link}
-            onClick={(e) => {
-              e.preventDefault(); // Prevent navigation
-              setTosClicked(true); // Mark the link as clicked
-              window.open("/Terms-Of-Service", "_blank", "noopener,noreferrer"); // Open in a new tab
-            }}
-          >
-            View Terms of Service
-          </a>
-          <label style={styles.label}>
-            <input
-              type="checkbox"
-              checked={!requireTos || tosChecked}
-              onChange={(e) => setTosChecked(e.target.checked)}
-              disabled={!tosClicked} // Disable until the link is clicked
-            />
-            I agree to the Terms of Service
-          </label>
+          <h2 className="agreements-subtitle">
+            {requireTos && requirePp
+              ? "Please read and accept the updated documents to continue"
+              : "Please read and accept the updated document to continue"}
+          </h2>
         </div>
-      )}
-      {requirePp && (
-        <div style={styles.agreementSection}>
-          <a
-            href="/Privacy-Policy"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={styles.link}
-            onClick={(e) => {
-              e.preventDefault(); // Prevent navigation
-              setPpClicked(true); // Mark the link as clicked
-              window.open("/Privacy-Policy", "_blank", "noopener,noreferrer"); // Open in a new tab
-            }}
-          >
-            View Privacy Policy
-          </a>
-          <label style={styles.label}>
-            <input
-              type="checkbox"
-              checked={!requirePp || ppChecked}
-              onChange={(e) => setPpChecked(e.target.checked)}
-              disabled={!ppClicked} // Disable until the link is clicked
-            />
-            I agree to the Privacy Policy
-          </label>
+
+        <div className="agreements-sections">
+          {requireTos && (
+            <div className="agreement-section">
+              <a
+                href="/Terms-Of-Service"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="agreement-link"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setTosClicked(true);
+                  window.open(
+                    "/Terms-Of-Service",
+                    "_blank",
+                    "noopener,noreferrer"
+                  );
+                }}
+              >
+                View Terms of Service
+              </a>
+              <label className="agreement-checkbox">
+                <input
+                  type="checkbox"
+                  checked={tosChecked}
+                  onChange={(e) => setTosChecked(e.target.checked)}
+                  disabled={!tosClicked}
+                />
+                I agree to the Terms of Service
+              </label>
+              {requireTos && !tosClicked && (
+                <span className="agreement-status">
+                  Please read the document
+                </span>
+              )}
+            </div>
+          )}
+
+          {requirePp && (
+            <div className="agreement-section">
+              <a
+                href="/Privacy-Policy"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="agreement-link"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setPpClicked(true);
+                  window.open(
+                    "/Privacy-Policy",
+                    "_blank",
+                    "noopener,noreferrer"
+                  );
+                }}
+              >
+                View Privacy Policy
+              </a>
+              <label className="agreement-checkbox">
+                <input
+                  type="checkbox"
+                  checked={ppChecked}
+                  onChange={(e) => setPpChecked(e.target.checked)}
+                  disabled={!ppClicked}
+                />
+                I agree to the Privacy Policy
+              </label>
+              {requirePp && !ppClicked && (
+                <span className="agreement-status">
+                  Please read the document
+                </span>
+              )}
+            </div>
+          )}
         </div>
-      )}
 
-      {error && <p style={styles.error}>{error}</p>}
+        {error && <p className="error-message">{error}</p>}
 
-      <button onClick={handleSubmit} style={styles.button}>
-        Submit
-      </button>
+        <button
+          className="submit-button"
+          onClick={handleSubmit}
+          disabled={
+            (requireTos && (!tosClicked || !tosChecked)) ||
+            (requirePp && (!ppClicked || !ppChecked))
+          }
+        >
+          Accept and Continue
+        </button>
+      </div>
     </div>
   );
-};
-
-Agreements.propTypes = {
-  requireTos: PropTypes.bool,
-  requirePp: PropTypes.bool,
-};
-
-const styles = {
-  container: {
-    padding: "20px",
-    margin: "auto",
-    borderRadius: "8px",
-    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-  },
-  agreementSection: {
-    marginBottom: "20px",
-  },
-  link: {
-    color: "#007bff",
-    textDecoration: "none",
-    display: "block",
-    marginBottom: "8px",
-  },
-  label: {
-    display: "flex",
-    alignItems: "center",
-    fontSize: "14px",
-  },
-  error: {
-    color: "red",
-    fontSize: "14px",
-    marginBottom: "10px",
-  },
-  button: {
-    backgroundColor: "#007bff",
-    color: "white",
-    border: "none",
-    padding: "10px 15px",
-    borderRadius: "5px",
-    cursor: "pointer",
-    fontSize: "14px",
-  },
 };
 
 export default Agreements;

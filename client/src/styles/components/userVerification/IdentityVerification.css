@@ -1,0 +1,71 @@
+.identity-verification-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 2rem;
+  text-align: center;
+}
+
+.identity-verification-card {
+  width: 100%;
+  max-width: 600px;
+  background: #2a2a2a;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 2rem;
+  color: white;
+}
+
+.identity-verification-title {
+  color: #fb6a31;
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.identity-verification-message {
+  color: #ddd;
+  font-size: 1.2rem;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+}
+
+.identity-verification-input {
+  width: 300px;
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.identity-verification-button {
+  background: #034da4;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.identity-verification-button:hover {
+  background: #023d83;
+}
+
+.file-upload-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.document-section {
+  border: 1px solid #034da4;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin: 1rem 0;
+}

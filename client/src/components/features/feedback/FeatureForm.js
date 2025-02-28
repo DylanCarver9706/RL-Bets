@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { createJiraIssue } from "../../../services/jiraService";
 import { useUser } from "../../../contexts/UserContext";
+import "../../../styles/components/feedback/Feedback.css";
 
 const FeatureForm = () => {
   const { user } = useUser();
@@ -62,51 +63,46 @@ const FeatureForm = () => {
   };
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h2>Suggest a Feature</h2>
-      {error && <p style={{ color: "red" }}>{error}</p>}{" "}
-      {/* Display validation error */}
-      <h3>All fields marked with a "*" are required.</h3>
-      <form onSubmit={handleSubmit}>
-        <div>
+    <div className="feedback-container">
+      <h2 className="feedback-header">Suggest a Feature</h2>
+      {error && <p className="error-message">{error}</p>}
+      <h3 className="feedback-subheader">All fields marked with a "*" are required.</h3>
+      
+      <form className="feedback-form" onSubmit={handleSubmit}>
+        <div className="form-group">
           <label>Summary*:</label>
           <input
             type="text"
             value={summary}
             onChange={(e) => setSummary(e.target.value)}
-            style={{ width: "100%", marginBottom: "10px" }}
           />
         </div>
-        <div>
+        <div className="form-group">
           <label>Use Case*:</label>
           <textarea
             value={useCase}
             onChange={(e) => setUseCase(e.target.value)}
-            style={{ width: "100%", marginBottom: "10px" }}
           />
         </div>
-        <div>
+        <div className="form-group">
           <label>Expected Behavior*:</label>
           <textarea
             value={expectedBehavior}
             onChange={(e) => setExpectedBehavior(e.target.value)}
-            style={{ width: "100%", marginBottom: "10px" }}
           />
         </div>
-        <div>
+        <div className="form-group">
           <label>Impact*:</label>
           <textarea
             value={impact}
             onChange={(e) => setImpact(e.target.value)}
-            style={{ width: "100%", marginBottom: "10px" }}
           />
         </div>
-        <div>
+        <div className="form-group">
           <label>Priority*:</label>
           <select
             value={priority}
             onChange={(e) => setPriority(e.target.value)}
-            style={{ width: "100%", marginBottom: "10px" }}
           >
             <option value="">Select Priority</option>
             <option value="Critical">Critical</option>
@@ -115,23 +111,21 @@ const FeatureForm = () => {
             <option value="Low Priority">Low Priority</option>
           </select>
         </div>
-        <div>
+        <div className="form-group">
           <label>Related Features:</label>
           <textarea
             value={relatedFeatures}
             onChange={(e) => setRelatedFeatures(e.target.value)}
-            style={{ width: "100%", marginBottom: "10px" }}
           />
         </div>
-        <div>
+        <div className="form-group">
           <label>Additional Details:</label>
           <textarea
             value={additionalDetails}
             onChange={(e) => setAdditionalDetails(e.target.value)}
-            style={{ width: "100%", marginBottom: "10px" }}
           />
         </div>
-        <button type="submit">Submit Feature</button>
+        <button className="submit-button" type="submit">Submit Feature</button>
       </form>
     </div>
   );

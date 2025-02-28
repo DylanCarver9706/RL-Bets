@@ -1,0 +1,151 @@
+.transaction-container {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.transaction-header {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.transaction-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #333;
+  border-radius: 8px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.transaction-table th {
+  background: #034da4;
+  color: white;
+  padding: 1rem;
+  text-align: left;
+}
+
+.transaction-table td {
+  padding: 1rem;
+  border-bottom: 1px solid #444;
+}
+
+.transaction-amount {
+  font-weight: 600;
+}
+
+.amount-positive {
+  color: #28a745;
+}
+
+.amount-negative {
+  color: #dc3545;
+}
+
+.transaction-type {
+  text-transform: capitalize;
+}
+
+.expand-cell {
+  width: 20px;
+  padding: 0 !important;
+}
+
+.expand-button {
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  padding: 0;
+  font-size: 0.7rem;
+  transition: color 0.2s;
+  width: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Only change color on hover for desktop */
+@media (min-width: 769px) {
+  .expand-button:hover {
+    color: #fb6a31;
+  }
+}
+
+/* Active state for the button when content is expanded */
+.expand-button.active {
+  color: #fb6a31;
+}
+
+.expanded-row {
+  background: transparent;
+}
+
+.expanded-row td {
+  padding-top: 0.5rem !important;
+  padding-bottom: 0.5rem !important;
+}
+
+.wager-details {
+  padding: 0.5rem 1rem !important;
+  text-align: left;
+  color: #888;
+  white-space: normal;
+  line-height: 1.2;
+  font-size: 0.85em;
+  font-style: italic;
+}
+
+@media (max-width: 768px) {
+  .transaction-container {
+    margin: 0;
+    padding: 0;
+  }
+
+  .transaction-table {
+    font-size: 0.9rem;
+  }
+
+  .transaction-table th,
+  .transaction-table td {
+    padding: 0.5rem;
+    font-size: 0.8rem;
+  }
+
+  /* Update column widths */
+  .expand-cell {
+    width: 15px;
+  }
+
+  .transaction-table th:nth-child(2),
+  .transaction-table td:nth-child(2) {
+    min-width: 70px; /* Credits column */
+  }
+
+  .transaction-table th:nth-child(3),
+  .transaction-table td:nth-child(3) {
+    min-width: 80px; /* Type column */
+  }
+
+  .transaction-table th:nth-child(4),
+  .transaction-table td:nth-child(4) {
+    min-width: 90px; /* Date column */
+  }
+
+  .expanded-row td {
+    padding-top: 0.4rem !important;
+    padding-bottom: 0.4rem !important;
+  }
+
+  .wager-details {
+    padding: 0.4rem 0.5rem !important;
+    font-size: 0.75em;
+  }
+}

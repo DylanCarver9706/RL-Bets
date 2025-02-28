@@ -1,0 +1,13 @@
+@import './Auth.css';
+
+.forgot-password {
+  align-self: center;
+  margin: 0.25rem 0 0.75rem;
+  font-size: 0.85rem;
+}
+
+@media (max-width: 768px) {
+  .forgot-password {
+    margin: 0.25rem 0 0.75rem;
+  }
+} 

@@ -1,0 +1,194 @@
+.profile-container {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 1rem;
+  background: #2a2a2a;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.profile-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  align-items: center;
+  width: 100%;
+}
+
+.profile-section {
+  background: #333;
+  padding: 1.5rem;
+  border-radius: 8px;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  width: 100%;
+  max-width: 100%;
+}
+
+.profile-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #444;
+}
+
+.info-label {
+  font-weight: 600;
+  color: #888;
+}
+
+.info-value {
+  color: #fff;
+}
+
+.credits-info {
+  background: #333;
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin: 1rem 0;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.user-info-container {
+  background: #333;
+  padding: 1.5rem;
+  padding-top: 3rem;
+  border-radius: 8px;
+  margin: 1rem 0;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+}
+
+.edit-icon-button {
+  position: absolute;
+  top: 0.8rem;
+  right: 0.8rem;
+  background: none;
+  border: none;
+  color: #888;
+  cursor: pointer;
+  padding: 0.5rem;
+  transition: color 0.2s;
+  z-index: 1;
+}
+
+.edit-icon-button:hover {
+  color: #fb6a31;
+}
+
+/* Placeholder for edit icon - remove once you have the image */
+.edit-icon-button::before {
+  content: "✎";
+  font-size: 1.2rem;
+}
+
+.button-group {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  justify-content: center; /* Center buttons horizontally */
+}
+
+.profile-button {
+  padding: 0.8rem 1.5rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.edit-button {
+  background: #034da4;
+  color: white;
+}
+
+.delete-button {
+  background: #b43b47;
+  color: white;
+}
+
+.logout-button {
+  background: #6c757d;
+  color: white;
+}
+
+.copy-button {
+  background: #28a745;
+  color: white;
+}
+
+.edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.form-input {
+  padding: 0.8rem;
+  border: 1px solid #444;
+  border-radius: 4px;
+  background: #222;
+  color: white;
+}
+
+@media (max-width: 768px) {
+  .profile-container {
+    margin: 1rem;
+    padding: 0.5rem;
+  }
+
+  .profile-section {
+    padding: 1rem;
+  }
+
+  .info-row {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.5rem;
+  }
+
+  .credits-info {
+    padding: 1rem;
+  }
+
+  .button-group {
+    flex-direction: column;
+    justify-content: stretch;
+  }
+
+  .profile-button {
+    width: 100%;
+  }
+
+  .user-info-container {
+    padding-top: 1.5rem;
+  }
+}
+
+.referral-section {
+  background: #333;
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  text-align: center;
+}
+
+.referral-text {
+  color: #fff;
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+  background: linear-gradient(90deg, #034da4, #fb6a31);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 600;
+}

@@ -1,0 +1,101 @@
+.feedback-container {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: #2a2a2a;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  color: white;
+}
+
+.feedback-header {
+  color: #fb6a31;
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  border-bottom: 1px solid #034da4;
+  padding-bottom: 1rem;
+}
+
+.feedback-subheader {
+  color: #888;
+  font-size: 1rem;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.feedback-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group label {
+  color: #fb6a31;
+  font-weight: 600;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+  padding: 0.75rem;
+  border: 1px solid #444;
+  border-radius: 4px;
+  background: #333;
+  color: white;
+  font-size: 1rem;
+}
+
+.form-group textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.form-group select {
+  cursor: pointer;
+}
+
+.form-group select option {
+  background: #333;
+  color: white;
+}
+
+.submit-button {
+  padding: 0.8rem;
+  border: none;
+  border-radius: 6px;
+  background: #034da4;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  margin-top: 1rem;
+}
+
+.submit-button:hover {
+  background: #0056b3;
+}
+
+.error-message {
+  color: #dc3545;
+  text-align: center;
+  margin-bottom: 1rem;
+  font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  .feedback-container {
+    margin: 1rem;
+    padding: 1rem;
+  }
+
+  .feedback-header {
+    font-size: 1.75rem;
+  }
+} 

@@ -3,6 +3,7 @@ import { auth } from "../../../config/firebaseConfig";
 import { useUser } from "../../../contexts/UserContext";
 import { useNavigate } from "react-router-dom";
 import { updateUser } from "../../../services/userService";
+import "../../../styles/components/userVerification/EmailVerification.css";
 
 const EmailVerification = () => {
   const { user, setUser } = useUser();
@@ -24,7 +25,7 @@ const EmailVerification = () => {
 
         // Checking if the user has had their email verified either through Firebase or MongoDB
         if (
-          auth.currentUser.emailVerified ||
+          // auth.currentUser.emailVerified ||
           user.emailVerificationStatus === "verified"
         ) {
           // Update the user's verification status in MongoDB
@@ -62,29 +63,23 @@ const EmailVerification = () => {
   };
 
   return (
-    <div style={{ padding: "20px", textAlign: "center" }}>
-      <h1>Email Verification Required</h1>
-      <p>
-        Thank you for signing up! To proceed, please verify your email address.
-        Check your inbox for a verification email and click the verification
-        link.
-      </p>
-      <p>
-        If you didn't receive the email, click the button below to resend it.
-      </p>
-      <button
-        onClick={resendVerificationEmail}
-        style={{
-          padding: "10px 20px",
-          backgroundColor: "#007bff",
-          color: "white",
-          border: "none",
-          borderRadius: "5px",
-          cursor: "pointer",
-        }}
-      >
-        Resend Verification Email
-      </button>
+    <div className="email-verification-container">
+      <div className="email-verification-card">
+        <h1 className="email-verification-title">Email Verification Required</h1>
+        <p className="email-verification-message">
+          Thank you for signing up! To proceed, please verify your email address.
+          Check your inbox for a verification email and click the verification link.
+        </p>
+        <p className="email-verification-message">
+          If you didn't receive the email, click the button below to resend it.
+        </p>
+        <button
+          className="email-verification-button"
+          onClick={resendVerificationEmail}
+        >
+          Resend Verification Email
+        </button>
+      </div>
     </div>
   );
 };

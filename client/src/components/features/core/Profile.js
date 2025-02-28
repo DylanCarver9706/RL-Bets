@@ -15,6 +15,8 @@ import {
 import { useUser } from "../../../contexts/UserContext";
 import TransactionHistory from "./TransactionHistory";
 import { auth } from "../../../config/firebaseConfig";
+import "../../../styles/components/core/Profile.css";
+import Tooltip from "../../common/ToolTip";
 
 const Profile = () => {
   const { user, setUser } = useUser();
@@ -154,91 +156,139 @@ const Profile = () => {
   };
 
   return (
-    <>
-      <div>
-        <h2>User Profile</h2>
-        {user ? (
-          <div>
-            <h3>Mongo ID: {user.mongoUserId}</h3>
-            <h3>Firebase ID: {user.firebaseUserId}</h3>
-            <div>
+    <div className="profile-container">
+      {user ? (
+        <div className="profile-grid">
+          <div className="profile-section">
+            <div className="referral-section">
+              <div className="referral-text">
+                Refer a friend and receive 50 Credits!{" "}
+                {
+                  <Tooltip
+                    infoText={
+                      "Note that the credits will not be received for the referrer until you have completed both email and identity verification."
+                    }
+                  />
+                }
+              </div>
+              <button
+                className="profile-button copy-button"
+                onClick={handleCopyReferralLink}
+              >
+                {copySuccess || "Copy Referral Link"}
+              </button>
+            </div>
+            <div className="credits-info">
+              <div className="info-row">
+                <span className="info-label">Spendable Credits:</span>
+                <span className="info-value">{parseInt(user.credits)}</span>
+              </div>
+              <div className="info-row">
+                <span className="info-label">
+                  Earned Credits This Tournament:
+                </span>
+                <span className="info-value">
+                  {parseFloat(user.earnedCredits).toFixed(4)}
+                </span>
+              </div>
+              <div className="info-row">
+                <span className="info-label">Lifetime Earned Credits:</span>
+                <span className="info-value">
+                  {parseFloat(user.lifetimeEarnedCredits).toFixed(4)}
+                </span>
+              </div>
+            </div>
+            <div className="profile-info">
               {!editing ? (
                 <>
-                  <p>Name: {user.name}</p>
-                  <p>Email: {user.email}</p>
-                  <button onClick={() => setEditing(true)}>Edit Profile</button>
+                  <div className="user-info-container">
+                    <button
+                      className="edit-icon-button"
+                      onClick={() => setEditing(true)}
+                      aria-label="Edit profile"
+                    />
+                    <div className="info-row">
+                      <span className="info-label">Name:</span>
+                      <span className="info-value">{user.name}</span>
+                    </div>
+                    <div className="info-row">
+                      <span className="info-label">Email:</span>
+                      <span className="info-value">{user.email}</span>
+                    </div>
+                  </div>
                 </>
               ) : (
-                <>
-                  <div>
-                    <label>Name: </label>
-                    <input
-                      type="text"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                    />
-                    <br />
-                    <label>Email: </label>
-                    <input
-                      type="text"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                    />
+                <div className="edit-form">
+                  <input
+                    type="text"
+                    className="form-input"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Name"
+                  />
+                  <input
+                    type="email"
+                    className="form-input"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Email"
+                  />
+                  <div className="button-group">
+                    <button
+                      className="profile-button edit-button"
+                      onClick={handleUpdateUser}
+                    >
+                      Update
+                    </button>
+                    <button
+                      className="profile-button logout-button"
+                      onClick={() => setEditing(false)}
+                    >
+                      Cancel
+                    </button>
                   </div>
-                  <button onClick={handleUpdateUser}>Update User</button>
-                  <button onClick={() => setEditing(false)}>Cancel</button>
-                </>
+                </div>
               )}
-              <p>Credits: {parseFloat(user.credits).toFixed(4)}</p>
-              <p>Earned Credits: {parseFloat(user.earnedCredits).toFixed(4)}</p>
-              <p>
-                Lifetime Earned Credits:{" "}
-                {parseFloat(user.lifetimeEarnedCredits).toFixed(4)}
-              </p>
-              <p>Identity Verification Status: {user.idvStatus}</p>
-              <p>Email Verification Status: {user.emailVerificationStatus}</p>
-              <br />
-              <button
-                onClick={handleDeleteUser}
-                style={{ marginRight: "10px" }}
-              >
-                Delete User
-              </button>
-              <br />
-              <button onClick={handleLogout} style={{ marginRight: "10px" }}>
-                Logout
-              </button>
-              {user.authProvider !== "google" && (
-                <div>
+
+              <div className="button-group">
+                <button
+                  className="profile-button edit-button"
+                  onClick={handleLogout}
+                >
+                  Logout
+                </button>
+                {user.authProvider !== "google" && (
                   <button
+                    className="profile-button edit-button"
                     onClick={handleResetPassword}
-                    style={{ marginRight: "10px" }}
                   >
                     Reset Password
                   </button>
-                </div>
-              )}
-              {copySuccess ? (
-                <div>
-                  <br />
-                  <p style={{ marginRight: "10px" }}>{copySuccess}</p>
-                </div>
-              ) : (
+                )}
                 <button
-                  onClick={handleCopyReferralLink}
-                  style={{ marginRight: "10px" }}
+                  className="profile-button edit-button"
+                  onClick={() => navigate("/Instructions")}
                 >
-                  Copy Referral Link
+                  How to Play
                 </button>
-              )}
+                <button
+                  className="profile-button delete-button"
+                  onClick={handleDeleteUser}
+                >
+                  Delete Account
+                </button>
+              </div>
             </div>
           </div>
-        ) : (
-          <p>Loading user data...</p>
-        )}
-      </div>
-      <div>{auth.currentUser && <TransactionHistory />}</div>
-    </>
+
+          <div className="profile-section">
+            <TransactionHistory />
+          </div>
+        </div>
+      ) : (
+        <p>Loading user data...</p>
+      )}
+    </div>
   );
 };
 

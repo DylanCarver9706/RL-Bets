@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import "../../../styles/components/errorHandling/SomethingWentWrong.css";
 
 const SomethingWentWrong = () => {
   const navigate = useNavigate();
@@ -9,19 +10,26 @@ const SomethingWentWrong = () => {
   };
 
   return (
-    <div>
-      <h1>Whoopsie-Daisy! Something went wrong.</h1>
-      <p>
-        A report has been sent to RL Bets to investigate why this happened. If
-        you would like to provide additional context
-      </p>
-      <p>
-        If you would like to provide additional context to this crash, please
-        fill out a Bug Report form
-      </p>
-      <button onClick={handleReportProblem} style={{ margin: "10px" }}>
-        Report a Bug
-      </button>
+    <div className="something-wrong-container">
+      <div className="something-wrong-card">
+        <div className="something-wrong-icon">⚠️</div>
+        <h1 className="something-wrong-title">
+          Whoopsie-Daisy! Something went wrong.
+        </h1>
+        <p className="something-wrong-message">
+          A report has been sent to RL Bets to investigate why this happened.
+        </p>
+        <p className="something-wrong-message">
+          If you would like to provide additional context to this crash, please
+          fill out a Bug Report form.
+        </p>
+        <button
+          className="something-wrong-button"
+          onClick={handleReportProblem}
+        >
+          Report a Bug
+        </button>
+      </div>
     </div>
   );
 };

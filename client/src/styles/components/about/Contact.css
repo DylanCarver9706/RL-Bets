@@ -1,0 +1,45 @@
+.about-container {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: #2a2a2a;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  color: white;
+}
+
+.about-header {
+  color: #fb6a31;
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  border-bottom: 1px solid #034da4;
+  padding-bottom: 1rem;
+}
+
+.contact-content {
+  text-align: center;
+  margin-top: 2rem;
+}
+
+.contact-email {
+  color: #034da4;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.contact-email:hover {
+  color: #fb6a31;
+}
+
+@media (max-width: 768px) {
+  .about-container {
+    margin: 1rem;
+    padding: 1rem;
+  }
+
+  .about-header {
+    font-size: 1.75rem;
+  }
+} 

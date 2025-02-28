@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { createJiraIssue } from "../../../services/jiraService";
 import { useUser } from "../../../contexts/UserContext";
+import "../../../styles/components/feedback/Feedback.css";
 
 const FeedbackForm = () => {
   const { user } = useUser();
@@ -51,29 +52,29 @@ const FeedbackForm = () => {
   };
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h2>Give Feedback</h2>
-      {error && <p style={{ color: "red" }}>{error}</p>}{" "}
-      {/* Display validation error */}
-      <form onSubmit={handleSubmit}>
-        <div>
+    <div className="feedback-container">
+      <h2 className="feedback-header">Give Feedback</h2>
+      {error && <p className="error-message">{error}</p>}
+      
+      <form className="feedback-form" onSubmit={handleSubmit}>
+        <div className="form-group">
           <label>Summary:</label>
           <input
             type="text"
             value={summary}
             onChange={(e) => setSummary(e.target.value)}
-            style={{ width: "100%", marginBottom: "10px" }}
           />
         </div>
-        <div>
+
+        <div className="form-group">
           <label>Feedback:</label>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            style={{ width: "100%", height: "100px", marginBottom: "10px" }}
           />
         </div>
-        <button type="submit">Submit Feedback</button>
+
+        <button className="submit-button" type="submit">Submit Feedback</button>
       </form>
     </div>
   );

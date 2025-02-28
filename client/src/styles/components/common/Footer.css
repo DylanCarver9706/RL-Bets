@@ -12,6 +12,15 @@
   margin-top: auto;
 }
 
+.footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
 .footer-column {
   display: flex;
   flex-direction: column;

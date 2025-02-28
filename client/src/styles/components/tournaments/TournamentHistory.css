@@ -1,0 +1,371 @@
+.tournament-history {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  min-height: 100vh;
+}
+
+.tournament-tree {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.tree-node {
+  width: 100%;
+}
+
+.node-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.node-header:hover {
+  background: rgba(3, 77, 164, 0.2);
+}
+
+.tournament-header {
+  background: #034da4;
+  color: white;
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+
+.match-header {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.expand-icon {
+  color: #fb6a31;
+  font-size: 0.8rem;
+  width: 20px;
+}
+
+.node-children {
+  padding-left: 2rem;
+  margin-top: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.results-table-container {
+  margin: 1rem 0;
+  padding: 1rem;
+  border-radius: 8px;
+  width: 75%;
+  margin: 1rem auto;
+  display: flex;
+  justify-content: center;
+}
+
+.results-table {
+  width: 70%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.results-table th,
+.results-table td {
+  padding: 0.5rem 0.25rem;
+  text-align: center;
+  border: 2px solid rgba(255, 255, 255, 0.205);
+  min-width: 2.5rem;
+}
+
+.team-name {
+  font-size: 1.1rem;
+  padding: 0.75rem 0.25rem;
+  color: white;
+}
+
+.team1-name {
+  background: rgba(3, 77, 164, 0.4);
+}
+
+.team2-name {
+  background: rgba(251, 106, 49, 0.4);
+}
+
+.player-name {
+  background: rgba(0, 0, 0, 0.4);
+  color: white;
+  font-weight: bold;
+  padding: 0.5rem 0.25rem;
+  font-size: 0.9rem;
+  max-width: 8rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.team1-player {
+  background: rgba(3, 77, 164, 0.2);
+}
+
+.team2-player {
+  background: rgba(251, 106, 49, 0.2);
+}
+
+.attribute-header,
+.attribute-name {
+  background: rgba(0, 0, 0, 0.5);
+  color: #fb6a31;
+  font-weight: bold;
+  white-space: nowrap;
+  padding: 0.5rem 0.75rem;
+  min-width: 4rem;
+}
+
+.team1-stats {
+  background: rgba(3, 77, 164, 0.1);
+  color: white;
+}
+
+.team2-stats {
+  background: rgba(251, 106, 49, 0.1);
+  color: white;
+}
+
+.results-table tr:hover td:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.results-table tr:first-child th:first-child {
+  border-top-left-radius: 8px;
+}
+
+.results-table tr:first-child th:last-child {
+  border-top-right-radius: 8px;
+}
+
+.results-table tr:last-child td:first-child {
+  border-bottom-left-radius: 8px;
+}
+
+.results-table tr:last-child td:last-child {
+  border-bottom-right-radius: 8px;
+}
+
+.tournament-selector {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.tournament-button {
+  padding: 0.5rem 1rem;
+  background: #2a2a2a;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  cursor: pointer;
+}
+
+.tournament-button.active {
+  background: #034da4;
+}
+
+.tournament-bracket {
+  display: flex;
+  gap: 4rem;
+  padding: 2rem;
+}
+
+.tournament-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.bracket-node {
+  display: flex;
+  flex-direction: column;
+  min-width: 180px;
+  position: relative;
+}
+
+.bracket-label {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  padding: 0.75rem;
+  font-weight: bold;
+  color: white;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.tournament-name {
+  background: #034da4;
+  color: white;
+  font-size: 1.1rem;
+  padding: 1rem;
+}
+
+.bracket-children {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  position: relative;
+  margin-left: 2rem;
+  margin-top: 1rem;
+}
+
+.bracket-child {
+  position: relative;
+}
+
+/* Lines connecting brackets */
+.bracket-child::before {
+  content: "";
+  position: absolute;
+  left: -2rem;
+  top: 50%;
+  width: 2rem;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.bracket-children::after {
+  content: "";
+  position: absolute;
+  left: -2rem;
+  top: 25%;
+  bottom: 25%;
+  width: 2px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.match-details {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  padding: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.match-details:hover {
+  background: rgba(3, 77, 164, 0.2);
+}
+
+.match-teams {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: white;
+}
+
+.match-score {
+  color: #fb6a31;
+  font-weight: bold;
+}
+
+.results-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #2a2a2a;
+  padding: 1.5rem;
+  border-radius: 8px;
+  max-width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  z-index: 1000;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  z-index: 999;
+}
+
+@media (max-width: 768px) {
+  .tournament-history {
+    padding: 1rem;
+  }
+
+  .tournament-bracket {
+    padding: 1rem;
+  }
+
+  .bracket-node {
+    min-width: 180px;
+    padding: 0.8rem;
+  }
+
+  .match-details {
+    min-width: 160px;
+    padding: 0.8rem;
+  }
+
+  .bracket-children {
+    padding-left: 1.5rem;
+  }
+
+  .bracket-child::before {
+    left: -1.5rem;
+    width: 1.5rem;
+  }
+}
+
+.rewards-container {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  width: 70%;
+  margin: 0 auto 2rem auto;
+}
+
+.rewards-title {
+  color: white;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.rewards-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.rewards-table th,
+.rewards-table td {
+  padding: 0.75rem;
+  text-align: center;
+  border: 2px solid rgba(255, 255, 255, 0.205);
+}
+
+.rewards-table th {
+  background: rgba(3, 77, 164, 0.4);
+  color: white;
+  font-weight: bold;
+}
+
+.rewards-table td {
+  color: white;
+}
+
+.rewards-table tr:hover td {
+  background: rgba(255, 255, 255, 0.05);
+}

@@ -57,6 +57,42 @@ export const fetchEndedTournamentDataTree = async () => {
   }
 };
 
+export const fetchAllEventsDataTree = async () => {
+  try {
+    const response = await makeAuthenticatedRequest(
+      "/api/data-trees/events/all",
+      { method: "GET" }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch data tree for all events`);
+    }
+
+    return await response.json();
+  } catch (err) {
+    console.error("Error fetching all events data tree:", err.message);
+    throw err;
+  }
+};
+
+export const fetchCurrentEventsDataTree = async () => {
+  try {
+    const response = await makeAuthenticatedRequest(
+      "/api/data-trees/events/current",
+      { method: "GET" }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch data tree for current events`);
+    }
+
+    return await response.json();
+  } catch (err) {
+    console.error("Error fetching current events data tree:", err.message);
+    throw err;
+  }
+};
+
 export const fetchPlayers = async () => {
   try {
     // Check cache first

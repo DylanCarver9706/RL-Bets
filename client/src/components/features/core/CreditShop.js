@@ -3,6 +3,7 @@ import { loadStripe } from "@stripe/stripe-js";
 import { useUser } from "../../../contexts/UserContext";
 import { createCheckoutSession } from "../../../services/userService"; // Import service
 import { fetchProducts } from "../../../services/adminService";
+import "../../../styles/components/core/CreditShop.css";
 
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
 
@@ -25,7 +26,7 @@ const CreditShop = () => {
       }
     };
     getProducts();
-  }, [])
+  }, []);
 
   // Update cart and recalculate total
   const updateCart = (option, quantity) => {
@@ -47,7 +48,12 @@ const CreditShop = () => {
       0
     );
     const totalDiscountAmount = Object.values(cart).reduce(
-      (acc, item) => acc + (!user.madeFirstPurchase ? item.firstPurchaseDiscountPrice : item.price) * item.quantity,
+      (acc, item) =>
+        acc +
+        (!user.madeFirstPurchase
+          ? item.firstPurchaseDiscountPrice
+          : item.price) *
+          item.quantity,
       0
     );
     setTotalPrice(totalAmount.toFixed(2)); // Keep 2 decimal places
@@ -77,7 +83,7 @@ const CreditShop = () => {
       const session = await createCheckoutSession(
         purchaseItems,
         user.mongoUserId,
-        user.madeFirstPurchase,
+        user.madeFirstPurchase
       );
       const stripe = await stripePromise;
       await stripe.redirectToCheckout({ sessionId: session.id });
@@ -88,118 +94,89 @@ const CreditShop = () => {
   };
 
   return (
-    <div style={styles.container}>
-      <h2 style={styles.header}>Purchase Credits</h2>
-      {!user.madeFirstPurchase && <h3>Enjoy 50% off on your first purchase!</h3>}
-      {errorMessage && <p style={styles.error}>{errorMessage}</p>}
+    <div className="credit-shop-container">
+      <h2 className="credit-shop-header">Purchase Credits</h2>
 
-      <ul style={styles.optionList}>
-        {products.map((option, index) => (
-          <li key={index} style={styles.optionItem}>
-          <strong>{option.name}</strong> 
-          {!user.madeFirstPurchase ? (
-            <>
-              <s>${option.price.toFixed(2)}</s> ${(option.firstPurchaseDiscountPrice).toFixed(2)}
-            </>
-          ) : (
-            `$${option.price.toFixed(2)}`
-          )}
-          <div style={styles.quantityContainer}>
-            <button
-              onClick={() =>
-                updateCart(option, (cart[option._id]?.quantity || 0) - 1)
-              }
-              style={styles.quantityButton}
-            >
-              -
-            </button>
-            <span>{cart[option._id]?.quantity || 0}</span>
-            <button
-              onClick={() =>
-                updateCart(option, (cart[option._id]?.quantity || 0) + 1)
-              }
-              style={styles.quantityButton}
-            >
-              +
-            </button>
-          </div>
-        </li>
+      {!user.madeFirstPurchase && (
+        <div className="first-purchase-banner">
+          Enjoy 50% off on your first purchase!
+        </div>
+      )}
+
+      {errorMessage && <p className="error-message">{errorMessage}</p>}
+
+      <ul className="credit-options-list">
+        {products.map((option) => (
+          <li key={option._id} className="credit-option">
+            <div className="option-details">
+              <span className="option-name">{option.name}</span>
+              <span className="option-price">
+                {!user.madeFirstPurchase ? (
+                  <>
+                    <span className="original-price">
+                      ${option.price.toFixed(2)}
+                    </span>
+                    <span className="discounted-price">
+                      ${option.firstPurchaseDiscountPrice.toFixed(2)}
+                    </span>
+                  </>
+                ) : (
+                  `$${option.price.toFixed(2)}`
+                )}
+              </span>
+            </div>
+
+            <div className="quantity-controls">
+              <button
+                className="quantity-button"
+                onClick={() =>
+                  updateCart(option, (cart[option._id]?.quantity || 0) - 1)
+                }
+                disabled={!cart[option._id]?.quantity}
+              >
+                -
+              </button>
+              <span className="quantity-display">
+                {cart[option._id]?.quantity || 0}
+              </span>
+              <button
+                className="quantity-button"
+                onClick={() =>
+                  updateCart(option, (cart[option._id]?.quantity || 0) + 1)
+                }
+              >
+                +
+              </button>
+            </div>
+          </li>
         ))}
       </ul>
 
-      <h3>Credits: {calculateTotalCredits(cart)}</h3>
-      <h3>
-        Total: $
-        {!user.madeFirstPurchase && totalPrice !== 0 ? (
-          <>
-            <s>{totalPrice}</s> {(totalDiscountPrice)}
-          </>
-        ) : (
-          totalPrice
-        )}
-      </h3>
-
-      <button onClick={handleCheckout} style={styles.purchaseButton}>
-        Checkout
-      </button>
+      <div className="cart-summary">
+        <div className="total-credits">
+          Credits: {calculateTotalCredits(cart)}
+        </div>
+        <div className="total-price">
+          Total:{" "}
+          {!user.madeFirstPurchase && totalPrice !== "0.00" ? (
+            <>
+              <span className="original-price">${totalPrice}</span>
+              <span className="discounted-price">${totalDiscountPrice}</span>
+            </>
+          ) : (
+            `$${totalPrice}`
+          )}
+        </div>
+        <button
+          className="checkout-button"
+          onClick={handleCheckout}
+          disabled={!Object.keys(cart).length}
+        >
+          Checkout
+        </button>
+      </div>
     </div>
   );
 };
 
 export default CreditShop;
-
-const styles = {
-  container: {
-    padding: "20px",
-    maxWidth: "400px",
-    margin: "0 auto",
-    textAlign: "center",
-    backgroundColor: "#635d5d",
-    borderRadius: "8px",
-    boxShadow: "0 0 10px rgba(0, 0, 0, 0.1)",
-  },
-  header: {
-    fontSize: "24px",
-    marginBottom: "20px",
-  },
-  optionList: {
-    listStyle: "none",
-    padding: 0,
-    margin: 0,
-  },
-  optionItem: {
-    marginBottom: "15px",
-    backgroundColor: "#4f4b4b",
-    padding: "10px",
-    borderRadius: "5px",
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  quantityContainer: {
-    display: "flex",
-    alignItems: "center",
-    gap: "10px",
-  },
-  quantityButton: {
-    backgroundColor: "#007bff",
-    color: "white",
-    border: "none",
-    borderRadius: "5px",
-    padding: "5px 10px",
-    cursor: "pointer",
-  },
-  purchaseButton: {
-    marginTop: "20px",
-    padding: "10px 20px",
-    backgroundColor: "#28a745",
-    color: "white",
-    border: "none",
-    borderRadius: "5px",
-    cursor: "pointer",
-  },
-  error: {
-    color: "red",
-    marginBottom: "10px",
-  },
-};

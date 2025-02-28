@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useUser } from "../../../contexts/UserContext";
 import { updateUser } from "../../../services/userService";
 import { useNavigate } from "react-router-dom";
+import "../../../styles/components/core/Instructions.css";
 
 const instructionData = [
   {
@@ -60,7 +61,7 @@ const Instructions = () => {
   const handleFinish = async () => {
     if (user) {
       await updateUser(user.mongoUserId, { viewedInstructions: true });
-      setUser({ ...user, viewedInstructions: true }); // Update user state
+      setUser({ ...user, viewedInstructions: true });
       navigate("/Wagers");
     } else {
       navigate("/");
@@ -68,93 +69,53 @@ const Instructions = () => {
   };
 
   return (
-    <div style={styles.carouselContainer}>
-      <div style={styles.card}>
-        <h2>{instructionData[currentIndex].title}</h2>
-        <img
-          src={instructionData[currentIndex].image}
-          alt="Instruction"
-          style={styles.image}
-        />
-        <p>{instructionData[currentIndex].description}</p>
+    <div className="instructions-container">
+      <div className="instruction-card">
+        <h2 className="instruction-header">
+          {instructionData[currentIndex].title}
+        </h2>
 
-        <p style={styles.slideCounter}>
+        <div className="instruction-image-container">
+          <span className="instruction-image-placeholder">
+            Instruction Image Coming Soon
+          </span>
+        </div>
+
+        <p className="instruction-description">
+          {instructionData[currentIndex].description}
+        </p>
+
+        <p className="instruction-counter">
           Slide {currentIndex + 1} / {instructionData.length}
         </p>
 
-        <button onClick={prevSlide} style={styles.nextButton}>
-          ◀ Back
-        </button>
-        {currentIndex === instructionData.length - 1 ? (
-          <button onClick={handleFinish} style={styles.finishButton}>
-            Finish
+        <div className="instruction-buttons">
+          <button
+            onClick={prevSlide}
+            className="instruction-button back-button"
+          >
+            ◀ Back
           </button>
-        ) : (
-          <>
-            <button onClick={nextSlide} style={styles.nextButton}>
+
+          {currentIndex === instructionData.length - 1 ? (
+            <button
+              onClick={handleFinish}
+              className="instruction-button finish-button"
+            >
+              Finish
+            </button>
+          ) : (
+            <button
+              onClick={nextSlide}
+              className="instruction-button next-button"
+            >
               Next ▶
             </button>
-          </>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );
 };
 
 export default Instructions;
-
-const styles = {
-  carouselContainer: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: "20px",
-    padding: "20px",
-  },
-  card: {
-    width: "400px",
-    padding: "20px",
-    textAlign: "center",
-    borderRadius: "10px",
-    backgroundColor: "rgb(99, 93, 93)",
-    boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
-  },
-  image: {
-    width: "100%",
-    height: "200px",
-    objectFit: "cover",
-    borderRadius: "10px",
-    marginBottom: "10px",
-  },
-  navButton: {
-    fontSize: "24px",
-    padding: "10px",
-    cursor: "pointer",
-    backgroundColor: "transparent",
-    border: "none",
-    color: "#fff",
-  },
-  nextButton: {
-    marginTop: "10px",
-    padding: "10px",
-    cursor: "pointer",
-    backgroundColor: "#007bff",
-    color: "#fff",
-    border: "none",
-    borderRadius: "5px",
-  },
-  finishButton: {
-    marginTop: "10px",
-    padding: "10px",
-    cursor: "pointer",
-    backgroundColor: "green",
-    color: "#fff",
-    border: "none",
-    borderRadius: "5px",
-  },
-  slideCounter: {
-    marginTop: "10px",
-    fontSize: "14px",
-    color: "#fff",
-  },
-};

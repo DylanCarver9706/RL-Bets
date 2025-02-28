@@ -1,0 +1,66 @@
+.outage-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh);
+  padding: 2rem;
+  text-align: center;
+}
+
+.outage-card {
+  width: 100%;
+  max-width: 600px;
+  background: #2a2a2a;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 2rem;
+  color: white;
+}
+
+.outage-icon {
+  color: #fb6a31;
+  font-size: 4rem;
+  margin-bottom: 1.5rem;
+}
+
+.outage-title {
+  color: #fb6a31;
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.outage-message {
+  color: #ddd;
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+}
+
+.outage-status {
+  display: inline-block;
+  background: #333;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  border: 1px solid #444;
+  color: #ddd;
+  font-size: 1rem;
+}
+
+@media (max-width: 768px) {
+  .outage-container {
+    padding: 1rem;
+  }
+
+  .outage-card {
+    padding: 1.5rem;
+  }
+
+  .outage-title {
+    font-size: 1.75rem;
+  }
+
+  .outage-message {
+    font-size: 1rem;
+  }
+} 

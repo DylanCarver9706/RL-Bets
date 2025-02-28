@@ -5,7 +5,7 @@ import socket from "../../services/socketService.js";
 import { fetchCurrentTournament } from "../../services/leaderboardService.js";
 import Notifications from "../features/core/Notifications.js";
 import { auth } from "../../config/firebaseConfig.js";
-import "../../styles/components/Navbar.css";
+import "../../styles/components/common/Navbar.css";
 
 const Navbar = () => {
   const { user, setUser } = useUser();
@@ -60,6 +60,17 @@ const Navbar = () => {
     }
   };
 
+  const handleMouseLeave = (dropdownName) => {
+    if (window.innerWidth > 768) {
+      setTimeout(() => {
+        // Ensure the user is not still hovering over the dropdown menu
+        if (hoveredDropdown === dropdownName) {
+          setHoveredDropdown(null);
+        }
+      }, 600); // Small delay to allow moving cursor to dropdown menu
+    }
+  };
+
   const handleNavLinkClick = () => {
     setIsMobileMenuOpen(false);
     setActiveDropdown(null);
@@ -82,7 +93,7 @@ const Navbar = () => {
           <div
             className="dropdown-container"
             onMouseEnter={() => handleMouseEnter("tournaments")}
-            onMouseLeave={() => setHoveredDropdown(null)}
+            onMouseLeave={() => handleMouseLeave("tournaments")}
           >
             <span className="nav-link">Tournaments</span>
             <div
@@ -103,7 +114,7 @@ const Navbar = () => {
           <div
             className="dropdown-container"
             onMouseEnter={() => handleMouseEnter("leaderboards")}
-            onMouseLeave={() => setHoveredDropdown(null)}
+            onMouseLeave={() => handleMouseLeave("leaderboards")}
           >
             <span className="nav-link">Leaderboards</span>
             <div
@@ -117,7 +128,7 @@ const Navbar = () => {
                 </Link>
               )}
               <Link to="/Lifetime-Leaderboard" className="dropdown-link">
-                Lifetime Leaderboard
+                Lifetime
               </Link>
             </div>
           </div>
@@ -125,7 +136,7 @@ const Navbar = () => {
             <div
               className="dropdown-container"
               onMouseEnter={() => handleMouseEnter("admin")}
-              onMouseLeave={() => setHoveredDropdown(null)}
+              onMouseLeave={() => handleMouseLeave("admin")}
             >
               <span className="nav-link">Admin</span>
               <div
@@ -203,11 +214,7 @@ const Navbar = () => {
         </button>
         <div className={`mobile-menu ${isMobileMenuOpen ? "active" : ""}`}>
           <div className="mobile-column-left">
-            <Link
-              to="/Wagers"
-              className="mobile-nav-link"
-              onClick={handleNavLinkClick}
-            >
+            <Link to="/Wagers" className="mobile-nav-link" onClick={handleNavLinkClick}>
               Wagers
             </Link>
             <div className="mobile-dropdown">
@@ -232,7 +239,7 @@ const Navbar = () => {
                   </Link>
                 )}
                 <Link
-                  to={`/Tournament-History`}
+                  to="/Tournament-History"
                   className="mobile-nav-link"
                   onClick={handleNavLinkClick}
                 >
@@ -240,6 +247,8 @@ const Navbar = () => {
                 </Link>
               </div>
             </div>
+          </div>
+          <div className="mobile-column-right">
             <div className="mobile-dropdown">
               <span
                 className="mobile-nav-link"
@@ -258,7 +267,7 @@ const Navbar = () => {
                     className="mobile-nav-link"
                     onClick={handleNavLinkClick}
                   >
-                    {currentTournament?.name}
+                    {currentTournament.name}
                   </Link>
                 )}
                 <Link
@@ -266,80 +275,63 @@ const Navbar = () => {
                   className="mobile-nav-link"
                   onClick={handleNavLinkClick}
                 >
-                  Lifetime Leaderboard
+                  Lifetime
                 </Link>
               </div>
             </div>
-          </div>
-          <div className="mobile-column-right">
-            {user && (
-              <>
-                <Link
-                  to="/Profile"
+            <Link to="/Profile" className="mobile-nav-link" onClick={handleNavLinkClick}>
+              Profile
+            </Link>
+            {user?.userType === "admin" && (
+              <div className="mobile-dropdown">
+                <span
                   className="mobile-nav-link"
-                  onClick={handleNavLinkClick}
+                  onClick={() => toggleDropdown("admin")}
                 >
-                  Profile
-                </Link>
-                <Link
-                  to="/Settings"
-                  className="mobile-nav-link"
-                  onClick={handleNavLinkClick}
+                  Admin
+                </span>
+                <div
+                  className={`mobile-dropdown-menu ${
+                    activeDropdown === "admin" ? "active" : ""
+                  }`}
                 >
-                  Settings
-                </Link>
-                {user?.userType === "admin" && (
-                  <div className="mobile-dropdown">
-                    <span
-                      className="mobile-nav-link"
-                      onClick={() => toggleDropdown("admin")}
-                    >
-                      Admin
-                    </span>
-                    <div
-                      className={`mobile-dropdown-menu ${
-                        activeDropdown === "admin" ? "active" : ""
-                      }`}
-                    >
-                      <Link
-                        to="/Admin"
-                        className="mobile-nav-link"
-                        onClick={handleNavLinkClick}
-                      >
-                        Home
-                      </Link>
-                      <Link
-                        to="/Create_Wager"
-                        className="mobile-nav-link"
-                        onClick={handleNavLinkClick}
-                      >
-                        Create Wager
-                      </Link>
-                      <Link
-                        to="/Log"
-                        className="mobile-nav-link"
-                        onClick={handleNavLinkClick}
-                      >
-                        Logs
-                      </Link>
-                      <Link
-                        to="/Admin-Email"
-                        className="mobile-nav-link"
-                        onClick={handleNavLinkClick}
-                      >
-                        Email Users
-                      </Link>
-                      <Link
-                        to="/Admin-Identity-Verification"
-                        className="mobile-nav-link"
-                        onClick={handleNavLinkClick}
-                      >
-                        Identity Verification
-                      </Link>
-                    </div>
-                  </div>
-                )}
-              </>
+                  <Link
+                    to="/Admin"
+                    className="mobile-nav-link"
+                    onClick={handleNavLinkClick}
+                  >
+                    Home
+                  </Link>
+                  <Link
+                    to="/Create_Wager"
+                    className="mobile-nav-link"
+                    onClick={handleNavLinkClick}
+                  >
+                    Create Wager
+                  </Link>
+                  <Link
+                    to="/Log"
+                    className="mobile-nav-link"
+                    onClick={handleNavLinkClick}
+                  >
+                    Logs
+                  </Link>
+                  <Link
+                    to="/Admin-Email"
+                    className="mobile-nav-link"
+                    onClick={handleNavLinkClick}
+                  >
+                    Email Users
+                  </Link>
+                  <Link
+                    to="/Admin-Identity-Verification"
+                    className="mobile-nav-link"
+                    onClick={handleNavLinkClick}
+                  >
+                    Identity Verification
+                  </Link>
+                </div>
+              </div>
             )}
           </div>
         </div>
