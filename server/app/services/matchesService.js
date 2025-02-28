@@ -28,8 +28,8 @@ const createMatch = async (matchData) => {
     wentToOvertime: matchData.wentToOvertime,
   };
 
-  if (matchData.match_happened_date) {
-    matchPayload.matchHappenedDate = new Date(matchData.match_happened_date);
+  if (matchData.originalEventDate) {
+    matchPayload.originalEventDate = new Date(matchData.originalEventDate);
   }
 
   if (matchData.historical) {
