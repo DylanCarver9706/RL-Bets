@@ -210,9 +210,9 @@ const getBettableDataTree = async () => {
   // Fetch all teams related to the Bettable matches and series
   const allTeamIds = [
     ...new Set(
-      bettableMatches.flatMap((match) => match.teams).concat(
-        bettableSeries.flatMap((series) => series.teams)
-      )
+      bettableMatches
+        .flatMap((match) => match.teams)
+        .concat(bettableSeries.flatMap((series) => series.teams))
     ),
   ];
 
@@ -272,7 +272,9 @@ const getEndedTournamentsDataTree = async () => {
   let tournamentDataTrees = [];
 
   for (const tournament of endedTournaments) {
-    tournamentDataTrees.push(await getTournamentDataTree(tournament._id.toString()));
+    tournamentDataTrees.push(
+      await getTournamentDataTree(tournament._id.toString())
+    );
   }
 
   return tournamentDataTrees;
@@ -280,7 +282,7 @@ const getEndedTournamentsDataTree = async () => {
 
 const getCurrentTournamentDataTree = async () => {
   // Fetch the tournament document
-  const tournament = await getCurrentTournament()
+  const tournament = await getCurrentTournament();
 
   if (tournament.leaderboard) {
     tournament.leaderboard = await getCurrentLeaderboard();
@@ -345,6 +347,227 @@ const getCurrentTournamentDataTree = async () => {
   return tournamentWithSeries;
 };
 
+const getAllEventsDataTree = async () => {
+  // Fetch all data like in getAllTournamentsDataTree
+  const tournaments = await collections.tournamentsCollection.find().toArray();
+  const seriesList = await collections.seriesCollection.find().toArray();
+  const matches = await collections.matchesCollection
+    .find({ series: { $in: seriesList.map((s) => s._id) } })
+    .toArray();
+
+  // Get teams and players data
+  const allTeamIds = [
+    ...new Set([
+      ...matches.flatMap((match) => match.teams),
+      ...seriesList.flatMap((series) => series.teams),
+    ]),
+  ];
+
+  const teams = await collections.teamsCollection
+    .find({ _id: { $in: allTeamIds } })
+    .toArray();
+
+  const players = await collections.playersCollection
+    .find({ _id: { $in: teams.flatMap((team) => team.players) } })
+    .toArray();
+
+  // Map teams with their players
+  const teamsWithPlayers = teams.map((team) => ({
+    ...team,
+    players: players.filter((player) => player.team.equals(team._id)),
+  }));
+
+  // Map matches with their teams
+  const matchesWithTeams = matches.map((match) => ({
+    ...match,
+    teams: teamsWithPlayers.filter((team) =>
+      match.teams.some((t) => t.equals(team._id))
+    ),
+  }));
+
+  // Create hierarchical structure
+  const buildTree = (series) => {
+    const path = series.name.split(" -> ");
+    const tournamentName = path.slice(0, 2).join(" ");
+    const remainingPath = path.slice(2);
+
+    return {
+      tournamentName,
+      path: remainingPath,
+      seriesData: {
+        ...series,
+        teams: teamsWithPlayers.filter((team) =>
+          series.teams.some((t) => t.equals(team._id))
+        ),
+        matches: matchesWithTeams.filter((match) =>
+          match.series.equals(series._id)
+        ),
+      },
+    };
+  };
+
+  // Group series by tournament and create nested structure
+  const eventTree = { tournaments: [] };
+  const seriesTreeData = seriesList.map(buildTree);
+
+  // Group by tournament first
+  const tournamentGroups = {};
+  seriesTreeData.forEach((seriesData) => {
+    if (!tournamentGroups[seriesData.tournamentName]) {
+      const tournament = tournaments.find(
+        (t) => t.name === seriesData.tournamentName
+      );
+      tournamentGroups[seriesData.tournamentName] = {
+        name: seriesData.tournamentName,
+        _id: tournament?._id,
+        children: [],
+      };
+    }
+  });
+
+  // Build nested structure for each tournament
+  Object.values(tournamentGroups).forEach((tournament) => {
+    const tournamentSeries = seriesTreeData.filter(
+      (s) => s.tournamentName === tournament.name
+    );
+
+    tournamentSeries.forEach((seriesData) => {
+      let currentLevel = tournament.children;
+
+      // Create/traverse nested structure for each path segment
+      seriesData.path.forEach((segment, index) => {
+        let existingNode = currentLevel.find((node) => node.name === segment);
+
+        if (!existingNode) {
+          existingNode = {
+            name: segment,
+            children: [],
+          };
+          currentLevel.push(existingNode);
+        }
+
+        // If this is the last segment, add the series data
+        if (index === seriesData.path.length - 1) {
+          existingNode.seriesData = seriesData.seriesData;
+        }
+
+        currentLevel = existingNode.children;
+      });
+    });
+
+    eventTree.tournaments.push(tournament);
+  });
+
+  return eventTree;
+};
+
+const getCurrentEventsDataTree = async () => {
+  // Fetch the current tournament
+  const tournament = await getCurrentTournament();
+  const leaderboard = await getCurrentLeaderboard();
+  console.log(leaderboard);
+  // Fetch all series for this tournament
+  const seriesList = await collections.seriesCollection
+    .find({ tournament: tournament._id })
+    .toArray();
+
+  // Fetch all matches for the series
+  const matches = await collections.matchesCollection
+    .find({ series: { $in: seriesList.map((s) => s._id) } })
+    .toArray();
+
+  // Get teams and players data
+  const allTeamIds = [
+    ...new Set([
+      ...matches.flatMap((match) => match.teams),
+      ...seriesList.flatMap((series) => series.teams),
+    ]),
+  ];
+
+  const teams = await collections.teamsCollection
+    .find({ _id: { $in: allTeamIds } })
+    .toArray();
+
+  const players = await collections.playersCollection
+    .find({ _id: { $in: teams.flatMap((team) => team.players) } })
+    .toArray();
+
+  // Map teams with their players
+  const teamsWithPlayers = teams.map((team) => ({
+    ...team,
+    players: players.filter((player) => player.team.equals(team._id)),
+  }));
+
+  // Map matches with their teams
+  const matchesWithTeams = matches.map((match) => ({
+    ...match,
+    teams: teamsWithPlayers.filter((team) =>
+      match.teams.some((t) => t.equals(team._id))
+    ),
+  }));
+
+  // Create hierarchical structure
+  const buildTree = (series) => {
+    const path = series.name.split(" -> ");
+    const tournamentName = path.slice(0, 2).join(" ");
+    const remainingPath = path.slice(2);
+
+    return {
+      tournamentName,
+      path: remainingPath,
+      seriesData: {
+        ...series,
+        teams: teamsWithPlayers.filter((team) =>
+          series.teams.some((t) => t.equals(team._id))
+        ),
+        matches: matchesWithTeams.filter((match) =>
+          match.series.equals(series._id)
+        ),
+      },
+    };
+  };
+
+  // Group series by tournament and create nested structure
+  const eventTree = { tournaments: [] };
+  const seriesTreeData = seriesList.map(buildTree);
+
+  // Create tournament group
+  const tournamentGroup = {
+    _id: tournament._id,
+    name: tournament.name,
+    leaderboard: leaderboard,
+    children: [],
+  };
+
+  // Build nested structure for the tournament
+  seriesTreeData.forEach((seriesData) => {
+    let currentLevel = tournamentGroup.children;
+
+    // Create/traverse nested structure for each path segment
+    seriesData.path.forEach((segment, index) => {
+      let existingNode = currentLevel.find((node) => node.name === segment);
+
+      if (!existingNode) {
+        existingNode = {
+          name: segment,
+          children: [],
+        };
+        currentLevel.push(existingNode);
+      }
+
+      // If this is the last segment, add the series data
+      if (index === seriesData.path.length - 1) {
+        existingNode.seriesData = seriesData.seriesData;
+      }
+
+      currentLevel = existingNode.children;
+    });
+  });
+
+  eventTree.tournaments.push(tournamentGroup);
+  return eventTree;
+};
+
 module.exports = {
   getAllTournamentsDataTree,
   getTournamentDataTree,
@@ -352,4 +575,6 @@ module.exports = {
   getBettableDataTree,
   getEndedTournamentsDataTree,
   getCurrentTournamentDataTree,
+  getAllEventsDataTree,
+  getCurrentEventsDataTree,
 };
