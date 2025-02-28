@@ -159,9 +159,6 @@ const Navbar = () => {
               <Link to="/Profile" className="nav-link">
                 Profile
               </Link>
-              <Link to="/Settings" className="nav-link">
-                Settings
-              </Link>
             </>
           )}
         </div>
