@@ -19,6 +19,7 @@ export const makeAuthenticatedRequest = async (endpoint, options = {}) => {
 
   return fetch(`${BASE_SERVER_URL}${endpoint}`, {
     ...options,
+    credentials: "include",
     headers: {
       ...defaultHeaders,
       ...options.headers,

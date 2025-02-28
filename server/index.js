@@ -22,7 +22,10 @@ let allowedOrigins = null;
 if (process.env.ENV === "production") {
   allowedOrigins = process.env.PROD_CLIENT_URLS.split(",");
 } else if (process.env.ENV === "development") {
-  allowedOrigins = [process.env.DEV_CLIENT_URL, ...process.env.PROD_CLIENT_URLS.split(",")];
+  allowedOrigins = [
+    process.env.DEV_CLIENT_URL,
+    ...process.env.PROD_CLIENT_URLS.split(","),
+  ];
 }
 
 // WebSocket setup
@@ -52,9 +55,18 @@ app.use(
     origin: "*",
     // origin: allowedOrigins,
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
-    credentials: true,
+    // credentials: true,
   })
 );
+
+// Add before your routes
+app.use((req, res, next) => {
+  res.setHeader(
+    "Content-Security-Policy",
+    "default-src 'self'; font-src 'self' https://js.stripe.com data:; img-src 'self' data: https:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com; style-src 'self' 'unsafe-inline';"
+  );
+  next();
+});
 
 // Instead of chaining promises, use async/await and initialize everything before setting up routes
 const startServer = async () => {
