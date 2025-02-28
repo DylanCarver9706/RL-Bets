@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-// import socket from "../../../services/socketService";
+import socket from "../../../services/socketService";
 import { fetchCurrentLeaderboard } from "../../../services/leaderboardService";
 import "../../../styles/components/leaderboards/CurrentTournamentLeaderboard.css";
 import { getUsers } from "../../../services/adminService";
@@ -24,13 +24,13 @@ const CurrentTournamentLeaderboard = () => {
   }, []);
 
   // Listen for updates
-  // useEffect(() => {
-  //   socket.on("updateLeaderboard", (updatedLeaderboard) => {
-  //     setLeaderboard(updatedLeaderboard);
-  //   });
+  useEffect(() => {
+    socket.on("updateLeaderboard", (updatedLeaderboard) => {
+      setLeaderboard(updatedLeaderboard);
+    });
 
-  //   return () => socket.disconnect();
-  // }, []);
+    return () => socket.disconnect();
+  }, []);
 
   const getRankClass = (rank) => {
     if (rank === 1) return "rank-1";

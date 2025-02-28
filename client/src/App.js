@@ -13,7 +13,7 @@ import {
 } from "./services/agreementService";
 import { useUser } from "./contexts/UserContext";
 import { Routes, Route, useNavigate } from "react-router-dom";
-// import socket from "./services/socketService";
+import socket from "./services/socketService";
 import Wagers from "./components/features/core/Wagers";
 import Profile from "./components/features/core/Profile";
 import Navbar from "./components/common/Navbar";
@@ -140,13 +140,13 @@ function App() {
   }, [setUser, navigate]);
 
   // Initialize the socket connection when the app mounts
-  // useEffect(() => {
-  //   socket.connect();
+  useEffect(() => {
+    socket.connect();
 
-  //   return () => {
-  //     socket.disconnect();
-  //   };
-  // }, []);
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
 
   // Get a potential referral code from the URL
   useEffect(() => {

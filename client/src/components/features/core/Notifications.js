@@ -4,7 +4,7 @@ import {
   dismissNotification,
 } from "../../../services/userService.js";
 import { useUser } from "../../../contexts/UserContext.js";
-// import socket from "../../../services/socketService.js";
+import socket from "../../../services/socketService.js";
 import { formatDateToUserTimezone } from "../../../services/dateService.js";
 import "../../../styles/components/core/Notifications.css";
 
@@ -41,18 +41,18 @@ const Notifications = () => {
   const unreadCount = notifications.length;
 
   // Listen for updates from the server
-  // useEffect(() => {
-  //   socket.on("updateUserLogs", (updatedUserLogs) => {
-  //     setNotifications(updatedUserLogs);
-  //   });
+  useEffect(() => {
+    socket.on("updateUserLogs", (updatedUserLogs) => {
+      setNotifications(updatedUserLogs);
+    });
 
-  //   // Cleanup listener on unmount
-  //   return () => {
-  //     socket.off("wagersUpdate");
-  //     socket.disconnect();
-  //   };
-  //   // eslint-disable-next-line
-  // }, [user?.mongoUserId]);
+    // Cleanup listener on unmount
+    return () => {
+      socket.off("wagersUpdate");
+      socket.disconnect();
+    };
+    // eslint-disable-next-line
+  }, [user?.mongoUserId]);
 
   const handleDismiss = async (notificationId) => {
     try {

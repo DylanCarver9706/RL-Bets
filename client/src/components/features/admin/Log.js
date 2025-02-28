@@ -1,19 +1,11 @@
 import React, { useEffect, useState } from "react";
-// import io from "socket.io-client";
+import socket from "../../../services/socketService";
 import { getLogs } from "../../../services/userService";
-
-let BASE_SERVER_URL;
-if (process.env.REACT_APP_ENV === "production") {
-  BASE_SERVER_URL = process.env.REACT_APP_BASE_PROD_SERVER_URL;
-} else if (process.env.REACT_APP_ENV === "development") {
-  BASE_SERVER_URL = process.env.REACT_APP_BASE_DEV_SERVER_URL;
-}
 
 const Log = () => {
   const [logs, setLogs] = useState([]);
 
   useEffect(() => {
-    // const socket = io(BASE_SERVER_URL);
 
     const fetchLogs = async () => {
       try {
@@ -26,13 +18,13 @@ const Log = () => {
 
     fetchLogs();
 
-    // socket.on("updateLogs", (updatedLogs) => {
-    //   setLogs(updatedLogs.reverse() || []);
-    // });
+    socket.on("updateLogs", (updatedLogs) => {
+      setLogs(updatedLogs.reverse() || []);
+    });
 
-    // return () => {
-    //   socket.disconnect();
-    // };
+    return () => {
+      socket.disconnect();
+    };
   }, []);
 
   return (

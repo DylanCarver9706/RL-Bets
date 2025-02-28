@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-// import socket from "../../../services/socketService";
+import socket from "../../../services/socketService";
 import { fetchLifetimeLeaderboard } from "../../../services/leaderboardService";
 import "../../../styles/components/leaderboards/LifetimeLeaderboard.css";
 
@@ -21,13 +21,13 @@ const LifetimeLeaderboard = () => {
   }, []);
 
   // Listen for updates
-  // useEffect(() => {
-  //   socket.on("updateUsers", (updatedUsers) => {
-  //     setSortedUsers(updatedUsers);
-  //   });
+  useEffect(() => {
+    socket.on("updateUsers", (updatedUsers) => {
+      setSortedUsers(updatedUsers);
+    });
 
-  //   return () => socket.disconnect();
-  // }, []);
+    return () => socket.disconnect();
+  }, []);
 
   const getRankClass = (index) => {
     if (index === 0) return "rank-1";
