@@ -49,15 +49,14 @@ app.use((req, res, next) => {
 });
 
 // Update the main CORS middleware
-// app.use(
-//   cors({
-//     // Allow all origins for development
-//     origin: "*",
-//     // origin: allowedOrigins,
-//     methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
-//     // credentials: true,
-//   })
-// );
+app.use(
+  cors({
+    origin: process.env.PROD_CLIENT_URLS.split(",")[0], // Use the first URL (www.rlbets.gg)
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
+    credentials: true,
+    optionsSuccessStatus: 204,
+  })
+);
 
 // Add before your routes
 // app.use((req, res, next) => {
