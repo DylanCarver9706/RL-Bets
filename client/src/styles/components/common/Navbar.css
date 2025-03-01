@@ -18,6 +18,7 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   z-index: 2;
+  flex: 0 0 auto;
 }
 
 .desktop-nav .brand-link {
@@ -31,11 +32,11 @@
 
 /* Desktop-specific styles */
 .desktop-nav {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
+  display: flex;
+  justify-content: space-between;
   align-items: center;
+  padding: 0.5rem 2rem;
   width: 100%;
-  gap: 1.5rem;
 }
 
 /* Brand section (left) */
@@ -45,11 +46,11 @@
 
 /* Center navigation section */
 .desktop-nav .nav-center {
-  grid-column: 2;
+  flex: 1;
   display: flex;
   justify-content: center;
-  align-items: center;
-  gap: 1.5rem;
+  gap: 2rem;
+  margin: 0 2rem;
 }
 
 /* User section (right) */
@@ -118,9 +119,12 @@
 }
 
 /* Mobile-specific styles */
-.mobile-nav {
-  display: none;
-}
+/* .mobile-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+} */
 
 .mobile-menu-button {
   display: none;
@@ -164,7 +168,8 @@
   }
 
   .mobile-brand {
-    order: 1;
+    margin: 0;
+    flex: 0 0 auto;
   }
 
   .mobile-credits {
@@ -204,7 +209,7 @@
     gap: 1.2rem;
     align-items: center;
   }
-  
+
   .mobile-column-right {
     border-left: 1px solid #034da4;
     /* margin-left: -rem; */
@@ -232,7 +237,7 @@
     transition: all 0.3s ease;
     margin: 0 auto;
   }
-  
+
   .mobile-dropdown-menu.active {
     border: 1px solid #034da4;
     opacity: 1;
@@ -260,6 +265,16 @@
     background: linear-gradient(90deg, #034da4, #fb6a31);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+  }
+}
+
+@media (min-width: 769px) {
+  .mobile-nav {
+    display: none;
+  }
+
+  .desktop-nav {
+    display: flex;
   }
 }
 
@@ -296,4 +311,36 @@
   display: block !important;
   opacity: 1 !important;
   visibility: visible !important;
+}
+
+.navbar-cta-button-mobile {
+  padding: 0.6rem 1.5rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  background: linear-gradient(90deg, #034da4, #fb6a31);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  margin-left: auto; /* Push to the right */
+  margin-right: -2rem; /* Add spacing from the right edge */
+}
+
+.navbar-cta-button-browser {
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  background: linear-gradient(90deg, #034da4, #fb6a31);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  margin-left: auto; /* Push to the right */
+}
+
+.navbar-cta-button-browser:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(3, 77, 164, 0.3);
 }

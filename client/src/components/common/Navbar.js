@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useUser } from "../../contexts/UserContext.js";
 import socket from "../../services/socketService.js";
 import { fetchCurrentTournament } from "../../services/leaderboardService.js";
@@ -13,7 +13,7 @@ const Navbar = () => {
   const [hoveredDropdown, setHoveredDropdown] = useState(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState(null);
-
+  const navigate = useNavigate();
   useEffect(() => {
     // Fetch the current tournament data
     const fetchTournament = async () => {
@@ -86,10 +86,11 @@ const Navbar = () => {
           </Link>
         </h2>
 
-        <div className="nav-center">
-          <Link to="/Wagers" className="nav-link">
-            Wagers
-          </Link>
+        {user ? (
+          <div className="nav-center">
+            <Link to="/Wagers" className="nav-link">
+              Wagers
+            </Link>
           <div
             className="dropdown-container"
             onMouseEnter={() => handleMouseEnter("tournaments")}
@@ -173,6 +174,11 @@ const Navbar = () => {
             </>
           )}
         </div>
+        ) : (
+          <button className="navbar-cta-button-browser" onClick={() => navigate("/Login")}>
+            Login
+          </button>
+        )}
 
         {user && (
           <div className="user-controls">
@@ -197,7 +203,7 @@ const Navbar = () => {
             RLBets
           </Link>
         </h2>
-        {user && (
+        {user ? (
           <>
             <div className="mobile-credits">
               <Link to="/Credit-Shop" className="credits-display">
@@ -207,146 +213,150 @@ const Navbar = () => {
             <div className="mobile-notifications">
               <Notifications />
             </div>
-          </>
-        )}
-        <button className="mobile-menu-button" onClick={toggleMobileMenu}>
-          {isMobileMenuOpen ? "✕" : "☰"}
-        </button>
-        <div className={`mobile-menu ${isMobileMenuOpen ? "active" : ""}`}>
-          <div className="mobile-column-left">
-            <Link
-              to="/Wagers"
-              className="mobile-nav-link"
-              onClick={handleNavLinkClick}
-            >
-              Wagers
-            </Link>
-            <div className="mobile-dropdown">
-              <span
-                className="mobile-nav-link"
-                onClick={() => toggleDropdown("tournaments")}
-              >
-                Tournaments
-              </span>
-              <div
-                className={`mobile-dropdown-menu ${
-                  activeDropdown === "tournaments" ? "active" : ""
-                }`}
-              >
-                {currentTournament && (
-                  <Link
-                    to={`/Tournament`}
+            <div className={`mobile-menu ${isMobileMenuOpen ? "active" : ""}`}>
+              <div className="mobile-column-left">
+                <div className="mobile-dropdown">
+                  <span
                     className="mobile-nav-link"
-                    onClick={handleNavLinkClick}
+                    onClick={() => toggleDropdown("tournaments")}
                   >
-                    {currentTournament.name}
-                  </Link>
-                )}
-                <Link
-                  to={`/Tournament-History`}
-                  className="mobile-nav-link"
-                  onClick={handleNavLinkClick}
-                >
-                  Tournament History
-                </Link>
-              </div>
-            </div>
-            <div className="mobile-dropdown">
-              <span
-                className="mobile-nav-link"
-                onClick={() => toggleDropdown("leaderboards")}
-              >
-                Leaderboards
-              </span>
-              <div
-                className={`mobile-dropdown-menu ${
-                  activeDropdown === "leaderboards" ? "active" : ""
-                }`}
-              >
-                {currentTournament && (
-                  <Link
-                    to={`/Tournament-Leaderboard`}
-                    className="mobile-nav-link"
-                    onClick={handleNavLinkClick}
+                    Tournaments
+                  </span>
+                  <div
+                    className={`mobile-dropdown-menu ${
+                      activeDropdown === "tournaments" ? "active" : ""
+                    }`}
                   >
-                    {currentTournament?.name}
-                  </Link>
-                )}
-                <Link
-                  to="/Lifetime-Leaderboard"
-                  className="mobile-nav-link"
-                  onClick={handleNavLinkClick}
-                >
-                  Lifetime Leaderboard
-                </Link>
-              </div>
-            </div>
-          </div>
-          <div className="mobile-column-right">
-            {user && (
-              <>
-                <Link
-                  to="/Profile"
-                  className="mobile-nav-link"
-                  onClick={handleNavLinkClick}
-                >
-                  Profile
-                </Link>
-                {user?.userType === "admin" && (
-                  <div className="mobile-dropdown">
-                    <span
+                    {currentTournament && (
+                      <Link
+                        to={`/Tournament`}
+                        className="mobile-nav-link"
+                        onClick={handleNavLinkClick}
+                      >
+                        {currentTournament.name}
+                      </Link>
+                    )}
+                    <Link
+                      to={`/Tournament-History`}
                       className="mobile-nav-link"
-                      onClick={() => toggleDropdown("admin")}
+                      onClick={handleNavLinkClick}
                     >
-                      Admin
-                    </span>
-                    <div
-                      className={`mobile-dropdown-menu ${
-                        activeDropdown === "admin" ? "active" : ""
-                      }`}
-                    >
-                      <Link
-                        to="/Admin"
-                        className="mobile-nav-link"
-                        onClick={handleNavLinkClick}
-                      >
-                        Home
-                      </Link>
-                      <Link
-                        to="/Create_Wager"
-                        className="mobile-nav-link"
-                        onClick={handleNavLinkClick}
-                      >
-                        Create Wager
-                      </Link>
-                      <Link
-                        to="/Log"
-                        className="mobile-nav-link"
-                        onClick={handleNavLinkClick}
-                      >
-                        Logs
-                      </Link>
-                      <Link
-                        to="/Admin-Email"
-                        className="mobile-nav-link"
-                        onClick={handleNavLinkClick}
-                      >
-                        Email Users
-                      </Link>
-                      <Link
-                        to="/Admin-Identity-Verification"
-                        className="mobile-nav-link"
-                        onClick={handleNavLinkClick}
-                      >
-                        Identity Verification
-                      </Link>
-                    </div>
+                      Tournament History
+                    </Link>
                   </div>
+                </div>
+                <Link
+                  to="/Wagers"
+                  className="mobile-nav-link"
+                  onClick={handleNavLinkClick}
+                >
+                  Wagers
+                </Link>
+              </div>
+              <div className="mobile-column-right">
+                {user && (
+                  <>
+                    <div className="mobile-dropdown">
+                      <span
+                        className="mobile-nav-link"
+                        onClick={() => toggleDropdown("leaderboards")}
+                      >
+                        Leaderboards
+                      </span>
+                      <div
+                        className={`mobile-dropdown-menu ${
+                          activeDropdown === "leaderboards" ? "active" : ""
+                        }`}
+                      >
+                        {currentTournament && (
+                          <Link
+                            to={`/Tournament-Leaderboard`}
+                            className="mobile-nav-link"
+                            onClick={handleNavLinkClick}
+                          >
+                            {currentTournament?.name}
+                          </Link>
+                        )}
+                        <Link
+                          to="/Lifetime-Leaderboard"
+                          className="mobile-nav-link"
+                          onClick={handleNavLinkClick}
+                        >
+                          Lifetime Leaderboard
+                        </Link>
+                      </div>
+                    </div>
+                    <Link
+                      to="/Profile"
+                      className="mobile-nav-link"
+                      onClick={handleNavLinkClick}
+                    >
+                      Profile
+                    </Link>
+                    {user?.userType === "admin" && (
+                      <div className="mobile-dropdown">
+                        <span
+                          className="mobile-nav-link"
+                          onClick={() => toggleDropdown("admin")}
+                        >
+                          Admin
+                        </span>
+                        <div
+                          className={`mobile-dropdown-menu ${
+                            activeDropdown === "admin" ? "active" : ""
+                          }`}
+                        >
+                          <Link
+                            to="/Admin"
+                            className="mobile-nav-link"
+                            onClick={handleNavLinkClick}
+                          >
+                            Home
+                          </Link>
+                          <Link
+                            to="/Create_Wager"
+                            className="mobile-nav-link"
+                            onClick={handleNavLinkClick}
+                          >
+                            Create Wager
+                          </Link>
+                          <Link
+                            to="/Log"
+                            className="mobile-nav-link"
+                            onClick={handleNavLinkClick}
+                          >
+                            Logs
+                          </Link>
+                          <Link
+                            to="/Admin-Email"
+                            className="mobile-nav-link"
+                            onClick={handleNavLinkClick}
+                          >
+                            Email Users
+                          </Link>
+                          <Link
+                            to="/Admin-Identity-Verification"
+                            className="mobile-nav-link"
+                            onClick={handleNavLinkClick}
+                          >
+                            Identity Verification
+                          </Link>
+                        </div>
+                      </div>
+                    )}
+                  </>
                 )}
-              </>
-            )}
-          </div>
-        </div>
+              </div>
+            </div>
+            <button className="mobile-menu-button" onClick={toggleMobileMenu}>
+              {isMobileMenuOpen ? "✕" : "☰"}
+            </button>
+          </>
+        ) : (
+          <button className="navbar-cta-button-mobile" onClick={() => navigate("/Login")}>
+            Login
+          </button>
+        )}
       </div>
     </nav>
   );

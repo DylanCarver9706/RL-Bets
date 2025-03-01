@@ -42,18 +42,24 @@
 
 .credits-title {
   font-size: 1.5rem;
-  color: #fb6a31;
   margin: 2rem 0;
+
+  display: inline-block; /* Ensures gradient only applies to text width */
+  background: linear-gradient(90deg, #034da4, #fb6a31);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  white-space: nowrap; /* Prevents text from wrapping and stretching gradient */
 }
 
 .credits-role {
   margin: 0.5rem 0;
   font-size: 1.1rem;
   opacity: 0.9;
+  color: #034da4
 }
 
 .credits-name {
-  color: #034da4;
+  color: #fb6a36;;
   font-weight: 600;
 }
 

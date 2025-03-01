@@ -29,6 +29,7 @@ const ForgotPassword = () => {
   };
 
   return (
+    <div className="auth-container">
     <div className="forgot-password-container">
       <div className="forgot-password-card">
         <h2 className="forgot-password-header">Reset Password</h2>
@@ -57,6 +58,7 @@ const ForgotPassword = () => {
             </Link>
           </div>
         </form>
+        </div>
       </div>
     </div>
   );

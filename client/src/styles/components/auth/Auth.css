@@ -1,5 +1,12 @@
 /* Common styles for both Login and Signup */
+
 .auth-container {
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.auth-component {
   max-width: 500px;
   margin: 1rem auto;
   padding: 1.5rem;
@@ -12,7 +19,7 @@
 .auth-header {
   text-align: center;
   margin-bottom: 0.75rem;
-  color: white;
+  color: #fb6a31;
 }
 
 .auth-form {

@@ -1,10 +1,14 @@
-.about-container {
+.about-content-container {
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.about-content {
   max-width: 800px;
-  margin: 2rem auto;
-  padding: 2rem;
+  margin: auto;
   background: #2a2a2a;
   border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   color: white;
 }
 
@@ -23,8 +27,15 @@
 }
 
 .about-content p {
-  margin: 1rem 0;
+  margin: 1.5rem 0;
   text-align: justify;
+  word-spacing: normal;
+  hyphens: auto;
+}
+
+.about-content p:not(:last-child) {
+  padding-bottom: 1.5rem;
+  border-bottom: 2px solid rgba(3, 77, 164, 0.3);
 }
 
 @media (max-width: 768px) {
@@ -40,6 +51,12 @@
   .about-content {
     font-size: 1rem;
   }
+
+  .about-content p {
+    text-align: left;
+    word-spacing: normal;
+    padding: 0 0.5rem;
+  }
 }
 
 .gradient-text {
@@ -48,4 +65,4 @@
   background-clip: text;
   color: transparent;
   font-weight: 600;
-} 
+}

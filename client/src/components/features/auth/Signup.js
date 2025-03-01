@@ -265,255 +265,261 @@ const Signup = () => {
   };
 
   return (
-    <div className="auth-container">
-      <h2 className="auth-header">Create Account</h2>
-      {error && <p className="error-message">{error}</p>}
+    <div className="auth-component">
+      <div className="auth-container">
+        <h2 className="auth-header">Create Account</h2>
+        {error && <p className="error-message">{error}</p>}
 
-      <div className="google-section">
-        <button
-          className="google-button"
-          onClick={handleGoogleAuth}
-          disabled={loading}
-        >
-          <svg className="google-icon" viewBox="0 0 18 18">
-            <path
-              fill="#4285f4"
-              d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"
-            ></path>
-            <path
-              fill="#34a853"
-              d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"
-            ></path>
-            <path
-              fill="#fbbc05"
-              d="M3.964 10.71c-.18-.54-.282-1.117-.282-1.71s.102-1.17.282-1.71V4.958H.957C.347 6.173 0 7.548 0 9s.348 2.827.957 4.042l3.007-2.332z"
-            ></path>
-            <path
-              fill="#ea4335"
-              d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"
-            ></path>
-          </svg>
-          Sign up with Google
-        </button>
-      </div>
+        <div className="google-section">
+          <button
+            className="google-button"
+            onClick={handleGoogleAuth}
+            disabled={loading}
+          >
+            <svg className="google-icon" viewBox="0 0 18 18">
+              <path
+                fill="#4285f4"
+                d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"
+              ></path>
+              <path
+                fill="#34a853"
+                d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"
+              ></path>
+              <path
+                fill="#fbbc05"
+                d="M3.964 10.71c-.18-.54-.282-1.117-.282-1.71s.102-1.17.282-1.71V4.958H.957C.347 6.173 0 7.548 0 9s.348 2.827.957 4.042l3.007-2.332z"
+              ></path>
+              <path
+                fill="#ea4335"
+                d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"
+              ></path>
+            </svg>
+            Sign up with Google
+          </button>
+        </div>
 
-      <div className="divider-with-text">
-        <span className="divider-text">or</span>
-      </div>
+        <div className="divider-with-text">
+          <span className="divider-text">or</span>
+        </div>
 
-      <form className="auth-form" onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label>Name:</label>
-          <div className="form-input-container">
+        <form className="auth-form" onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label>Name:</label>
+            <div className="form-input-container">
+              <input
+                type="text"
+                className="form-input"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+              />
+              <Tooltip infoText="Please use the name on your form of identification." />
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label>Email:</label>
+            <input
+              type="email"
+              className="form-input"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Password:</label>
+            <div className="password-group">
+              <input
+                type={showPassword ? "text" : "password"}
+                className="form-input"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+              <button
+                type="button"
+                className="show-password"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? "Hide" : "Show"}
+              </button>
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label>Confirm Password:</label>
+            <div className="password-group">
+              <input
+                type={showConfirmPassword ? "text" : "password"}
+                className="form-input"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+              />
+              <button
+                type="button"
+                className="show-password"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              >
+                {showConfirmPassword ? "Hide" : "Show"}
+              </button>
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label>Address Line 1:</label>
             <input
               type="text"
               className="form-input"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              value={address1}
+              onChange={(e) => setAddress1(e.target.value)}
+              placeholder="Address Line 1"
               required
             />
-            <Tooltip infoText="Please use the name on your form of identification." />
           </div>
-        </div>
 
-        <div className="form-group">
-          <label>Email:</label>
-          <input
-            type="email"
-            className="form-input"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </div>
-
-        <div className="form-group">
-          <label>Password:</label>
-          <div className="password-group">
+          <div className="form-group">
+            <label>Address Line 2:</label>
             <input
-              type={showPassword ? "text" : "password"}
+              type="text"
               className="form-input"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
+              value={address2}
+              onChange={(e) => setAddress2(e.target.value)}
+              placeholder="Address Line 2"
             />
-            <button
-              type="button"
-              className="show-password"
-              onClick={() => setShowPassword(!showPassword)}
-            >
-              {showPassword ? "Hide" : "Show"}
-            </button>
           </div>
-        </div>
 
-        <div className="form-group">
-          <label>Confirm Password:</label>
-          <div className="password-group">
+          <div className="form-group">
+            <label>City:</label>
             <input
-              type={showConfirmPassword ? "text" : "password"}
+              type="text"
               className="form-input"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              placeholder="City"
               required
             />
-            <button
-              type="button"
-              className="show-password"
-              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-            >
-              {showConfirmPassword ? "Hide" : "Show"}
-            </button>
-          </div>
-        </div>
-
-        <div className="form-group">
-          <label>Address Line 1:</label>
-          <input
-            type="text"
-            className="form-input"
-            value={address1}
-            onChange={(e) => setAddress1(e.target.value)}
-            placeholder="Address Line 1"
-            required
-          />
-        </div>
-
-        <div className="form-group">
-          <label>Address Line 2:</label>
-          <input
-            type="text"
-            className="form-input"
-            value={address2}
-            onChange={(e) => setAddress2(e.target.value)}
-            placeholder="Address Line 2"
-          />
-        </div>
-
-        <div className="form-group">
-          <label>City:</label>
-          <input
-            type="text"
-            className="form-input"
-            value={city}
-            onChange={(e) => setCity(e.target.value)}
-            placeholder="City"
-            required
-          />
-        </div>
-
-        <div className="form-group">
-          <label>State:</label>
-          <select
-            className="form-input"
-            value={state}
-            onChange={(e) => setState(e.target.value)}
-          >
-            <option value="">Select a State</option>
-            {statesList.map((state) => (
-              <option key={state} value={state}>
-                {state}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="form-group">
-          <label>Zip:</label>
-          <input
-            type="text"
-            className="form-input"
-            value={zip}
-            onChange={(e) => setZip(e.target.value)}
-            placeholder="Zip"
-            required
-          />
-        </div>
-
-        <div className="form-group">
-          <label>Date of Birth:</label>
-          <input
-            type="date"
-            className="form-input"
-            value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
-            required
-          />
-        </div>
-
-        <div className="form-group">
-          <label>Referral Code:</label>
-          <input
-            className="form-input"
-            value={referralCode}
-            onChange={(e) => setReferralCode(e.target.value)}
-          />
-        </div>
-
-        <div className="signup-agreements-container">
-          <div className="signup-agreement-section">
-            <a
-              href="/Terms-Of-Service"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="signup-agreement-link"
-              onClick={(e) => {
-                e.preventDefault();
-                setTosClicked(true);
-                window.open(
-                  "/Terms-Of-Service",
-                  "_blank",
-                  "noopener,noreferrer"
-                );
-              }}
-            >
-              Terms of Service
-            </a>
-            <label className="signup-agreement-checkbox">
-              <input
-                type="checkbox"
-                checked={tosChecked}
-                onChange={(e) => setTosChecked(e.target.checked)}
-                disabled={!tosClicked}
-              />
-              <span>I agree</span>
-            </label>
           </div>
 
-          <div className="signup-agreement-section">
-            <a
-              href="/Privacy-Policy"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="signup-agreement-link"
-              onClick={(e) => {
-                e.preventDefault();
-                setPpClicked(true);
-                window.open("/Privacy-Policy", "_blank", "noopener,noreferrer");
-              }}
+          <div className="form-group">
+            <label>State:</label>
+            <select
+              className="form-input"
+              value={state}
+              onChange={(e) => setState(e.target.value)}
             >
-              Privacy Policy
-            </a>
-            <label className="signup-agreement-checkbox">
-              <input
-                type="checkbox"
-                checked={ppChecked}
-                onChange={(e) => setPpChecked(e.target.checked)}
-                disabled={!ppClicked}
-              />
-              <span>I agree</span>
-            </label>
+              <option value="">Select a State</option>
+              {statesList.map((state) => (
+                <option key={state} value={state}>
+                  {state}
+                </option>
+              ))}
+            </select>
           </div>
-        </div>
 
-        <button className="auth-button" disabled={loading} type="submit">
-          {loading ? "Creating Account..." : "Sign Up"}
-        </button>
-      </form>
-      <div className="auth-links">
-        <Link to="/Login" className="auth-link">
-          Already have an account? Log in now
-        </Link>
+          <div className="form-group">
+            <label>Zip:</label>
+            <input
+              type="text"
+              className="form-input"
+              value={zip}
+              onChange={(e) => setZip(e.target.value)}
+              placeholder="Zip"
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Date of Birth:</label>
+            <input
+              type="date"
+              className="form-input"
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Referral Code:</label>
+            <input
+              className="form-input"
+              value={referralCode}
+              onChange={(e) => setReferralCode(e.target.value)}
+            />
+          </div>
+
+          <div className="signup-agreements-container">
+            <div className="signup-agreement-section">
+              <a
+                href="/Terms-Of-Service"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="signup-agreement-link"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setTosClicked(true);
+                  window.open(
+                    "/Terms-Of-Service",
+                    "_blank",
+                    "noopener,noreferrer"
+                  );
+                }}
+              >
+                Terms of Service
+              </a>
+              <label className="signup-agreement-checkbox">
+                <input
+                  type="checkbox"
+                  checked={tosChecked}
+                  onChange={(e) => setTosChecked(e.target.checked)}
+                  disabled={!tosClicked}
+                />
+                <span>I agree</span>
+              </label>
+            </div>
+
+            <div className="signup-agreement-section">
+              <a
+                href="/Privacy-Policy"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="signup-agreement-link"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setPpClicked(true);
+                  window.open(
+                    "/Privacy-Policy",
+                    "_blank",
+                    "noopener,noreferrer"
+                  );
+                }}
+              >
+                Privacy Policy
+              </a>
+              <label className="signup-agreement-checkbox">
+                <input
+                  type="checkbox"
+                  checked={ppChecked}
+                  onChange={(e) => setPpChecked(e.target.checked)}
+                  disabled={!ppClicked}
+                />
+                <span>I agree</span>
+              </label>
+            </div>
+          </div>
+
+          <button className="auth-button" disabled={loading} type="submit">
+            {loading ? "Creating Account..." : "Sign Up"}
+          </button>
+        </form>
+        <div className="auth-links">
+          <Link to="/Login" className="auth-link">
+            Already have an account? Log in now
+          </Link>
+        </div>
       </div>
     </div>
   );
