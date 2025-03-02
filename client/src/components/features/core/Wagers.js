@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import socket from "../../../services/socketService.js";
+import { subscribeToUpdates } from "../../../services/supabaseService";
 import { createBet } from "../../../services/wagerService.js";
 import { useUser } from "../../../contexts/UserContext.js";
 import { getWagers } from "../../../services/userService.js";
@@ -84,24 +84,22 @@ const Wagers = () => {
 
   // Listen for updates from the server
   useEffect(() => {
-    const handleWagersUpdate = (updatedWagers) => {
-      if (Array.isArray(updatedWagers)) {
-        setWagers(() => {
-          applyFilter(activeFilter, updatedWagers); // Ensure activeFilter is correctly applied
-          return updatedWagers; // Update state with new wagers
-        });
-      } else {
-        console.error(
-          "Invalid data received from wagersUpdate:",
-          updatedWagers
-        );
+    const subscription = subscribeToUpdates(
+      "wagers",
+      "wagersUpdate",
+      (payload) => {
+        console.log("payload", payload);
+        if (Array.isArray(payload.payload.wagers)) {
+          setWagers(() => {
+            applyFilter(activeFilter, payload.payload.wagers);
+            return payload.payload.wagers;
+          });
+        }
       }
-    };
-
-    socket.on("wagersUpdate", handleWagersUpdate);
+    );
 
     return () => {
-      socket.off("wagersUpdate", handleWagersUpdate);
+      subscription.unsubscribe();
     };
     // eslint-disable-next-line
   }, [activeFilter]);
@@ -165,9 +163,10 @@ const Wagers = () => {
 
   // Handle submit bet
   const handleSubmitBet = async () => {
-    
     // Alert to confirm bet
-    const confirmBet = window.confirm("Are you sure you want to place this bet?");
+    const confirmBet = window.confirm(
+      "Are you sure you want to place this bet?"
+    );
     if (!confirmBet) {
       return;
     }
@@ -400,13 +399,16 @@ const Wagers = () => {
                     happen{" "}
                   </div>
                   <div className="estimated-winnings">
-                    Estimated Winnings: {estimatedWinnings.toFixed(2)} Credits {<ToolTip
-                      infoText={`Total ${
-                        wagerCaseSelected ? "Disagree" : "Agree"
-                      } Credits Bet x ( Bet Amount / ( Bet Amount + Total ${
-                        wagerCaseSelected ? "Agree" : "Disagree"
-                      } Credits Bet ))`}
-                    />}
+                    Estimated Winnings: {estimatedWinnings.toFixed(2)} Credits{" "}
+                    {
+                      <ToolTip
+                        infoText={`Total ${
+                          wagerCaseSelected ? "Disagree" : "Agree"
+                        } Credits Bet x ( Bet Amount / ( Bet Amount + Total ${
+                          wagerCaseSelected ? "Agree" : "Disagree"
+                        } Credits Bet ))`}
+                      />
+                    }
                   </div>
                   <div className="bet-actions">
                     <button

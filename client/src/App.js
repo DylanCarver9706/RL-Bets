@@ -13,7 +13,6 @@ import {
 } from "./services/agreementService";
 import { useUser } from "./contexts/UserContext";
 import { Routes, Route, useNavigate } from "react-router-dom";
-import socket from "./services/socketService";
 import Wagers from "./components/features/core/Wagers";
 import Profile from "./components/features/core/Profile";
 import Navbar from "./components/common/Navbar";
@@ -53,6 +52,7 @@ import SmsVerification from "./components/features/userVerification/SmsVerificat
 import Instructions from "./components/features/core/Instructions";
 import About from "./components/features/about/About";
 import Contact from "./components/features/about/Contact";
+import DbTest from "./components/DbTest";
 import {
   checkGeolocationPermission,
   userLocationLegal,
@@ -138,15 +138,6 @@ function App() {
     return () => unsubscribe();
     // eslint-disable-next-line
   }, [setUser, navigate]);
-
-  // Initialize the socket connection when the app mounts
-  useEffect(() => {
-    socket.connect();
-
-    return () => {
-      socket.disconnect();
-    };
-  }, []);
 
   // Get a potential referral code from the URL
   useEffect(() => {
@@ -310,6 +301,7 @@ function App() {
           <Route path="/Instructions" element={<Instructions />} />
           <Route path="/About" element={<About />} />
           <Route path="/Contact" element={<Contact />} />
+          <Route path="/DbTest" element={<DbTest />} />
           {/* Catch-all route for undefined paths */}
           <Route path="*" element={<PageNotFound />} />
 

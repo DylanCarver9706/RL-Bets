@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useUser } from "../../contexts/UserContext.js";
-import socket from "../../services/socketService.js";
+import { subscribeToUpdates } from '../../services/supabaseService';
 import { fetchCurrentTournament } from "../../services/leaderboardService.js";
 import Notifications from "../features/core/Notifications.js";
 import { auth } from "../../config/firebaseConfig.js";
@@ -28,16 +28,16 @@ const Navbar = () => {
 
   // Listen for updates from the server
   useEffect(() => {
-    socket.on("updateUser", (updateUser) => {
-      if (updateUser._id === user?.mongoUserId) {
-        setUser({ ...user, credits: updateUser.credits });
+    const subscription = subscribeToUpdates('users', 'updateUser', (payload) => {
+      console.log("payload", payload);
+      if (payload.payload.user._id === user?.mongoUserId) {
+        setUser({ ...user, credits: payload.payload.user.credits });
       }
     });
 
     // Cleanup listener on unmount
     return () => {
-      socket.off("wagersUpdate");
-      socket.disconnect();
+      subscription.unsubscribe();
     };
     // eslint-disable-next-line
   }, [user?.mongoUserId]);

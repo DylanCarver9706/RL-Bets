@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import socket from "../../../services/socketService";
+import { subscribeToUpdates } from "../../../services/supabaseService";
 import { fetchLifetimeLeaderboard } from "../../../services/leaderboardService";
 import "../../../styles/components/leaderboards/LifetimeLeaderboard.css";
 
@@ -22,11 +22,13 @@ const LifetimeLeaderboard = () => {
 
   // Listen for updates
   useEffect(() => {
-    socket.on("updateUsers", (updatedUsers) => {
-      setSortedUsers(updatedUsers);
+    const subscription = subscribeToUpdates('users', 'updateUsers', (payload) => {
+      setSortedUsers(payload.users);
     });
 
-    return () => socket.disconnect();
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   const getRankClass = (index) => {

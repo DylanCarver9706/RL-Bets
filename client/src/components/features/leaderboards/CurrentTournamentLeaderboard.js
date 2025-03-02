@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import socket from "../../../services/socketService";
+import { subscribeToUpdates } from "../../../services/supabaseService";
 import { fetchCurrentLeaderboard } from "../../../services/leaderboardService";
 import "../../../styles/components/leaderboards/CurrentTournamentLeaderboard.css";
 import { getUsers } from "../../../services/adminService";
@@ -25,11 +25,13 @@ const CurrentTournamentLeaderboard = () => {
 
   // Listen for updates
   useEffect(() => {
-    socket.on("updateLeaderboard", (updatedLeaderboard) => {
-      setLeaderboard(updatedLeaderboard);
+    const subscription = subscribeToUpdates('leaderboard', 'updateLeaderboard', (payload) => {
+      setLeaderboard(payload.leaderboard);
     });
 
-    return () => socket.disconnect();
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   const getRankClass = (rank) => {

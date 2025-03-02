@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import socket from "../../../services/socketService";
+import { subscribeToUpdates } from '../../../services/supabaseService';
 import { getLogs } from "../../../services/userService";
 
 const Log = () => {
@@ -18,12 +18,12 @@ const Log = () => {
 
     fetchLogs();
 
-    socket.on("updateLogs", (updatedLogs) => {
-      setLogs(updatedLogs.reverse() || []);
+    const subscription = subscribeToUpdates('logs', 'updateLogs', (payload) => {
+      setLogs(payload.payload.logs.reverse() || []);
     });
 
     return () => {
-      socket.disconnect();
+      subscription.unsubscribe();
     };
   }, []);
 
