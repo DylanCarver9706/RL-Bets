@@ -73,10 +73,10 @@ const statesList = [
 
 const Signup = () => {
   const { user } = useUser(); // Get user object from context
-  const [email, setEmail] = useState("testuser@example.com");
-  const [password, setPassword] = useState("password123");
-  const [confirmPassword, setConfirmPassword] = useState("password123");
-  const [name, setName] = useState("Test User");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [name, setName] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [referralCode, setReferralCode] = useState("");
@@ -137,8 +137,14 @@ const Signup = () => {
         referralCode,
         "email",
         null,
-        `Accepted v0 at ${new Date().toISOString().split("T")[0]}`,
-        `Accepted v0 at ${new Date().toISOString().split("T")[0]}`
+        {
+          version: 0,
+          acceptedAt: new Date().toISOString(),
+        },
+        {
+          version: 0,
+          acceptedAt: new Date().toISOString(),
+        }
       );
 
       // Remove referral code from local storage
@@ -311,6 +317,7 @@ const Signup = () => {
                 className="form-input"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
+                placeholder="Zen"
                 required
               />
               <Tooltip infoText="Please use the name on your form of identification." />
@@ -324,6 +331,7 @@ const Signup = () => {
               className="form-input"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              placeholder="Email"
               required
             />
           </div>
@@ -336,6 +344,7 @@ const Signup = () => {
                 className="form-input"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                placeholder="Password"
                 required
               />
               <button
@@ -356,6 +365,7 @@ const Signup = () => {
                 className="form-input"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Confirm Password"
                 required
               />
               <button
