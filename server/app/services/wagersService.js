@@ -5,7 +5,7 @@ const {
   createMongoDocument,
   updateMongoDocument,
 } = require("../../database/middlewares/mongo");
-const { getSocketIo } = require("../middlewares/socketIO");
+const { broadcastUpdate } = require('../middlewares/supabaseAdmin');
 
 const wagersWithStats = async (wagers) => {
   try {
@@ -114,8 +114,8 @@ const updateWager = async (id, updateData) => {
   await updateMongoDocument(collections.wagersCollection, id, {
     $set: updateData,
   });
-  const io = getSocketIo();
-  io.emit("wagersUpdate", await getAllWagers());
+  const updatedWagers = await getAllWagers();
+  await broadcastUpdate('wagers', 'wagersUpdate', { wagers: updatedWagers });
   return await collections.wagersCollection.findOne({
     _id: ObjectId.createFromHexString(id),
   });

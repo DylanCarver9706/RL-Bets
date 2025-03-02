@@ -5,7 +5,7 @@ const {
   createMongoDocument,
   updateMongoDocument,
 } = require("../../database/middlewares/mongo");
-const { getSocketIo } = require("../middlewares/socketIO");
+const { broadcastUpdate } = require("../middlewares/supabaseAdmin");
 const { sendEmail } = require("../middlewares/nodemailer");
 const { createUserNotificationLog } = require("./logsService");
 
@@ -103,7 +103,7 @@ const updateUser = async (id, updateData) => {
     "accountStatus",
   ]
 
-  // Check if any of the fields in updateData are not allowed and throw an error saying which field is not allowed to be updated
+  // Check if any of the fields in updateData are not allowed
   for (const field in updateData) {
     if (!allowedFields.includes(field)) {
       throw new Error(`Field ${field} is not allowed to be updated`);
@@ -118,11 +118,10 @@ const updateUser = async (id, updateData) => {
     _id: ObjectId.createFromHexString(id),
   });
 
-  // Emit WebSocket updates
+  // Emit updates via Supabase
   const allUsers = await getAllUsers();
-  const io = getSocketIo();
-  io.emit("updateUser", updatedUser);
-  io.emit("updateUsers", allUsers);
+  await broadcastUpdate('users', 'updateUser', { user: updatedUser });
+  await broadcastUpdate('users', 'updateUsers', { users: allUsers });
 
   return updatedUser;
 };
@@ -131,13 +130,10 @@ const softDeleteUser = async (id) => {
   await updateMongoDocument(collections.usersCollection, id, {
     $set: {
       name: null,
-      // email
-      // mongoUserId
       credits: 0.0,
       earnedCredits: 0.0,
       lifetimeEarnedCredits: 0.0,
       firebaseUserId: null,
-      // userType
       idvStatus: "unverified",
       emailVerificationStatus: "unverified",
       accountStatus: "deleted",
@@ -161,11 +157,10 @@ const softDeleteUser = async (id) => {
     _id: ObjectId.createFromHexString(id),
   });
 
-  // Emit WebSocket updates
+  // Emit updates via Supabase
   const allUsers = await getAllUsers();
-  const io = getSocketIo();
-  io.emit("updateUser", updatedUser);
-  io.emit("updateUsers", allUsers);
+  await broadcastUpdate('users', 'updateUser', { user: updatedUser });
+  await broadcastUpdate('users', 'updateUsers', { users: allUsers });
 };
 
 const deleteUser = async (id) => {

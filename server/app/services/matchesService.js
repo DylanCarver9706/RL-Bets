@@ -5,7 +5,7 @@ const {
 } = require("../../database/middlewares/mongo");
 const { createAdminLog, createUserNotificationLog } = require("./logsService");
 const { ObjectId } = require("mongodb");
-const { getSocketIo } = require("../middlewares/socketIO");
+const { broadcastUpdate } = require("../middlewares/supabaseAdmin");
 const { getAllWagers } = require("./wagersService");
 const { getCurrentLeaderboard } = require("./leaderboardService");
 const { getAllUsers } = require("./usersService");
@@ -90,8 +90,7 @@ const updateMatch = async (id, updateData) => {
         )
       )
     );
-    const io = getSocketIo();
-    io.emit("wagersUpdate", await getAllWagers());
+    await broadcastUpdate('wagers', 'wagersUpdate', { wagers: await getAllWagers() });
   }
 };
 
@@ -219,8 +218,7 @@ const payOutBetWinners = async (wagerId, agreeIsWinner) => {
       });
 
       // Emit 'updateUser' event with updated user data to all connected clients
-      const io = getSocketIo();
-      io.emit("updateUser", updatedUser);
+      await broadcastUpdate('users', 'updateUser', { user: updatedUser });
     }
   }
 };
@@ -356,8 +354,7 @@ const handleWagerEnded = async (wagerId, agreeIsWinner) => {
 
   // Fetch updated wager and statistics
   const updatedWagers = await getAllWagers();
-  const io = getSocketIo();
-  io.emit("wagersUpdate", updatedWagers); // Emit updated data to all clients
+  await broadcastUpdate('wagers', 'wagersUpdate', { wagers: updatedWagers });
 
   await payOutBetWinners(wagerId, agreeIsWinner);
 };
@@ -1103,9 +1100,10 @@ const matchConcluded = async (matchId, data) => {
       "Tournament has ended and all user earnedCredits have been reset to 0.00. Congrats RL Bets!"
     );
   }
-  const io = getSocketIo();
-  io.emit("updateUsers", await getAllUsers());
-  io.emit("updateLeaderboard", await getCurrentLeaderboard());
+  await broadcastUpdate('users', 'updateUsers', { users: await getAllUsers() });
+  await broadcastUpdate('leaderboard', 'updateLeaderboard', { 
+    leaderboard: await getCurrentLeaderboard() 
+  });
 
   return { message: message };
 };

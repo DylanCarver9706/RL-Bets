@@ -3,7 +3,7 @@ const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const { collections } = require("../../database/mongoCollections");
 const { ObjectId } = require("mongodb");
 const { updateMongoDocument, createMongoDocument } = require("../../database/middlewares/mongo");
-const { getSocketIo } = require("../middlewares/socketIO");
+const { broadcastUpdate } = require("../middlewares/supabaseAdmin");
 const { getUserById } = require("./usersService");
 
 const createCheckoutSession = async (purchaseItems, mongoUserId, userMadeFirstPurchase) => {
@@ -68,7 +68,7 @@ const createCheckoutSession = async (purchaseItems, mongoUserId, userMadeFirstPu
   }
 };
 
-const handleWebhookEvent = async (event, io) => {
+const handleWebhookEvent = async (event) => {
   const session = event.data.object;
 
   // Handle only 'checkout.session.completed' events
@@ -102,8 +102,7 @@ const handleWebhookEvent = async (event, io) => {
         true
       );
 
-      io = getSocketIo();
-      io.emit("updateUser", updatedUser);
+      await broadcastUpdate('users', 'updateUser', { user: updatedUser });
 
       // Add credit purchase to the transactions collection
       await createMongoDocument(collections.transactionsCollection, {

@@ -4,7 +4,7 @@ const {
   createMongoDocument,
   updateMongoDocument,
 } = require("../../database/middlewares/mongo");
-const { getSocketIo } = require("../middlewares/socketIO");
+const { broadcastUpdate } = require("../middlewares/supabaseAdmin");
 
 const getAllLogs = async () => {
   try {
@@ -39,10 +39,9 @@ const createLog = async (logData) => {
       logData
     );
 
-    // Emit updated logs via WebSocket
+    // Emit updated logs
     const logs = await getAllLogs();
-    const io = getSocketIo();
-    io.emit("updatedLogs", logs);
+    await broadcastUpdate('logs', 'updatedLogs', { logs });
 
     return { logId: result.insertedId };
   } catch (error) {
@@ -60,10 +59,9 @@ const createAdminLog = async (logData) => {
       }
     );
 
-    // Emit updated logs via WebSocket
+    // Emit updated logs
     const logs = await getAllLogs();
-    const io = getSocketIo();
-    io.emit("updateLogs", logs);
+    await broadcastUpdate('logs', 'updateLogs', { logs });
 
     return { logId: result.insertedId };
   } catch (error) {
@@ -83,10 +81,9 @@ const createUserNotificationLog = async (logData) => {
       }
     );
 
-    // Emit updated logs via WebSocket
+    // Emit updated logs
     const logs = await getUserNotificationLogs(logData.user.toString());
-    const io = getSocketIo();
-    io.emit("updateUserLogs", logs);
+    await broadcastUpdate('userLogs', 'updateUserLogs', { userLogs: logs });
 
     return { logId: result.insertedId };
   } catch (error) {

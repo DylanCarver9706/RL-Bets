@@ -4,7 +4,7 @@ const {
   createMongoDocument,
   updateMongoDocument,
 } = require("../../database/middlewares/mongo");
-const { getSocketIo } = require("../middlewares/socketIO");
+const { broadcastUpdate } = require("../middlewares/supabaseAdmin");
 
 const getAllTransactions = async () => {
   return await collections.transactionsCollection.find().toArray();
@@ -24,9 +24,8 @@ const createTransaction = async (transactionData) => {
     true
   );
 
-  // Emit WebSocket event for real-time updates
-  const io = getSocketIo();
-  io.emit("newTransaction", newTransaction);
+  // Emit real-time updates
+  await broadcastUpdate('transactions', 'newTransaction', { transaction: newTransaction });
 
   return newTransaction;
 };
@@ -42,9 +41,8 @@ const updateTransaction = async (id, updateData) => {
     _id: ObjectId.createFromHexString(id),
   });
 
-  // Emit WebSocket updates
-  const io = getSocketIo();
-  io.emit("updateTransaction", updatedTransaction);
+  // Emit updates
+  await broadcastUpdate('transactions', 'updateTransaction', { transaction: updatedTransaction });
 
   return updatedTransaction;
 };
@@ -59,9 +57,8 @@ const deleteTransaction = async (id) => {
     throw new Error("Transaction not found");
   }
 
-  // Emit WebSocket event for real-time updates
-  const io = getSocketIo();
-  io.emit("deleteTransaction", { id });
+  // Emit real-time updates
+  await broadcastUpdate('transactions', 'deleteTransaction', { transactionId: id });
 };
 
 const getUserTransactions = async (userId) => {

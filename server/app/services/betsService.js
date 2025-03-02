@@ -4,7 +4,7 @@ const {
   updateMongoDocument,
 } = require("../../database/middlewares/mongo");
 const { ObjectId } = require("mongodb");
-const { getSocketIo } = require("../middlewares/socketIO");
+const { broadcastUpdate } = require("../middlewares/supabaseAdmin");
 const { getAllWagers } = require("./wagersService");
 const { getCurrentLeaderboard } = require("./leaderboardService");
 
@@ -28,15 +28,13 @@ const createBet = async (betData) => {
 
   const result = await createMongoDocument(collections.betsCollection, newBet);
 
-  const io = getSocketIo();
-
   // Update wager with the new bet
   const wager = await updateMongoDocument(collections.wagersCollection, wagerId, {
     $push: { bets: result.insertedId },
   }, true);
 
   const allWagers = await getAllWagers();
-  io.emit("wagersUpdate", allWagers);
+  await broadcastUpdate('wagers', 'wagersUpdate', { wagers: allWagers });
 
   // Deduct credits from user
   const updatedUser = await updateMongoDocument(
@@ -48,7 +46,7 @@ const createBet = async (betData) => {
     true
   );
 
-  io.emit("updateUser", updatedUser);
+  await broadcastUpdate('users', 'updateUser', { user: updatedUser });
 
   // Update leaderboard with the new user
   const currentLeaderboard = await getCurrentLeaderboard();
@@ -67,7 +65,9 @@ const createBet = async (betData) => {
         $push: { users: ObjectId.createFromHexString(user) },
       }
     );
-    io.emit("updateLeaderboard", await getCurrentLeaderboard());
+    await broadcastUpdate('leaderboard', 'updateLeaderboard', { 
+      leaderboard: await getCurrentLeaderboard() 
+    });
   }
 
   // Add bet to the transactions collection

@@ -1,12 +1,10 @@
 // server.js
 const express = require("express");
 const http = require("http");
-const { Server } = require("socket.io");
 const cors = require("cors");
 require("dotenv").config();
 const { initializeCollections } = require("./database/mongoCollections");
 const { initializeFirebase } = require("./app/middlewares/firebaseAdmin");
-const { initializeSocketIo } = require("./app/middlewares/socketIO");
 const { errorLogger } = require("./app/middlewares/errorLogger");
 const {
   scheduleDailyEmail,
@@ -28,16 +26,7 @@ if (process.env.ENV === "production") {
   ];
 }
 
-// WebSocket setup
 const server = http.createServer(app);
-const io = new Server(server, {
-  cors: {
-    origin: process.env.DEV_CLIENT_URL,
-    // credentials: true,
-  },
-});
-
-app.set("io", io);
 
 // Initialize middleware
 app.use((req, res, next) => {
@@ -72,7 +61,6 @@ const startServer = async () => {
   try {
     await initializeCollections();
     await initializeFirebase();
-    await initializeSocketIo(io);
     console.log("Server Ready");
 
     // Log all requests
