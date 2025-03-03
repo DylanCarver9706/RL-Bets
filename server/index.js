@@ -2,7 +2,7 @@
 const express = require("express");
 const http = require("http");
 const cors = require("cors");
-const bodyParser = require('body-parser');
+const bodyParser = require("body-parser");
 require("dotenv").config();
 const { initializeCollections } = require("./database/mongoCollections");
 const { initializeFirebase } = require("./app/middlewares/firebaseAdmin");
@@ -30,20 +30,20 @@ if (process.env.ENV === "production") {
 const server = http.createServer(app);
 
 // Initialize middleware
-app.use((req, res, next) => {
-  if (req.originalUrl === "/webhook") {
-    next(); // Skip JSON body parsing for the webhook route
-  } else {
-    express.json()(req, res, next); // Use JSON body parser for all other routes
-  }
-});
 
-// Increase payload size limit for file uploads
-app.use(bodyParser.urlencoded({
-  limit: '50mb',
-  extended: true,
-  parameterLimit: 50000
-}));
+// Important: Place the webhook route before any body parsers
+app.use("/webhook", require("./app/routes/stripeWebhookRoute"));
+
+// Body parsers for all other routes
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ limit: "50mb", extended: true }));
+app.use(
+  bodyParser.urlencoded({
+    limit: "50mb",
+    extended: true,
+    parameterLimit: 50000,
+  })
+);
 
 // Update the main CORS middleware
 app.use(
@@ -52,13 +52,13 @@ app.use(
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
     credentials: true,
     optionsSuccessStatus: 204,
-    exposedHeaders: ['Content-Length', 'Content-Type'],
+    exposedHeaders: ["Content-Length", "Content-Type"],
   })
 );
 
 // Configure multer for file uploads
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ limit: '50mb', extended: true }));
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
 // Add before your routes
 // app.use((req, res, next) => {
@@ -106,7 +106,6 @@ const startServer = async () => {
     app.use("/api/players", require("./app/routes/playersRoutes"));
     app.use("/api/data-trees", require("./app/routes/dataTreeRoutes"));
     app.use("/api/jira", require("./app/routes/jiraRoutes"));
-    app.use("/webhook", require("./app/routes/stripeWebhookRoute"));
     app.use("/api/server-utils", require("./app/routes/serverUtilsRoutes"));
     app.use("/api/promotions", require("./app/routes/promotionsRoutes"));
     app.use("/api/leaderboards", require("./app/routes/leaderboardRoutes"));

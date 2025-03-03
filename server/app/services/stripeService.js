@@ -2,21 +2,33 @@
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const { collections } = require("../../database/mongoCollections");
 const { ObjectId } = require("mongodb");
-const { updateMongoDocument, createMongoDocument } = require("../../database/middlewares/mongo");
+const {
+  updateMongoDocument,
+  createMongoDocument,
+} = require("../../database/middlewares/mongo");
 const { broadcastUpdate } = require("../middlewares/supabaseAdmin");
 const { getUserById } = require("./usersService");
 
-const createCheckoutSession = async (purchaseItems, mongoUserId, userMadeFirstPurchase) => {
+const createCheckoutSession = async (
+  purchaseItems,
+  mongoUserId,
+  userMadeFirstPurchase
+) => {
   try {
     // Fetch product details from the database
-    const productIds = purchaseItems.map(item => ObjectId.createFromHexString(item._id));
+    const productIds = purchaseItems.map((item) =>
+      ObjectId.createFromHexString(item._id)
+    );
     const productsFromDb = await collections.productsCollection
       .find({ _id: { $in: productIds } })
       .toArray();
 
     let productPriceMap = null;
-    const userDoc = await getUserById(mongoUserId)
-    if (userMadeFirstPurchase === false && userDoc.madeFirstPurchase === false) {
+    const userDoc = await getUserById(mongoUserId);
+    if (
+      userMadeFirstPurchase === false &&
+      userDoc.madeFirstPurchase === false
+    ) {
       // Create a map for quick lookup
       productPriceMap = productsFromDb.reduce((acc, product) => {
         acc[product._id.toString()] = product.firstPurchaseDiscountPrice; // Store price for comparison
@@ -29,7 +41,6 @@ const createCheckoutSession = async (purchaseItems, mongoUserId, userMadeFirstPu
         return acc;
       }, {});
     }
-
 
     let creditsTotal = 0;
 
@@ -56,14 +67,26 @@ const createCheckoutSession = async (purchaseItems, mongoUserId, userMadeFirstPu
       payment_method_types: ["card"],
       line_items: lineItems,
       mode: "payment",
-      success_url: `${process.env.DEV_CLIENT_URL}/Wagers`,
-      cancel_url: `${process.env.DEV_CLIENT_URL}/Credit-Shop`,
+      success_url: `${
+        process.env.ENV === "production"
+          ? process.env.PROD_CLIENT_URL
+          : process.env.DEV_CLIENT_URL
+      }/Wagers`,
+      cancel_url: `${
+        process.env.ENV === "production"
+          ? process.env.PROD_CLIENT_URL
+          : process.env.DEV_CLIENT_URL
+      }/Credit-Shop`,
       metadata: { mongoUserId, creditsTotal, userMadeFirstPurchase },
     });
 
     return session;
   } catch (error) {
-    console.error("Error creating Stripe checkout session:", error.message, error.stack);
+    console.error(
+      "Error creating Stripe checkout session:",
+      error.message,
+      error.stack
+    );
     throw error;
   }
 };
@@ -89,7 +112,7 @@ const handleWebhookEvent = async (event) => {
 
       const updatedCredits = (user.credits || 0) + parseFloat(creditsPurchased);
 
-      let updateUserObj = { credits: updatedCredits }
+      let updateUserObj = { credits: updatedCredits };
 
       if (userMadeFirstPurchase === "false") {
         updateUserObj.madeFirstPurchase = true;
@@ -102,21 +125,24 @@ const handleWebhookEvent = async (event) => {
         true
       );
 
-      await broadcastUpdate('users', 'updateUser', { user: updatedUser });
+      await broadcastUpdate("users", "updateUser", { user: updatedUser });
 
       // Add credit purchase to the transactions collection
       await createMongoDocument(collections.transactionsCollection, {
         user: user._id,
         credits: parseInt(creditsPurchased),
         type: "purchase",
-      })
-
+      });
     } catch (error) {
-      console.error("Error handling 'checkout.session.completed' event:", error.message, error.stack);
+      console.error(
+        "Error handling 'checkout.session.completed' event:",
+        error.message,
+        error.stack
+      );
       throw error;
     }
   } else {
-    throw new Error("Unhandled Stripe event type:", event.type);
+    console.warn("Unhandled Stripe event type:", event.type);
   }
 };
 
