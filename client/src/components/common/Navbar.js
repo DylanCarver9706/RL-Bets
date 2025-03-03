@@ -29,7 +29,6 @@ const Navbar = () => {
   // Listen for updates from the server
   useEffect(() => {
     const subscription = subscribeToUpdates('users', 'updateUser', (payload) => {
-      console.log("payload", payload);
       if (payload.payload.user._id === user?.mongoUserId) {
         setUser({ ...user, credits: payload.payload.user.credits });
       }

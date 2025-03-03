@@ -130,22 +130,22 @@ const Signup = () => {
       });
 
       // Create the user in MongoDB
-      const mongoUser = await createUserInDatabase(
-        name,
-        email,
-        firebaseUser.uid,
-        referralCode,
-        "email",
-        null,
-        {
+      const mongoUser = await createUserInDatabase({
+        name: name,
+        email: email,
+        firebaseUserId: firebaseUser.uid,
+        referralCode: referralCode,
+        authProvider: "email",
+        address: null,
+        pp: {
           version: 0,
           acceptedAt: new Date().toISOString(),
         },
-        {
+        tos: {
           version: 0,
           acceptedAt: new Date().toISOString(),
-        }
-      );
+        },
+      });
 
       // Remove referral code from local storage
       localStorage.removeItem("referralCode");
@@ -216,14 +216,14 @@ const Signup = () => {
             storedTermsOfService = JSON.parse(storedTermsOfService);
           }
 
-          const mongoUser = await createUserInDatabase(
-            firebaseUser.displayName,
-            firebaseUser.email,
-            firebaseUser.uid,
-            referralCode,
-            "google",
-            null,
-            {
+          const mongoUser = await createUserInDatabase({
+            name: firebaseUser.displayName,
+            email: firebaseUser.email,
+            firebaseUserId: firebaseUser.uid,
+            referralCode: referralCode,
+            authProvider: "google",
+            address: null,
+            pp: {
               version: mongoUserFound
                 ? parseInt(storedPrivacyPolicy.version, 10)
                 : ppChecked && tosChecked
@@ -231,15 +231,15 @@ const Signup = () => {
                 : 0,
               acceptedAt: new Date().toISOString(),
             },
-            {
+            tos: {
               version: mongoUserFound
                 ? parseInt(storedTermsOfService.version, 10)
                 : ppChecked && tosChecked
                 ? parseInt(storedTermsOfService.version, 10)
                 : 0,
               acceptedAt: new Date().toISOString(),
-            }
-          );
+            },
+          });
 
           // Remove referral code from local storage
           localStorage.removeItem("referralCode");
@@ -263,7 +263,7 @@ const Signup = () => {
         }
       }
       // window.location.reload();
-      navigate("/Identity-Verification");
+      navigate("/Sms-Verification");
     } catch (error) {
       console.error("Error during Google authentication:", error.message);
       alert("Failed to sign in with Google. Please try again.");

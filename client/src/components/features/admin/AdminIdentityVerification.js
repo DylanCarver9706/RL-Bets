@@ -28,11 +28,11 @@ const AdminIdentityVerification = () => {
           acc[user._id] = {
             name: user.name,
             address: {
-              address1: user.address.address1,
-              address2: user.address.address2,
-              city: user.address.city,
-              state: user.address.state,
-              zip: user.address.zip,
+              address1: user.address?.address1,
+              address2: user.address?.address2,
+              city: user.address?.city,
+              state: user.address?.state,
+              zip: user.address?.zip,
             },
             DOB: user.DOB,
           };

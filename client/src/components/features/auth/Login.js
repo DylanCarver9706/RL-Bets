@@ -56,22 +56,22 @@ const Login = () => {
       if (!mongoUserFound) {
         // New user: Create in MongoDB
         try {
-          const mongoUser = await createUserInDatabase(
-            firebaseUser.displayName,
-            firebaseUser.email,
-            firebaseUser.uid,
-            null,
-            "google",
-            null,
-            {
+          const mongoUser = await createUserInDatabase({
+            name: firebaseUser.displayName,
+            email: firebaseUser.email,
+            firebaseUserId: firebaseUser.uid,
+            referralCode: null,
+            authProvider: "google",
+            address: null,
+            pp: {
               version: 0,
               acceptedAt: new Date(),
             },
-            {
+            tos: {
               version: 0,
               acceptedAt: new Date(),
-            }
-          );
+            },
+          });
 
           // Remove referral code from local storage
           localStorage.removeItem("referralCode");
