@@ -2,7 +2,6 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, RecaptchaVerifier } from "firebase/auth";
 import { getAnalytics } from "firebase/analytics";
-import { getDatabase } from "firebase/database";
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
@@ -23,8 +22,5 @@ const auth = getAuth(app);
 // Initialize Analytics
 const analytics = getAnalytics(app);
 
-// Initialize Realtime Database
-const db = getDatabase(app);
-
 // Get the auth instance
-export { auth, analytics, RecaptchaVerifier, db };
+export { auth, analytics, RecaptchaVerifier };

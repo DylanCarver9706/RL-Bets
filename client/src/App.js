@@ -52,7 +52,6 @@ import SmsVerification from "./components/features/userVerification/SmsVerificat
 import Instructions from "./components/features/core/Instructions";
 import About from "./components/features/about/About";
 import Contact from "./components/features/about/Contact";
-import DbTest from "./components/DbTest";
 import {
   checkGeolocationPermission,
   userLocationLegal,
@@ -301,7 +300,6 @@ function App() {
           <Route path="/Instructions" element={<Instructions />} />
           <Route path="/About" element={<About />} />
           <Route path="/Contact" element={<Contact />} />
-          <Route path="/DbTest" element={<DbTest />} />
           {/* Catch-all route for undefined paths */}
           <Route path="*" element={<PageNotFound />} />
 
@@ -502,6 +500,7 @@ function App() {
         </Routes>
       </div>
       <Footer />
+      <div id="recaptcha-container" style={{ display: "none" }}></div>
     </div>
   );
 }
