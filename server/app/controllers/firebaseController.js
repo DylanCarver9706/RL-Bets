@@ -55,13 +55,13 @@ const getIdentityVerificationImages = async (req, res) => {
 
 const deleteUserIdvFiles = async (req, res) => {
     try {
-      const { userId, userName } = req.body;
+      const { userId } = req.body;
   
-      if (!userId || !userName) {
-        return res.status(400).json({ error: "Missing userId or userName in request." });
+      if (!userId) {
+        return res.status(400).json({ error: "Missing userId in request." });
       }
   
-      const result = await deleteIdentityVerificationFiles(userId, userName);
+      const result = await deleteIdentityVerificationFiles(userId);
       res.json(result);
     } catch (error) {
       console.error("Error deleting identity verification files:", error);

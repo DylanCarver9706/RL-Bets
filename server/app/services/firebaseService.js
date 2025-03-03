@@ -70,7 +70,7 @@ const listIdentityVerificationImages = async () => {
   }
 };
 
-const deleteIdentityVerificationFiles = async (userId, userName) => {
+const deleteIdentityVerificationFiles = async (userId) => {
     try {
       const storageBucket = bucket();
   
@@ -90,7 +90,7 @@ const deleteIdentityVerificationFiles = async (userId, userName) => {
       // ✅ Delete all files
       await Promise.all(files.map(file => file.delete()));
   
-      return { message: `All identity verification files for ${userName} have been deleted.` };
+      return { message: `All identity verification files for ${userId} have been deleted.` };
     } catch (error) {
       console.error("Error deleting identity verification files:", error);
       throw new Error("Failed to delete identity verification files");
