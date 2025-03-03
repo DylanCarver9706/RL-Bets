@@ -69,12 +69,12 @@ const createCheckoutSession = async (
       mode: "payment",
       success_url: `${
         process.env.ENV === "production"
-          ? process.env.PROD_CLIENT_URL
+          ? process.env.process.env.PROD_CLIENT_URLS.split(",")[1]
           : process.env.DEV_CLIENT_URL
       }/Wagers`,
       cancel_url: `${
         process.env.ENV === "production"
-          ? process.env.PROD_CLIENT_URL
+          ? process.env.PROD_CLIENT_URLS.split(",")[1]
           : process.env.DEV_CLIENT_URL
       }/Credit-Shop`,
       metadata: { mongoUserId, creditsTotal, userMadeFirstPurchase },
