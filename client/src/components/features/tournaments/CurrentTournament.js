@@ -3,7 +3,7 @@ import {
   fetchCurrentEventsDataTree,
   fetchPlayers,
 } from "../../../services/adminService";
-import "../../../styles/components/tournaments/TournamentHistory.css";
+import "../../../styles/components/tournaments/CurrentTournament.css";
 
 const CurrentTournament = () => {
   const [eventData, setEventData] = useState(null);
@@ -53,11 +53,17 @@ const CurrentTournament = () => {
           <thead>
             <tr>
               {/* Team Names Row */}
-              <th colSpan={team1Results.length} className="team-name team1-name">
+              <th
+                colSpan={team1Results.length}
+                className="team-name team1-name"
+              >
                 {team1Name}
               </th>
               <th className="attribute-header">Attribute</th>
-              <th colSpan={team2Results.length} className="team-name team2-name">
+              <th
+                colSpan={team2Results.length}
+                className="team-name team2-name"
+              >
                 {team2Name}
               </th>
             </tr>
@@ -65,7 +71,9 @@ const CurrentTournament = () => {
               {/* Team 1 Players */}
               {team1Results.map((player) => (
                 <th key={player.playerId} className="player-name team1-player">
-                  {players.find((p) => p._id === player.playerId)?.names.at(-1) || "Unknown"}
+                  {players
+                    .find((p) => p._id === player.playerId)
+                    ?.names.at(-1) || "Unknown"}
                 </th>
               ))}
               {/* Center Column */}
@@ -73,7 +81,9 @@ const CurrentTournament = () => {
               {/* Team 2 Players */}
               {team2Results.map((player) => (
                 <th key={player.playerId} className="player-name team2-player">
-                  {players.find((p) => p._id === player.playerId)?.names.at(-1) || "Unknown"}
+                  {players
+                    .find((p) => p._id === player.playerId)
+                    ?.names.at(-1) || "Unknown"}
                 </th>
               ))}
             </tr>
@@ -83,7 +93,10 @@ const CurrentTournament = () => {
               <tr key={attribute}>
                 {/* Team 1 Stats */}
                 {team1Results.map((player) => (
-                  <td key={`${player.playerId}-${attribute}`} className="team1-stats">
+                  <td
+                    key={`${player.playerId}-${attribute}`}
+                    className="team1-stats"
+                  >
                     {player[attribute]}
                   </td>
                 ))}
@@ -93,7 +106,10 @@ const CurrentTournament = () => {
                 </td>
                 {/* Team 2 Stats */}
                 {team2Results.map((player) => (
-                  <td key={`${player.playerId}-${attribute}`} className="team2-stats">
+                  <td
+                    key={`${player.playerId}-${attribute}`}
+                    className="team2-stats"
+                  >
                     {player[attribute]}
                   </td>
                 ))}
@@ -122,7 +138,10 @@ const CurrentTournament = () => {
           <div className="node-children">
             {seriesData.matches.map((match, index) => (
               <div key={match._id} className="tree-node">
-                <div className="node-header match-header" onClick={() => toggleNode(match._id)}>
+                <div
+                  className="node-header match-header"
+                  onClick={() => toggleNode(match._id)}
+                >
                   <span className="expand-icon">
                     {expandedNodes.has(match._id) ? "▼" : "▶"}
                   </span>
@@ -159,13 +178,15 @@ const CurrentTournament = () => {
               </span>
               {node.name}
             </div>
-            {expandedNodes.has(nodeId) && node.children && node.children.length > 0 && (
-              <div className="node-children">
-                {node.children.map((child, index) => (
-                  <div key={index}>{renderBracketNode(child, nodeId)}</div>
-                ))}
-              </div>
-            )}
+            {expandedNodes.has(nodeId) &&
+              node.children &&
+              node.children.length > 0 && (
+                <div className="node-children">
+                  {node.children.map((child, index) => (
+                    <div key={index}>{renderBracketNode(child, nodeId)}</div>
+                  ))}
+                </div>
+              )}
           </>
         )}
       </div>
@@ -177,7 +198,8 @@ const CurrentTournament = () => {
       {eventData?.tournaments[0]?.leaderboard && (
         <div className="rewards-container">
           <h2 className="rewards-title">
-            Rewards for Leaderboard: "{eventData.tournaments[0].leaderboard.name}"
+            Rewards for Leaderboard: "
+            {eventData.tournaments[0].leaderboard.name}"
           </h2>
           <table className="rewards-table">
             <thead>
@@ -187,14 +209,14 @@ const CurrentTournament = () => {
               </tr>
             </thead>
             <tbody>
-              {Object.entries(eventData.tournaments[0].leaderboard.rewards || {}).map(
-                ([rank, reward]) => (
-                  <tr key={rank}>
-                    <td>{rank}</td>
-                    <td>{reward}</td>
-                  </tr>
-                )
-              )}
+              {Object.entries(
+                eventData.tournaments[0].leaderboard.rewards || {}
+              ).map(([rank, reward]) => (
+                <tr key={rank}>
+                  <td>{rank}</td>
+                  <td>{reward}</td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
@@ -208,17 +230,22 @@ const CurrentTournament = () => {
                 onClick={() => toggleNode(`tournament-${tournament.name}`)}
               >
                 <span className="expand-icon">
-                  {expandedNodes.has(`tournament-${tournament.name}`) ? "▼" : "▶"}
+                  {expandedNodes.has(`tournament-${tournament.name}`)
+                    ? "▼"
+                    : "▶"}
                 </span>
                 {tournament.name}
               </div>
-              {expandedNodes.has(`tournament-${tournament.name}`) && tournament.children && (
-                <div className="node-children">
-                  {tournament.children.map((child, index) => (
-                    <div key={index}>{renderBracketNode(child, tournament.name)}</div>
-                  ))}
-                </div>
-              )}
+              {expandedNodes.has(`tournament-${tournament.name}`) &&
+                tournament.children && (
+                  <div className="node-children">
+                    {tournament.children.map((child, index) => (
+                      <div key={index}>
+                        {renderBracketNode(child, tournament.name)}
+                      </div>
+                    ))}
+                  </div>
+                )}
             </div>
           ))}
         </div>

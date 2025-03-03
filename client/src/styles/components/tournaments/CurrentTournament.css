@@ -1,0 +1,83 @@
+/* Import base styles from TournamentHistory */
+@import "./TournamentHistory.css";
+
+/* Override and add specific styles for CurrentTournament */
+
+.rewards-container {
+  background: linear-gradient(145deg, #2a2a2a, #333);
+  border-radius: 12px;
+  padding: 2rem;
+  margin: 2rem auto;
+  width: 100%;
+  max-width: var(--tournament-width, 800px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.rewards-title {
+  color: #fb6a31;
+  font-size: 1.8rem;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.rewards-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 auto;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.rewards-table th {
+  background: rgba(251, 106, 49, 0.1);
+  color: #fb6a31;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.rewards-table td {
+  color: #fff;
+}
+
+.rewards-table tr:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .rewards-container {
+    margin: 1rem 0;
+    padding: 1rem;
+  }
+
+  .rewards-title {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .rewards-table th,
+  .rewards-table td {
+    padding: 0.75rem;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .rewards-container {
+    margin: 0.5rem 0;
+    padding: 0.5rem;
+  }
+
+  .rewards-title {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+  }
+
+  .rewards-table th,
+  .rewards-table td {
+    padding: 0.5rem;
+    font-size: 0.8rem;
+  }
+}
