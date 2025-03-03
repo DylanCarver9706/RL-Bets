@@ -16,7 +16,7 @@ import { CgSpinner } from "react-icons/cg"; // Import spinner icon
 import "../../../styles/components/userVerification/SmsVerification.css";
 
 const PhoneVerification = () => {
-  const { user, setUser } = useUser();
+  const { user } = useUser();
   const [phoneNumber, setPhoneNumber] = useState("");
   const [otp, setOtp] = useState("");
   const [verificationId, setVerificationId] = useState(null);
@@ -108,19 +108,13 @@ const PhoneVerification = () => {
         }
 
         await linkWithCredential(currentUser, credential);
-        setUser({
-          ...user,
-          phoneNumber: phoneNumber,
-          smsVerificationStatus: "verified",
-        });
         await updateUser(user.mongoUserId, {
-          phoneNumber,
+          phoneNumber: phoneNumber,
           smsVerificationStatus: "verified",
         });
         window.location.reload();
       } catch (err) {
-        alert("Invalid OTP or linking failed. Please try again.");
-        throw new Error("Error linking phone number:", err);
+        alert("Invalid OTP or phone number is already linked to another account. Please try again.");
       }
     }
   };
@@ -133,7 +127,6 @@ const PhoneVerification = () => {
     <div className="sms-verification-container">
       <div className="sms-verification-card">
         <h2 className="sms-verification-title">SMS Verification</h2>
-        <div id="recaptcha-container" style={{ display: "none" }}></div>
         {!showOTP ? (
           <>
             <label className="sms-verification-label">
