@@ -1,11 +1,137 @@
 .wagers-container {
-  padding: 2rem;
-  max-width: 1200px;
-  margin: 2rem auto;
-  background: linear-gradient(145deg, #2a2a2a, #333);
-  border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-  min-height: 100vh;
+  padding: 20px;
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: center;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  min-height: calc(100vh - 70px);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.wagers-header {
+  font-size: 28px;
+  margin-bottom: 20px;
+}
+
+.wagers-filter-container {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  padding: 15px;
+  background-color: #635d5dbd;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  width: 100%;
+}
+
+.wagers-list-container {
+  text-align: left;
+  width: 100%;
+}
+
+.wagers-list {
+  list-style: none;
+  padding: 0;
+}
+
+.wager-item {
+  background-color: #4f4b4b;
+  padding: 10px;
+  border-radius: 5px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.wager-header {
+  font-size: 18px;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.wager-body {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.agree-section,
+.disagree-section {
+  width: 45%;
+  text-align: center;
+}
+
+.wager-input {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  padding: 5px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  width: 100%;
+}
+
+.bet-button {
+  margin-top: 10px;
+  padding: 10px 20px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  width: 100%;
+}
+
+.submit-bet-button {
+  margin-top: 10px;
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  width: 100%;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  /* padding: 20px; */
+}
+
+.modal-content {
+  background-color: #2a2a2a;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  max-width: 500px;
+  width: 90%;
+  position: relative;
+  max-height: 85vh;
+  /* overflow-y: auto; */
+  display: flex;
+  flex-direction: column;
+  margin-top: 1vh;
+}
+
+.modal-close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  color: white;
+  z-index: 1;
 }
 
 .filter-container {
@@ -19,7 +145,9 @@
 }
 
 .filter-button {
-  padding: 1rem 2rem;
+  flex: 1;
+  min-width: 0;
+  padding: 12px 24px;
   border: none;
   border-radius: 8px;
   background: #2a2a2a;
@@ -28,13 +156,11 @@
   transition: all 0.3s ease;
   font-weight: 600;
   font-size: 1.1rem;
-  min-width: 120px;
 }
 
 .filter-button:hover {
   background: #383838;
   color: white;
-  transform: translateY(-1px);
 }
 
 .filter-button.active {
@@ -345,14 +471,13 @@
     padding: 0.5rem;
   }
 
-  .filter-container {
-    flex-wrap: wrap;
+  .wagers-filter-container {
+    padding: 10px;
+    gap: 8px;
   }
 
   .filter-button {
-    flex: 1;
-    min-width: 140px;
-    padding: 0.8rem 1rem;
+    padding: 8px 16px;
     font-size: 1rem;
   }
 
@@ -502,4 +627,36 @@
     padding: 0.6rem;
     font-size: 0.8rem;
   }
+
+  .filter-button {
+    padding: 8px 12px;
+    font-size: 0.9rem;
+  }
+}
+
+.no-wagers-message {
+  text-align: center;
+  padding: 2rem;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  color: #aaa;
+  font-size: 1.2rem;
+  margin: 1rem 0;
+}
+
+/* Credit Shop Modal Overrides */
+.modal-content .credit-shop-container {
+  padding: 0;
+  margin: 0;
+  background: #2a2a2a;
+  box-shadow: none;
+  min-height: auto;
+}
+
+.modal-content .credit-shop-title {
+  margin-top: 20px;
+}
+
+.modal-content .credit-packages {
+  margin: 20px 0;
 }

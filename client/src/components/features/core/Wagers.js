@@ -88,7 +88,6 @@ const Wagers = () => {
       "wagers",
       "wagersUpdate",
       (payload) => {
-        console.log("payload", payload);
         if (Array.isArray(payload.payload.wagers)) {
           setWagers(() => {
             applyFilter(activeFilter, payload.payload.wagers);
@@ -163,20 +162,21 @@ const Wagers = () => {
 
   // Handle submit bet
   const handleSubmitBet = async () => {
-    // Alert to confirm bet
-    const confirmBet = window.confirm(
-      "Are you sure you want to place this bet?"
-    );
-    if (!confirmBet) {
-      return;
-    }
-
     if (creditsWagered === 0 || !creditsWagered || isNaN(creditsWagered)) {
       return alert("Please enter a valid number of credits.");
     }
 
     if (creditsWagered > user?.credits) {
       setShowCreditShopModal(true);
+      return;
+    }
+
+    // Alert to confirm bet
+    const confirmBet = window.confirm(
+      "Are you sure you want to place this bet?"
+    );
+
+    if (!confirmBet) {
       return;
     }
 
@@ -224,216 +224,232 @@ const Wagers = () => {
 
   return (
     <div className="wagers-container">
-      <div className="filter-container">
-        <button
-          className={`filter-button ${
-            activeFilter === "Bettable" ? "active" : ""
-          }`}
-          onClick={() => handleFilterChange("Bettable")}
-        >
-          Bettable
-        </button>
-        <button
-          className={`filter-button ${
-            activeFilter === "Ongoing" ? "active" : ""
-          }`}
-          onClick={() => handleFilterChange("Ongoing")}
-        >
-          Ongoing
-        </button>
-        <button
-          className={`filter-button ${
-            activeFilter === "BetOn" ? "active" : ""
-          }`}
-          onClick={() => handleFilterChange("BetOn")}
-        >
-          Bet On
-        </button>
+      <div>
+        <div className="wagers-filter-container">
+          <button
+            onClick={() => handleFilterChange("Bettable")}
+            className={`filter-button ${
+              activeFilter === "Bettable" ? "active" : ""
+            }`}
+          >
+            Bettable
+          </button>
+          <button
+            onClick={() => handleFilterChange("Ongoing")}
+            className={`filter-button ${
+              activeFilter === "Ongoing" ? "active" : ""
+            }`}
+          >
+            Ongoing
+          </button>
+          <button
+            onClick={() => handleFilterChange("BetOn")}
+            className={`filter-button ${
+              activeFilter === "BetOn" ? "active" : ""
+            }`}
+          >
+            Bet On
+          </button>
+        </div>
       </div>
 
-      <ul className="wagers-list">
-        {filteredWagers?.map((wager) => {
-          let userBet = wager.bets.find(
-            (bet) => bet.user === user?.mongoUserId
-          );
-          const totalBets = wager.agreeCreditsBet + wager.disagreeCreditsBet;
-          const agreePercentage = totalBets
-            ? ((wager.agreeCreditsBet / totalBets) * 100).toFixed(1)
-            : 0;
-          const disagreePercentage = totalBets
-            ? ((wager.disagreeCreditsBet / totalBets) * 100).toFixed(1)
-            : 0;
+      <div className="wagers-list-container">
+        {filteredWagers?.length === 0 && (
+          <div className="no-wagers-message">
+            {activeFilter === "Bettable" &&
+              "No wagers available to bet on at this time."}
+            {activeFilter === "Ongoing" && "No ongoing wagers at this time."}
+            {activeFilter === "BetOn" && "You haven't placed any bets yet."}
+          </div>
+        )}
+        <ul className="wagers-list">
+          {filteredWagers?.map((wager) => {
+            let userBet = wager.bets.find(
+              (bet) => bet.user === user?.mongoUserId
+            );
+            const totalBets = wager.agreeCreditsBet + wager.disagreeCreditsBet;
+            const agreePercentage = totalBets
+              ? ((wager.agreeCreditsBet / totalBets) * 100).toFixed(1)
+              : 0;
+            const disagreePercentage = totalBets
+              ? ((wager.disagreeCreditsBet / totalBets) * 100).toFixed(1)
+              : 0;
 
-          return (
-            <li key={wager._id} className="wager-item">
-              <div className="wager-header">
-                <h2 className="wager-name">{wager.name}</h2>
-                {userBet && wager.status !== "Ended" && (
-                  <strong>
-                    Current Estimated Winnings:{" "}
-                    {wagerPayoutFormula(
-                      userBet.credits,
-                      userBet.agreeBet
-                        ? wager.agreeCreditsBet
-                        : wager.disagreeCreditsBet,
-                      userBet.agreeBet
-                        ? wager.disagreeCreditsBet
-                        : wager.agreeCreditsBet,
-                      userBet.agreeBet
-                    ).toFixed(2)}{" "}
-                    Credits
-                    <ToolTip infoText="This is your current estimated payout if you win. This will change as more bets are placed." />
-                  </strong>
-                )}
-              </div>
-
-              <div className="wager-options">
-                <div className="bet-percentage-bar">
-                  <div
-                    className="percentage-indicator"
-                    style={{
-                      [agreePercentage > disagreePercentage ? "right" : "left"]:
-                        "0",
-                      width: `${Math.min(
-                        agreePercentage,
-                        disagreePercentage
-                      )}%`,
-                    }}
-                  />
-                  <div
-                    className="percentage-separator"
-                    style={{
-                      left: `${agreePercentage}%`,
-                    }}
-                  />
-                  <div className="percentage-text">
-                    <span>Agree {agreePercentage}%</span>
-                    <span>Disagree {disagreePercentage}%</span>
-                  </div>
+            return (
+              <li key={wager._id} className="wager-item">
+                <div className="wager-header">
+                  <h2 className="wager-name">{wager.name}</h2>
+                  {userBet && wager.status !== "Ended" && (
+                    <strong>
+                      Current Estimated Winnings:{" "}
+                      {wagerPayoutFormula(
+                        userBet.credits,
+                        userBet.agreeBet
+                          ? wager.agreeCreditsBet
+                          : wager.disagreeCreditsBet,
+                        userBet.agreeBet
+                          ? wager.disagreeCreditsBet
+                          : wager.agreeCreditsBet,
+                        userBet.agreeBet
+                      ).toFixed(2)}{" "}
+                      Credits
+                      <ToolTip infoText="This is your current estimated payout if you win. This will change as more bets are placed." />
+                    </strong>
+                  )}
                 </div>
 
-                <div className="bet-buttons-container">
-                  {!["Ongoing", "Ended"].includes(wager.status) &&
-                    wager.bets.every(
-                      (bet) => bet.user !== user?.mongoUserId
-                    ) && (
-                      <>
-                        <button
-                          className="bet-button"
-                          onClick={() => handleWagerOptionClick(wager, true)}
-                        >
-                          Bet Agree
-                        </button>
-                        <button
-                          className="bet-button"
-                          onClick={() => handleWagerOptionClick(wager, false)}
-                        >
-                          Bet Disagree
-                        </button>
-                      </>
-                    )}
-                </div>
-
-                <button
-                  className={`dropdown-toggle ${
-                    expandedWagers[wager._id] ? "open" : ""
-                  }`}
-                  onClick={() => toggleWagerDetails(wager._id)}
-                />
-
-                {expandedWagers[wager._id] && (
-                  <div className="bet-details">
-                    <div className="bet-details-section">
-                      <h3>Agree</h3>
-                      <p>Total Credits: {wager.agreeCreditsBet}</p>
-                      <p>
-                        Total Bets:{" "}
-                        {wager.bets.filter((b) => b.agreeBet).length}
-                      </p>
-                      <p>
-                        Average Bet:{" "}
-                        {(
-                          wager.agreeCreditsBet /
-                            wager.bets.filter((b) => b.agreeBet).length || 0
-                        ).toFixed(2)}
-                      </p>
-                    </div>
-
-                    <div className="bet-details-divider" />
-
-                    <div className="bet-details-section">
-                      <h3>Disagree</h3>
-                      <p>Total Credits: {wager.disagreeCreditsBet}</p>
-                      <p>
-                        Total Bets:{" "}
-                        {wager.bets.filter((b) => !b.agreeBet).length}
-                      </p>
-                      <p>
-                        Average Bet:{" "}
-                        {(
-                          wager.disagreeCreditsBet /
-                            wager.bets.filter((b) => !b.agreeBet).length || 0
-                        ).toFixed(2)}
-                      </p>
+                <div className="wager-options">
+                  <div className="bet-percentage-bar">
+                    <div
+                      className="percentage-indicator"
+                      style={{
+                        [agreePercentage > disagreePercentage
+                          ? "right"
+                          : "left"]: "0",
+                        width: `${Math.min(
+                          agreePercentage,
+                          disagreePercentage
+                        )}%`,
+                      }}
+                    />
+                    <div
+                      className="percentage-separator"
+                      style={{
+                        left: `${agreePercentage}%`,
+                      }}
+                    />
+                    <div className="percentage-text">
+                      <span>Agree {agreePercentage}%</span>
+                      <span>Disagree {disagreePercentage}%</span>
                     </div>
                   </div>
-                )}
-              </div>
 
-              {showBetInput && selectedWager?._id === wager._id && (
-                <div className="bet-input-container">
-                  <div className="bet-input-row">
-                    I bet{" "}
-                    <input
-                      type="number"
-                      className="bet-input"
-                      value={creditsWagered}
-                      onChange={(e) => handleBetInputChange(e.target.value)}
-                      min="0"
-                      step="1"
-                    />{" "}
-                    credits that this{" "}
-                    <span className="bet-prediction">
-                      {wagerCaseSelected ? "will" : "will not"}
-                    </span>{" "}
-                    happen{" "}
+                  <div className="bet-buttons-container">
+                    {!["Ongoing", "Ended"].includes(wager.status) &&
+                      wager.bets.every(
+                        (bet) => bet.user !== user?.mongoUserId
+                      ) && (
+                        <>
+                          <button
+                            className="bet-button"
+                            onClick={() => handleWagerOptionClick(wager, true)}
+                          >
+                            Bet Agree
+                          </button>
+                          <button
+                            className="bet-button"
+                            onClick={() => handleWagerOptionClick(wager, false)}
+                          >
+                            Bet Disagree
+                          </button>
+                        </>
+                      )}
                   </div>
-                  <div className="estimated-winnings">
-                    Estimated Winnings: {estimatedWinnings.toFixed(2)} Credits{" "}
-                    {
-                      <ToolTip
-                        infoText={`Total ${
-                          wagerCaseSelected ? "Disagree" : "Agree"
-                        } Credits Bet x ( Bet Amount / ( Bet Amount + Total ${
-                          wagerCaseSelected ? "Agree" : "Disagree"
-                        } Credits Bet ))`}
-                      />
-                    }
-                  </div>
-                  <div className="bet-actions">
-                    <button
-                      className="confirm-button"
-                      onClick={handleSubmitBet}
-                    >
-                      Confirm
-                    </button>
-                    <button className="cancel-button" onClick={handleCancelBet}>
-                      Cancel
-                    </button>
-                  </div>
+
+                  <button
+                    className={`dropdown-toggle ${
+                      expandedWagers[wager._id] ? "open" : ""
+                    }`}
+                    onClick={() => toggleWagerDetails(wager._id)}
+                  />
+
+                  {expandedWagers[wager._id] && (
+                    <div className="bet-details">
+                      <div className="bet-details-section">
+                        <h3>Agree</h3>
+                        <p>Total Credits: {wager.agreeCreditsBet}</p>
+                        <p>
+                          Total Bets:{" "}
+                          {wager.bets.filter((b) => b.agreeBet).length}
+                        </p>
+                        <p>
+                          Average Bet:{" "}
+                          {(
+                            wager.agreeCreditsBet /
+                              wager.bets.filter((b) => b.agreeBet).length || 0
+                          ).toFixed(2)}
+                        </p>
+                      </div>
+
+                      <div className="bet-details-divider" />
+
+                      <div className="bet-details-section">
+                        <h3>Disagree</h3>
+                        <p>Total Credits: {wager.disagreeCreditsBet}</p>
+                        <p>
+                          Total Bets:{" "}
+                          {wager.bets.filter((b) => !b.agreeBet).length}
+                        </p>
+                        <p>
+                          Average Bet:{" "}
+                          {(
+                            wager.disagreeCreditsBet /
+                              wager.bets.filter((b) => !b.agreeBet).length || 0
+                          ).toFixed(2)}
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              )}
-            </li>
-          );
-        })}
-      </ul>
+
+                {showBetInput && selectedWager?._id === wager._id && (
+                  <div className="bet-input-container">
+                    <div className="bet-input-row">
+                      I bet{" "}
+                      <input
+                        type="number"
+                        className="bet-input"
+                        value={creditsWagered}
+                        onChange={(e) => handleBetInputChange(e.target.value)}
+                        min="0"
+                        step="1"
+                      />{" "}
+                      credits that this{" "}
+                      <span className="bet-prediction">
+                        {wagerCaseSelected ? "will" : "will not"}
+                      </span>{" "}
+                      happen{" "}
+                    </div>
+                    <div className="estimated-winnings">
+                      Estimated Winnings: {estimatedWinnings.toFixed(2)} Credits{" "}
+                      {
+                        <ToolTip
+                          infoText={`Total ${
+                            wagerCaseSelected ? "Disagree" : "Agree"
+                          } Credits Bet x ( Bet Amount / ( Bet Amount + Total ${
+                            wagerCaseSelected ? "Agree" : "Disagree"
+                          } Credits Bet ))`}
+                        />
+                      }
+                    </div>
+                    <div className="bet-actions">
+                      <button
+                        className="confirm-button"
+                        onClick={handleSubmitBet}
+                      >
+                        Confirm
+                      </button>
+                      <button
+                        className="cancel-button"
+                        onClick={handleCancelBet}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      </div>
 
       {showCreditShopModal ? (
-        <div style={styles.modalOverlay}>
-          <div style={styles.modalContent}>
+        <div className="modal-overlay">
+          <div className="modal-content">
             <button
+              className="modal-close-button"
               onClick={() => setShowCreditShopModal(false)}
-              style={styles.closeButton}
             >
               ✖
             </button>
@@ -446,117 +462,3 @@ const Wagers = () => {
 };
 
 export default Wagers;
-
-const styles = {
-  container: {
-    padding: "20px",
-    maxWidth: "800px",
-    margin: "0 auto",
-    textAlign: "center",
-    backgroundColor: "#635d5d",
-    borderRadius: "8px",
-    boxShadow: "0 0 10px rgba(0, 0, 0, 0.1)",
-    minHeight: "calc(100vh - 70px)", // Subtract navbar height
-  },
-  header: {
-    fontSize: "28px",
-    marginBottom: "20px",
-  },
-  toggleContainer: {
-    display: "flex",
-    justifyContent: "center",
-    gap: "20px",
-    marginBottom: "20px",
-  },
-  wagerListContainer: {
-    textAlign: "left",
-  },
-  wagerList: {
-    listStyle: "none",
-    padding: 0,
-  },
-  wagerItem: {
-    marginBottom: "15px",
-    backgroundColor: "#4f4b4b",
-    padding: "10px",
-    borderRadius: "5px",
-    boxShadow: "0 0 5px rgba(0, 0, 0, 0.1)",
-  },
-  wagerHeader: {
-    fontSize: "18px",
-    marginBottom: "10px",
-    textAlign: "center",
-  },
-  wagerBody: {
-    display: "flex",
-    justifyContent: "space-between",
-    marginBottom: "10px",
-  },
-  agreeSection: {
-    width: "45%",
-    textAlign: "center",
-  },
-  disagreeSection: {
-    width: "45%",
-    textAlign: "center",
-  },
-  input: {
-    marginTop: "10px",
-    marginBottom: "10px",
-    padding: "5px",
-    borderRadius: "4px",
-    border: "1px solid #ccc",
-    width: "100%",
-  },
-  betButton: {
-    marginTop: "10px",
-    padding: "10px 20px",
-    backgroundColor: "#28a745",
-    color: "white",
-    border: "none",
-    borderRadius: "5px",
-    cursor: "pointer",
-    width: "100%",
-  },
-  submitBetButton: {
-    marginTop: "10px",
-    padding: "10px 20px",
-    backgroundColor: "#007bff",
-    color: "white",
-    border: "none",
-    borderRadius: "5px",
-    cursor: "pointer",
-    width: "100%",
-  },
-  modalOverlay: {
-    position: "fixed",
-    top: 0,
-    left: 0,
-    width: "100%",
-    height: "100%",
-    backgroundColor: "rgba(0, 0, 0, 0.6)", // Semi-transparent background
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    zIndex: 1000, // Ensure it appears on top
-  },
-  modalContent: {
-    backgroundColor: "#635d5d", // Modal background
-    padding: "20px", // Space inside the modal
-    borderRadius: "8px", // Rounded corners
-    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)", // Subtle shadow
-    maxWidth: "500px", // Limit width
-    width: "90%", // Responsive width
-    position: "relative", // For positioning the close button
-  },
-  closeButton: {
-    position: "absolute",
-    top: "10px",
-    right: "10px",
-    background: "none",
-    border: "none",
-    fontSize: "16px",
-    cursor: "pointer",
-    color: "white",
-  },
-};

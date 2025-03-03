@@ -153,24 +153,26 @@ const CreditShop = () => {
       </ul>
 
       <div className="cart-summary">
-        <div className="total-credits">
-          Credits: {calculateTotalCredits(cart)}
-        </div>
-        <div className="total-price">
-          Total:{" "}
-          {!user.madeFirstPurchase && totalPrice !== "0.00" ? (
-            <>
-              <span className="original-price">${totalPrice}</span>
-              <span className="discounted-price">${totalDiscountPrice}</span>
-            </>
-          ) : (
-            `$${totalPrice}`
-          )}
+        <div className="totals-row">
+          <div className="total-credits">
+            Total Credits: <span className="total-credits-value">{calculateTotalCredits(cart)}</span>
+          </div>
+          <div className="total-price">
+            <span className="total-label">Total:</span> {" "}
+            {!user.madeFirstPurchase && totalPrice !== "0.00" && totalPrice !== 0 ? (
+              <>
+                <span className="original-price">${totalPrice}</span>
+                <span className="discounted-price">${totalDiscountPrice}</span>
+              </>
+            ) : (
+              `$${totalPrice}`
+            )}
+          </div>
         </div>
         <button
           className="checkout-button"
           onClick={handleCheckout}
-          disabled={!Object.keys(cart).length}
+          disabled={totalPrice === "0.00" || totalPrice === 0}
         >
           Checkout
         </button>
