@@ -6,7 +6,13 @@ const { verifyFirebaseToken } = require("../middlewares/firebaseAdmin");
 const router = express.Router();
 
 // ✅ Set up Multer for handling multiple file uploads
-const upload = multer({ storage: multer.memoryStorage() });
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 50 * 1024 * 1024, // 50MB max file size
+    files: 3 // Max number of files
+  }
+});
 
 router.post(
   "/storage/upload",

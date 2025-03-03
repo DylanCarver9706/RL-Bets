@@ -10,18 +10,26 @@ if (process.env.REACT_APP_ENV === "production") {
 
 // Helper function to make authenticated requests
 export const makeAuthenticatedRequest = async (endpoint, options = {}) => {
-  const idToken = await getFirebaseIdToken();
-
-  const defaultHeaders = {
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${idToken}`,
-  };
-
-  return fetch(`${BASE_SERVER_URL}${endpoint}`, {
-    ...options,
-    headers: {
-      ...defaultHeaders,
+  try {
+    const token = await getFirebaseIdToken();
+    const headers = {
       ...options.headers,
-    },
-  });
+      Authorization: `Bearer ${token}`,
+    };
+
+    // Don't set Content-Type for FormData
+    if (!(options.body instanceof FormData)) {
+      headers['Content-Type'] = 'application/json';
+    }
+
+    const response = await fetch(`${BASE_SERVER_URL}${endpoint}`, {
+      ...options,
+      headers,
+    });
+
+    return response;
+  } catch (error) {
+    console.error("Request failed:", error);
+    throw error;
+  }
 };

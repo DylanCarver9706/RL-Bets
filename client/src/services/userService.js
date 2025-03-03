@@ -65,24 +65,6 @@ export const updateUser = async (userId, updatedData) => {
   }
 };
 
-// Delete a user by their MongoDB ID
-export const deleteUser = async (userId) => {
-  try {
-    const response = await makeAuthenticatedRequest(`/api/users/${userId}`, {
-      method: "DELETE",
-    });
-
-    if (!response.ok) {
-      throw new Error("Failed to delete user.");
-    }
-
-    return true;
-  } catch (err) {
-    console.error("Error deleting user:", err.message);
-    throw err;
-  }
-};
-
 // Soft delete a user by their MongoDB ID
 // NOTE: Only keeping email to prevent abuse in future new customer promotions
 export const softDeleteUserStatusUpdate = async (mongoUserId) => {

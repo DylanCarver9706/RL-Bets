@@ -2,6 +2,7 @@
 const express = require("express");
 const http = require("http");
 const cors = require("cors");
+const bodyParser = require('body-parser');
 require("dotenv").config();
 const { initializeCollections } = require("./database/mongoCollections");
 const { initializeFirebase } = require("./app/middlewares/firebaseAdmin");
@@ -37,6 +38,13 @@ app.use((req, res, next) => {
   }
 });
 
+// Increase payload size limit for file uploads
+app.use(bodyParser.urlencoded({
+  limit: '50mb',
+  extended: true,
+  parameterLimit: 50000
+}));
+
 // Update the main CORS middleware
 app.use(
   cors({
@@ -44,8 +52,13 @@ app.use(
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
     credentials: true,
     optionsSuccessStatus: 204,
+    exposedHeaders: ['Content-Length', 'Content-Type'],
   })
 );
+
+// Configure multer for file uploads
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Add before your routes
 // app.use((req, res, next) => {

@@ -33,15 +33,13 @@ export const sendImagesToAPI = async (formData) => {
       "/api/firebase/storage/upload",
       {
         method: "POST",
-        // Remove Content-Type header to let browser set it with boundary for FormData
-        headers: {
-          "Content-Type": undefined,
-        },
         body: formData,
       }
     );
 
     if (!response.ok) {
+      const errorData = await response.json();
+      console.error("Upload error:", errorData);
       throw new Error("Failed to upload images to server.");
     }
 
@@ -71,13 +69,13 @@ export const fetchIdentityVerificationImages = async () => {
   }
 };
 
-export const deleteUserIdvFiles = async (userId, userName) => {
+export const deleteUserIdvFiles = async (userId) => {
   try {
     const response = await makeAuthenticatedRequest(
       "/api/firebase/storage/delete",
       {
         method: "POST",
-        body: JSON.stringify({ userId, userName }),
+        body: JSON.stringify({ userId }),
       }
     );
 
