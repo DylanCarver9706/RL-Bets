@@ -24,7 +24,6 @@ const getUserByFirebaseId = async (firebaseUserId) => {
 };
 
 const createUser = async (userData) => {
-
   let defaultNewUserValues = {
     credits: 0.0,
     earnedCredits: 0.0,
@@ -39,8 +38,8 @@ const createUser = async (userData) => {
     phoneNumber: null,
     viewedInstructions: false,
     madeFirstPurchase: false,
-  }
-  
+  };
+
   let userDoc = null;
 
   // Check if a user with the provided email exists and has been deleted
@@ -58,7 +57,11 @@ const createUser = async (userData) => {
       true
     );
   } else {
-    userDoc = await createMongoDocument(collections.usersCollection, { ...defaultNewUserValues, ...userData }, true) 
+    userDoc = await createMongoDocument(
+      collections.usersCollection,
+      { ...defaultNewUserValues, ...userData },
+      true
+    );
   }
 
   await sendEmail(
@@ -66,19 +69,21 @@ const createUser = async (userData) => {
     "Welcome to RL Bets",
     `Hello ${userData.name},\n\nWelcome to RL Bets! We're excited to have you on board. Your account is now active, and you can start using our services right away.\n\nIf you have any questions or need assistance, please don't hesitate to reach out to our support team.\n\nBest regards,\nThe RL Bets Team`,
     null,
-    null,
+    null
   );
 
   await createUserNotificationLog({
     user: userDoc._id.toString(),
     type: "welcome",
-    message: "Welcome to RL Bets! Feel free to explore our platform and start betting on your favorite teams or players. Good luck!",
+    message:
+      "Welcome to RL Bets! Feel free to explore our platform and start betting on your favorite teams or players. Good luck!",
   });
 
   await createUserNotificationLog({
     user: userDoc._id.toString(),
     type: "welcome",
-    message: "Ready to get in on the action? Enjoy 50% off all credits on your first purchase!",
+    message:
+      "Ready to get in on the action? Enjoy 50% off all credits on your first purchase!",
   });
 
   return userDoc;
@@ -101,7 +106,7 @@ const updateUser = async (id, updateData) => {
     "email",
     "smsVerificationStatus",
     "accountStatus",
-  ]
+  ];
 
   // Check if any of the fields in updateData are not allowed
   for (const field in updateData) {
@@ -120,8 +125,8 @@ const updateUser = async (id, updateData) => {
 
   // Emit updates via Supabase
   const allUsers = await getAllUsers();
-  await broadcastUpdate('users', 'updateUser', { user: updatedUser });
-  await broadcastUpdate('users', 'updateUsers', { users: allUsers });
+  await broadcastUpdate("users", "updateUser", { user: updatedUser });
+  await broadcastUpdate("users", "updateUsers", { users: allUsers });
 
   return updatedUser;
 };
@@ -130,10 +135,13 @@ const softDeleteUser = async (id) => {
   await updateMongoDocument(collections.usersCollection, id, {
     $set: {
       name: null,
+      // email
+      // mongoUserId
       credits: 0.0,
       earnedCredits: 0.0,
       lifetimeEarnedCredits: 0.0,
       firebaseUserId: null,
+      // userType
       idvStatus: "unverified",
       emailVerificationStatus: "unverified",
       accountStatus: "deleted",
@@ -159,8 +167,8 @@ const softDeleteUser = async (id) => {
 
   // Emit updates via Supabase
   const allUsers = await getAllUsers();
-  await broadcastUpdate('users', 'updateUser', { user: updatedUser });
-  await broadcastUpdate('users', 'updateUsers', { users: allUsers });
+  await broadcastUpdate("users", "updateUser", { user: updatedUser });
+  await broadcastUpdate("users", "updateUsers", { users: allUsers });
 };
 
 const deleteUser = async (id) => {
@@ -173,30 +181,30 @@ const deleteUser = async (id) => {
 const adminEmailUsers = async (users, subject, body) => {
   // console.log("Sending email to users:", users);
   for (const user of users) {
-    await sendEmail(
-      user,
-      subject,
-      null,
-      body,
-      null,
-    );
+    await sendEmail(user, subject, null, body, null);
   }
 };
 
 const sendIdentityVerificationResults = async (submissionData) => {
-
   let updateUserObject = {
-    idvStatus: submissionData.status, 
-    DOB: submissionData.dob
+    idvStatus: submissionData.status,
   };
 
-  if (submissionData.status === "denied" && submissionData.reason === "Underage") {
+  if (
+    submissionData.status === "denied" &&
+    submissionData.reason === "Underage"
+  ) {
     updateUserObject.ageValid = false;
   }
 
-  const updatedUser = await updateMongoDocument(collections.usersCollection, submissionData.userId, {
-    $set: updateUserObject,
-  }, true);
+  const updatedUser = await updateMongoDocument(
+    collections.usersCollection,
+    submissionData.userId,
+    {
+      $set: updateUserObject,
+    },
+    true
+  );
 
   let bodyHtml = "";
   if (submissionData.status === "verified") {
@@ -215,13 +223,17 @@ const sendIdentityVerificationResults = async (submissionData) => {
     "RL Bets Identity Verification Results",
     null,
     bodyHtml,
-    null,
+    null
   );
 
   await createUserNotificationLog({
     user: updatedUser._id.toString(),
     type: "info",
-    message: "Your identity verification status has been updated to: " + (submissionData.status === "verified" ? "Approved" : `Denied due to reason: "${submissionData.reason}"`),
+    message:
+      "Your identity verification status has been updated to: " +
+      (submissionData.status === "verified"
+        ? "Approved"
+        : `Denied due to reason: "${submissionData.reason}"`),
   });
 };
 

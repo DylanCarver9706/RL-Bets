@@ -38,7 +38,7 @@ const Notifications = () => {
     fetchData();
   }, [user.mongoUserId]);
 
-  const unreadCount = notifications.length;
+  const unreadCount = notifications?.length;
 
   // Listen for updates from the server
   useEffect(() => {

@@ -465,7 +465,6 @@ const getCurrentEventsDataTree = async () => {
   // Fetch the current tournament
   const tournament = await getCurrentTournament();
   const leaderboard = await getCurrentLeaderboard();
-  console.log(leaderboard);
   // Fetch all series for this tournament
   const seriesList = await collections.seriesCollection
     .find({ tournament: tournament._id })
