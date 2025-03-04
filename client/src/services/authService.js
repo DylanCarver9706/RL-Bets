@@ -19,7 +19,7 @@ export const makeAuthenticatedRequest = async (endpoint, options = {}) => {
 
     // Don't set Content-Type for FormData
     if (!(options.body instanceof FormData)) {
-      headers['Content-Type'] = 'application/json';
+      headers["Content-Type"] = "application/json";
     }
 
     const response = await fetch(`${BASE_SERVER_URL}${endpoint}`, {

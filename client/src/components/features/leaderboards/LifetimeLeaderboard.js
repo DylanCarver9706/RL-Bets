@@ -22,9 +22,13 @@ const LifetimeLeaderboard = () => {
 
   // Listen for updates
   useEffect(() => {
-    const subscription = subscribeToUpdates('users', 'updateUsers', (payload) => {
-      setSortedUsers(payload.users);
-    });
+    const subscription = subscribeToUpdates(
+      "users",
+      "updateUsers",
+      (payload) => {
+        setSortedUsers(payload.users);
+      }
+    );
 
     return () => {
       subscription.unsubscribe();

@@ -90,7 +90,9 @@ const updateMatch = async (id, updateData) => {
         )
       )
     );
-    await broadcastUpdate('wagers', 'wagersUpdate', { wagers: await getAllWagers() });
+    await broadcastUpdate("wagers", "wagersUpdate", {
+      wagers: await getAllWagers(),
+    });
   }
 };
 
@@ -218,7 +220,7 @@ const payOutBetWinners = async (wagerId, agreeIsWinner) => {
       });
 
       // Emit 'updateUser' event with updated user data to all connected clients
-      await broadcastUpdate('users', 'updateUser', { user: updatedUser });
+      await broadcastUpdate("users", "updateUser", { user: updatedUser });
     }
   }
 };
@@ -354,7 +356,7 @@ const handleWagerEnded = async (wagerId, agreeIsWinner) => {
 
   // Fetch updated wager and statistics
   const updatedWagers = await getAllWagers();
-  await broadcastUpdate('wagers', 'wagersUpdate', { wagers: updatedWagers });
+  await broadcastUpdate("wagers", "wagersUpdate", { wagers: updatedWagers });
 
   await payOutBetWinners(wagerId, agreeIsWinner);
 };
@@ -1100,9 +1102,9 @@ const matchConcluded = async (matchId, data) => {
       "Tournament has ended and all user earnedCredits have been reset to 0.00. Congrats RL Bets!"
     );
   }
-  await broadcastUpdate('users', 'updateUsers', { users: await getAllUsers() });
-  await broadcastUpdate('leaderboard', 'updateLeaderboard', { 
-    leaderboard: await getCurrentLeaderboard() 
+  await broadcastUpdate("users", "updateUsers", { users: await getAllUsers() });
+  await broadcastUpdate("leaderboard", "updateLeaderboard", {
+    leaderboard: await getCurrentLeaderboard(),
   });
 
   return { message: message };

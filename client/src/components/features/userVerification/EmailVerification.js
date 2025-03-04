@@ -65,10 +65,13 @@ const EmailVerification = () => {
   return (
     <div className="email-verification-container">
       <div className="email-verification-card">
-        <h1 className="email-verification-title">Email Verification Required</h1>
+        <h1 className="email-verification-title">
+          Email Verification Required
+        </h1>
         <p className="email-verification-message">
-          Thank you for signing up! To proceed, please verify your email address.
-          Check your inbox for a verification email and click the verification link.
+          Thank you for signing up! To proceed, please verify your email
+          address. Check your inbox for a verification email and click the
+          verification link.
         </p>
         <p className="email-verification-message">
           If you didn't receive the email, click the button below to resend it.

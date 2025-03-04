@@ -26,7 +26,6 @@ const getLogById = async (logId) => {
 
 const createLog = async (logData) => {
   try {
-    
     if (logData.user) {
       logData = {
         ...logData,
@@ -41,7 +40,7 @@ const createLog = async (logData) => {
 
     // Emit updated logs
     const logs = await getAllLogs();
-    await broadcastUpdate('logs', 'updatedLogs', { logs });
+    await broadcastUpdate("logs", "updatedLogs", { logs });
 
     return { logId: result.insertedId };
   } catch (error) {
@@ -53,15 +52,15 @@ const createAdminLog = async (logData) => {
   try {
     const result = await createMongoDocument(
       collections.logsCollection,
-      logData = {
+      (logData = {
         ...logData,
-        logType: "Admin Notification"
-      }
+        logType: "Admin Notification",
+      })
     );
 
     // Emit updated logs
     const logs = await getAllLogs();
-    await broadcastUpdate('logs', 'updateLogs', { logs });
+    await broadcastUpdate("logs", "updateLogs", { logs });
 
     return { logId: result.insertedId };
   } catch (error) {
@@ -73,17 +72,17 @@ const createUserNotificationLog = async (logData) => {
   try {
     const result = await createMongoDocument(
       collections.logsCollection,
-      logData = {
+      (logData = {
         ...logData,
         logType: "User Notification",
         cleared: false,
         user: ObjectId.createFromHexString(logData.user),
-      }
+      })
     );
 
     // Emit updated logs
     const logs = await getUserNotificationLogs(logData.user.toString());
-    await broadcastUpdate('userLogs', 'updateUserLogs', { userLogs: logs });
+    await broadcastUpdate("userLogs", "updateUserLogs", { userLogs: logs });
 
     return { logId: result.insertedId };
   } catch (error) {
@@ -123,15 +122,17 @@ const deleteAllLogs = async () => {
 const getUserNotificationLogs = async (userId) => {
   try {
     const logs = await collections.logsCollection
-    .find({
-      user: ObjectId.createFromHexString(userId),
-      logType: "User Notification",
-      cleared: false,
-    })
-    .toArray();
+      .find({
+        user: ObjectId.createFromHexString(userId),
+        logType: "User Notification",
+        cleared: false,
+      })
+      .toArray();
     return logs;
   } catch (error) {
-    throw new Error("Failed to retrieve user notification logs: " + error.message);
+    throw new Error(
+      "Failed to retrieve user notification logs: " + error.message
+    );
   }
 };
 

@@ -25,7 +25,9 @@ const createTransaction = async (transactionData) => {
   );
 
   // Emit real-time updates
-  await broadcastUpdate('transactions', 'newTransaction', { transaction: newTransaction });
+  await broadcastUpdate("transactions", "newTransaction", {
+    transaction: newTransaction,
+  });
 
   return newTransaction;
 };
@@ -42,7 +44,9 @@ const updateTransaction = async (id, updateData) => {
   });
 
   // Emit updates
-  await broadcastUpdate('transactions', 'updateTransaction', { transaction: updatedTransaction });
+  await broadcastUpdate("transactions", "updateTransaction", {
+    transaction: updatedTransaction,
+  });
 
   return updatedTransaction;
 };
@@ -58,7 +62,9 @@ const deleteTransaction = async (id) => {
   }
 
   // Emit real-time updates
-  await broadcastUpdate('transactions', 'deleteTransaction', { transactionId: id });
+  await broadcastUpdate("transactions", "deleteTransaction", {
+    transactionId: id,
+  });
 };
 
 const getUserTransactions = async (userId) => {

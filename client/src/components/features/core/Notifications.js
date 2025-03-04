@@ -9,14 +9,14 @@ import { formatDateToUserTimezone } from "../../../services/dateService.js";
 import "../../../styles/components/core/Notifications.css";
 
 const BellIcon = () => (
-  <svg 
-    width="28" 
-    height="28" 
-    viewBox="0 0 24 24" 
-    fill="none" 
-    stroke="currentColor" 
-    strokeWidth="2" 
-    strokeLinecap="round" 
+  <svg
+    width="28"
+    height="28"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
     strokeLinejoin="round"
   >
     <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
@@ -42,9 +42,13 @@ const Notifications = () => {
 
   // Listen for updates from the server
   useEffect(() => {
-    const subscription = subscribeToUpdates('userLogs', 'updateUserLogs', (payload) => {
-      setNotifications(payload.userLogs);
-    });
+    const subscription = subscribeToUpdates(
+      "userLogs",
+      "updateUserLogs",
+      (payload) => {
+        setNotifications(payload.userLogs);
+      }
+    );
 
     return () => {
       subscription.unsubscribe();
@@ -68,7 +72,7 @@ const Notifications = () => {
           <span className="notification-badge">{unreadCount}</span>
         )}
       </div>
-      
+
       {isDropdownVisible && (
         <div className="notifications-dropdown">
           <div className="dropdown-header">
@@ -80,7 +84,7 @@ const Notifications = () => {
               ✖
             </button>
           </div>
-          
+
           {notifications.length > 0 ? (
             <ul className="notifications-list">
               {notifications.map((notification) => (

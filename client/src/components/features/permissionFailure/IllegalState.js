@@ -7,7 +7,8 @@ const IllegalState = () => {
       <div className="illegal-state-card">
         <h1 className="illegal-state-title">Illegal State</h1>
         <h2 className="illegal-state-message">
-          Due to state law, you are not allowed to use this app from your location.
+          Due to state law, you are not allowed to use this app from your
+          location.
         </h2>
       </div>
     </div>

@@ -25,9 +25,13 @@ const CurrentTournamentLeaderboard = () => {
 
   // Listen for updates
   useEffect(() => {
-    const subscription = subscribeToUpdates('leaderboard', 'updateLeaderboard', (payload) => {
-      setLeaderboard(payload.leaderboard);
-    });
+    const subscription = subscribeToUpdates(
+      "leaderboard",
+      "updateLeaderboard",
+      (payload) => {
+        setLeaderboard(payload.leaderboard);
+      }
+    );
 
     return () => {
       subscription.unsubscribe();

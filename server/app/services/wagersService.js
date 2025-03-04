@@ -5,11 +5,10 @@ const {
   createMongoDocument,
   updateMongoDocument,
 } = require("../../database/middlewares/mongo");
-const { broadcastUpdate } = require('../middlewares/supabaseAdmin');
+const { broadcastUpdate } = require("../middlewares/supabaseAdmin");
 
 const wagersWithStats = async (wagers) => {
   try {
-
     const wagersWithStats = await Promise.all(
       wagers.map(async (wager) => {
         const betIds = wager.bets || [];
@@ -115,7 +114,7 @@ const updateWager = async (id, updateData) => {
     $set: updateData,
   });
   const updatedWagers = await getAllWagers();
-  await broadcastUpdate('wagers', 'wagersUpdate', { wagers: updatedWagers });
+  await broadcastUpdate("wagers", "wagersUpdate", { wagers: updatedWagers });
   return await collections.wagersCollection.findOne({
     _id: ObjectId.createFromHexString(id),
   });

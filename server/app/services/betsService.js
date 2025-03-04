@@ -29,12 +29,17 @@ const createBet = async (betData) => {
   const result = await createMongoDocument(collections.betsCollection, newBet);
 
   // Update wager with the new bet
-  const wager = await updateMongoDocument(collections.wagersCollection, wagerId, {
-    $push: { bets: result.insertedId },
-  }, true);
+  const wager = await updateMongoDocument(
+    collections.wagersCollection,
+    wagerId,
+    {
+      $push: { bets: result.insertedId },
+    },
+    true
+  );
 
   const allWagers = await getAllWagers();
-  await broadcastUpdate('wagers', 'wagersUpdate', { wagers: allWagers });
+  await broadcastUpdate("wagers", "wagersUpdate", { wagers: allWagers });
 
   // Deduct credits from user
   const updatedUser = await updateMongoDocument(
@@ -46,7 +51,7 @@ const createBet = async (betData) => {
     true
   );
 
-  await broadcastUpdate('users', 'updateUser', { user: updatedUser });
+  await broadcastUpdate("users", "updateUser", { user: updatedUser });
 
   // Update leaderboard with the new user
   const currentLeaderboard = await getCurrentLeaderboard();
@@ -65,8 +70,8 @@ const createBet = async (betData) => {
         $push: { users: ObjectId.createFromHexString(user) },
       }
     );
-    await broadcastUpdate('leaderboard', 'updateLeaderboard', { 
-      leaderboard: await getCurrentLeaderboard() 
+    await broadcastUpdate("leaderboard", "updateLeaderboard", {
+      leaderboard: await getCurrentLeaderboard(),
     });
   }
 
@@ -77,7 +82,7 @@ const createBet = async (betData) => {
     type: "bet",
     wager: wager.name,
     wagerId: ObjectId.createFromHexString(wagerId),
-  })
+  });
 
   return {
     betId: result.insertedId,
