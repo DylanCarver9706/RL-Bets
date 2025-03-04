@@ -271,8 +271,8 @@ const Signup = () => {
   };
 
   return (
-    <div className="auth-component">
-      <div className="auth-container">
+    <div className="auth-container">
+      <div className="auth-component">
         <h2 className="auth-header">Create Account</h2>
         {error && <p className="error-message">{error}</p>}
 
