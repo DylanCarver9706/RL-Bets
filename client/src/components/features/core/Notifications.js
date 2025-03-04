@@ -27,18 +27,18 @@ const BellIcon = () => (
 const Notifications = () => {
   const [notifications, setNotifications] = useState([]);
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
   const { user } = useUser();
 
   useEffect(() => {
     const fetchData = async () => {
       const data = await fetchUserNotificationLogs(user.mongoUserId);
       setNotifications(data);
+      setUnreadCount(data?.length || 0);
     };
 
     fetchData();
   }, [user.mongoUserId]);
-
-  const unreadCount = notifications?.length;
 
   // Listen for updates from the server
   useEffect(() => {
@@ -46,7 +46,8 @@ const Notifications = () => {
       "userLogs",
       "updateUserLogs",
       (payload) => {
-        setNotifications(payload.userLogs);
+        setNotifications(payload.payload.userLogs);
+        setUnreadCount(payload.payload.userLogs?.length || 0);
       }
     );
 
@@ -57,8 +58,12 @@ const Notifications = () => {
 
   const handleDismiss = async (notificationId) => {
     try {
-      await dismissNotification(notificationId); // Call API to dismiss notification
-      setNotifications((prev) => prev.filter((n) => n._id !== notificationId)); // Update local state
+      await dismissNotification(notificationId);
+      const updatedNotifications = notifications.filter(
+        (n) => n._id !== notificationId
+      );
+      setNotifications(updatedNotifications);
+      setUnreadCount(updatedNotifications?.length);
     } catch (error) {
       console.error("Failed to dismiss notification:", error);
     }
@@ -85,7 +90,7 @@ const Notifications = () => {
             </button>
           </div>
 
-          {notifications.length > 0 ? (
+          {notifications?.length > 0 ? (
             <ul className="notifications-list">
               {notifications.map((notification) => (
                 <li key={notification._id} className="notification-item">
