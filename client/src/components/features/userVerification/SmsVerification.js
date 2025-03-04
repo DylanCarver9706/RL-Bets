@@ -23,22 +23,28 @@ const PhoneVerification = () => {
   const [error, setError] = useState("");
   const [showOTP, setShowOTP] = useState(false);
   const [loading, setLoading] = useState(false);
-
-  // Setup reCAPTCHA
-  const setupRecaptcha = () => {
-    if (!window.recaptchaVerifier) {
-      window.recaptchaVerifier = new RecaptchaVerifier(
-        auth,
-        "recaptcha-container",
-        {
-          size: "invisible",
-        }
-      );
-    }
-  };
+  const [recaptchaVerifier, setRecaptchaVerifier] = useState(null);
 
   useEffect(() => {
-    setupRecaptcha(); // Ensure reCAPTCHA is set up when the component mounts
+    // Initialize reCAPTCHA when component mounts
+    const verifier = new RecaptchaVerifier(auth, "recaptcha-container", {
+      size: "invisible",
+      callback: () => {
+        console.log("reCAPTCHA verified");
+      },
+      "expired-callback": () => {
+        console.log("reCAPTCHA expired");
+        setError("reCAPTCHA expired. Please try again.");
+        setLoading(false);
+      },
+    });
+
+    setRecaptchaVerifier(verifier);
+
+    // Cleanup function to clear reCAPTCHA when component unmounts
+    return () => {
+      verifier.clear();
+    };
   }, []);
 
   const handlePhoneChange = (value) => {
@@ -57,38 +63,49 @@ const PhoneVerification = () => {
 
   // Send OTP
   const sendOtp = async (number) => {
-    setLoading(true);
-    console.log(number);
-
-    // Send an alert if the phone number is not a US-based phone number
-    if (!number.startsWith("1")) {
-      alert("Please enter a US-based phone number.");
-      setLoading(false); // Ensure loading is set to false
-      return;
-    }
-
-    if (number.length < 11) {
-      alert("Enter a valid phone number.");
-      setLoading(false); // Ensure loading is set to false
-      return;
-    }
-
     try {
-      const appVerifier = window.recaptchaVerifier;
+      setLoading(true);
+      console.log(number);
+      setError("");
+      if (!recaptchaVerifier) {
+        throw new Error("reCAPTCHA not initialized");
+      }
+
+      // Send an alert if the phone number is not a US-based phone number
+      if (!number.startsWith("1")) {
+        alert("Please enter a US-based phone number.");
+        setLoading(false); // Ensure loading is set to false
+        return;
+      }
+
+      if (number.length < 11) {
+        alert("Enter a valid phone number.");
+        setLoading(false); // Ensure loading is set to false
+        return;
+      }
       const formattedPhone = `+${number}`; // Assuming the phone number is already in the correct format
 
       const confirmationResult = await signInWithPhoneNumber(
         auth,
         formattedPhone,
-        appVerifier
+        recaptchaVerifier
       );
+
       setVerificationId(confirmationResult.verificationId);
       setShowOTP(true);
-    } catch (err) {
-      setError(err.message);
-      console.error("Error sending OTP:", err);
-    } finally {
-      setLoading(false); // Ensure loading is set to false
+      setLoading(false);
+    } catch (error) {
+      console.error("Error sending OTP:", error);
+      // Reset reCAPTCHA on error
+      if (recaptchaVerifier) {
+        await recaptchaVerifier.clear();
+        const newVerifier = new RecaptchaVerifier(auth, "recaptcha-container", {
+          size: "invisible",
+        });
+        setRecaptchaVerifier(newVerifier);
+      }
+      setError(error.message);
+      setLoading(false);
     }
   };
 
@@ -114,7 +131,9 @@ const PhoneVerification = () => {
         });
         window.location.reload();
       } catch (err) {
-        alert("Invalid OTP or phone number is already linked to another account. Please try again.");
+        alert(
+          "Invalid OTP or phone number is already linked to another account. Please try again."
+        );
       }
     }
   };
@@ -139,6 +158,7 @@ const PhoneVerification = () => {
                 country={"us"}
                 value={phoneNumber}
                 onChange={handlePhoneChange}
+                placeholder="+1 (123) 456-7890"
                 inputClass="sms-verification-input"
                 buttonClass="sms-verification-country-button"
               />
