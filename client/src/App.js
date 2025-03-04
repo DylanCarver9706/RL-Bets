@@ -192,7 +192,11 @@ function App() {
         ["review", "unverified"].includes(user?.idvStatus)
       ) {
         navigate("/Identity-Verification");
-      } else if (auth.currentUser && (user?.pp.version !== privacyPolicyVersion || user.tos.version !== termsOfServiceVersion)) {
+      } else if (
+        auth.currentUser &&
+        (user?.pp.version !== privacyPolicyVersion ||
+          user.tos.version !== termsOfServiceVersion)
+      ) {
         navigate("/Agreements");
       } else if (auth.currentUser && user?.locationValid === false) {
         navigate("/Illegal-State");
@@ -209,7 +213,14 @@ function App() {
       }
     };
     routeUser();
-  }, [loading, user, navigate, unprotectedRoutes, privacyPolicyVersion, termsOfServiceVersion]);
+  }, [
+    loading,
+    user,
+    navigate,
+    unprotectedRoutes,
+    privacyPolicyVersion,
+    termsOfServiceVersion,
+  ]);
 
   // Check terms of service and privacy policy versions
   useEffect(() => {
@@ -262,7 +273,7 @@ function App() {
   }, [navigate]);
 
   if (loading) {
-    return <p>Loading...</p>;
+    return <span class="loader"></span>;
   }
 
   const locationPermissionGranted = user?.locationPermissionGranted;
