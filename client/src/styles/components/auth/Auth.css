@@ -202,4 +202,49 @@
     margin: 0.5rem;
     padding: 1rem;
   }
-} 
+}
+
+.auth-form .form-group input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #444;
+  border-radius: 6px;
+  background: #333;
+  color: white;
+  font-size: 1rem;
+}
+
+/* Style placeholder text */
+.auth-form .form-group input::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Ensure date input shows placeholder on mobile */
+.auth-form input[type="date"]::-webkit-datetime-edit-text,
+.auth-form input[type="date"]::-webkit-datetime-edit-month-field,
+.auth-form input[type="date"]::-webkit-datetime-edit-day-field,
+.auth-form input[type="date"]::-webkit-datetime-edit-year-field {
+  color: white;
+}
+
+.auth-form input[type="date"]:not(:valid)::-webkit-datetime-edit {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Date picker calendar icon color */
+.auth-form input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  cursor: pointer;
+}
+
+/* For Firefox */
+.auth-form input[type="date"]::-moz-calendar-picker-indicator {
+  filter: invert(1);
+  cursor: pointer;
+}
+
+/* For other browsers */
+.auth-form input[type="date"]::-ms-calendar-picker-indicator {
+  filter: invert(1);
+  cursor: pointer;
+}

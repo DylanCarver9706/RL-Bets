@@ -375,10 +375,13 @@ const IdentityVerification = () => {
               <label>Date of Birth:</label>
               <input
                 type="date"
-                className="form-input"
+                id="dateOfBirth"
+                name="dateOfBirth"
                 value={selectedDate}
                 onChange={(e) => {console.log(e.target.value); setSelectedDate(e.target.value); }}
                 required
+                placeholder="Date of Birth"
+                onFocus={(e) => e.target.showPicker()}
               />
             </div>
 
