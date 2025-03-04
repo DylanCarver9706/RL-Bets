@@ -4,6 +4,7 @@ import {
   fetchIdentityVerificationImages,
 } from "../../../services/firebaseService";
 import { getUsers, validateUserIdv } from "../../../services/adminService";
+import Spinner from "../../common/Spinner";
 
 const AdminIdentityVerification = () => {
   const [userImages, setUserImages] = useState({});
@@ -161,7 +162,7 @@ const AdminIdentityVerification = () => {
     <div style={styles.container}>
       <h2>Identity Verification Documents</h2>
 
-      {loading && <p>Loading...</p>}
+      {loading && <Spinner />}
       {error && <p style={styles.error}>{error}</p>}
       {!loading && Object.keys(userImages).length === 0 && (
         <p>No documents to validate.</p>

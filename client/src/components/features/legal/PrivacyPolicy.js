@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { getLatestPrivacyPolicy } from "../../../services/agreementService";
 import "../../../styles/components/legal/Legal.css";
+import Spinner from "../../common/Spinner";
 
 const PrivacyPolicy = () => {
   const [agreement, setAgreement] = useState(null);
@@ -24,7 +25,7 @@ const PrivacyPolicy = () => {
   }, []);
 
   if (loading) {
-    return <div className="legal-container">Loading...</div>;
+    return <Spinner />;
   }
 
   if (error) {

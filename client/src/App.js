@@ -56,6 +56,7 @@ import {
   checkGeolocationPermission,
   userLocationLegal,
 } from "./services/locationService";
+import Spinner from "./components/common/Spinner";
 
 // Deprecated components
 // import PlaidIdentityVerification from "./components/PlaidIdentityVerification"; Deprecated
@@ -273,7 +274,7 @@ function App() {
   }, [navigate]);
 
   if (loading) {
-    return <span class="loader"></span>;
+    return <Spinner />;
   }
 
   const locationPermissionGranted = user?.locationPermissionGranted;

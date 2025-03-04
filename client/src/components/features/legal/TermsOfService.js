@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { getLatestTermsOfService } from "../../../services/agreementService";
 import "../../../styles/components/legal/Legal.css";
+import Spinner from "../../common/Spinner";
 
 const TermsOfService = () => {
   const [agreement, setAgreement] = useState(null);
@@ -24,7 +25,7 @@ const TermsOfService = () => {
   }, []);
 
   if (loading) {
-    return <div className="legal-container">Loading...</div>;
+    return <Spinner />;
   }
 
   if (error) {
