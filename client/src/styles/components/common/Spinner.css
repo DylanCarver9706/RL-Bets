@@ -7,10 +7,6 @@
 }
 
 .loader {
-  width: 96px;
-  height: 96px;
-  border: 10px solid #034da4;
-  border-bottom-color: #fb6a31;
   border-radius: 50%;
   display: inline-block;
   box-sizing: border-box;
