@@ -10,9 +10,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   min-height: 100vh;
-  padding: 20px;
+  padding: 2rem;
   text-align: center;
   background-color: #1a1a1a;
 }
@@ -139,13 +138,16 @@
 
 /* Ensure date input shows placeholder on mobile */
 .identity-verification-form input[type="date"]::-webkit-datetime-edit-text,
-.identity-verification-form input[type="date"]::-webkit-datetime-edit-month-field,
+.identity-verification-form
+  input[type="date"]::-webkit-datetime-edit-month-field,
 .identity-verification-form input[type="date"]::-webkit-datetime-edit-day-field,
-.identity-verification-form input[type="date"]::-webkit-datetime-edit-year-field {
+.identity-verification-form
+  input[type="date"]::-webkit-datetime-edit-year-field {
   color: white;
 }
 
-.identity-verification-form input[type="date"]:not(:valid)::-webkit-datetime-edit {
+.identity-verification-form
+  input[type="date"]:not(:valid)::-webkit-datetime-edit {
   color: rgba(255, 255, 255, 0.7);
 }
 

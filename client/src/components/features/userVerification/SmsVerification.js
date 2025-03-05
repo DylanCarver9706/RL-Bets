@@ -14,6 +14,7 @@ import OtpInput from "otp-input-react";
 import "react-phone-input-2/lib/style.css";
 import { CgSpinner } from "react-icons/cg"; // Import spinner icon
 import "../../../styles/components/userVerification/SmsVerification.css";
+import Spinner from "../../common/Spinner";
 
 const PhoneVerification = () => {
   const { user } = useUser();
@@ -162,13 +163,12 @@ const PhoneVerification = () => {
                 inputClass="sms-verification-input"
                 buttonClass="sms-verification-country-button"
               />
-              {loading && <CgSpinner size={24} className="loading-spinner" />}
             </div>
             <br />
             {loading && (
               <>
                 <br />
-                <CgSpinner size={48} className="loading-spinner" />
+                <Spinner pageLoad={false} />
               </>
             )}
           </>
