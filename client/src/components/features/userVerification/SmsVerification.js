@@ -12,7 +12,6 @@ import { updateUser } from "../../../services/userService";
 import PhoneInput from "react-phone-input-2";
 import OtpInput from "otp-input-react";
 import "react-phone-input-2/lib/style.css";
-import { CgSpinner } from "react-icons/cg"; // Import spinner icon
 import "../../../styles/components/userVerification/SmsVerification.css";
 import Spinner from "../../common/Spinner";
 

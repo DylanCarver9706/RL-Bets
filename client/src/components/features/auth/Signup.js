@@ -16,7 +16,6 @@ import { analytics } from "../../../config/firebaseConfig";
 import Tooltip from "../../common/ToolTip";
 import { Link, useNavigate } from "react-router-dom";
 import "../../../styles/components/auth/Signup.css";
-import { useUser } from "../../../contexts/UserContext"; // Get user context
 
 const statesList = [
   "Alabama",
@@ -72,7 +71,6 @@ const statesList = [
 ];
 
 const Signup = () => {
-  const { user } = useUser(); // Get user object from context
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -161,7 +159,7 @@ const Signup = () => {
       }
 
       // Update the user's address and date of birth
-      await updateUser(user.mongoUserId, {
+      await updateUser(mongoUser._id, {
         address: {
           address1,
           address2,
@@ -183,13 +181,6 @@ const Signup = () => {
 
   const handleGoogleAuth = async () => {
     try {
-      // Check if user has agreed to TOS and PP
-      if (!tosChecked || !ppChecked) {
-        setError(
-          "You must read and agree to the Terms of Service and Privacy Policy."
-        );
-        return;
-      }
 
       const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
@@ -458,6 +449,7 @@ const Signup = () => {
               className="form-input"
               value={referralCode}
               onChange={(e) => setReferralCode(e.target.value)}
+              placeholder="*Optional*"
             />
           </div>
 

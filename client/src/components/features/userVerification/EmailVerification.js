@@ -25,7 +25,7 @@ const EmailVerification = () => {
 
         // Checking if the user has had their email verified either through Firebase or MongoDB
         if (
-          // auth.currentUser.emailVerified ||
+          auth.currentUser.emailVerified ||
           user.emailVerificationStatus === "verified"
         ) {
           // Update the user's verification status in MongoDB
