@@ -8,10 +8,10 @@ import {
 import "../../../styles/components/legal/Agreements.css";
 
 const Agreements = () => {
-  const [tosClicked, setTosClicked] = useState(false);
-  const [ppClicked, setPpClicked] = useState(false);
   const [tosChecked, setTosChecked] = useState(false);
   const [ppChecked, setPpChecked] = useState(false);
+  const [requireTos, setRequireTos] = useState(false);
+  const [requirePp, setRequirePp] = useState(false);
   const [error, setError] = useState(null);
   const [latestVersions, setLatestVersions] = useState({ tos: null, pp: null });
   const { user } = useUser();
@@ -24,10 +24,15 @@ const Agreements = () => {
           getLatestTermsOfService(),
           getLatestPrivacyPolicy(),
         ]);
-        setLatestVersions({
-          tos: parseInt(tosDoc.version),
-          pp: parseInt(ppDoc.version),
-        });
+        const newVersions = {
+          tos: parseInt(tosDoc.version, 10),
+          pp: parseInt(ppDoc.version, 10),
+        };
+        setLatestVersions(newVersions);
+        
+        // Set which agreements need attention after we have the versions
+        setRequireTos(parseInt(user?.tos?.version, 10) !== newVersions.tos);
+        setRequirePp(parseInt(user?.pp?.version, 10) !== newVersions.pp);
       } catch (err) {
         console.error("Error fetching latest versions:", err);
         setError("Failed to load agreement versions. Please try again.");
@@ -35,20 +40,16 @@ const Agreements = () => {
     };
 
     fetchLatestVersions();
-  }, []);
-
-  // Check which agreements need to be updated
-  const requireTos = user?.tos?.version !== latestVersions.tos;
-  const requirePp = user?.pp?.version !== latestVersions.pp;
+  }, [user?.tos?.version, user?.pp?.version]);
 
   const handleSubmit = async () => {
     try {
       // Validate that required agreements have been read and accepted
-      if (requireTos && (!tosClicked || !tosChecked)) {
+      if (requireTos && !tosChecked) {
         setError("Please read and accept the Terms of Service");
         return;
       }
-      if (requirePp && (!ppClicked || !ppChecked)) {
+      if (requirePp && !ppChecked) {
         setError("Please read and accept the Privacy Policy");
         return;
       }
@@ -82,35 +83,87 @@ const Agreements = () => {
     return null;
   }
 
+  console.log(requireTos, requirePp);
+
   return (
     <div className="agreements-container">
       <div className="agreements-card">
         <div className="agreements-header">
           <h1 className="agreements-title">
             {requireTos && requirePp
-              ? "Agreement Updates Required"
-              : `${
-                  requireTos ? "Terms of Service" : "Privacy Policy"
-                } Update Required`}
+              ? "Agreement Updates"
+              : `${requireTos ? "Terms of Service" : "Privacy Policy"} Update`}
           </h1>
           <h2 className="agreements-subtitle">
-            {requireTos && requirePp
-              ? "Please read and accept the updated documents to continue"
-              : "Please read and accept the updated document to continue"}
+            {`Please read and accept the updated ${
+              requireTos && requirePp ? "documents" : "document"
+            } to continue`}
           </h2>
         </div>
 
         <div className="agreements-sections">
-          {requireTos && (
-            <div className="agreement-section">
+          <div className="signup-agreements">
+            <div className="signup-agreement-checkbox">
+              <input
+                type="checkbox"
+                checked={requireTos ? tosChecked : ppChecked}
+                onChange={(e) => {
+                  if (requireTos) {
+                    setTosChecked(e.target.checked);
+                  }
+
+                  if (requirePp) {
+                    setPpChecked(e.target.checked);
+                  }
+                }}
+              />
+              <span>I agree to the updated </span>
+            </div>
+            {requireTos && requirePp && (
+              <>
+                <a
+                  href="/Terms-Of-Service"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="signup-agreement-link"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    window.open(
+                      "/Terms-Of-Service",
+                      "_blank",
+                      "noopener,noreferrer"
+                    );
+                  }}
+                >
+                  Terms of Service
+                </a>
+                <span> and </span>
+                <a
+                  href="/Privacy-Policy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="signup-agreement-link"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    window.open(
+                      "/Privacy-Policy",
+                      "_blank",
+                      "noopener,noreferrer"
+                    );
+                  }}
+                >
+                  Privacy Policy
+                </a>
+              </>
+            )}
+            {requireTos && !requirePp && (
               <a
                 href="/Terms-Of-Service"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="agreement-link"
+                className="signup-agreement-link"
                 onClick={(e) => {
                   e.preventDefault();
-                  setTosClicked(true);
                   window.open(
                     "/Terms-Of-Service",
                     "_blank",
@@ -118,35 +171,17 @@ const Agreements = () => {
                   );
                 }}
               >
-                View Terms of Service
+                Terms of Service
               </a>
-              <label className="agreement-checkbox">
-                <input
-                  type="checkbox"
-                  checked={tosChecked}
-                  onChange={(e) => setTosChecked(e.target.checked)}
-                  disabled={!tosClicked}
-                />
-                I agree to the Terms of Service
-              </label>
-              {requireTos && !tosClicked && (
-                <span className="agreement-status">
-                  Please read the document
-                </span>
-              )}
-            </div>
-          )}
-
-          {requirePp && (
-            <div className="agreement-section">
+            )}
+            {requirePp && !requireTos && (
               <a
                 href="/Privacy-Policy"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="agreement-link"
+                className="signup-agreement-link"
                 onClick={(e) => {
                   e.preventDefault();
-                  setPpClicked(true);
                   window.open(
                     "/Privacy-Policy",
                     "_blank",
@@ -154,38 +189,29 @@ const Agreements = () => {
                   );
                 }}
               >
-                View Privacy Policy
+                Privacy Policy
               </a>
-              <label className="agreement-checkbox">
-                <input
-                  type="checkbox"
-                  checked={ppChecked}
-                  onChange={(e) => setPpChecked(e.target.checked)}
-                  disabled={!ppClicked}
-                />
-                I agree to the Privacy Policy
-              </label>
-              {requirePp && !ppClicked && (
-                <span className="agreement-status">
-                  Please read the document
-                </span>
-              )}
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
         {error && <p className="error-message">{error}</p>}
 
-        <button
-          className="submit-button"
-          onClick={handleSubmit}
-          disabled={
-            (requireTos && (!tosClicked || !tosChecked)) ||
-            (requirePp && (!ppClicked || !ppChecked))
-          }
-        >
-          Accept and Continue
-        </button>
+        <div className="form-group">
+          <div className="submit-button-container">
+            <button
+              className="auth-button"
+              onClick={handleSubmit}
+              disabled={
+                (requireTos && !tosChecked) ||
+                (requirePp && !ppChecked) ||
+                (requireTos && requirePp && (!tosChecked || !ppChecked))
+              }
+            >
+              Accept and Continue
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
