@@ -113,6 +113,7 @@ const PhoneVerification = () => {
   const verifyOtpAndLink = async (otpValue) => {
     if (otpValue.length === 6 && verificationId) {
       try {
+        setLoading(true);
         const credential = PhoneAuthProvider.credential(
           verificationId,
           otpValue
@@ -134,6 +135,7 @@ const PhoneVerification = () => {
         alert(
           "Invalid OTP or phone number is already linked to another account. Please try again."
         );
+        setLoading(false);
       }
     }
   };
@@ -186,9 +188,13 @@ const PhoneVerification = () => {
               className="opt-container"
             />
             <br />
-            <button className="sms-verification-button" onClick={handleCancel}>
+            {loading ? (
+                <Spinner pageLoad={false} />
+              ) : (
+                <button className="sms-verification-button" onClick={handleCancel}>
               Cancel
             </button>
+              )}
           </>
         )}
         {error && <p style={{ color: "red" }}>{error}</p>}
