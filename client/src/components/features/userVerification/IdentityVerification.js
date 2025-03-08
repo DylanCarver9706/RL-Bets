@@ -3,6 +3,7 @@ import { useUser } from "../../../contexts/UserContext"; // Get user context
 import { sendImagesToAPI } from "../../../services/firebaseService"; // API request function
 import { redeemReferralCode, updateUser } from "../../../services/userService";
 import "../../../styles/components/userVerification/IdentityVerification.css";
+import { getDeviceInfo } from "../../../utils/deviceDetection";
 import {
   formatDobDate,
   handleDobDateSubmit,
@@ -107,6 +108,8 @@ const IdentityVerification = () => {
   // State to track if we need to collect user info
   const [needsUserInfo, setNeedsUserInfo] = useState(false);
 
+  const { isDesktop, isMobileBrowser } = getDeviceInfo();
+
   // Set review status if user has IDV in review
   useEffect(() => {
     if (user && user.idvStatus === "review") {
@@ -121,18 +124,42 @@ const IdentityVerification = () => {
   // Start the camera when needed
   useEffect(() => {
     if (cameraActive && videoRef.current) {
+      // Store ref in a variable to use in cleanup
+      const video = videoRef.current;
+
+      // Check if MediaDevices API is supported
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        setError("Camera access is not supported in your browser");
+        setCameraActive(false);
+        return;
+      }
+
       navigator.mediaDevices
-        .getUserMedia({ video: true })
+        .getUserMedia({
+          video: {
+            facingMode: captureTarget === "selfie" ? "user" : "environment",
+          },
+        })
         .then((stream) => {
-          videoRef.current.srcObject = stream;
-          videoRef.current.play();
+          video.srcObject = stream;
+          video.play();
         })
         .catch((err) => {
           setError("Failed to access camera. Please allow camera permissions.");
           console.error("Camera access error:", err);
+          setCameraActive(false);
         });
+
+      // Cleanup function
+      return () => {
+        if (video && video.srcObject) {
+          video.srcObject
+            .getTracks()
+            .forEach((track) => track.stop());
+        }
+      };
     }
-  }, [cameraActive]);
+  }, [cameraActive, captureTarget]);
 
   // Capture image from the camera preview
   const captureImage = () => {
@@ -179,31 +206,88 @@ const IdentityVerification = () => {
 
   // Helper function to handle camera button clicks
   const handleCameraClick = (target) => {
+    // Check if MediaDevices API is supported
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      setError("Camera access is not supported in your browser");
+      return;
+    }
+
     if (cameraActive) {
       stopCamera();
-      // Small delay to ensure camera is fully stopped before restarting
-      setTimeout(() => {
-        setCameraActive(true);
-        setCaptureTarget(target);
-        // Restart camera feed
-        if (videoRef.current) {
-          navigator.mediaDevices
-            .getUserMedia({ video: true })
-            .then((stream) => {
-              videoRef.current.srcObject = stream;
-              videoRef.current.play();
-            })
-            .catch((err) => {
-              setError(
-                "Failed to access camera. Please allow camera permissions."
-              );
-              console.error("Camera access error:", err);
-            });
-        }
-      }, 100);
-    } else {
+    }
+
+    // Small delay to ensure camera is fully stopped before restarting
+    setTimeout(() => {
       setCameraActive(true);
       setCaptureTarget(target);
+    }, 100);
+  };
+
+  const renderCameraOptions = (target, setImageFunction, currentImage) => {
+
+    // For selfie - all platforms use camera
+    if (target === "selfie" && isDesktop) {
+      return (
+        <div className="file-upload-container">
+          <button
+            onClick={() => handleCameraClick(target)}
+            className="identity-verification-button"
+          >
+            Take a Picture
+          </button>
+        </div>
+      );
+    }
+
+    // For documents - desktop gets file picker, mobile gets camera
+    if (isDesktop) {
+      return (
+        <div className="file-upload-container">
+          <button
+            onClick={() => handleCameraClick(target)}
+            className="identity-verification-button"
+          >
+            Take a Picture
+          </button>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => handleFileChange(e, setImageFunction)}
+            style={{ display: "none" }}
+            id={`${target}Input`}
+            onClick={() => stopCamera()}
+          />
+          <label
+            htmlFor={`${target}Input`}
+            className="identity-verification-button"
+          >
+            Choose File
+          </label>
+        </div>
+      );
+    }
+
+    // Mobile browsers get camera-only option for documents
+    if (isMobileBrowser) {
+      return (
+        <div className="file-upload-container">
+          <input
+            type="file"
+            accept="image/*"
+            capture="environment"
+            onChange={(e) => handleFileChange(e, setImageFunction)}
+            style={{ display: "none" }}
+            id={`${target}Input`}
+            onClick={() => stopCamera()}
+          />
+          <label
+            htmlFor={`${target}Input`}
+            className="identity-verification-button"
+          >
+            Take Picture
+          </label>
+        </div>
+      );
     }
   };
 
@@ -396,10 +480,6 @@ const IdentityVerification = () => {
               />
             </div>
 
-            {/* <button type="submit" className="identity-verification-button">
-              Continue to Verification
-            </button> */}
-
             <div className="form-group">
               <div className="idv-submit-button-container">
                 {uploading ? (
@@ -462,33 +542,8 @@ const IdentityVerification = () => {
               <div className="document-section">
                 <label>Front of Document:</label>
 
-                {(!cameraActive || captureTarget !== "front") && (
-                  <div className="file-upload-container">
-                    <button
-                      onClick={() => {
-                        handleCameraClick("front");
-                      }}
-                      className="identity-verification-button"
-                    >
-                      Take a Picture
-                    </button>
-
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => handleFileChange(e, setFrontImage)}
-                      style={{ display: "none" }}
-                      id="frontImageInput"
-                      onClick={() => stopCamera()}
-                    />
-                    <label
-                      htmlFor="frontImageInput"
-                      className="identity-verification-button"
-                    >
-                      Choose File
-                    </label>
-                  </div>
-                )}
+                {(!cameraActive || captureTarget !== "front") &&
+                  renderCameraOptions("front", setFrontImage, frontImage)}
                 {frontImage && <p>Front completed!</p>}
                 {cameraActive && captureTarget === "front" && (
                   <div>
@@ -519,32 +574,8 @@ const IdentityVerification = () => {
               {documentsWithBack.has(documentType) && (
                 <div className="document-section">
                   <label>Back of Document:</label>
-                  {(!cameraActive || captureTarget !== "back") && (
-                    <div className="file-upload-container">
-                      <button
-                        onClick={() => {
-                          handleCameraClick("back");
-                        }}
-                        className="identity-verification-button"
-                      >
-                        Take a Picture
-                      </button>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => handleFileChange(e, setBackImage)}
-                        style={{ display: "none" }}
-                        id="backImageInput"
-                        onClick={() => stopCamera()}
-                      />
-                      <label
-                        htmlFor="backImageInput"
-                        className="identity-verification-button"
-                      >
-                        Choose File
-                      </label>
-                    </div>
-                  )}
+                  {(!cameraActive || captureTarget !== "back") &&
+                    renderCameraOptions("back", setBackImage, backImage)}
                   {backImage && <p>Back completed!</p>}
                   {cameraActive && captureTarget === "back" && (
                     <div>
@@ -575,18 +606,8 @@ const IdentityVerification = () => {
 
               <div className="document-section">
                 <label>Selfie:</label>
-                {(!cameraActive || captureTarget !== "selfie") && (
-                  <div className="file-upload-container">
-                    <button
-                      onClick={() => {
-                        handleCameraClick("selfie");
-                      }}
-                      className="identity-verification-button"
-                    >
-                      Take a Picture
-                    </button>
-                  </div>
-                )}
+                {(!cameraActive || captureTarget !== "selfie") &&
+                  renderCameraOptions("selfie", setSelfieImage, selfieImage)}
                 {selfieImage && <p>Selfie completed!</p>}
                 {cameraActive && captureTarget === "selfie" && (
                   <div>
