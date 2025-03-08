@@ -3,6 +3,11 @@ import { useUser } from "../../../contexts/UserContext"; // Get user context
 import { sendImagesToAPI } from "../../../services/firebaseService"; // API request function
 import { redeemReferralCode, updateUser } from "../../../services/userService";
 import "../../../styles/components/userVerification/IdentityVerification.css";
+import {
+  formatDobDate,
+  handleDobDateSubmit,
+} from "../../../services/dateService";
+import Spinner from "../../common/Spinner";
 
 const documentTypes = [
   "Driver's License",
@@ -97,8 +102,8 @@ const IdentityVerification = () => {
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
   const [zip, setZip] = useState("");
+  const [formattedDate, setFormattedDate] = useState("");
   const [selectedDate, setSelectedDate] = useState("");
-
   // State to track if we need to collect user info
   const [needsUserInfo, setNeedsUserInfo] = useState(false);
 
@@ -275,7 +280,7 @@ const IdentityVerification = () => {
           state,
           zip,
         },
-        DOB: selectedDate,
+        DOB: formattedDate,
       });
       setUser({
         ...user,
@@ -286,7 +291,7 @@ const IdentityVerification = () => {
           state,
           zip,
         },
-        DOB: selectedDate,
+        DOB: formattedDate,
       });
       setNeedsUserInfo(false);
     } catch (error) {
@@ -374,20 +379,42 @@ const IdentityVerification = () => {
             <div className="form-group">
               <label>Date of Birth:</label>
               <input
-                type="date"
-                id="dateOfBirth"
-                name="dateOfBirth"
+                type="tel"
+                className="form-input"
                 value={selectedDate}
-                onChange={(e) => {console.log(e.target.value); setSelectedDate(e.target.value); }}
+                onChange={(e) => setSelectedDate(formatDobDate(e.target.value))}
+                placeholder="MM/DD/YYYY"
+                pattern="\d{2}/\d{2}/\d{4}"
+                maxLength="10"
+                onBlur={(e) => {
+                  const formatted = handleDobDateSubmit(e.target.value);
+                  if (formatted) setFormattedDate(formatted);
+                }}
+                name="bday"
+                autoComplete="bday"
                 required
-                placeholder="Date of Birth"
-                onFocus={(e) => e.target.showPicker()}
               />
             </div>
 
-            <button type="submit" className="identity-verification-button">
+            {/* <button type="submit" className="identity-verification-button">
               Continue to Verification
-            </button>
+            </button> */}
+
+            <div className="form-group">
+              <div className="idv-submit-button-container">
+                {uploading ? (
+                  <Spinner pageLoad={false} />
+                ) : (
+                  <button
+                    className="auth-button"
+                    disabled={uploading}
+                    type="submit"
+                  >
+                    Sign Up
+                  </button>
+                )}
+              </div>
+            </div>
           </form>
         </div>
       )}
@@ -589,13 +616,19 @@ const IdentityVerification = () => {
             </>
           )}
           {documentType !== "" && (
-            <button
-              onClick={handleUpload}
-              disabled={uploading}
-              className="identity-verification-button"
-            >
-              {uploading ? "Uploading..." : "Submit Verification"}
-            </button>
+            <div className="idv-submit-button-container">
+              {uploading ? (
+                <Spinner pageLoad={false} />
+              ) : (
+                <button
+                  onClick={handleUpload}
+                  disabled={uploading}
+                  className="identity-verification-button"
+                >
+                  Submit Verification
+                </button>
+              )}
+            </div>
           )}
         </div>
       )}

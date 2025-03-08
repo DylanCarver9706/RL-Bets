@@ -169,3 +169,12 @@
   filter: invert(1);
   cursor: pointer;
 }
+
+.idv-submit-button-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 36px;
+  margin-bottom: 1rem;
+  margin-top: 1.5rem;
+}
