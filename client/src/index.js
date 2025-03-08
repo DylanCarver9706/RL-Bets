@@ -6,6 +6,7 @@ import reportWebVitals from "./reportWebVitals";
 import { BrowserRouter, useNavigate } from "react-router-dom";
 import { UserProvider, useUser } from "./contexts/UserContext";
 import ErrorBoundary from "./components/features/errorHandling/ErrorBoundary";
+import ScrollToTop from "./components/common/ScrollToTop";
 
 // Capture console logs but prevent them from rendering on screen
 const capturedLogs = [];
@@ -47,6 +48,7 @@ const AppWithErrorBoundary = () => {
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <BrowserRouter>
+    <ScrollToTop />
     <UserProvider>
       {process.env.REACT_APP_ENV === "production" ? (
         <AppWithErrorBoundary />
