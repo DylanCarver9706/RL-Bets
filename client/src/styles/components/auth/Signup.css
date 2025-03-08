@@ -6,60 +6,34 @@
   gap: 0.5rem;
 }
 
-.signup-agreements-container {
+.signup-agreements {
+  margin: 1rem 0;
   display: flex;
-  gap: 1rem;
-  margin: 0.75rem auto;
-  width: 66.666%;
+  align-items: center;
   justify-content: center;
-}
-
-.signup-agreement-section {
-  flex: 1;
-  font-size: 0.85rem;
-  margin: 0;
-  text-align: center;
+  flex-wrap: wrap;
+  color: white;
+  font-size: 0.8rem;
 }
 
 .signup-agreement-link {
   color: #034da4;
   text-decoration: none;
-  display: block;
-  margin-bottom: 0.25rem;
-  font-size: 1.1rem;
+  font-size: 0.8rem;
+  margin: 0 0.25rem;
 }
 
 .signup-agreement-checkbox {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 0.25rem;
-  color: #888;
+  gap: 0.5rem;
+  color: white;
   font-size: 0.8rem;
 }
 
 .signup-agreement-checkbox input[type="checkbox"] {
   width: 14px;
   height: 14px;
-}
-
-@media (max-width: 768px) {
-  .signup-agreements-container {
-    width: 100%;
-    gap: 1.5rem;
-    max-width: 400px;
-    margin: 0.75rem auto;
-  }
-
-  .signup-agreement-section {
-    width: auto;
-    min-width: 120px;
-    text-align: center;
-  }
-
-  .signup-agreement-link {
-    font-size: 1rem;
-  }
 }
 
 .google-button {

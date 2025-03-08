@@ -16,6 +16,11 @@ import { analytics } from "../../../config/firebaseConfig";
 import Tooltip from "../../common/ToolTip";
 import { Link, useNavigate } from "react-router-dom";
 import "../../../styles/components/auth/Signup.css";
+import {
+  formatDobDate,
+  handleDobDateSubmit,
+} from "../../../services/dateService";
+import Spinner from "../../common/Spinner";
 
 const statesList = [
   "Alabama",
@@ -74,12 +79,11 @@ const Signup = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [name, setName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [referralCode, setReferralCode] = useState("");
-  const [tosClicked, setTosClicked] = useState(false);
-  const [ppClicked, setPpClicked] = useState(false);
   const [tosChecked, setTosChecked] = useState(false);
   const [ppChecked, setPpChecked] = useState(false);
   const [error, setError] = useState(null);
@@ -90,6 +94,7 @@ const Signup = () => {
   const [state, setState] = useState("");
   const [zip, setZip] = useState("");
   const [selectedDate, setSelectedDate] = useState("");
+  const [formattedDate, setFormattedDate] = useState("");
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -129,7 +134,7 @@ const Signup = () => {
 
       // Create the user in MongoDB
       const mongoUser = await createUserInDatabase({
-        name: name,
+        name: `${firstName} ${lastName}`,
         email: email,
         firebaseUserId: firebaseUser.uid,
         referralCode: referralCode,
@@ -167,7 +172,7 @@ const Signup = () => {
           state,
           zip,
         },
-        DOB: selectedDate,
+        DOB: formattedDate,
       });
 
       navigate("/Email-Verification");
@@ -181,7 +186,7 @@ const Signup = () => {
 
   const handleGoogleAuth = async () => {
     try {
-
+      setLoading(true);
       const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
       const firebaseUser = result.user;
@@ -257,6 +262,7 @@ const Signup = () => {
       navigate("/Sms-Verification");
     } catch (error) {
       console.error("Error during Google authentication:", error.message);
+      setLoading(false);
       alert("Failed to sign in with Google. Please try again.");
     }
   };
@@ -268,31 +274,35 @@ const Signup = () => {
         {error && <p className="error-message">{error}</p>}
 
         <div className="google-section">
-          <button
-            className="google-button"
-            onClick={handleGoogleAuth}
-            disabled={loading}
-          >
-            <svg className="google-icon" viewBox="0 0 18 18">
-              <path
-                fill="#4285f4"
-                d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"
-              ></path>
-              <path
-                fill="#34a853"
-                d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"
-              ></path>
-              <path
-                fill="#fbbc05"
-                d="M3.964 10.71c-.18-.54-.282-1.117-.282-1.71s.102-1.17.282-1.71V4.958H.957C.347 6.173 0 7.548 0 9s.348 2.827.957 4.042l3.007-2.332z"
-              ></path>
-              <path
-                fill="#ea4335"
-                d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"
-              ></path>
-            </svg>
-            Sign up with Google
-          </button>
+          {loading ? (
+            <Spinner pageLoad={false} />
+          ) : (
+            <button
+              className="google-button"
+              onClick={handleGoogleAuth}
+              disabled={loading}
+            >
+              <svg className="google-icon" viewBox="0 0 18 18">
+                <path
+                  fill="#4285f4"
+                  d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"
+                ></path>
+                <path
+                  fill="#34a853"
+                  d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"
+                ></path>
+                <path
+                  fill="#fbbc05"
+                  d="M3.964 10.71c-.18-.54-.282-1.117-.282-1.71s.102-1.17.282-1.71V4.958H.957C.347 6.173 0 7.548 0 9s.348 2.827.957 4.042l3.007-2.332z"
+                ></path>
+                <path
+                  fill="#ea4335"
+                  d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"
+                ></path>
+              </svg>
+              Sign up with Google
+            </button>
+          )}
         </div>
 
         <div className="divider-with-text">
@@ -301,17 +311,35 @@ const Signup = () => {
 
         <form className="auth-form" onSubmit={handleSubmit}>
           <div className="form-group">
-            <label>Name:</label>
+            <label>First Name:</label>
             <div className="form-input-container">
               <input
                 type="text"
                 className="form-input"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
                 placeholder="Zen"
+                name="given-name"
+                autoComplete="given-name"
                 required
               />
               <Tooltip infoText="Please use the name on your form of identification." />
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label>Last Name:</label>
+            <div className="form-input-container">
+              <input
+                type="text"
+                className="form-input"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                placeholder="Zen"
+                name="family-name"
+                autoComplete="family-name"
+                required
+              />
             </div>
           </div>
 
@@ -435,10 +463,19 @@ const Signup = () => {
           <div className="form-group">
             <label>Date of Birth:</label>
             <input
-              type="date"
+              type="tel"
               className="form-input"
               value={selectedDate}
-              onChange={(e) => setSelectedDate(e.target.value)}
+              onChange={(e) => setSelectedDate(formatDobDate(e.target.value))}
+              placeholder="MM/DD/YYYY"
+              pattern="\d{2}/\d{2}/\d{4}"
+              maxLength="10"
+              onBlur={(e) => {
+                const formatted = handleDobDateSubmit(e.target.value);
+                if (formatted) setFormattedDate(formatted);
+              }}
+              name="bday"
+              autoComplete="bday"
               required
             />
           </div>
@@ -453,8 +490,19 @@ const Signup = () => {
             />
           </div>
 
-          <div className="signup-agreements-container">
-            <div className="signup-agreement-section">
+          <div className="form-group">
+            <div className="signup-agreements">
+              <div className="signup-agreement-checkbox">
+                <input
+                  type="checkbox"
+                  checked={tosChecked && ppChecked}
+                  onChange={(e) => {
+                    setTosChecked(e.target.checked);
+                    setPpChecked(e.target.checked);
+                  }}
+                />
+                <span>I agree to the</span>
+              </div>
               <a
                 href="/Terms-Of-Service"
                 target="_blank"
@@ -462,7 +510,6 @@ const Signup = () => {
                 className="signup-agreement-link"
                 onClick={(e) => {
                   e.preventDefault();
-                  setTosClicked(true);
                   window.open(
                     "/Terms-Of-Service",
                     "_blank",
@@ -472,18 +519,7 @@ const Signup = () => {
               >
                 Terms of Service
               </a>
-              <label className="signup-agreement-checkbox">
-                <input
-                  type="checkbox"
-                  checked={tosChecked}
-                  onChange={(e) => setTosChecked(e.target.checked)}
-                  disabled={!tosClicked}
-                />
-                <span>I agree</span>
-              </label>
-            </div>
-
-            <div className="signup-agreement-section">
+              <span> and </span>
               <a
                 href="/Privacy-Policy"
                 target="_blank"
@@ -491,7 +527,6 @@ const Signup = () => {
                 className="signup-agreement-link"
                 onClick={(e) => {
                   e.preventDefault();
-                  setPpClicked(true);
                   window.open(
                     "/Privacy-Policy",
                     "_blank",
@@ -501,21 +536,24 @@ const Signup = () => {
               >
                 Privacy Policy
               </a>
-              <label className="signup-agreement-checkbox">
-                <input
-                  type="checkbox"
-                  checked={ppChecked}
-                  onChange={(e) => setPpChecked(e.target.checked)}
-                  disabled={!ppClicked}
-                />
-                <span>I agree</span>
-              </label>
             </div>
           </div>
 
-          <button className="auth-button" disabled={loading} type="submit">
-            {loading ? "Creating Account..." : "Sign Up"}
-          </button>
+          <div className="form-group">
+            <div className="submit-button-container">
+              {loading ? (
+                <Spinner pageLoad={false} />
+              ) : (
+                <button
+                  className="auth-button"
+                  disabled={loading}
+                  type="submit"
+                >
+                  Sign Up
+                </button>
+              )}
+            </div>
+          </div>
         </form>
         <div className="auth-links">
           <Link to="/Login" className="auth-link">
