@@ -18,7 +18,8 @@ export const generateLinkTokenForIDV = async (mongoUserId) => {
 
     return await response.json();
   } catch (error) {
-    console.error("Error generating Plaid Link token:", error);
+    if (process.env.ENV === "development")
+      console.error("Error generating Plaid Link token:", error);
     throw error;
   }
 };
@@ -37,7 +38,8 @@ export const completeIDV = async (idvSession) => {
 
     return await response.json();
   } catch (error) {
-    console.error("Error completing IDV:", error);
+    if (process.env.ENV === "development")
+      console.error("Error completing IDV:", error);
     throw error;
   }
 };
@@ -52,12 +54,14 @@ export const openPlaidIDV = async (linkToken) => {
           const result = await completeIDV(metadata.link_session_id);
           resolve(result);
         } catch (error) {
-          console.error("Error completing IDV:", error);
+          if (process.env.ENV === "development")
+            console.error("Error completing IDV:", error);
           reject(error);
         }
       },
       onExit: (err) => {
-        console.error("Exited IDV early:", err);
+        if (process.env.ENV === "development")
+          console.error("Exited IDV early:", err);
         reject(
           new Error(
             "Identity verification was not completed. Please try again."
@@ -88,7 +92,8 @@ export const analyzeDocument = async (formData) => {
     const data = await response.json();
     return data.result;
   } catch (error) {
-    console.error("Error analyzing image:", error);
+    if (process.env.ENV === "development")
+      console.error("Error analyzing image:", error);
     throw error;
   }
 };

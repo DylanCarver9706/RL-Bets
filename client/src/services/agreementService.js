@@ -15,7 +15,8 @@ export const getLatestPrivacyPolicy = async () => {
 
     return await response.json();
   } catch (err) {
-    console.error("Error fetching Privacy Policy:", err.message);
+    if (process.env.ENV === "development")
+      console.error("Error fetching Privacy Policy:", err.message);
     throw err;
   }
 };
@@ -35,7 +36,8 @@ export const getLatestTermsOfService = async () => {
 
     return await response.json();
   } catch (err) {
-    console.error("Error fetching Terms of Service:", err.message);
+    if (process.env.ENV === "development")
+      console.error("Error fetching Terms of Service:", err.message);
     throw err;
   }
 };

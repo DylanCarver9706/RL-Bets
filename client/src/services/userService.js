@@ -14,7 +14,8 @@ export const createUserInDatabase = async (userData) => {
 
     return await response.json();
   } catch (err) {
-    console.error("Error creating user in MongoDB:", err.message);
+    if (process.env.ENV === "development")
+      console.error("Error creating user in MongoDB:", err.message);
     throw err;
   }
 };
@@ -41,7 +42,8 @@ export const getMongoUserDataByFirebaseId = async (firebaseUserId) => {
 
     return data;
   } catch (err) {
-    console.error("Error fetching MongoDB user data:", err.message);
+    if (process.env.ENV === "development")
+      console.error("Error fetching MongoDB user data:", err.message);
     throw err;
   }
 };
@@ -60,7 +62,8 @@ export const updateUser = async (userId, updatedData) => {
 
     return await response.json();
   } catch (err) {
-    console.error("Error updating user:", err.message);
+    if (process.env.ENV === "development")
+      console.error("Error updating user:", err.message);
     throw err;
   }
 };
@@ -82,7 +85,8 @@ export const softDeleteUserStatusUpdate = async (mongoUserId) => {
 
     return await response.json();
   } catch (err) {
-    console.error("Error soft deleting user:", err.message);
+    if (process.env.ENV === "development")
+      console.error("Error soft deleting user:", err.message);
     throw err;
   }
 };
@@ -112,7 +116,8 @@ export const createCheckoutSession = async (
 
     return await response.json();
   } catch (err) {
-    console.error("Purchase Failed:", err.message);
+    if (process.env.ENV === "development")
+      console.error("Purchase Failed:", err.message);
     throw err;
   }
 };
@@ -129,7 +134,8 @@ export const getWagers = async () => {
 
     return await response.json();
   } catch (err) {
-    console.error("Error fetching wagers:", err.message);
+    if (process.env.ENV === "development")
+      console.error("Error fetching wagers:", err.message);
     throw err;
   }
 };
@@ -147,7 +153,8 @@ export const getLogs = async () => {
 
     return await response.json();
   } catch (err) {
-    console.error("Error fetching logs:", err.message);
+    if (process.env.ENV === "development")
+      console.error("Error fetching logs:", err.message);
     throw err;
   }
 };
@@ -169,7 +176,8 @@ export const userAgeLegal = async (state, DOB) => {
     const data = await response.json();
     return data.isAllowed;
   } catch (err) {
-    console.error("Error validating age:", err.message);
+    if (process.env.ENV === "development")
+      console.error("Error validating age:", err.message);
     return false;
   }
 };
@@ -199,13 +207,13 @@ export const redeemReferralCode = async (
 
     return await response.json();
   } catch (err) {
-    console.error("Error redeeming referral code:", err.message);
+    if (process.env.ENV === "development")
+      console.error("Error redeeming referral code:", err.message);
     return false;
   }
 };
 
 export const generateReferralCode = async (userId) => {
-  
   let BASE_CLIENT_URL;
   if (process.env.REACT_APP_ENV === "production") {
     BASE_CLIENT_URL = process.env.REACT_APP_BASE_PROD_CLIENT_URL;
@@ -235,7 +243,8 @@ export const fetchTransactionHistory = async (userId) => {
 
     return await response.json();
   } catch (err) {
-    console.error("Error fetching transaction history:", err.message);
+    if (process.env.ENV === "development")
+      console.error("Error fetching transaction history:", err.message);
     return [];
   }
 };
@@ -253,7 +262,8 @@ export const fetchUserNotificationLogs = async (userId) => {
 
     return await response.json();
   } catch (err) {
-    console.error("Error fetching user notification logs:", err.message);
+    if (process.env.ENV === "development")
+      console.error("Error fetching user notification logs:", err.message);
     return [];
   }
 };
@@ -274,7 +284,8 @@ export const dismissNotification = async (notificationId) => {
 
     return await response.json();
   } catch (err) {
-    console.error("Error dismissing notification:", err.message);
+    if (process.env.ENV === "development")
+      console.error("Error dismissing notification:", err.message);
     return false;
   }
 };

@@ -23,30 +23,41 @@ export const getUserStateByLatLon = async (lat, lon) => {
 
     return data;
   } catch (err) {
-    console.error("Error validating state:", err.message);
+    if (process.env.ENV === "development")
+      console.error("Error validating state:", err.message);
     throw err;
   }
 };
 
 export const userLocationLegal = async () => {
   if (!navigator.geolocation) {
-    console.log("Geolocation is not supported by your browser.");
+    if (process.env.ENV === "development")
+      console.log("Geolocation is not supported by your browser.");
     return;
   }
 
   try {
-    const { coords: { latitude, longitude } } = await getUserLocation();
-    const reverseGeocodeResponse = await getUserStateByLatLon(latitude, longitude);
-    
+    const {
+      coords: { latitude, longitude },
+    } = await getUserLocation();
+    const reverseGeocodeResponse = await getUserStateByLatLon(
+      latitude,
+      longitude
+    );
+
     let response = {
-      allowed: reverseGeocodeResponse?.allowed, 
-      state: reverseGeocodeResponse?.state
+      allowed: reverseGeocodeResponse?.allowed,
+      state: reverseGeocodeResponse?.state,
     };
-    
+
     return response;
   } catch (error) {
-    console.error("Error checking user location:", error.message);
-    console.log("Unable to determine your location. Location access is required.");
+    if (process.env.ENV === "development")
+      console.error("Error checking user location:", error.message);
+    if (process.env.ENV === "development")
+      console.log(
+        "Unable to determine your location. Location access is required."
+      );
   }
 };
 
@@ -57,7 +68,9 @@ export const checkGeolocationPermission = async () => {
   }
 
   try {
-    const permissionStatus = await navigator.permissions.query({ name: "geolocation" });
+    const permissionStatus = await navigator.permissions.query({
+      name: "geolocation",
+    });
 
     if (permissionStatus.state === "denied") {
       return false;
@@ -74,7 +87,8 @@ export const checkGeolocationPermission = async () => {
 
     return permissionStatus.state === "granted";
   } catch (error) {
-    console.error("Error checking geolocation permission:", error);
+    if (process.env.ENV === "development")
+      console.error("Error checking geolocation permission:", error);
     return false;
   }
-}; 
+};

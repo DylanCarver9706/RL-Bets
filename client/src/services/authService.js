@@ -29,7 +29,8 @@ export const makeAuthenticatedRequest = async (endpoint, options = {}) => {
 
     return response;
   } catch (error) {
-    console.error("Request failed:", error);
+    if (process.env.ENV === "development")
+      console.error("Request failed:", error);
     throw error;
   }
 };

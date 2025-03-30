@@ -15,7 +15,8 @@ export const fetchWagers = async () => {
 
     return await response.json();
   } catch (err) {
-    console.error("Error fetching wagers:", err.message);
+    if (process.env.ENV === "development")
+      console.error("Error fetching wagers:", err.message);
     throw err;
   }
 };
@@ -34,7 +35,8 @@ export const createWager = async (wagerData) => {
 
     return await response.json();
   } catch (err) {
-    console.error("Error creating wager:", err.message);
+    if (process.env.ENV === "development")
+      console.error("Error creating wager:", err.message);
     throw err;
   }
 };
@@ -53,7 +55,8 @@ export const createBet = async (betData) => {
 
     return await response.json();
   } catch (err) {
-    console.error("Error creating bet:", err.message);
+    if (process.env.ENV === "development")
+      console.error("Error creating bet:", err.message);
     throw err;
   }
 };
@@ -91,7 +94,8 @@ export const fetchTeams = async () => {
 
     return data;
   } catch (err) {
-    console.error("Error fetching teams:", err.message);
+    if (process.env.ENV === "development")
+      console.error("Error fetching teams:", err.message);
     throw err;
   }
 };
@@ -110,7 +114,8 @@ export const fetchBettableObjects = async () => {
     const data = await response.json();
     return data;
   } catch (err) {
-    console.error("Error fetching data tree:", err.message);
+    if (process.env.ENV === "development")
+      console.error("Error fetching data tree:", err.message);
     throw err;
   }
 };

@@ -13,7 +13,8 @@ export const fetchAllTournamentsDataTree = async () => {
 
     return await response.json();
   } catch (err) {
-    console.error("Error fetching tournament data tree:", err.message);
+    if (process.env.ENV === "development")
+      console.error("Error fetching tournament data tree:", err.message);
     throw err;
   }
 };
@@ -31,7 +32,11 @@ export const fetchCurrentTournamentDataTree = async () => {
 
     return await response.json();
   } catch (err) {
-    console.error("Error fetching current tournament data tree:", err.message);
+    if (process.env.ENV === "development")
+      console.error(
+        "Error fetching current tournament data tree:",
+        err.message
+      );
     throw err;
   }
 };
@@ -49,7 +54,8 @@ export const updateTournamentById = async (id, updateData) => {
 
     return await response.json();
   } catch (err) {
-    console.error(`Error updating tournament with ID ${id}:`, err.message);
+    if (process.env.ENV === "development")
+      console.error(`Error updating tournament with ID ${id}:`, err.message);
     throw err;
   }
 };

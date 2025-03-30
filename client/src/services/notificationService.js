@@ -6,14 +6,15 @@ export const fetchUserNotificationLogs = async (userId) => {
       `/api/logs/notifications/user/${userId}`,
       { method: "GET" }
     );
-    
+
     if (!response.ok) {
       throw new Error("Failed to fetch user notification logs.");
     }
-    
+
     return await response.json();
   } catch (err) {
-    console.error("Error fetching user notification logs:", err.message);
+    if (process.env.ENV === "development")
+      console.error("Error fetching user notification logs:", err.message);
     return [];
   }
 };
@@ -27,14 +28,15 @@ export const dismissNotification = async (notificationId) => {
         body: JSON.stringify({ cleared: true }),
       }
     );
-    
+
     if (!response.ok) {
       throw new Error("Failed to dismiss notification.");
     }
-    
+
     return await response.json();
   } catch (err) {
-    console.error("Error dismissing notification:", err.message);
+    if (process.env.ENV === "development")
+      console.error("Error dismissing notification:", err.message);
     return false;
   }
-}; 
+};

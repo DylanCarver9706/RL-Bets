@@ -84,9 +84,12 @@ function App() {
       if (firebaseUser?.uid) {
         try {
           const idToken = await firebaseUser.getIdToken();
-          console.log("Firebase ID token:", idToken);
+          if (process.env.ENV === "development")
+            if (process.env.ENV === "development")
+              console.log("Firebase ID token:", idToken);
           if (!idToken) {
-            console.warn("ID token not available");
+            if (process.env.ENV === "development")
+              console.warn("ID token not available");
             return;
           }
 
@@ -95,8 +98,10 @@ function App() {
             firebaseUser.uid
           );
 
-          console.log("Mongo User:", mongoUser);
-          console.log("firebaseUser", firebaseUser);
+          if (process.env.ENV === "development")
+            console.log("Mongo User:", mongoUser);
+          if (process.env.ENV === "development")
+            console.log("firebaseUser", firebaseUser);
 
           const userLocationMeta = await userLocationLegal();
 
@@ -161,7 +166,7 @@ function App() {
         return;
       }
 
-      console.log("User:", user);
+      if (process.env.ENV === "development") console.log("User:", user);
 
       // Check current path
       const currentPath = window.location.pathname;

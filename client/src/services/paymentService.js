@@ -24,7 +24,8 @@ export const createCheckoutSession = async (
 
     return await response.json();
   } catch (err) {
-    console.error("Purchase Failed:", err.message);
+    if (process.env.ENV === "development")
+      console.error("Purchase Failed:", err.message);
     throw err;
   }
 };
@@ -44,7 +45,8 @@ export const fetchTransactionHistory = async (userId) => {
 
     return await response.json();
   } catch (err) {
-    console.error("Error fetching transaction history:", err.message);
+    if (process.env.ENV === "development")
+      console.error("Error fetching transaction history:", err.message);
     return [];
   }
 };

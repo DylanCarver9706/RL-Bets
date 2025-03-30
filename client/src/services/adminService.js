@@ -16,7 +16,8 @@ export const fetchAllTournamentsDataTree = async () => {
 
     return await response.json();
   } catch (err) {
-    console.error("Error fetching tournament data tree:", err.message);
+    if (process.env.ENV === "development")
+      console.error("Error fetching tournament data tree:", err.message);
     throw err;
   }
 };
@@ -34,7 +35,11 @@ export const fetchCurrentTournamentDataTree = async () => {
 
     return await response.json();
   } catch (err) {
-    console.error("Error fetching current tournament data tree:", err.message);
+    if (process.env.ENV === "development")
+      console.error(
+        "Error fetching current tournament data tree:",
+        err.message
+      );
     throw err;
   }
 };
@@ -52,7 +57,8 @@ export const fetchEndedTournamentDataTree = async () => {
 
     return await response.json();
   } catch (err) {
-    console.error("Error fetching ended tournament data tree:", err.message);
+    if (process.env.ENV === "development")
+      console.error("Error fetching ended tournament data tree:", err.message);
     throw err;
   }
 };
@@ -70,7 +76,8 @@ export const fetchAllEventsDataTree = async () => {
 
     return await response.json();
   } catch (err) {
-    console.error("Error fetching all events data tree:", err.message);
+    if (process.env.ENV === "development")
+      console.error("Error fetching all events data tree:", err.message);
     throw err;
   }
 };
@@ -88,7 +95,8 @@ export const fetchCurrentEventsDataTree = async () => {
 
     return await response.json();
   } catch (err) {
-    console.error("Error fetching current events data tree:", err.message);
+    if (process.env.ENV === "development")
+      console.error("Error fetching current events data tree:", err.message);
     throw err;
   }
 };
@@ -125,7 +133,8 @@ export const fetchPlayers = async () => {
 
     return data;
   } catch (err) {
-    console.error("Error fetching all players:", err.message);
+    if (process.env.ENV === "development")
+      console.error("Error fetching all players:", err.message);
     throw err;
   }
 };
@@ -144,7 +153,8 @@ const updateDocumentById = async (endpoint, id, updateData) => {
 
     return await response.json();
   } catch (err) {
-    console.error(`Error updating ${endpoint} with ID ${id}:`, err.message);
+    if (process.env.ENV === "development")
+      console.error(`Error updating ${endpoint} with ID ${id}:`, err.message);
     throw err;
   }
 };
@@ -182,10 +192,11 @@ export const updateMatchResults = async (matchId, updateData) => {
 
     return await response.json();
   } catch (err) {
-    console.error(
-      `Error updating match results for match ID ${matchId}:`,
-      err.message
-    );
+    if (process.env.ENV === "development")
+      console.error(
+        `Error updating match results for match ID ${matchId}:`,
+        err.message
+      );
     throw err;
   }
 };
@@ -203,7 +214,8 @@ export const createSeries = async (seriesData) => {
 
     return await response.json();
   } catch (err) {
-    console.error("Error creating series:", err.message);
+    if (process.env.ENV === "development")
+      console.error("Error creating series:", err.message);
     throw err;
   }
 };
@@ -224,10 +236,11 @@ export const updateFirstBlood = async (matchId, updateData) => {
 
     return await response.json();
   } catch (err) {
-    console.error(
-      `Error updating first blood for match ID ${matchId}:`,
-      err.message
-    );
+    if (process.env.ENV === "development")
+      console.error(
+        `Error updating first blood for match ID ${matchId}:`,
+        err.message
+      );
     throw err;
   }
 };
@@ -244,7 +257,8 @@ export const getUsers = async () => {
 
     return await response.json();
   } catch (err) {
-    console.error("Error fetching users:", err.message);
+    if (process.env.ENV === "development")
+      console.error("Error fetching users:", err.message);
     throw err;
   }
 };
@@ -265,7 +279,8 @@ export const sendEmailToUsers = async (users, subject, body) => {
 
     return await response.json();
   } catch (err) {
-    console.error("Error sending admin email:", err.message);
+    if (process.env.ENV === "development")
+      console.error("Error sending admin email:", err.message);
     throw err;
   }
 };
@@ -286,7 +301,8 @@ export const validateUserIdv = async (userData) => {
 
     return await response.json();
   } catch (err) {
-    console.error("Error validating user idv:", err.message);
+    if (process.env.ENV === "development")
+      console.error("Error validating user idv:", err.message);
     return false;
   }
 };
@@ -303,7 +319,8 @@ export const fetchProducts = async () => {
 
     return await response.json();
   } catch (err) {
-    console.error("Error fetching all products:", err.message);
+    if (process.env.ENV === "development")
+      console.error("Error fetching all products:", err.message);
     throw err;
   }
 };

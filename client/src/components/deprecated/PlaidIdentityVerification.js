@@ -65,7 +65,7 @@ const PlaidIdentityVerification = () => {
         await wait(3000);
         window.location.reload();
       } else {
-        console.log("IDV failed");
+        if (process.env.ENV === "development") console.log("IDV failed");
         // Create Jira issue if IDV fails and alert user
         if (user.idvStatus !== "pending review") {
           await updateUser(user.mongoUserId, { idvStatus: "pending review" });
