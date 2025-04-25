@@ -83,7 +83,8 @@ const Agreements = () => {
     return null;
   }
 
-  console.log(requireTos, requirePp);
+  if (process.env.REACT_APP_ENV === "development")
+    console.log(requireTos, requirePp);
 
   return (
     <div className="agreements-container">

@@ -11,11 +11,12 @@ const EmailVerification = () => {
 
   useEffect(() => {
     const checkEmailVerification = async () => {
-      console.log(
-        "Polling user for email verification. firebaseUser:",
-        auth.currentUser,
-        "User:",
-        user
+      if (process.env.REACT_APP_ENV === "development")
+        console.log(
+          "Polling user for email verification. firebaseUser:",
+          auth.currentUser,
+          "User:",
+          user
       );
 
       // Checking if the user is authenticated and has had their email verified

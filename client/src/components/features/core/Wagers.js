@@ -201,7 +201,8 @@ const Wagers = () => {
     setCreditsWagered(parseInt(user?.credits / 10));
     setShowBetInput(true);
 
-    console.log("wager", wager);
+    if (process.env.REACT_APP_ENV === "development")
+      console.log("wager", wager);
     setSelectedWager(wager);
     setWagerCaseSelected(agreeBet);
 

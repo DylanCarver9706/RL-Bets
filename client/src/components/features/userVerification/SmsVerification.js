@@ -65,7 +65,6 @@ const PhoneVerification = () => {
   const sendOtp = async (number) => {
     try {
       setLoading(true);
-      console.log(number);
       setError("");
       if (!recaptchaVerifier) {
         throw new Error("reCAPTCHA not initialized");
