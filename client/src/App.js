@@ -318,7 +318,6 @@ function App() {
           <Route path="/Instructions" element={<Instructions />} />
           <Route path="/About" element={<About />} />
           <Route path="/Contact" element={<Contact />} />
-          <Route path="/Profile" element={<Profile />} />
           {/* Catch-all route for undefined paths */}
           <Route path="*" element={<PageNotFound />} />
 
@@ -336,6 +335,14 @@ function App() {
             element={
               <PrivateRoute authorized={loggedIn}>
                 <CreateWager />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/Profile"
+            element={
+              <PrivateRoute authorized={loggedIn}>
+                <Profile />
               </PrivateRoute>
             }
           />
