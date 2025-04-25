@@ -13,7 +13,7 @@ export const fetchUserNotificationLogs = async (userId) => {
 
     return await response.json();
   } catch (err) {
-    if (process.env.ENV === "development")
+    if (process.env.REACT_APP_ENV === "development")
       console.error("Error fetching user notification logs:", err.message);
     return [];
   }
@@ -35,7 +35,7 @@ export const dismissNotification = async (notificationId) => {
 
     return await response.json();
   } catch (err) {
-    if (process.env.ENV === "development")
+    if (process.env.REACT_APP_ENV === "development")
       console.error("Error dismissing notification:", err.message);
     return false;
   }

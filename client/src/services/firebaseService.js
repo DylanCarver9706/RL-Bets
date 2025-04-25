@@ -13,7 +13,7 @@ export const getFirebaseIdToken = async () => {
     }
     return await currentUser.getIdToken();
   } catch (error) {
-    if (process.env.ENV === "development")
+    if (process.env.REACT_APP_ENV === "development")
       console.error("Error getting Firebase ID token:", error);
     return null;
   }
@@ -40,14 +40,14 @@ export const sendImagesToAPI = async (formData) => {
 
     if (!response.ok) {
       const errorData = await response.json();
-      if (process.env.ENV === "development")
+      if (process.env.REACT_APP_ENV === "development")
         console.error("Upload error:", errorData);
       throw new Error("Failed to upload images to server.");
     }
 
     return await response.json();
   } catch (error) {
-    if (process.env.ENV === "development")
+    if (process.env.REACT_APP_ENV === "development")
       console.error("Error uploading images to API:", error);
     throw error;
   }
@@ -67,7 +67,7 @@ export const fetchIdentityVerificationImages = async () => {
     const data = await response.json();
     return data.images;
   } catch (error) {
-    if (process.env.ENV === "development")
+    if (process.env.REACT_APP_ENV === "development")
       console.error("Error fetching images:", error);
     throw error;
   }
@@ -89,7 +89,7 @@ export const deleteUserIdvFiles = async (userId) => {
 
     return await response.json();
   } catch (error) {
-    if (process.env.ENV === "development")
+    if (process.env.REACT_APP_ENV === "development")
       console.error("Error deleting ID verification files:", error);
     throw error;
   }

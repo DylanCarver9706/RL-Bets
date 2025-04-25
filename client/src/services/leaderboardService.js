@@ -13,7 +13,7 @@ export const fetchCurrentLeaderboard = async () => {
 
     return await response.json();
   } catch (err) {
-    if (process.env.ENV === "development")
+    if (process.env.REACT_APP_ENV === "development")
       console.error("Error fetching current leaderboard data:", err.message);
     throw err;
   }
@@ -32,7 +32,7 @@ export const fetchCurrentTournament = async () => {
 
     return await response.json();
   } catch (err) {
-    if (process.env.ENV === "development")
+    if (process.env.REACT_APP_ENV === "development")
       console.error("Error fetching current tournaments data:", err.message);
     throw err;
   }
@@ -51,7 +51,7 @@ export const fetchLifetimeLeaderboard = async () => {
 
     return await response.json();
   } catch (err) {
-    if (process.env.ENV === "development")
+    if (process.env.REACT_APP_ENV === "development")
       console.error("Error fetching lifetime leaderboard data:", err.message);
     throw err;
   }

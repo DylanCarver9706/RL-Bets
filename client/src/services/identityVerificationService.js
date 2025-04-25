@@ -18,7 +18,7 @@ export const generateLinkTokenForIDV = async (mongoUserId) => {
 
     return await response.json();
   } catch (error) {
-    if (process.env.ENV === "development")
+    if (process.env.REACT_APP_ENV === "development")
       console.error("Error generating Plaid Link token:", error);
     throw error;
   }
@@ -38,7 +38,7 @@ export const completeIDV = async (idvSession) => {
 
     return await response.json();
   } catch (error) {
-    if (process.env.ENV === "development")
+    if (process.env.REACT_APP_ENV === "development")
       console.error("Error completing IDV:", error);
     throw error;
   }
@@ -54,13 +54,13 @@ export const openPlaidIDV = async (linkToken) => {
           const result = await completeIDV(metadata.link_session_id);
           resolve(result);
         } catch (error) {
-          if (process.env.ENV === "development")
+          if (process.env.REACT_APP_ENV === "development")
             console.error("Error completing IDV:", error);
           reject(error);
         }
       },
       onExit: (err) => {
-        if (process.env.ENV === "development")
+        if (process.env.REACT_APP_ENV === "development")
           console.error("Exited IDV early:", err);
         reject(
           new Error(
@@ -92,7 +92,7 @@ export const analyzeDocument = async (formData) => {
     const data = await response.json();
     return data.result;
   } catch (error) {
-    if (process.env.ENV === "development")
+    if (process.env.REACT_APP_ENV === "development")
       console.error("Error analyzing image:", error);
     throw error;
   }

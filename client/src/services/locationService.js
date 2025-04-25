@@ -23,7 +23,7 @@ export const getUserStateByLatLon = async (lat, lon) => {
 
     return data;
   } catch (err) {
-    if (process.env.ENV === "development")
+    if (process.env.REACT_APP_ENV === "development")
       console.error("Error validating state:", err.message);
     throw err;
   }
@@ -31,7 +31,7 @@ export const getUserStateByLatLon = async (lat, lon) => {
 
 export const userLocationLegal = async () => {
   if (!navigator.geolocation) {
-    if (process.env.ENV === "development")
+    if (process.env.REACT_APP_ENV === "development")
       console.log("Geolocation is not supported by your browser.");
     return;
   }
@@ -52,9 +52,9 @@ export const userLocationLegal = async () => {
 
     return response;
   } catch (error) {
-    if (process.env.ENV === "development")
+    if (process.env.REACT_APP_ENV === "development")
       console.error("Error checking user location:", error.message);
-    if (process.env.ENV === "development")
+    if (process.env.REACT_APP_ENV === "development")
       console.log(
         "Unable to determine your location. Location access is required."
       );
@@ -87,7 +87,7 @@ export const checkGeolocationPermission = async () => {
 
     return permissionStatus.state === "granted";
   } catch (error) {
-    if (process.env.ENV === "development")
+    if (process.env.REACT_APP_ENV === "development")
       console.error("Error checking geolocation permission:", error);
     return false;
   }

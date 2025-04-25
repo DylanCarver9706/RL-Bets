@@ -29,7 +29,7 @@ export const createJiraIssue = async (
 
     return response;
   } catch (error) {
-    if (process.env.ENV === "development")
+    if (process.env.REACT_APP_ENV === "development")
       console.error("Error:", error.message);
     throw new Error("Failed to create Jira issue.");
   }

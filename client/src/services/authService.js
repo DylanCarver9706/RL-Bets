@@ -29,7 +29,7 @@ export const makeAuthenticatedRequest = async (endpoint, options = {}) => {
 
     return response;
   } catch (error) {
-    if (process.env.ENV === "development")
+    if (process.env.REACT_APP_ENV === "development")
       console.error("Request failed:", error);
     throw error;
   }
