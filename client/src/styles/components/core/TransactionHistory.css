@@ -11,6 +11,15 @@
   margin-bottom: 1rem;
 }
 
+.no-transactions-message {
+  text-align: center;
+  color: #888;
+  font-style: italic;
+  background: #333;
+  border-radius: 8px;
+  margin: 1rem 0;
+}
+
 .table-wrapper {
   width: 100%;
   overflow-x: auto;

@@ -44,62 +44,70 @@ const TransactionHistory = () => {
   return (
     <div className="transaction-container">
       <h2 className="transaction-header">Transaction History</h2>
-      <div className="table-wrapper">
-        <table className="transaction-table">
-          <thead>
-            <tr>
-              <th></th>
-              <th>Credits</th>
-              <th>Type</th>
-              <th>Date</th>
-            </tr>
-          </thead>
-          <tbody>
-            {transactions.map((transaction, index) => (
-              <React.Fragment key={index}>
-                <tr>
-                  <td className="expand-cell">
-                    {transaction.type === "payout" && transaction.wager && (
-                      <button
-                        className={`expand-button ${expandedRows.has(index) ? 'active' : ''}`}
-                        onClick={() => toggleRow(index)}
-                      >
-                        {expandedRows.has(index) ? "▼" : "▶"}
-                      </button>
+      {transactions.length === 0 ? (
+        <div className="no-transactions-message">
+          No transactions to display
+        </div>
+      ) : (
+        <div className="table-wrapper">
+          <table className="transaction-table">
+            <thead>
+              <tr>
+                <th></th>
+                <th>Credits</th>
+                <th>Type</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {transactions.map((transaction, index) => (
+                <React.Fragment key={index}>
+                  <tr>
+                    <td className="expand-cell">
+                      {transaction.type === "payout" && transaction.wager && (
+                        <button
+                          className={`expand-button ${
+                            expandedRows.has(index) ? "active" : ""
+                          }`}
+                          onClick={() => toggleRow(index)}
+                        >
+                          {expandedRows.has(index) ? "▼" : "▶"}
+                        </button>
+                      )}
+                    </td>
+                    <td
+                      className={`transaction-amount ${
+                        ["payout", "purchase"].includes(transaction.type)
+                          ? "amount-positive"
+                          : "amount-negative"
+                      }`}
+                    >
+                      {["payout", "purchase"].includes(transaction.type)
+                        ? "+"
+                        : "-"}
+                      {parseFloat(transaction.credits).toFixed(2)}
+                    </td>
+                    <td className="transaction-type">
+                      {capitalize(transaction.type)}
+                    </td>
+                    <td>{formatDate(transaction.createdAt)}</td>
+                  </tr>
+                  {transaction.type === "payout" &&
+                    transaction.wager &&
+                    expandedRows.has(index) && (
+                      <tr className="expanded-row">
+                        <td></td>
+                        <td colSpan="3" className="wager-details">
+                          {transaction.wager}
+                        </td>
+                      </tr>
                     )}
-                  </td>
-                  <td
-                    className={`transaction-amount ${
-                      ["payout", "purchase"].includes(transaction.type)
-                        ? "amount-positive"
-                        : "amount-negative"
-                    }`}
-                  >
-                    {["payout", "purchase"].includes(transaction.type)
-                      ? "+"
-                      : "-"}
-                    {parseFloat(transaction.credits).toFixed(2)}
-                  </td>
-                  <td className="transaction-type">
-                    {capitalize(transaction.type)}
-                  </td>
-                  <td>{formatDate(transaction.createdAt)}</td>
-                </tr>
-                {transaction.type === "payout" &&
-                  transaction.wager &&
-                  expandedRows.has(index) && (
-                    <tr className="expanded-row">
-                      <td></td>
-                      <td colSpan="3" className="wager-details">
-                        {transaction.wager}
-                      </td>
-                    </tr>
-                  )}
-              </React.Fragment>
-            ))}
-          </tbody>
-        </table>
-      </div>
+                </React.Fragment>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 };
