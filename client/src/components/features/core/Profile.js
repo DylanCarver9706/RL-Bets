@@ -26,8 +26,6 @@ const Profile = () => {
   const [copySuccess, setCopySuccess] = useState(false);
   const navigate = useNavigate();
 
-  console.log("User in Profile:", user);
-
   const updateUserMeta = async () => {
     try {
       let updatedUserFields = {};
@@ -132,10 +130,18 @@ const Profile = () => {
 
   const handleResetPassword = async () => {
     try {
-      await sendPasswordResetEmail(auth, user.email);
-      await signOut(auth); // Firebase sign-out
-      navigate("/Login");
-      alert("Password reset email sent successfully.");
+      if (
+        user.emailVerificationStatus === "verified" &&
+        user.smsVerificationStatus === "verified" &&
+        user.idvStatus === "verified"
+      ) {
+        await sendPasswordResetEmail(auth, user.email);
+        await signOut(auth); // Firebase sign-out
+        navigate("/Login");
+        alert("Password reset email sent successfully.");
+      } else {
+        alert("Please verify your email, phone number, and identity before resetting your password.");
+      }
     } catch (error) {
       console.error("Error sending password reset email:", error.message);
       alert("Failed to send password reset email. Please try again.");
@@ -152,6 +158,23 @@ const Profile = () => {
     } catch (error) {
       setCopySuccess("Failed to copy!");
       console.error("Failed to copy text:", error);
+    }
+  };
+
+  const handleEditProfileClick = async () => {
+    try {
+      if (
+        user.emailVerificationStatus === "verified" &&
+        user.smsVerificationStatus === "verified" &&
+        user.idvStatus === "verified"
+      ) {
+        setEditing(true);
+      } else {
+        alert("Please verify your email, phone number, and identity before editing your profile.");
+      }
+    } catch (error) {
+      console.error("Failed to edit profile:", error);
+      alert("Failed to edit profile. Please try again.");
     }
   };
 
@@ -204,7 +227,7 @@ const Profile = () => {
                   <div className="user-info-container">
                     <button
                       className="edit-icon-button"
-                      onClick={() => setEditing(true)}
+                      onClick={handleEditProfileClick}
                       aria-label="Edit profile"
                     />
                     <div className="info-row">
