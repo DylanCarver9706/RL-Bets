@@ -66,7 +66,7 @@ const Profile = () => {
         alert(
           "Please confirm the new email by clicking the link in the email we've sent. Then log back in."
         );
-        navigate("/Login");
+        navigate("/login");
       } else {
         return;
       }
@@ -75,7 +75,7 @@ const Profile = () => {
         alert(
           "Email updates require a recent login. Please log in again and retry."
         );
-        navigate("/Login");
+        navigate("/login");
       }
       console.error("Error updating user email:", err.message);
       alert("Failed to update user email. Please try again.");
@@ -101,14 +101,14 @@ const Profile = () => {
       await deleteUser(auth.currentUser);
       setUser(null);
       alert("Your account has been successfully deleted.");
-      navigate("/Signup");
+      navigate("/signup");
     } catch (err) {
       if (err.code === "auth/requires-recent-login") {
         await updateUser(user.mongoUserId, { accountStatus: "active" });
         alert(
           "Account deletion requires recent login. Please log in again and try again."
         );
-        navigate("/Login");
+        navigate("/login");
       } else {
         await updateUser(user.mongoUserId, { accountStatus: "active" });
         console.error("Error deleting user account:", err.message);
@@ -122,7 +122,7 @@ const Profile = () => {
   const handleLogout = async () => {
     try {
       await signOut(auth); // Firebase sign-out
-      navigate("/Login");
+      navigate("/login");
     } catch (error) {
       console.error("Error logging out:", error.message);
     }
@@ -137,7 +137,7 @@ const Profile = () => {
       ) {
         await sendPasswordResetEmail(auth, user.email);
         await signOut(auth); // Firebase sign-out
-        navigate("/Login");
+        navigate("/login");
         alert("Password reset email sent successfully.");
       } else {
         alert("Please verify your email, phone number, and identity before resetting your password.");
@@ -290,7 +290,7 @@ const Profile = () => {
                 )}
                 <button
                   className="profile-button edit-button"
-                  onClick={() => navigate("/Instructions")}
+                  onClick={() => navigate("/instructions")}
                 >
                   How to Play
                 </button>

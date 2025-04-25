@@ -75,11 +75,11 @@ class ErrorBoundary extends React.Component {
 
   render() {
     if (this.state.outage && !this.state.hasError) {
-      return <Navigate to="/App-Outage" replace />;
+      return <Navigate to="/app-outage" replace />;
     }
 
     if (this.state.hasError) {
-      return <Navigate to="/Whoopsie-Daisy" replace />;
+      return <Navigate to="/whoopsie-daisy" replace />;
     }
 
     return this.props.children;

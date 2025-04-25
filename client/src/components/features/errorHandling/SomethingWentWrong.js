@@ -6,7 +6,7 @@ const SomethingWentWrong = () => {
   const navigate = useNavigate();
 
   const handleReportProblem = () => {
-    navigate("/Bug-Form");
+    navigate("/bug-form");
   };
 
   return (

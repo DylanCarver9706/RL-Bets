@@ -55,7 +55,7 @@ const FeatureForm = () => {
         setPriority("");
         setRelatedFeatures("");
         setAdditionalDetails("");
-        navigate("/Wagers");
+        navigate("/wagers");
       }
     } catch (error) {
       alert("Failed to submit feature request. Please try again.");

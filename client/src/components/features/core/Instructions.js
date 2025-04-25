@@ -62,7 +62,7 @@ const Instructions = () => {
     if (user) {
       await updateUser(user.mongoUserId, { viewedInstructions: true });
       setUser({ ...user, viewedInstructions: true });
-      navigate("/Wagers");
+      navigate("/wagers");
     } else {
       navigate("/");
     }

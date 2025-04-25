@@ -7,34 +7,34 @@ const Footer = () => {
     <footer className="footer">
       <div className="footer-column">
         <h3 className="footer-header">About</h3>
-        <Link to="/About" className="footer-link">
+        <Link to="/about" className="footer-link">
           About Us
         </Link>
-        <Link to="/Contact" className="footer-link">
+        <Link to="/contact" className="footer-link">
           Contact
         </Link>
-        <Link to="/Credits" className="footer-link">
+        <Link to="/credits" className="footer-link">
           Credits
         </Link>
       </div>
       <div className="footer-column">
         <h3 className="footer-header">Feedback</h3>
-        <Link to="/Bug-Form" className="footer-link">
+        <Link to="/bug-form" className="footer-link">
           Report an Issue
         </Link>
-        <Link to="/Feature-Form" className="footer-link">
+        <Link to="/feature-form" className="footer-link">
           Suggest a Feature
         </Link>
-        <Link to="/Feedback-Form" className="footer-link">
+        <Link to="/feedback-form" className="footer-link">
           General Feedback
         </Link>
       </div>
       <div className="footer-column">
         <h3 className="footer-header">Legal</h3>
-        <Link to="/Privacy-Policy" className="footer-link">
+        <Link to="/privacy-policy" className="footer-link">
           Privacy Policy
         </Link>
-        <Link to="/Terms-Of-Service" className="footer-link">
+        <Link to="/terms-of-service" className="footer-link">
           Terms of Service
         </Link>
       </div>

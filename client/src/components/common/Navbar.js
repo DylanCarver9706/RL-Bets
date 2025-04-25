@@ -87,7 +87,7 @@ const Navbar = () => {
 
         {user ? (
           <div className="nav-center">
-            <Link to="/Wagers" className="nav-link">
+            <Link to="/wagers" className="nav-link">
               Wagers
             </Link>
           <div
@@ -102,11 +102,11 @@ const Navbar = () => {
               }`}
             >
               {currentTournament && (
-                <Link to={`/Tournament`} className="dropdown-link">
+                <Link to={`/tournament`} className="dropdown-link">
                   {currentTournament.name}
                 </Link>
               )}
-              <Link to={`/Tournament-History`} className="dropdown-link">
+              <Link to={`/tournament-history`} className="dropdown-link">
                 Tournament History
               </Link>
             </div>
@@ -123,11 +123,11 @@ const Navbar = () => {
               }`}
             >
               {currentTournament && (
-                <Link to={`/Tournament-Leaderboard`} className="dropdown-link">
+                <Link to={`/tournament-leaderboard`} className="dropdown-link">
                   {currentTournament?.name}
                 </Link>
               )}
-              <Link to="/Lifetime-Leaderboard" className="dropdown-link">
+              <Link to="/lifetime-leaderboard" className="dropdown-link">
                 Lifetime
               </Link>
             </div>
@@ -144,20 +144,20 @@ const Navbar = () => {
                   hoveredDropdown === "admin" ? "active" : ""
                 }`}
               >
-                <Link to="/Admin" className="dropdown-link">
+                <Link to="/admin" className="dropdown-link">
                   Home
                 </Link>
-                <Link to="/Create_Wager" className="dropdown-link">
+                <Link to="/create_wager" className="dropdown-link">
                   Create Wager
                 </Link>
-                <Link to="/Log" className="dropdown-link">
+                <Link to="/logs" className="dropdown-link">
                   Logs
                 </Link>
-                <Link to="/Admin-Email" className="dropdown-link">
+                <Link to="/admin-email" className="dropdown-link">
                   Email Users
                 </Link>
                 <Link
-                  to="/Admin-Identity-Verification"
+                  to="/admin-identity-verification"
                   className="dropdown-link"
                 >
                   Identity Verification
@@ -167,7 +167,7 @@ const Navbar = () => {
           )}
           {user && (
             <>
-              <Link to="/Profile" className="nav-link">
+              <Link to="/profile" className="nav-link">
                 Profile
               </Link>
             </>
@@ -181,7 +181,7 @@ const Navbar = () => {
 
         {user && (
           <div className="user-controls">
-            <Link to="/Credit-Shop" className="credits-display">
+            <Link to="/credit-shop" className="credits-display">
               {parseInt(user?.credits)} Credits
             </Link>
             <div className="desktop-notifications">
@@ -205,7 +205,7 @@ const Navbar = () => {
         {user ? (
           <>
             <div className="mobile-credits">
-              <Link to="/Credit-Shop" className="credits-display">
+              <Link to="/credit-shop" className="credits-display">
                 {parseInt(user?.credits)} Credits
               </Link>
             </div>
@@ -228,7 +228,7 @@ const Navbar = () => {
                   >
                     {currentTournament && (
                       <Link
-                        to={`/Tournament`}
+                        to={`/tournament`}
                         className="mobile-nav-link"
                         onClick={handleNavLinkClick}
                       >
@@ -236,7 +236,7 @@ const Navbar = () => {
                       </Link>
                     )}
                     <Link
-                      to={`/Tournament-History`}
+                      to={`/tournament-history`}
                       className="mobile-nav-link"
                       onClick={handleNavLinkClick}
                     >
@@ -245,7 +245,7 @@ const Navbar = () => {
                   </div>
                 </div>
                 <Link
-                  to="/Wagers"
+                  to="/wagers"
                   className="mobile-nav-link"
                   onClick={handleNavLinkClick}
                 >
@@ -269,7 +269,7 @@ const Navbar = () => {
                       >
                         {currentTournament && (
                           <Link
-                            to={`/Tournament-Leaderboard`}
+                            to={`/tournament-leaderboard`}
                             className="mobile-nav-link"
                             onClick={handleNavLinkClick}
                           >
@@ -277,7 +277,7 @@ const Navbar = () => {
                           </Link>
                         )}
                         <Link
-                          to="/Lifetime-Leaderboard"
+                          to="/lifetime-leaderboard"
                           className="mobile-nav-link"
                           onClick={handleNavLinkClick}
                         >
@@ -286,7 +286,7 @@ const Navbar = () => {
                       </div>
                     </div>
                     <Link
-                      to="/Profile"
+                      to="/profile"
                       className="mobile-nav-link"
                       onClick={handleNavLinkClick}
                     >
@@ -306,35 +306,35 @@ const Navbar = () => {
                           }`}
                         >
                           <Link
-                            to="/Admin"
+                            to="/admin"
                             className="mobile-nav-link"
                             onClick={handleNavLinkClick}
                           >
                             Home
                           </Link>
                           <Link
-                            to="/Create_Wager"
+                            to="/create_wager"
                             className="mobile-nav-link"
                             onClick={handleNavLinkClick}
                           >
                             Create Wager
                           </Link>
                           <Link
-                            to="/Log"
+                            to="/logs"
                             className="mobile-nav-link"
                             onClick={handleNavLinkClick}
                           >
                             Logs
                           </Link>
                           <Link
-                            to="/Admin-Email"
+                            to="/admin-email"
                             className="mobile-nav-link"
                             onClick={handleNavLinkClick}
                           >
                             Email Users
                           </Link>
                           <Link
-                            to="/Admin-Identity-Verification"
+                            to="/admin-identity-verification"
                             className="mobile-nav-link"
                             onClick={handleNavLinkClick}
                           >
@@ -352,7 +352,7 @@ const Navbar = () => {
             </button>
           </>
         ) : (
-          <button className="navbar-cta-button-mobile" onClick={() => navigate("/Login")}>
+          <button className="navbar-cta-button-mobile" onClick={() => navigate("/login")}>
             Login
           </button>
         )}

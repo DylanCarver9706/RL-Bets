@@ -175,7 +175,7 @@ const Signup = () => {
         DOB: formattedDate,
       });
 
-      navigate("/Email-Verification");
+      navigate("/email-verification");
     } catch (error) {
       console.error("Error during authentication:", error.message);
       setError(error.message);
@@ -259,7 +259,7 @@ const Signup = () => {
         }
       }
       // window.location.reload();
-      navigate("/Sms-Verification");
+      navigate("/sms-verification");
     } catch (error) {
       console.error("Error during Google authentication:", error.message);
       setLoading(false);
@@ -504,14 +504,14 @@ const Signup = () => {
                 <span>I agree to the</span>
               </div>
               <a
-                href="/Terms-Of-Service"
+                href="/terms-of-service"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="signup-agreement-link"
                 onClick={(e) => {
                   e.preventDefault();
                   window.open(
-                    "/Terms-Of-Service",
+                    "/terms-of-service",
                     "_blank",
                     "noopener,noreferrer"
                   );
@@ -521,14 +521,14 @@ const Signup = () => {
               </a>
               <span> and </span>
               <a
-                href="/Privacy-Policy"
+                href="/privacy-policy"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="signup-agreement-link"
                 onClick={(e) => {
                   e.preventDefault();
                   window.open(
-                    "/Privacy-Policy",
+                    "/privacy-policy",
                     "_blank",
                     "noopener,noreferrer"
                   );
@@ -556,7 +556,7 @@ const Signup = () => {
           </div>
         </form>
         <div className="auth-links">
-          <Link to="/Login" className="auth-link">
+          <Link to="/login" className="auth-link">
             Already have an account? Log in now
           </Link>
         </div>

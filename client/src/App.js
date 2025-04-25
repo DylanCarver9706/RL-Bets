@@ -154,7 +154,7 @@ function App() {
       localStorage.setItem("referralCode", referralCode);
 
       // Optionally navigate to a specific route or process the referral code
-      navigate("/Signup");
+      navigate("/signup");
     }
   }, [navigate]);
 
@@ -179,44 +179,44 @@ function App() {
 
       // If user has not verified email or IDV, redirect to respective pages
       if (auth.currentUser && user?.locationPermissionGranted === false) {
-        navigate("/Location-Permission-Required");
+        navigate("/location-permission-required");
       } else if (
         auth.currentUser &&
         user?.emailVerificationStatus &&
         user?.emailVerificationStatus !== "verified"
       ) {
-        navigate("/Email-Verification");
+        navigate("/email-verification");
       } else if (
         auth.currentUser &&
         !user?.phoneNumber &&
         user?.smsVerificationStatus &&
         user?.smsVerificationStatus !== "verified"
       ) {
-        navigate("/SMS-Verification");
+        navigate("/sms-verification");
       } else if (
         auth.currentUser &&
         user?.idvStatus &&
         ["review", "unverified"].includes(user?.idvStatus)
       ) {
-        navigate("/Identity-Verification");
+        navigate("/identity-verification");
       } else if (
         auth.currentUser &&
         (user?.pp.version !== privacyPolicyVersion ||
           user.tos.version !== termsOfServiceVersion)
       ) {
-        navigate("/Agreements");
+        navigate("/agreements");
       } else if (auth.currentUser && user?.locationValid === false) {
-        navigate("/Illegal-State");
+        navigate("/illegal-state");
       } else if (auth.currentUser && user?.ageValid === false) {
-        navigate("/Illegal-Age");
+        navigate("/illegal-age");
       } else if (
         auth.currentUser &&
         user?.accountStatus &&
         user?.accountStatus === "suspended"
       ) {
-        navigate("/Account-Suspended");
+        navigate("/account-suspended");
       } else if (auth.currentUser && user?.viewedInstructions === false) {
-        navigate("/Instructions");
+        navigate("/instructions");
       }
     };
     routeUser();
@@ -305,25 +305,25 @@ function App() {
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<Hero />} />
-          <Route path="/Whoopsie-Daisy" element={<SomethingWentWrong />} />
-          <Route path="/Bug-Form" element={<BugForm />} />
-          <Route path="/Feature-Form" element={<FeatureForm />} />
-          <Route path="/Feedback-Form" element={<FeedbackForm />} />
-          <Route path="/Privacy-Policy" element={<PrivacyPolicy />} />
-          <Route path="/Terms-Of-Service" element={<TermsOfService />} />
-          <Route path="/Login" element={<Login />} />
-          <Route path="/Signup" element={<Signup />} />
-          <Route path="/Forgot-Password" element={<ForgotPassword />} />
-          <Route path="/App-Outage" element={<AppOutage />} />
-          <Route path="/Instructions" element={<Instructions />} />
-          <Route path="/About" element={<About />} />
-          <Route path="/Contact" element={<Contact />} />
+          <Route path="/whoopsie-daisy" element={<SomethingWentWrong />} />
+          <Route path="/bug-form" element={<BugForm />} />
+          <Route path="/feature-form" element={<FeatureForm />} />
+          <Route path="/feedback-form" element={<FeedbackForm />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/terms-of-service" element={<TermsOfService />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/app-outage" element={<AppOutage />} />
+          <Route path="/instructions" element={<Instructions />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
           {/* Catch-all route for undefined paths */}
           <Route path="*" element={<PageNotFound />} />
 
           {/* Protected Routes */}
           <Route
-            path="/Wagers"
+            path="/wagers"
             element={
               <PrivateRoute authorized={loggedIn}>
                 <Wagers />
@@ -331,7 +331,7 @@ function App() {
             }
           />
           <Route
-            path="/Create_Wager"
+            path="/create-wager"
             element={
               <PrivateRoute authorized={loggedIn}>
                 <CreateWager />
@@ -339,7 +339,7 @@ function App() {
             }
           />
           <Route
-            path="/Profile"
+            path="/profile"
             element={
               <PrivateRoute authorized={loggedIn}>
                 <Profile />
@@ -347,51 +347,51 @@ function App() {
             }
           />
           <Route
-            path="/Email-Verification"
+            path="/email-verification"
             element={
               <PrivateRoute
                 authorized={loggedIn && !emailVerified}
-                redirectTo="/Wagers"
+                redirectTo="/wagers"
               >
                 <EmailVerification />
               </PrivateRoute>
             }
           />
           <Route
-            path="/Identity-Verification"
+            path="/identity-verification"
             element={
               <PrivateRoute
                 authorized={loggedIn && !idvVerified}
-                redirectTo="/Wagers"
+                redirectTo="/wagers"
               >
                 <IdentityVerification />
               </PrivateRoute>
             }
           />
           <Route
-            path="/SMS-Verification"
+            path="/sms-verification"
             element={
               <PrivateRoute
                 authorized={loggedIn && !smsVerified}
-                redirectTo="/Wagers"
+                redirectTo="/wagers"
               >
                 <SmsVerification />
               </PrivateRoute>
             }
           />
           <Route
-            path="/Agreements"
+            path="/agreements"
             element={
               <PrivateRoute
                 authorized={loggedIn && (requireTos || requirePp)}
-                redirectTo="/Wagers"
+                redirectTo="/wagers"
               >
                 <Agreements />
               </PrivateRoute>
             }
           />
           <Route
-            path="/Credits"
+            path="/credits"
             element={
               <PrivateRoute authorized={loggedIn}>
                 <Credits />
@@ -399,7 +399,7 @@ function App() {
             }
           />
           <Route
-            path="/Tournament-History"
+            path="/tournament-history"
             element={
               <PrivateRoute authorized={loggedIn}>
                 <TournamentHistory />
@@ -407,7 +407,7 @@ function App() {
             }
           />
           <Route
-            path="/Credit-Shop"
+            path="/credit-shop"
             element={
               <PrivateRoute authorized={loggedIn}>
                 <CreditShop />
@@ -415,7 +415,7 @@ function App() {
             }
           />
           <Route
-            path="/Lifetime-Leaderboard"
+            path="/lifetime-leaderboard"
             element={
               <PrivateRoute authorized={loggedIn}>
                 <LifetimeLeaderboard />
@@ -423,7 +423,7 @@ function App() {
             }
           />
           <Route
-            path="/Tournament-Leaderboard"
+            path="/tournament-leaderboard"
             element={
               <PrivateRoute authorized={loggedIn}>
                 <CurrentTournamentLeaderboard />
@@ -431,7 +431,7 @@ function App() {
             }
           />
           <Route
-            path="/Tournament"
+            path="/tournament"
             element={
               <PrivateRoute authorized={loggedIn}>
                 <CurrentTournament />
@@ -439,44 +439,44 @@ function App() {
             }
           />
           <Route
-            path="/Illegal-State"
+            path="/illegal-state"
             element={
               <PrivateRoute
                 authorized={loggedIn && !locationValid}
-                redirectTo="/Wagers"
+                redirectTo="/wagers"
               >
                 <IllegalState />
               </PrivateRoute>
             }
           />
           <Route
-            path="/Location-Permission-Required"
+            path="/location-permission-required"
             element={
               <PrivateRoute
                 authorized={loggedIn && !locationPermissionGranted}
-                redirectTo="/Wagers"
+                redirectTo="/wagers"
               >
                 <LocationPermissionRequired />
               </PrivateRoute>
             }
           />
           <Route
-            path="/Illegal-Age"
+            path="/illegal-age"
             element={
               <PrivateRoute
                 authorized={loggedIn && !ageValid}
-                redirectTo="/Wagers"
+                redirectTo="/wagers"
               >
                 <IllegalAge />
               </PrivateRoute>
             }
           />
           <Route
-            path="/Account-Suspended"
+            path="/account-suspended"
             element={
               <PrivateRoute
                 authorized={loggedIn && accountSuspended}
-                redirectTo="/Wagers"
+                redirectTo="/wagers"
               >
                 <SuspendedUser />
               </PrivateRoute>
@@ -484,7 +484,7 @@ function App() {
           />
           {/* Admin Routes */}
           <Route
-            path="/Log"
+            path="/log"
             element={
               <PrivateRoute authorized={loggedIn && admin}>
                 <Log />
@@ -492,7 +492,7 @@ function App() {
             }
           />
           <Route
-            path="/Admin"
+            path="/admin"
             element={
               <PrivateRoute authorized={loggedIn && admin}>
                 <Admin />
@@ -500,7 +500,7 @@ function App() {
             }
           />
           <Route
-            path="/Admin-Email"
+            path="/admin-email"
             element={
               <PrivateRoute authorized={loggedIn && admin}>
                 <AdminEmail />
@@ -508,7 +508,7 @@ function App() {
             }
           />
           <Route
-            path="/Admin-Identity-Verification"
+            path="/admin-identity-verification"
             element={
               <PrivateRoute authorized={loggedIn && admin}>
                 <AdminIdentityVerification />

@@ -17,7 +17,7 @@ const SuspendedUser = () => {
           If you believe this is a mistake or wish to inquire further, please
           contact our support team.
         </p>
-        <Link to="/Feedback-Form" className="suspended-user-link">
+        <Link to="/feedback-form" className="suspended-user-link">
           Contact Support
         </Link>
       </div>

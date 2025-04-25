@@ -38,7 +38,7 @@ const EmailVerification = () => {
           setUser({ ...user, emailVerificationStatus: "verified" });
 
           // Redirect the user to the Identity Verification page
-          navigate("/Identity-Verification");
+          navigate("/identity-verification");
         }
       }
     };

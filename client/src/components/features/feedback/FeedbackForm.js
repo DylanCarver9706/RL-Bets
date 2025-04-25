@@ -44,7 +44,7 @@ const FeedbackForm = () => {
         alert("Feedback submitted successfully!");
         setSummary("");
         setDescription("");
-        navigate("/Wagers");
+        navigate("/wagers");
       }
     } catch (error) {
       alert("Failed to submit feedback. Please try again.");

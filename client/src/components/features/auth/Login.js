@@ -30,7 +30,7 @@ const Login = () => {
     try {
       setLoading(true);
       await signInWithEmailAndPassword(auth, email, password);
-      navigate("/Wagers");
+      navigate("/wagers");
     } catch (error) {
       console.error("Error during authentication:", error.message);
       setError(error.message);
@@ -84,12 +84,12 @@ const Login = () => {
           if (!firebaseUser.emailVerified) {
             // Send Email Verification
             await sendEmailVerification(firebaseUser);
-            navigate("/Email-Verification");
+            navigate("/email-verification");
           } else {
             await updateUser(mongoUser._id, {
               emailVerificationStatus: "verified",
             });
-            navigate("/Identity-Verification");
+            navigate("/identity-verification");
           }
         } catch (error) {
           console.error("Error creating new user:", error.message);
@@ -97,7 +97,7 @@ const Login = () => {
         }
       } else {
         // window.location.reload();
-        navigate("/Wagers");
+        navigate("/wagers");
       }
     } catch (error) {
       console.error("Error during Google authentication:", error.message);
@@ -177,7 +177,7 @@ const Login = () => {
             </div>
           </div>
 
-          <Link to="/Forgot-Password" className="auth-link forgot-password">
+          <Link to="/forgot-password" className="auth-link forgot-password">
             Forgot Password?
           </Link>
 
@@ -187,7 +187,7 @@ const Login = () => {
         </form>
 
         <div className="auth-links">
-          <Link to="/Signup" className="auth-link">
+          <Link to="/signup" className="auth-link">
             Don't have an account? Sign up now
           </Link>
         </div>

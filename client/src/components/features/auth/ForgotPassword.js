@@ -19,7 +19,7 @@ const ForgotPassword = () => {
       setLoading(true);
       await sendPasswordResetEmail(auth, email);
       alert("Check your email for a password reset link.");
-      navigate("/Login");
+      navigate("/login");
     } catch (error) {
       console.error("Error during authentication:", error.message);
       setError(error.message);
@@ -53,7 +53,7 @@ const ForgotPassword = () => {
               {loading ? "Sending..." : "Reset Password"}
             </button>
 
-            <Link to="/Login" className="back-link">
+            <Link to="/login" className="back-link">
               Back to Login
             </Link>
           </div>

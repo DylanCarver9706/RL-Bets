@@ -123,14 +123,14 @@ const Agreements = () => {
             {requireTos && requirePp && (
               <>
                 <a
-                  href="/Terms-Of-Service"
+                  href="/terms-of-service"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="signup-agreement-link"
                   onClick={(e) => {
                     e.preventDefault();
                     window.open(
-                      "/Terms-Of-Service",
+                      "/terms-of-service",
                       "_blank",
                       "noopener,noreferrer"
                     );
@@ -140,14 +140,14 @@ const Agreements = () => {
                 </a>
                 <span> and </span>
                 <a
-                  href="/Privacy-Policy"
+                  href="/privacy-policy"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="signup-agreement-link"
                   onClick={(e) => {
                     e.preventDefault();
                     window.open(
-                      "/Privacy-Policy",
+                      "/privacy-policy",
                       "_blank",
                       "noopener,noreferrer"
                     );
@@ -159,14 +159,14 @@ const Agreements = () => {
             )}
             {requireTos && !requirePp && (
               <a
-                href="/Terms-Of-Service"
+                href="/terms-of-service"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="signup-agreement-link"
                 onClick={(e) => {
                   e.preventDefault();
                   window.open(
-                    "/Terms-Of-Service",
+                    "/terms-of-service",
                     "_blank",
                     "noopener,noreferrer"
                   );
@@ -177,14 +177,14 @@ const Agreements = () => {
             )}
             {requirePp && !requireTos && (
               <a
-                href="/Privacy-Policy"
+                href="/privacy-policy"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="signup-agreement-link"
                 onClick={(e) => {
                   e.preventDefault();
                   window.open(
-                    "/Privacy-Policy",
+                    "/privacy-policy",
                     "_blank",
                     "noopener,noreferrer"
                   );

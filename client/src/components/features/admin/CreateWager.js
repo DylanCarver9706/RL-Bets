@@ -467,7 +467,7 @@ const CreateWager = () => {
     console.log("Wager Submitted: ", generatedBetString);
 
     handleBetCancel();
-    navigate("/Wagers");
+    navigate("/wagers");
   };
 
   return (

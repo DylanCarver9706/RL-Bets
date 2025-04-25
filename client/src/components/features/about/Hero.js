@@ -34,7 +34,7 @@ const Hero = () => {
           <p className="hero-subtitle">
             Compete, Bet, and Win Big during Rocket League Esports Tournaments!
           </p>
-          <button className="cta-button" onClick={() => navigate("/Signup")}>
+          <button className="cta-button" onClick={() => navigate("/signup")}>
             Get Started
           </button>
         </div>
@@ -86,7 +86,7 @@ const Hero = () => {
       {/* Final CTA Section */}
       <div className="final-cta-section">
         <h2>Ready to Start Betting?</h2>
-        <button className="cta-button" onClick={() => navigate("/Signup")}>
+        <button className="cta-button" onClick={() => navigate("/signup")}>
           Join Now
         </button>
       </div>
