@@ -147,7 +147,7 @@ const Navbar = () => {
                 <Link to="/admin" className="dropdown-link">
                   Home
                 </Link>
-                <Link to="/create_wager" className="dropdown-link">
+                <Link to="/create-wager" className="dropdown-link">
                   Create Wager
                 </Link>
                 <Link to="/logs" className="dropdown-link">
@@ -313,7 +313,7 @@ const Navbar = () => {
                             Home
                           </Link>
                           <Link
-                            to="/create_wager"
+                            to="/create-wager"
                             className="mobile-nav-link"
                             onClick={handleNavLinkClick}
                           >
