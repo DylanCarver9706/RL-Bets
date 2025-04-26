@@ -21,6 +21,7 @@ import {
   handleDobDateSubmit,
 } from "../../../services/dateService";
 import Spinner from "../../common/Spinner";
+import { getLatestPrivacyPolicy, getLatestTermsOfService } from "../../../services/agreementService";
 
 const statesList = [
   "Alabama",
@@ -132,6 +133,10 @@ const Signup = () => {
         method: "email",
       });
 
+      // Get the latest privacy policy and terms of service
+      let privacyPolicy = await getLatestPrivacyPolicy();
+      let termsOfService = await getLatestTermsOfService();
+
       // Create the user in MongoDB
       const mongoUser = await createUserInDatabase({
         name: `${firstName} ${lastName}`,
@@ -141,11 +146,11 @@ const Signup = () => {
         authProvider: "email",
         address: null,
         pp: {
-          version: 0,
+          version: parseInt(privacyPolicy.version, 10),
           acceptedAt: new Date().toISOString(),
         },
         tos: {
-          version: 0,
+          version: parseInt(termsOfService.version, 10),
           acceptedAt: new Date().toISOString(),
         },
       });
@@ -202,15 +207,10 @@ const Signup = () => {
       if (!mongoUserFound) {
         // New user: Create in MongoDB
         try {
-          let storedPrivacyPolicy = localStorage.getItem("privacyPolicy");
-          let storedTermsOfService = localStorage.getItem("termsOfService");
 
-          if (storedPrivacyPolicy) {
-            storedPrivacyPolicy = JSON.parse(storedPrivacyPolicy);
-          }
-          if (storedTermsOfService) {
-            storedTermsOfService = JSON.parse(storedTermsOfService);
-          }
+          // Get the latest privacy policy and terms of service
+          let privacyPolicy = await getLatestPrivacyPolicy();
+          let termsOfService = await getLatestTermsOfService();
 
           const mongoUser = await createUserInDatabase({
             name: firebaseUser.displayName,
@@ -220,19 +220,11 @@ const Signup = () => {
             authProvider: "google",
             address: null,
             pp: {
-              version: mongoUserFound
-                ? parseInt(storedPrivacyPolicy.version, 10)
-                : ppChecked && tosChecked
-                ? parseInt(storedPrivacyPolicy.version, 10)
-                : 0,
+              version: parseInt(privacyPolicy.version, 10),
               acceptedAt: new Date().toISOString(),
             },
             tos: {
-              version: mongoUserFound
-                ? parseInt(storedTermsOfService.version, 10)
-                : ppChecked && tosChecked
-                ? parseInt(storedTermsOfService.version, 10)
-                : 0,
+              version: parseInt(termsOfService.version, 10),
               acceptedAt: new Date().toISOString(),
             },
           });

@@ -257,8 +257,8 @@ function App() {
         setTermsOfServiceVersion(parseInt(storedTermsOfService.version, 10));
       } else {
         // Fetch new versions from server
-        let privacyPolicy = await getLatestPrivacyPolicy("privacy-policy");
-        let termsOfService = await getLatestTermsOfService("terms-of-service");
+        let privacyPolicy = await getLatestPrivacyPolicy();
+        let termsOfService = await getLatestTermsOfService();
 
         // Save to localStorage
         localStorage.setItem(

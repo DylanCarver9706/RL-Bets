@@ -14,6 +14,7 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import { logEvent } from "firebase/analytics";
 import "../../../styles/components/auth/Login.css";
+import { getLatestPrivacyPolicy, getLatestTermsOfService } from "../../../services/agreementService.js";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -53,9 +54,16 @@ const Login = () => {
         console.error("Error fetching MongoDB user data:", error.message);
       }
 
+      // Get the latest privacy policy and terms of service
+
       if (!mongoUserFound) {
         // New user: Create in MongoDB
         try {
+
+          // Get the latest privacy policy and terms of service
+          let privacyPolicy = await getLatestPrivacyPolicy();
+          let termsOfService = await getLatestTermsOfService();
+
           const mongoUser = await createUserInDatabase({
             name: firebaseUser.displayName,
             email: firebaseUser.email,
@@ -64,11 +72,11 @@ const Login = () => {
             authProvider: "google",
             address: null,
             pp: {
-              version: 0,
+              version: parseInt(privacyPolicy.version, 10),
               acceptedAt: new Date(),
             },
             tos: {
-              version: 0,
+              version: parseInt(termsOfService.version, 10),
               acceptedAt: new Date(),
             },
           });
