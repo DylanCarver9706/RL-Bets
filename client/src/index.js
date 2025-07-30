@@ -7,6 +7,13 @@ import { BrowserRouter, useNavigate } from "react-router-dom";
 import { UserProvider, useUser } from "./contexts/UserContext";
 import ErrorBoundary from "./components/features/errorHandling/ErrorBoundary";
 import ScrollToTop from "./components/common/ScrollToTop";
+import posthog from "posthog-js";
+import { PostHogProvider } from "posthog-js/react";
+
+// Initialize PostHog
+posthog.init(process.env.REACT_APP_POSTHOG_KEY, {
+  api_host: process.env.REACT_APP_POSTHOG_HOST,
+});
 
 // Capture console logs but prevent them from rendering on screen
 const capturedLogs = [];
@@ -48,6 +55,7 @@ const AppWithErrorBoundary = () => {
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <BrowserRouter>
+    <PostHogProvider client={posthog}>
     <ScrollToTop />
     <UserProvider>
       {process.env.REACT_APP_ENV === "production" ? (
@@ -56,6 +64,7 @@ root.render(
         <App />
       )}
     </UserProvider>
+    </PostHogProvider>
   </BrowserRouter>
 );
 
